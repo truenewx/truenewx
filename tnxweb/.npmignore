@@ -1,0 +1,11 @@
+.DS_Store
+node_modules
+/dist
+/doc
+/lib
+/sample
+/public
+.*
+*.config.js
+README.md
+*.iml

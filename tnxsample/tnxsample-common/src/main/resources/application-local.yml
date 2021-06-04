@@ -1,0 +1,32 @@
+# common
+logging:
+  config: classpath:META-INF/log/logback-local.xml
+server:
+  servlet:
+    jsp:
+      init-parameters:
+        development: true
+tnxjee:
+  profile:
+    formal: false
+  common:
+    gateway-enabled: false
+    gateway-uri: http://localhost
+    apps:
+      root:
+        direct-uri: http://localhost:8880
+        context-path: ''
+      cas:
+        direct-uri: http://localhost:8881
+        context-path: /cas
+      fss:
+        direct-uri: http://localhost:8882
+        context-path: /fss
+      admin:
+        direct-uri: http://localhost:8885
+        context-path: /admin
+  web:
+    cors:
+      allowed-origins:
+        - http://localhost:8083
+        - http://localhost:8085

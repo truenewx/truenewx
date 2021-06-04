@@ -1,0 +1,89 @@
+/*!
+ * tnxcore.css
+ */
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a.plain,
+a.plain:hover,
+a.plain:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
+/**
+ * 水平和垂直都居中
+ */
+.flex-center {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/**
+ * 垂直居中
+ */
+.flex-v-center {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/**
+ * 水平居中
+ */
+.flex-h-center {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.w-fit-content {
+    width: fit-content !important;
+}
+
+.fs-1r {
+    font-size: 1rem !important;
+}
+
+.fs-p80 {
+    font-size: 80%;
+}
+
+.fs-p120 {
+    font-size: 120%;
+}
+
+.strong {
+    font-weight: bold;
+}
+
+h4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.line-height-1 {
+    line-height: 1;
+}
+
+span.nowrap {
+    white-space: nowrap;
+}
+
+[role="button"],
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-transparent {
+    color: transparent !important;
+}

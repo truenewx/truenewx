@@ -1,0 +1,179 @@
+/**
+ * tnxel-theme.css
+ * 对Element UI颜色主题相关CSS的调整。
+ * 从通用调整中拆分出来的原因是，工程可能使用定制颜色主题的样式库，本主题样式库应在工程定制颜色主题的样式库之前引入。
+ */
+.text-primary {
+    color: #409EFF !important;
+}
+
+.bg-primary {
+    background-color: #409EFF !important;
+    color: #ffffff;
+}
+
+.bg-primary a,
+.bg-primary a:hover,
+.bg-primary .el-link--default,
+.bg-primary .el-link--default:hover,
+.bg-primary .el-dropdown {
+    color: #ffffff;
+}
+
+.bg-primary .el-menu {
+    background-color: #409EFF !important;
+}
+
+.bg-primary .el-menu > .el-menu-item,
+.bg-primary .el-menu > .el-menu-item a,
+.bg-primary .el-menu > .el-submenu .el-submenu__title,
+.bg-primary .el-menu > .el-submenu .el-submenu__title i {
+    color: #ffffff;
+}
+
+.bg-primary .el-menu-item:hover a,
+.bg-primary .el-menu-item.is-active a,
+.bg-primary .el-menu-item a:hover {
+    color: #409EFF;
+    background-color: #fff;
+}
+
+.border-primary {
+    border-color: #409EFF !important;
+}
+
+.text-success,
+.theme-success .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: #67C23A !important;
+}
+
+.bg-success {
+    background-color: #67C23A !important;
+    color: #ffffff;
+}
+
+.bg-success-light {
+    background-color: #F0F9EB !important;
+}
+
+.border-success,
+.theme-success .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-success .el-input__inner:focus {
+    border-color: #67C23A !important;
+}
+
+.theme-success .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-success .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: #67C23A !important;
+    border-color: #67C23A !important;
+}
+
+.theme-success .el-button--default:hover,
+.theme-success .el-button--default:active,
+.theme-success .el-button--default:focus {
+    color: #67C23A;
+    background: #F0F9EB;
+    border-color: #C2E7B0;
+}
+
+.text-warning,
+.theme-warning .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: #E6A23C !important;
+}
+
+.bg-warning {
+    background-color: #E6A23C !important;
+    color: #ffffff;
+}
+
+.bg-warning-light {
+    background-color: #FDF6EC !important;
+}
+
+.border-warning,
+.theme-warning .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-warning .el-input__inner:focus {
+    border-color: #E6A23C !important;
+}
+
+.theme-warning .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-warning .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: #E6A23C !important;
+    border-color: #E6A23C !important;
+}
+
+.theme-warning .el-button--default:hover,
+.theme-warning .el-button--default:active,
+.theme-warning .el-button--default:focus {
+    color: #E6A23C;
+    background: #FDF6EC;
+    border-color: #F5DAB1;
+}
+
+.text-danger,
+.theme-danger .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: #F56C6C !important;
+}
+
+.bg-danger {
+    background-color: #F56C6C !important;
+    color: #ffffff;
+}
+
+.bg-danger-light {
+    background-color: #FEF0F0 !important;
+}
+
+.border-danger,
+.theme-danger .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-danger .el-input__inner:focus,
+.is-error .el-input__inner,
+.theme-success .is-error .el-input__inner:focus,
+.theme-warning .is-error .el-input__inner:focus {
+    border-color: #F56C6C !important;
+}
+
+.theme-danger .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-danger .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: #F56C6C !important;
+    border-color: #F56C6C !important;
+}
+
+.theme-danger .el-button--default:hover,
+.theme-danger .el-button--default:active,
+.theme-danger .el-button--default:focus {
+    color: #F56C6C;
+    background: #FEF0F0;
+    border-color: #FBC4C4;
+}
+
+.text-info {
+    color: #606266 !important;
+}
+
+.bg-info {
+    background-color: #909399 !important;
+    color: #ffffff;
+}
+
+.text-muted {
+    color: #909399 !important;
+}
+
+.bg-muted,
+.el-table .bg-muted th,
+.el-table .bg-muted tr {
+    background-color: #fafafa !important;
+}
+
+.text-white {
+    color: #ffffff !important;
+}
+
+.bg-white {
+    background-color: #fff !important;
+}
+
+.border-white {
+    border-color: #fff !important;
+}

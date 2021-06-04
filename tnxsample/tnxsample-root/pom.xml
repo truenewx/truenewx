@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.truenewx</groupId>
+        <artifactId>tnxsample</artifactId>
+        <version>2.2.1</version>
+    </parent>
+    <groupId>org.truenewx.tnxsample</groupId>
+    <artifactId>tnxsample-root</artifactId>
+    <packaging>pom</packaging>
+    <name>tnxsample-root</name>
+    <modules>
+        <module>tnxsample-root-api</module>
+        <module>tnxsample-root-model</module>
+        <module>tnxsample-root-repo</module>
+        <module>tnxsample-root-service</module>
+        <module>tnxsample-root-web</module>
+    </modules>
+    <dependencyManagement><!-- 其它微服务不能引用，仅本微服务内部引用的工程依赖在此管理 -->
+        <dependencies>
+            <dependency>
+                <groupId>org.truenewx.tnxsample.root</groupId>
+                <artifactId>tnxsample-root-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxsample.root</groupId>
+                <artifactId>tnxsample-root-repo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxsample.root</groupId>
+                <artifactId>tnxsample-root-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

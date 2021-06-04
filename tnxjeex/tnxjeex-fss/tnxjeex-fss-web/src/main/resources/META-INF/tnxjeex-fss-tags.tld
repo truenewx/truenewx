@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.5" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">
+
+    <tlib-version>1.2</tlib-version>
+    <short-name>tnxjeex-fss</short-name>
+    <uri>/tnxjeex-fss-tags</uri>
+    <display-name>Tnxjeex FSS Tags</display-name>
+    <description>Tnxjeex文件存储标签库</description>
+
+    <tag>
+        <name>read-url</name>
+        <tag-class>org.truenewx.tnxjeex.fss.web.tag.FssReadUrlTag</tag-class>
+        <body-content>empty</body-content>
+        <description>转换内部存储地址为外部读取地址</description>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>内部存储地址</description>
+        </attribute>
+        <attribute>
+            <name>thumbnail</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>是否缩略图，默认为false</description>
+        </attribute>
+    </tag>
+
+</taglib>

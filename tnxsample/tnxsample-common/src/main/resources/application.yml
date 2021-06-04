@@ -1,0 +1,11 @@
+# common
+spring:
+  http:
+    encoding:
+      force: true
+  profiles:
+    active: local
+tnxjee:
+  web:
+    cors:
+      allow-credentials: true

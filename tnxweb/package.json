@@ -1,0 +1,71 @@
+{
+  "name": "@truenewx/tnxweb",
+  "version": "2.2.0",
+  "description": "互联网技术解决方案：Web扩展支持",
+  "private": false,
+  "publishConfig": {
+    "cache": "~/.npm",
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "main": "components/index.js",
+  "keywords": [
+    "truenewx",
+    "tnxweb",
+    "tnx"
+  ],
+  "author": "truenewx",
+  "license": "Apache-2.0",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "base-64": "^1.0.0",
+    "core-js": "^3.6.5",
+    "element-ui": "^2.14.1",
+    "jquery": "^3.5.1",
+    "md5": "^2.3.0",
+    "vue": "^2.6.12"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.12",
+    "@vue/cli-plugin-eslint": "~4.5.12",
+    "@vue/cli-service": "~4.5.12",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "vue-template-compiler": "^2.6.12"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {
+      "eqeqeq": "warn",
+      "no-unused-vars": [
+        "error",
+        {
+          "vars": "local",
+          "args": "none"
+        }
+      ],
+      "no-undef": "warn",
+      "no-useless-escape": "warn"
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.truenewx</groupId>
+        <artifactId>tnxjee</artifactId>
+        <version>2.2.0</version>
+    </parent>
+    <groupId>org.truenewx.tnxjee</groupId>
+    <artifactId>tnxjee-web</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.truenewx.tnxjee</groupId>
+            <artifactId>tnxjee-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+        </dependency>
+    </dependencies>
+    <description>Webmvc和Webflux的公共部分</description>
+</project>

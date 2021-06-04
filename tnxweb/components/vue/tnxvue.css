@@ -1,0 +1,12 @@
+/* tnxvue.css */
+tnxvue-div, tnxvue-span {
+    display: none;
+}
+
+tnxvue-div[mode='v'], tnxvue-span[mode='v'] {
+    visibility: hidden;
+}
+
+[v-if], [v-else-if], [v-else] {
+    display: none;
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd">
+
+    <persistence-unit-metadata>
+        <persistence-unit-defaults>
+            <access>FIELD</access>
+        </persistence-unit-defaults>
+    </persistence-unit-metadata>
+
+    <entity class="org.truenewx.tnxsample.admin.model.entity.ManagerRoleRelation">
+        <table name="t_manager_role_relation"/>
+        <attributes>
+            <embedded-id name="id">
+                <attribute-override name="managerId">
+                    <column name="manager_id"/>
+                </attribute-override>
+                <attribute-override name="roleId">
+                    <column name="role_id"/>
+                </attribute-override>
+            </embedded-id>
+            <many-to-one name="manager" maps-id="manangerId" optional="false">
+                <join-column name="manager_id"/>
+            </many-to-one>
+            <many-to-one name="role" maps-id="roleId" optional="false">
+                <join-column name="role_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>
