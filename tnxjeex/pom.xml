@@ -6,6 +6,7 @@
         <groupId>org.truenewx</groupId>
         <artifactId>tnxjee</artifactId>
         <version>2.2.0</version>
+        <relativePath/>
     </parent>
     <artifactId>tnxjeex</artifactId>
     <packaging>pom</packaging>
