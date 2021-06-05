@@ -187,6 +187,9 @@ const tnxel = Object.assign({}, tnxvue, {
             window.tnx.loadingInstance = undefined;
         }
     },
+    hideLoading() {
+        this.closeLoading();
+    },
     validateUploaded(vm, reject) {
         let result = true;
         let formRef = null;
