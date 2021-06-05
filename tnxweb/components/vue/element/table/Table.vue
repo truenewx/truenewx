@@ -1,10 +1,10 @@
 <template>
-    <div>
+    <div class="tnxel-table">
         <el-table :data="records" :empty-text="emptyRecordText" :border="border" :stripe="stripe"
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort">
             <slot></slot>
         </el-table>
-        <tnxel-paged :value="paged" :change="query"/>
+        <tnxel-paged :value="paged" :change="query" :align="pagedAlign"/>
     </div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
     },
     name: 'TnxelTable',
     props: {
-        params: [Object, Function],
+        app: String,
         url: {
             type: String,
             required: true,
@@ -30,18 +30,20 @@ export default {
             type: Boolean,
             default: true,
         },
-        app: String,
+        defaultParams: {
+            type: [Object, Boolean],
+            default: true
+        },
+        pagedAlign: String,
     },
     data() {
         return {
-            paging: this.getPaging(this.params),
+            params: {
+                pageSize: 20,
+                pageNo: 1,
+            },
             records: null,
             paged: {},
-        }
-    },
-    watch: {
-        params(params) {
-            this.paging = this.getPaging(params);
         }
     },
     computed: {
@@ -60,26 +62,26 @@ export default {
         },
     },
     created() {
-        this.query();
+        if (this.defaultParams !== false) {
+            if (typeof this.defaultParams === 'object') {
+                this.query(this.defaultParams);
+            } else {
+                this.query();
+            }
+        } else {
+            this.records = [];
+        }
     },
     methods: {
-        getPaging(params) {
-            if (typeof params === 'function') {
-                params = params();
-            }
-            return Object.assign({
-                pageSize: 20,
-                pageNo: 1,
-            }, params);
-        },
-        query(pageNo) {
-            if (pageNo) {
-                this.paging.pageNo = pageNo;
+        query(params) {
+            if (typeof params === 'number') { // 参数为页码
+                this.params.pageNo = params;
+            } else if (typeof params === 'object') {
+                this.params = Object.assign(this.params, params);
             }
             this.records = null;
-            const app = window.tnx.app;
             let vm = this;
-            app.rpc.get(this.url, this.paging, function(result) {
+            window.tnx.app.rpc.get(this.url, this.params, function(result) {
                 vm.records = result.records;
                 vm.paged = result.paged;
             }, {
@@ -88,9 +90,9 @@ export default {
         },
         sort(options) {
             if (options && options.prop && options.order) {
-                this.paging.orderBy = options.prop + (options.order === 'descending' ? ' desc' : '');
+                this.params.orderBy = options.prop + (options.order === 'descending' ? ' desc' : '');
             } else {
-                delete this.paging.orderBy;
+                delete this.params.orderBy;
             }
             this.query(1);
         }

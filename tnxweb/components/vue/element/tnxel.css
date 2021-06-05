@@ -71,6 +71,11 @@ el-header a img,
     left: 3px;
 }
 
+.el-table .cell > .el-button--text {
+    width: 100%;
+    padding: 3px 0;
+}
+
 .el-dropdown-menu__item .el-badge {
     height: 36px;
 }
