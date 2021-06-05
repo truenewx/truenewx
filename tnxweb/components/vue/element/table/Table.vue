@@ -68,7 +68,8 @@ export default {
                 params = params();
             }
             return Object.assign({
-                pageNo: 1
+                pageSize: 20,
+                pageNo: 1,
             }, params);
         },
         query(pageNo) {
