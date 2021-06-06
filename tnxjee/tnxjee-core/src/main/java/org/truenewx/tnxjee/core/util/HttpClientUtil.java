@@ -1,24 +1,18 @@
 package org.truenewx.tnxjee.core.util;
 
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.truenewx.tnxjee.core.Strings;
@@ -38,31 +32,6 @@ public class HttpClientUtil {
     private HttpClientUtil() {
     }
 
-    private static List<NameValuePair> toNameValuePairs(Map<String, Object> params) {
-        List<NameValuePair> pairs = new ArrayList<>();
-        for (Entry<String, Object> entry : params.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Iterable) {
-                for (Object element : (Iterable<?>) value) {
-                    if (element != null) {
-                        pairs.add(new BasicNameValuePair(entry.getKey(), element.toString()));
-                    }
-                }
-            } else if (value.getClass().isArray()) {
-                int length = Array.getLength(value);
-                for (int i = 0; i < length; i++) {
-                    Object element = Array.get(value, i);
-                    if (element != null) {
-                        pairs.add(new BasicNameValuePair(entry.getKey(), element.toString()));
-                    }
-                }
-            } else {
-                pairs.add(new BasicNameValuePair(entry.getKey(), value.toString()));
-            }
-        }
-        return pairs;
-    }
-
     private static CloseableHttpResponse execute(String url, Map<String, Object> params,
             HttpRequestMethod method, String encoding, int timeout) throws Exception {
         HttpRequestBase request;
@@ -72,7 +41,9 @@ public class HttpClientUtil {
                 break;
             case POST:
                 HttpPost post = new HttpPost(url);
-                post.setEntity(new UrlEncodedFormEntity(toNameValuePairs(params), encoding));
+                // 发送微信公众号模板消息需以下写法
+                post.setEntity(new StringEntity(JsonUtil.toJson(params),
+                        ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), encoding)));
                 request = post;
                 break;
             default:
