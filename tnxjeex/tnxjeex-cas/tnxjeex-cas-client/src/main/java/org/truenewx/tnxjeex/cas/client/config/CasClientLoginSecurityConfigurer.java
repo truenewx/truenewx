@@ -26,7 +26,7 @@ public class CasClientLoginSecurityConfigurer
     private ResolvableExceptionAuthenticationFailureHandler authenticationFailureHandler;
 
     @Override
-    protected CasClientLoginProcessingFilter getProcessingFilter() {
+    protected CasClientLoginProcessingFilter createProcessingFilter() {
         return new CasClientLoginProcessingFilter();
     }
 

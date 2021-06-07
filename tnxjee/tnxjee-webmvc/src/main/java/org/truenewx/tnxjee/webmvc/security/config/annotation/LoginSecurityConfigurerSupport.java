@@ -22,6 +22,7 @@ public abstract class LoginSecurityConfigurerSupport<F extends AbstractAuthentic
 
     @Autowired
     private ApplicationContext context;
+    private F processingFilter;
 
     protected final ApplicationContext getApplicationContext() {
         return this.context;
@@ -40,14 +41,24 @@ public abstract class LoginSecurityConfigurerSupport<F extends AbstractAuthentic
 
     @Override
     public final void configure(HttpSecurity http) {
-        F filter = getProcessingFilter();
-        if (filter != null) {
-            filter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class)); // 固定必须
-            configure(http, filter);
+        this.processingFilter = createProcessingFilter();
+        if (this.processingFilter != null) {
+            this.processingFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class)); // 固定必须
+            configure(http, this.processingFilter);
         }
     }
 
-    protected abstract F getProcessingFilter();
+    /**
+     * 创建处理过滤器<br/>
+     * 注意：该过滤器创建后还需经过框架的后续配置才可使用，所以不能通过从它处注入后获取返回
+     *
+     * @return 处理过滤器
+     */
+    protected abstract F createProcessingFilter();
+
+    public F getProcessingFilter() {
+        return this.processingFilter;
+    }
 
     protected void configure(HttpSecurity http, F filter) {
         if (filter instanceof UsernamePasswordAuthenticationFilter) {

@@ -11,7 +11,7 @@ public class LoginModeCasServerLoginSecurityConfigurer extends
         AbstractCasServerLoginSecurityConfigurer<LoginModeAuthenticationFilter, LoginModeCasServerAuthenticationProvider> {
 
     @Override
-    protected LoginModeAuthenticationFilter getProcessingFilter() {
+    protected LoginModeAuthenticationFilter createProcessingFilter() {
         return new LoginModeAuthenticationFilter(getApplicationContext());
     }
 
