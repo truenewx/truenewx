@@ -80,7 +80,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             if (handlerMethod != null) {
                 Method method = handlerMethod.getMethod();
                 boolean internal = RpcUtil.isInternalRpc(request);
-                ObjectMapper mapper = getWriter(internal, method, object);
+                ObjectMapper mapper = getWriter(internal, method);
                 String json = mapper.writeValueAsString(object);
                 Charset charset = Objects.requireNonNullElse(getDefaultCharset(), StandardCharsets.UTF_8);
                 IOUtils.write(json, outputMessage.getBody(), charset.name());
@@ -90,7 +90,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         super.writeInternal(object, type, outputMessage);
     }
 
-    private ObjectMapper getWriter(boolean internal, Method method, Object object) {
+    private ObjectMapper getWriter(boolean internal, Method method) {
         String mapperKey = getMapperKey(internal, method);
         ObjectMapper writer = this.writers.get(mapperKey);
         if (writer == null) {
