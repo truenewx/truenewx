@@ -77,7 +77,7 @@ export default {
             if (typeof params === 'number') { // 参数为页码
                 this.params.pageNo = params;
             } else if (typeof params === 'object') {
-                this.params = params;
+                this.params = Object.assign({}, params); // 避免改动传入的参数对象
                 this.params.pageSize = this.params.pageSize || 20;
                 this.params.pageNo = this.params.pageNo || 1;
             }
