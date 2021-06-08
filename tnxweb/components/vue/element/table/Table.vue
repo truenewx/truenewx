@@ -46,7 +46,7 @@ export default {
         emptyRecordText() {
             if (this.querying) {
                 return '加载中...';
-            } else if (this.records == null) {
+            } else if (this.records === null) {
                 return '尚未开始查询';
             } else {
                 return '<空>';
