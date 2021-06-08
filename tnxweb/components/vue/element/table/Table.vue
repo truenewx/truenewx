@@ -22,6 +22,7 @@ export default {
             type: String,
             required: true,
         },
+        value: Object,
         border: {
             type: Boolean,
             default: true,
@@ -30,25 +31,26 @@ export default {
             type: Boolean,
             default: true,
         },
-        defaultParams: {
-            type: [Object, Boolean],
-            default: true
-        },
         pagedAlign: String,
+        success: Function,
     },
     data() {
         return {
-            params: {
-                pageSize: 20,
-                pageNo: 1,
-            },
+            params: this.getParams(this.value),
             records: null,
+            querying: false,
             paged: {},
         }
     },
     computed: {
         emptyRecordText() {
-            return this.records === null ? '加载中...' : '<空>';
+            if (this.querying) {
+                return '加载中...';
+            } else if (this.records == null) {
+                return '尚未开始查询';
+            } else {
+                return '<空>';
+            }
         },
         defaultSort() {
             if (this.paged && this.paged.orders && this.paged.orders.length) {
@@ -61,31 +63,36 @@ export default {
             return undefined;
         },
     },
-    created() {
-        if (this.defaultParams !== false) {
-            if (typeof this.defaultParams === 'object') {
-                this.query(this.defaultParams);
-            } else {
-                this.query();
-            }
-        } else {
-            this.records = [];
+    watch: {
+        value(value) {
+            this.params = this.getParams(value);
         }
     },
     methods: {
+        getParams(value) {
+            return Object.assign({}, value); // 避免改动传入的参数对象
+        },
         query(params) {
             if (typeof params === 'number') { // 参数为页码
                 this.params.pageNo = params;
+                if (this.value) { // 指定了value属性，在页码变更时需要触发更新事件
+                    this.$emit('input', this.params);
+                }
             } else if (typeof params === 'object') {
-                this.params = Object.assign({}, params); // 避免改动传入的参数对象
-                this.params.pageSize = this.params.pageSize || 20;
+                this.params = this.getParams(params);
                 this.params.pageNo = this.params.pageNo || 1;
             }
+
             this.records = null;
+            this.querying = true;
             let vm = this;
             window.tnx.app.rpc.get(this.url, this.params, function(result) {
+                vm.querying = false;
                 vm.records = result.records;
                 vm.paged = result.paged;
+                if (vm.success) {
+                    vm.success(vm.records, vm.paged);
+                }
             }, {
                 app: this.app
             });

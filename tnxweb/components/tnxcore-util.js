@@ -240,6 +240,14 @@ export const ObjectUtil = {
             return StringUtil.parseJson(json);
         }
         return obj;
+    },
+    clear(obj) {
+        if (typeof obj === 'object') {
+            let keys = Object.keys(obj);
+            for (let key of keys) {
+                delete obj[key];
+            }
+        }
     }
 }
 
@@ -300,7 +308,7 @@ export const StringUtil = {
     parseJson: JSON.parse,
     random(length, chars) {
         if (length >= 0) {
-            chars = chars || 'abcdefghijklmnopqrstuvwxyz'; // 默认取值范围为所有小写字母
+            chars = chars || 'abcdefghijklmnopqrstuvwxyz0123456789'; // 默认取值范围为所有小写字母和数字
             let s = '';
             for (let i = 0; i < length; i++) {
                 s += chars.charAt(MathUtil.randomInt(0, chars.length));
