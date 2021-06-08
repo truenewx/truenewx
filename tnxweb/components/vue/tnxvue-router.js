@@ -9,8 +9,12 @@ function addRoute(routes, superiorPath, item, fnImportPage) {
             path: item.path,
             meta: {
                 superiorPath: superiorPath,
+                cache: {}, // 路由级缓存
+                isHistory() {
+                    return this.historyFrom !== undefined;
+                }
             },
-            component: () => {
+            component() {
                 let path = item.page || item.path.replace(/\/:[a-zA-Z0-9_]+/g, '');
                 return fnImportPage(path);
             },
@@ -31,10 +35,9 @@ function matchesPath(path, pattern) {
     if (path === pattern) {
         return true;
     }
-    if (pattern.contains('/:')) {
+    if (pattern && pattern.contains('/:')) {
         pattern = pattern.replace(/\/:[a-zA-Z0-9_]+/g, '/\\w+');
-        let result = new RegExp(pattern).test(path);
-        return result;
+        return new RegExp(pattern).test(path);
     }
     return false;
 }
@@ -69,11 +72,27 @@ export default function(VueRouter, menu, fnImportPage) {
     applyItemsToRoutes(undefined, items, routes, fnImportPage);
 
     const router = new VueRouter({routes});
+
+    // 监听浏览器的返回事件
+    if (window.history && window.history.pushState) {
+        window.history.pushState(null, null, document.URL);
+        window.addEventListener('popstate', function() {
+            // 此函数先于VueRouter的所有钩子执行
+            router._historied = true;
+        }, false);
+    }
+
     router.beforeEach((to, from, next) => {
         window.tnx.app.page.stopCache(router, from.path);
         next();
     });
     router.afterEach((to, from) => {
+        if (router._historied) {
+            delete router._historied;
+            router.app.$route.meta.historyFrom = from.path;
+        } else {
+            delete router.app.$route.meta.historyFrom;
+        }
         // 前后路径相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
         if (to.path === from.path && to.fullPath !== from.fullPath) {
             window.location.reload();
@@ -92,6 +111,7 @@ export default function(VueRouter, menu, fnImportPage) {
         path = path || route.meta.superiorPath;
         path = instantiatePath(path, route.params);
         if (path) {
+            router._historied = true; // 标记路由器正在执行历史动作
             router.replace(path);
             return;
         }
