@@ -42,7 +42,7 @@ export default {
         },
         init: { // 是否初始化执行查询
             type: Boolean,
-            default: () => true
+            default: () => false
         }
     },
     computed: {
@@ -80,6 +80,9 @@ export default {
     },
     methods: {
         cacheParams() {
+            if (this.value.pageNo) {
+                this.value.pageNo = parseInt(this.value.pageNo);
+            }
             this.$route.meta.cache[this.cacheKey] = this.value;
         },
         toQuery(event) { // 为了避免传递事件参数，不直接使用query()
