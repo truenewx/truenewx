@@ -4,6 +4,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,26 +17,35 @@ public class TemporalUtil {
 
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
-    /**
-     * 最未来的日期：9999-12-31
-     */
-    public static final LocalDate MOST_FUTURE_DATE = LocalDate.of(9999, 12, 31);
-
     private TemporalUtil() {
     }
 
-    public static Instant toInstant(LocalDateTime dateTime) {
+    public static Date toDate(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return Date.from(toInstant(date));
+    }
+
+    public static Date toDate(LocalDateTime dateTime) {
         if (dateTime == null) {
             return null;
         }
-        return dateTime.atZone(TemporalUtil.DEFAULT_ZONE_ID).toInstant();
+        return Date.from(toInstant(dateTime));
     }
 
     public static Instant toInstant(LocalDate date) {
         if (date == null) {
             return null;
         }
-        return date.atStartOfDay(TemporalUtil.DEFAULT_ZONE_ID).toInstant();
+        return date.atStartOfDay(DEFAULT_ZONE_ID).toInstant();
+    }
+
+    public static Instant toInstant(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return null;
+        }
+        return dateTime.atZone(DEFAULT_ZONE_ID).toInstant();
     }
 
     public static LocalDate toLocalDate(Instant instant) {
@@ -56,7 +66,7 @@ public class TemporalUtil {
         if (instant == null) {
             return null;
         }
-        return LocalDateTime.ofInstant(instant, TemporalUtil.DEFAULT_ZONE_ID);
+        return LocalDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
     }
 
     public static LocalDateTime toLocalDateTime(LocalDate date, LocalTime time) {
@@ -81,7 +91,7 @@ public class TemporalUtil {
     }
 
     public static DateTimeFormatter formatter(String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).withZone(TemporalUtil.DEFAULT_ZONE_ID);
+        return DateTimeFormatter.ofPattern(pattern).withZone(DEFAULT_ZONE_ID);
     }
 
     public static String format(Temporal temporal) {
