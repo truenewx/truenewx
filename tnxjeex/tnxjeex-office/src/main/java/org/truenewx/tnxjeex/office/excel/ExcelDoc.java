@@ -13,6 +13,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjeex.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -31,6 +32,7 @@ public class ExcelDoc {
     private Map<String, Font> fonts = new HashMap<>();
 
     public ExcelDoc(String extension) {
+        extension = standardizeExtension(extension);
         if (EXTENSION_XLS.equalsIgnoreCase(extension)) {
             this.origin = new HSSFWorkbook();
         } else {
@@ -38,7 +40,15 @@ public class ExcelDoc {
         }
     }
 
+    private String standardizeExtension(String extension) {
+        if (extension.startsWith(Strings.DOT)) {
+            extension = extension.substring(1);
+        }
+        return extension;
+    }
+
     public ExcelDoc(InputStream in, String extension) throws IOException {
+        extension = standardizeExtension(extension);
         if (EXTENSION_XLS.equalsIgnoreCase(extension)) {
             this.origin = new HSSFWorkbook(in);
         } else {
