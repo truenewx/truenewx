@@ -1,13 +1,21 @@
 <template>
-    <el-date-picker :type="type" v-model="model" :value-format="format" :editable="false" :placeholder="placeholder"
-        :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions" :disabled="disabled"/>
+    <div class="d-flex" v-if="permanentable">
+        <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
+            :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
+            :disabled="disabled || value.permanent" class="flex-grow-1"/>
+        <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent">长期</el-checkbox>
+    </div>
+    <el-date-picker :type="type" v-model="model" :value-format="format" :editable="false"
+        :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
+        :disabled="disabled" v-else/>
 </template>
 
 <script>
 export default {
     name: 'TnxelDatePicker',
     props: {
-        value: [Date, Number, String],
+        permanentable: Boolean,
+        value: [Date, Number, String, Object], // 仅permanentable为true时传入Object
         valueFormat: String,
         type: {
             type: String,
@@ -64,23 +72,30 @@ export default {
                 return new Date(this.defaultValue);
             }
             return null;
-        }
+        },
     },
     watch: {
         model(value) {
             this.$emit('input', value);
         },
-        value(value) {
+        value() {
             this.model = this.getModel();
         }
     },
     methods: {
         getModel() {
-            if (this.value instanceof Date) {
-                return this.value.format(this.format);
-            }
-            if (typeof this.value === 'number') {
-                return new Date(this.value).format(this.format);
+            if (this.permanentable) {
+                this.value = this.value || {};
+                if (this.value.permanent) {
+                    this.value.value = null;
+                }
+            } else {
+                if (this.value instanceof Date) {
+                    return this.value.format(this.format);
+                }
+                if (typeof this.value === 'number') {
+                    return new Date(this.value).format(this.format);
+                }
             }
             return this.value;
         }

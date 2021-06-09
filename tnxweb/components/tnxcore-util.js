@@ -420,6 +420,15 @@ export const DateUtil = {
     formatMinute(date) {
         return this.format(date, DATE_PATTERNS.minute);
     },
+    formatPermanentableDate(date) {
+        if (date) {
+            if (date.permanent) {
+                return '长期';
+            }
+            return new Date(date.value).formatDate();
+        }
+        return undefined;
+    },
     /**
      * 将指定yyyy-MM-dd型的日期转换为yyyy-MM的月份格式
      * @param date 日期

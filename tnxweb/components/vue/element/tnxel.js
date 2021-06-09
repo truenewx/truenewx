@@ -255,6 +255,9 @@ tnxel.date = {
             return new Date(cellValue).formatMonth();
         }
         return undefined;
+    },
+    formatPermanentableDate: function(row, column, cellValue) {
+        return tnxvue.util.date.formatPermanentableDate(cellValue);
     }
 };
 
