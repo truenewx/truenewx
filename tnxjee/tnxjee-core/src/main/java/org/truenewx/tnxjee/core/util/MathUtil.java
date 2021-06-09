@@ -536,11 +536,13 @@ public class MathUtil {
             return null;
         }
         String s = decimal.toPlainString();
-        if (s.contains(Strings.DOT) && s.endsWith("0")) {
+        if (s.contains(Strings.DOT)) { // 包含小数点才需要缩减
             StringBuilder sb = new StringBuilder(s);
-            do {
+            // 去掉小数点后所有末尾的0
+            while (sb.charAt(sb.length() - 1) == '0') {
                 sb.deleteCharAt(sb.length() - 1);
-            } while (sb.charAt(sb.length() - 1) == '0');
+            }
+            // 如果最后以小数点结尾，则去掉小数点
             if (sb.charAt(sb.length() - 1) == '.') {
                 sb.deleteCharAt(sb.length() - 1);
             }
