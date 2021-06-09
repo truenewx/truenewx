@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -12,6 +13,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
 
@@ -140,6 +142,21 @@ public class ExcelCell {
             return month;
         }
         return null;
+    }
+
+    public PermanentableDate getPermanentableDateCellValue(Supplier<String> permanentDateTextSupplier) {
+        try {
+            LocalDate date = getLocalDateCellValue();
+            return date == null ? null : new PermanentableDate(date);
+        } catch (ExcelCellException e) {
+            if (ExcelExceptionCodes.CELL_DATE_FORMAT_ERROR.equals(e.getCode())) {
+                String text = getStringCellValue();
+                if (text.equals(permanentDateTextSupplier.get())) {
+                    return PermanentableDate.ofPermanent();
+                }
+            }
+            throw e;
+        }
     }
 
     public void setCellStyle(HSSFCellStyle style) {

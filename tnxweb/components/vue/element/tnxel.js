@@ -257,6 +257,9 @@ tnxel.date = {
         return undefined;
     },
     formatPermanentableDate: function(row, column, cellValue) {
+        if (Array.isArray(cellValue)) {
+            cellValue = cellValue[column];
+        }
         return tnxvue.util.date.formatPermanentableDate(cellValue);
     }
 };

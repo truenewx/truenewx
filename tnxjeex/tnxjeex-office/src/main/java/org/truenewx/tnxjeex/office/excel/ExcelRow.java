@@ -2,9 +2,11 @@ package org.truenewx.tnxjeex.office.excel;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.function.Supplier;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 
 /**
  * Excel行
@@ -84,6 +86,12 @@ public class ExcelRow {
     public LocalDate getLocalMonthCellValue(int columnIndex) {
         Cell cell = this.origin.getCell(columnIndex);
         return cell == null ? null : new ExcelCell(this, cell).getLocalMonthCellValue();
+    }
+
+    public PermanentableDate getPermanentableDateCellValue(int columnIndex,
+            Supplier<String> permanentDateTextSupplier) {
+        Cell cell = this.origin.getCell(columnIndex);
+        return cell == null ? null : new ExcelCell(this, cell).getPermanentableDateCellValue(permanentDateTextSupplier);
     }
 
 }

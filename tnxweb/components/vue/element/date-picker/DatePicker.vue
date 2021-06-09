@@ -2,7 +2,7 @@
     <div class="d-flex" v-if="permanentable">
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
             :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
-            :disabled="disabled || value.permanent" class="flex-grow-1"/>
+            :disabled="disabled || model.permanent" class="flex-grow-1"/>
         <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent">长期</el-checkbox>
     </div>
     <el-date-picker :type="type" v-model="model" :value-format="format" :editable="false"
@@ -86,6 +86,12 @@ export default {
         getModel() {
             if (this.permanentable) {
                 this.value = this.value || {};
+                // 可永久的日期不是对象，则封装为对象
+                if (typeof this.value !== 'object') {
+                    this.value = {
+                        value: this.value
+                    }
+                }
                 if (this.value.permanent) {
                     this.value.value = null;
                 }
