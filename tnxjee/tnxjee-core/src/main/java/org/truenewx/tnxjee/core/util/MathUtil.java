@@ -536,7 +536,7 @@ public class MathUtil {
             return null;
         }
         String s = decimal.toPlainString();
-        if (s.endsWith("0")) {
+        if (s.contains(Strings.DOT) && s.endsWith("0")) {
             StringBuilder sb = new StringBuilder(s);
             do {
                 sb.deleteCharAt(sb.length() - 1);
