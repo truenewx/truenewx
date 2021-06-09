@@ -15,23 +15,16 @@ public class ExcelCellException extends BusinessException {
     private CellAddress address;
 
     public ExcelCellException(CellAddress address, String code, Object... args) {
-        super(code, mergeLocationToArgs(address, args));
+        super(code, args);
         this.address = address;
-    }
-
-    private static Object[] mergeLocationToArgs(CellAddress address, Object... args) {
-        String location = address.formatAsString();
-        if (args.length == 0) {
-            return new Object[]{ location };
-        } else {
-            Object[] mergedArgs = new Object[args.length + 1];
-            System.arraycopy(args, 0, mergedArgs, 1, args.length);
-            mergedArgs[0] = location;
-            return mergedArgs;
-        }
     }
 
     public CellAddress getAddress() {
         return this.address;
     }
+
+    public void clearAddress() {
+        this.address = null;
+    }
+
 }

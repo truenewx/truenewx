@@ -8,15 +8,16 @@ import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
 import org.truenewx.tnxjee.core.enums.EnumItem;
 import org.truenewx.tnxjee.core.enums.EnumItemKey;
 import org.truenewx.tnxjee.core.enums.EnumType;
+import org.truenewx.tnxjee.core.message.MessageResolver;
 import org.truenewx.tnxjee.core.spec.BooleanEnum;
 import org.truenewx.tnxjee.core.spec.EnumGrouped;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
@@ -28,6 +29,7 @@ import org.truenewx.tnxjee.service.spec.region.NationalRegionSource;
 import org.truenewx.tnxjee.service.spec.region.Region;
 import org.truenewx.tnxjee.service.spec.region.RegionNationCodes;
 import org.truenewx.tnxjee.service.spec.region.RegionSource;
+import org.truenewx.tnxjeex.office.excel.ExcelCellFormatException;
 import org.truenewx.tnxjeex.office.excel.ExcelExceptionCodes;
 import org.truenewx.tnxjeex.office.excel.ExcelRow;
 
@@ -39,7 +41,9 @@ import org.truenewx.tnxjeex.office.excel.ExcelRow;
 @Component
 public class ExcelImportHelper {
 
-    private static final String GROUPED_ENUM_CAPTION_SEPARATOR = "constant.tnxjeex.office.excel.grouped_enum_caption_separator";
+    private static final String CONSTANT_GROUPED_ENUM_CAPTION_SEPARATOR = "constant.tnxjeex.office.excel.grouped_enum_caption_separator";
+    private static final String CONSTANT_PERMANENT_DATE_DEFAULT = "constant.tnxjeex.office.excel.permanent_date_default";
+    private static final String CONSTANT_PERMANENT_DATE = "constant.tnxjeex.office.excel.permanent_date";
 
     @Autowired
     private CodedErrorResolver codedErrorResolver;
@@ -48,10 +52,18 @@ public class ExcelImportHelper {
     @Autowired
     private RegionSource regionSource;
     @Autowired
-    private MessageSource messageSource;
+    private MessageResolver messageResolver;
 
     public String getGroupedCaptionSeparator(Locale locale) {
-        return this.messageSource.getMessage(GROUPED_ENUM_CAPTION_SEPARATOR, null, locale);
+        return this.messageResolver.resolveMessage(CONSTANT_GROUPED_ENUM_CAPTION_SEPARATOR, locale);
+    }
+
+    private String getPermanentDateText(Locale locale) {
+        String text = this.messageResolver.resolveMessage(CONSTANT_PERMANENT_DATE, locale);
+        if (CONSTANT_PERMANENT_DATE.equals(text)) {
+            text = this.messageResolver.resolveMessage(CONSTANT_PERMANENT_DATE_DEFAULT, locale);
+        }
+        return text;
     }
 
     public void addSheetError(ImportingExcelSheetModel<?> sheetModel, String code, Locale locale, Object... args) {
@@ -79,53 +91,88 @@ public class ExcelImportHelper {
         rowModel.addFieldError(fieldName, index, fieldValue == null ? null : fieldValue.toString(), error);
     }
 
-    public void addCellError(ImportingExcelRowModel rowModel, String fieldName, Object fieldValue, BusinessException be,
-            Locale locale) {
+    public void addCellBusinessError(ImportingExcelRowModel rowModel, String fieldName, Object fieldValue,
+            BusinessException be, Locale locale) {
         addCellError(rowModel, fieldName, fieldValue, be.getCode(), locale, be.getArgs());
     }
 
+    public void addCellBusinessError(ImportingExcelRowModel rowModel, String fieldName, int index, Object fieldValue,
+            BusinessException be, Locale locale) {
+        addCellError(rowModel, fieldName, index, fieldValue, be.getCode(), locale, be.getArgs());
+    }
+
+    public void addCellFormatError(ImportingExcelRowModel rowModel, String fieldName, ExcelCellFormatException fe,
+            Locale locale) {
+        fe.clearAddress(); // 作为字段错误处理时清除单元格地址信息
+        addCellError(rowModel, fieldName, fe.getOriginalText(), fe.getCode(), locale, fe.getArgs());
+    }
+
+    public void addCellFormatError(ImportingExcelRowModel rowModel, String fieldName, int index,
+            ExcelCellFormatException fe, Locale locale) {
+        fe.clearAddress(); // 作为字段错误处理时清除单元格地址信息
+        addCellError(rowModel, fieldName, index, fe.getOriginalText(), fe.getCode(), locale, fe.getArgs());
+    }
+
     public void addCellRequiredError(ImportingExcelRowModel rowModel, String fieldName, Locale locale) {
-        addCellError(rowModel, fieldName, null, ExcelExceptionCodes.IMPORT_CELL_REQUIRED, locale);
+        if (!rowModel.containsFieldError(fieldName, null)) { // 字段没有其它错误才可添加必填错误
+            addCellError(rowModel, fieldName, null, ExcelExceptionCodes.IMPORT_CELL_REQUIRED, locale);
+        }
     }
 
     public void addCellRequiredError(ImportingExcelRowModel rowModel, String fieldName, int index, Locale locale) {
-        addCellError(rowModel, fieldName, index, null, ExcelExceptionCodes.IMPORT_CELL_REQUIRED, locale);
+        if (!rowModel.containsFieldError(fieldName, index)) { // 字段没有其它错误才可添加必填错误
+            addCellError(rowModel, fieldName, index, null, ExcelExceptionCodes.IMPORT_CELL_REQUIRED, locale);
+        }
     }
 
     public void applyValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
             Locale locale, boolean required) {
         Object value = getCellValue(rowModel, row, columnIndex, fieldName, locale);
-        applyValue(rowModel, value, fieldName, locale, required);
+        applyValue(rowModel, fieldName, value, locale, required);
     }
 
+    /**
+     * 获取指定行指定列的单元格的值，如果出现读取错误，则将错误消息加入行数据模型中的字段错误集中
+     */
     @SuppressWarnings("unchecked")
     public <V> V getCellValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
             Locale locale) {
-        Field field = ClassUtil.findField(rowModel.getClass(), fieldName);
-        Class<?> fieldType = field.getType();
-        if (fieldType == LocalDate.class) {
-            return (V) row.getLocalDateCellValue(columnIndex);
-        } else if (ClassUtil.isNumeric(fieldType)) {
-            BigDecimal decimal = row.getNumericCellValue(columnIndex);
-            return (V) MathUtil.toValue(decimal, fieldType);
-        } else { // 其它都从字符串解析
-            String text = row.getStringCellValue(columnIndex);
-            if (fieldType.isArray()) {
-                if (StringUtils.isBlank(text)) {
-                    return null;
+        try {
+            Field field = ClassUtil.findField(rowModel.getClass(), fieldName);
+            Class<?> fieldType = field.getType();
+            if (ClassUtil.isNumeric(fieldType)) {
+                BigDecimal decimal = row.getNumericCellValue(columnIndex);
+                return (V) MathUtil.toValue(decimal, fieldType);
+            } else if (fieldType == LocalDate.class) {
+                return (V) row.getLocalDateCellValue(columnIndex);
+            } else if (fieldType == PermanentableDate.class) {
+                return (V) getPermanentableDateCellValue(row, columnIndex, locale);
+            } else { // 其它都从字符串解析
+                String text = row.getStringCellValue(columnIndex);
+                if (fieldType.isArray()) { // 为便于获取元素类型，行数据模型中的属性仅支持数组而不支持集合
+                    if (StringUtils.isBlank(text)) {
+                        return null;
+                    }
+                    Class<?> componentType = fieldType.getComponentType();
+                    String[] texts = text.split("\n");
+                    Object array = Array.newInstance(componentType, texts.length);
+                    for (int i = 0; i < texts.length; i++) {
+                        Object value = parseFromString(rowModel, field, i, texts[i], locale);
+                        Array.set(array, i, value);
+                    }
+                    return (V) array;
+                } else {
+                    return parseFromString(rowModel, field, null, text, locale);
                 }
-                Class<?> componentType = fieldType.getComponentType();
-                String[] texts = text.split("\n");
-                Object array = Array.newInstance(componentType, texts.length);
-                for (int i = 0; i < texts.length; i++) {
-                    Object value = parseFromString(rowModel, field, i, texts[i], locale);
-                    Array.set(array, i, value);
-                }
-                return (V) array;
-            } else {
-                return parseFromString(rowModel, field, null, text, locale);
             }
+        } catch (ExcelCellFormatException fe) {
+            addCellFormatError(rowModel, fieldName, fe, locale);
         }
+        return null;
+    }
+
+    public PermanentableDate getPermanentableDateCellValue(ExcelRow row, int columnIndex, Locale locale) {
+        return row.getPermanentableDateCellValue(columnIndex, () -> getPermanentDateText(locale));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -137,38 +184,37 @@ public class ExcelImportHelper {
         }
         String fieldName = field.getName();
         if (fieldType == String.class) {
-            String value = text;
             EnumItemKey enumItemKey = field.getAnnotation(EnumItemKey.class);
             if (enumItemKey != null) {
                 EnumType enumType = this.enumDictResolver.getEnumType(enumItemKey.type(), enumItemKey.subtype(),
                         locale);
                 if (enumType != null) {
-                    EnumItem enumItem = enumType.getItemByCaption(value);
+                    EnumItem enumItem = enumType.getItemByCaption(text);
                     if (enumItem != null) {
                         return (V) enumItem.getKey();
                     }
                 }
                 if (componentIndex == null) {
-                    addCellError(rowModel, fieldName, value, ExcelExceptionCodes.IMPORT_CELL_ENUM_ERROR, locale);
+                    addCellError(rowModel, fieldName, text, ExcelExceptionCodes.IMPORT_CELL_ENUM_ERROR, locale);
                 } else {
-                    addCellError(rowModel, fieldName, componentIndex, value, ExcelExceptionCodes.IMPORT_CELL_ENUM_ERROR,
+                    addCellError(rowModel, fieldName, componentIndex, text, ExcelExceptionCodes.IMPORT_CELL_ENUM_ERROR,
                             locale);
                 }
             }
             RegionCode regionCode = field.getAnnotation(RegionCode.class);
             if (regionCode != null) {
-                Region region = getNationalRegionSource().parseSubRegion(value, regionCode.withSuffix(), locale);
+                Region region = getNationalRegionSource().parseSubRegion(text, regionCode.withSuffix(), locale);
                 if (region != null) {
                     return (V) region.getCode();
                 }
                 if (componentIndex == null) {
-                    addCellError(rowModel, fieldName, value, ExcelExceptionCodes.IMPORT_CELL_REGION_ERROR, locale);
+                    addCellError(rowModel, fieldName, text, ExcelExceptionCodes.IMPORT_CELL_REGION_ERROR, locale);
                 } else {
-                    addCellError(rowModel, fieldName, componentIndex, value,
+                    addCellError(rowModel, fieldName, componentIndex, text,
                             ExcelExceptionCodes.IMPORT_CELL_REGION_ERROR, locale);
                 }
             }
-            return (V) value;
+            return (V) text;
         } else if (fieldType.isEnum()) {
             if (StringUtils.isNotBlank(text)) {
                 Class<Enum> enumClass = (Class<Enum>) fieldType;
@@ -216,7 +262,7 @@ public class ExcelImportHelper {
         return this.regionSource.getNationalRegionSource(RegionNationCodes.CHINA);
     }
 
-    public void applyValue(ImportingExcelRowModel rowModel, Object fieldValue, String fieldName, Locale locale,
+    public void applyValue(ImportingExcelRowModel rowModel, String fieldName, Object fieldValue, Locale locale,
             boolean required) {
         if (required) {
             if (fieldValue == null || (fieldValue instanceof String && StringUtils.isBlank((String) fieldValue))) {
@@ -228,6 +274,26 @@ public class ExcelImportHelper {
             }
         }
         BeanUtil.setPropertyValue(rowModel, fieldName, fieldValue);
+    }
+
+    public void applyLocalMonthValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
+            Locale locale, boolean required) {
+        try {
+            LocalDate value = row.getLocalMonthCellValue(columnIndex);
+            applyValue(rowModel, fieldName, value, locale, required);
+        } catch (ExcelCellFormatException fe) {
+            addCellFormatError(rowModel, fieldName, fe, locale);
+        }
+    }
+
+    public void applyLocalMonthValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
+            int index, Locale locale, boolean required) {
+        try {
+            LocalDate value = row.getLocalMonthCellValue(columnIndex);
+            applyValue(rowModel, fieldName, value, locale, required);
+        } catch (ExcelCellFormatException fe) {
+            addCellFormatError(rowModel, fieldName, index, fe, locale);
+        }
     }
 
 }

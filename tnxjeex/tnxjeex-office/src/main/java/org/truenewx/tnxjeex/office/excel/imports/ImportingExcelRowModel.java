@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.service.exception.model.CodedError;
 import org.truenewx.tnxjee.service.exception.model.TextWrong;
 
@@ -27,7 +28,8 @@ public abstract class ImportingExcelRowModel {
     }
 
     public void addFieldError(String fieldName, String originalText, CodedError error) {
-        TextWrong text = this.fieldWrongs.computeIfAbsent(fieldName, k -> new TextWrong(originalText));
+        String errorKey = getFieldErrorKey(fieldName, null);
+        TextWrong text = this.fieldWrongs.computeIfAbsent(errorKey, k -> new TextWrong(originalText));
         text.getErrors().add(error);
     }
 
@@ -40,7 +42,21 @@ public abstract class ImportingExcelRowModel {
      * @param error        错误对象
      */
     public void addFieldError(String fieldName, int index, String originalText, CodedError error) {
-        addFieldError(fieldName + "[" + index + "]", originalText, error);
+        String errorKey = getFieldErrorKey(fieldName, index);
+        addFieldError(errorKey, originalText, error);
+    }
+
+    private String getFieldErrorKey(String fieldName, Integer index) {
+        if (index == null) {
+            return fieldName;
+        } else {
+            return fieldName + Strings.LEFT_SQUARE_BRACKET + index + Strings.RIGHT_SQUARE_BRACKET;
+        }
+    }
+
+    public boolean containsFieldError(String fieldName, Integer index) {
+        String errorKey = getFieldErrorKey(fieldName, index);
+        return this.fieldWrongs.containsKey(errorKey);
     }
 
 }

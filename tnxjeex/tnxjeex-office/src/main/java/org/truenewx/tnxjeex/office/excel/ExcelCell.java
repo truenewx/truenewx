@@ -58,44 +58,61 @@ public class ExcelCell {
     }
 
     public String getStringCellValue() {
-        try {
-            if (this.origin.getCellType() == CellType.NUMERIC) {
-                try {
-                    BigDecimal decimal = BigDecimal.valueOf(this.origin.getNumericCellValue());
-                    return MathUtil.toShortestString(decimal);
-                } catch (Exception ignored) {
-                }
-            }
-            return this.origin.getStringCellValue();
-        } catch (Exception e) {
-            throw new ExcelCellException(this.origin.getAddress(), ExcelExceptionCodes.CELL_STRING_FORMAT_ERROR);
+        BigDecimal decimal = readDecimalValue();
+        if (decimal != null) {
+            return MathUtil.toShortestString(decimal);
         }
+        return readStringValue();
     }
 
-    public BigDecimal getNumericCellValue() {
-        CellType cellType = this.origin.getCellType();
-        if (cellType == CellType.NUMERIC) {
-            try {
+    /**
+     * 以数字格式读取单元格内容
+     *
+     * @return 单元格内容数字，未成功读取时返回null
+     */
+    private BigDecimal readDecimalValue() {
+        try {
+            CellType cellType = this.origin.getCellType();
+            if (cellType == CellType.NUMERIC) {
                 return BigDecimal.valueOf(this.origin.getNumericCellValue());
-            } catch (Exception ignored) {
-            }
-        } else if (cellType == CellType.FORMULA) {
-            try {
+            } else if (cellType == CellType.FORMULA) {
                 CellValue cellValue = this.row.getSheet().getDoc().evaluateFormula(this.origin);
                 if (cellValue != null) {
                     return BigDecimal.valueOf(cellValue.getNumberValue());
                 }
-                return null;
-            } catch (Exception ignored) {
             }
+        } catch (Exception ignored) {
         }
+        return null;
+    }
+
+    /**
+     * 以字符串格式读取单元格内容
+     *
+     * @return 单元格内容字符串
+     */
+    private String readStringValue() {
         try {
-            String value = this.origin.getStringCellValue();
-            if (StringUtils.isNotBlank(value)) {
-                return new BigDecimal(value);
-            }
+            return this.origin.getStringCellValue();
         } catch (Exception e) {
-            throw new ExcelCellException(this.origin.getAddress(), ExcelExceptionCodes.CELL_NUMBER_FORMAT_ERROR);
+            throw new ExcelCellFormatException(this.origin.getAddress());
+        }
+    }
+
+    public BigDecimal getNumericCellValue() {
+        BigDecimal decimal = readDecimalValue();
+        if (decimal != null) {
+            return decimal;
+        }
+
+        String text = readStringValue();
+        if (StringUtils.isNotBlank(text)) {
+            try {
+                return new BigDecimal(text);
+            } catch (NumberFormatException e) { // 可以读取字符串但数字格式化异常，则抛出数字格式错误异常
+                throw new ExcelCellFormatException(this.origin.getAddress(),
+                        ExcelCellFormatException.EXPECTED_TYPE_NUMBER, text);
+            }
         }
         return null;
     }
@@ -107,22 +124,23 @@ public class ExcelCell {
                 return dateTime.toLocalDate();
             }
         }
-        String value = this.origin.getStringCellValue();
-        if (StringUtils.isNotBlank(value)) {
+        String text = readStringValue();
+        if (StringUtils.isNotBlank(text)) {
             LocalDate date = null;
-            if (value.contains(Strings.MINUS)) {
-                date = TemporalUtil.parseDate(value);
+            if (text.contains(Strings.MINUS)) {
+                date = TemporalUtil.parseDate(text);
                 if (date == null) {
-                    date = TemporalUtil.parse(LocalDate.class, value, "yyyy-M-d");
+                    date = TemporalUtil.parse(LocalDate.class, text, "yyyy-M-d");
                 }
-            } else if (value.contains(Strings.SLASH)) {
-                date = TemporalUtil.parse(LocalDate.class, value, "yyyy/MM/dd");
+            } else if (text.contains(Strings.SLASH)) {
+                date = TemporalUtil.parse(LocalDate.class, text, "yyyy/MM/dd");
                 if (date == null) {
-                    date = TemporalUtil.parse(LocalDate.class, value, "yyyy/M/d");
+                    date = TemporalUtil.parse(LocalDate.class, text, "yyyy/M/d");
                 }
             }
             if (date == null) {
-                throw new ExcelCellException(this.origin.getAddress(), ExcelExceptionCodes.CELL_DATE_FORMAT_ERROR);
+                throw new ExcelCellFormatException(this.origin.getAddress(),
+                        ExcelCellFormatException.EXPECTED_TYPE_DATE, text);
             }
             return date;
         }
@@ -130,14 +148,15 @@ public class ExcelCell {
     }
 
     public LocalDate getLocalMonthCellValue() {
-        String value = getStringCellValue();
-        if (StringUtils.isNotBlank(value)) {
-            LocalDate month = TemporalUtil.parseDate(value + "-01");
+        String text = getStringCellValue();
+        if (StringUtils.isNotBlank(text)) {
+            LocalDate month = TemporalUtil.parseDate(text + "-01");
             if (month == null) {
-                month = TemporalUtil.parse(LocalDate.class, value + "-1", "yyyy-M-d");
+                month = TemporalUtil.parse(LocalDate.class, text + "-1", "yyyy-M-d");
             }
             if (month == null) {
-                throw new ExcelCellException(this.origin.getAddress(), ExcelExceptionCodes.CELL_MONTH_FORMAT_ERROR);
+                throw new ExcelCellFormatException(this.origin.getAddress(),
+                        ExcelCellFormatException.EXPECTED_TYPE_MONTH, text);
             }
             return month;
         }
@@ -148,15 +167,19 @@ public class ExcelCell {
         try {
             LocalDate date = getLocalDateCellValue();
             return date == null ? null : new PermanentableDate(date);
-        } catch (ExcelCellException e) {
-            if (ExcelExceptionCodes.CELL_DATE_FORMAT_ERROR.equals(e.getCode())) {
-                String text = getStringCellValue();
-                if (text.equals(permanentDateTextSupplier.get())) {
+        } catch (ExcelCellFormatException e) { // 不是正确的日期格式，则判断是否表示永久
+            String text = getStringCellValue();
+            if (StringUtils.isNotBlank(text)) {
+                String permanentDateText = permanentDateTextSupplier.get();
+                if (text.equals(permanentDateText)) { // 匹配表示永久的文本，则返回永久日期
                     return PermanentableDate.ofPermanent();
                 }
+                // 不匹配则抛出格式异常
+                throw new ExcelCellFormatException(this.origin.getAddress(),
+                        ExcelCellFormatException.EXPECTED_TYPE_PERMANENTABLE_DATE, text, permanentDateText);
             }
-            throw e;
         }
+        return null;
     }
 
     public void setCellStyle(HSSFCellStyle style) {
