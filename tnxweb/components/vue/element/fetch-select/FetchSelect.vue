@@ -96,7 +96,7 @@ export default {
         getItem(value) {
             if (value !== undefined && value !== null && this.items) {
                 for (let item of this.items) {
-                    if (item[this.valueName] === value) {
+                    if (item[this.valueName] === value + '') { // 确保一致的字符串值比较
                         return item;
                     }
                 }
@@ -117,6 +117,12 @@ export default {
                         if (result.paged) {
                             vm.more = result.paged.morePage;
                         }
+                    }
+                    // 确保选项的值均为字符串，以保证比较时的一致性
+                    if (Array.isArray(vm.items)) {
+                        vm.items.forEach(item => {
+                            item[vm.valueName] += '';
+                        });
                     }
                     vm.$emit('items', params, vm.items, vm.more);
                     vm.model = vm.getModel();
