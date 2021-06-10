@@ -426,7 +426,9 @@ export const DateUtil = {
             if (date.permanent) {
                 return this.PERMANENT_DATE_TEXT;
             }
-            return new Date(date.value).formatDate();
+            if (date.value) {
+                return new Date(date.value).formatDate();
+            }
         }
         return undefined;
     },

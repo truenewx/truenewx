@@ -2,7 +2,7 @@
     <div class="d-flex" v-if="permanentable">
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
             :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
-            :disabled="disabled || model.permanent" class="flex-grow-1"/>
+            :disabled="disabled || model.permanent" class="flex-grow-1" @change="onDateChange"/>
         <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent"
             @change="onPermanentChange">{{ permanentText }}
         </el-checkbox>
@@ -90,6 +90,9 @@ export default {
         }
     },
     methods: {
+        onDateChange() {
+            this.$emit('input', this.model);
+        },
         onPermanentChange() {
             // 如果不允许为空，需做特殊处理
             if (!this.empty) {
@@ -105,6 +108,7 @@ export default {
                     formItem.elForm.validateField(formItem.prop);
                 }
             }
+            this.$emit('input', this.model);
         },
         getModel() {
             if (this.permanentable) {
