@@ -75,7 +75,19 @@ public class PermanentableDate implements Comparable<PermanentableDate> {
 
     @Override
     public int compareTo(PermanentableDate other) {
-        return this.value.compareTo(other.value);
+        if (this.value == null) {
+            if (other.value == null) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else {
+            if (other.value == null) {
+                return 1;
+            } else {
+                return this.value.compareTo(other.value);
+            }
+        }
     }
 
 }

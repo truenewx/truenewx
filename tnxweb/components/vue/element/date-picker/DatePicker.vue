@@ -3,7 +3,9 @@
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
             :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
             :disabled="disabled || model.permanent" class="flex-grow-1"/>
-        <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent">长期</el-checkbox>
+        <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent"
+            @change="onPermanentChange">{{ permanentText }}
+        </el-checkbox>
     </div>
     <el-date-picker :type="type" v-model="model" :value-format="format" :editable="false"
         :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
@@ -37,6 +39,7 @@ export default {
     data() {
         let vm = this;
         return {
+            permanentText: window.tnx.util.date.PERMANENT_DATE_TEXT,
             model: this.getModel(),
             pickerOptions: {
                 disabledDate(date) {
@@ -73,6 +76,10 @@ export default {
             }
             return null;
         },
+        defaultDateValue() {
+            let date = this.defaultDate;
+            return date ? date.formatDate() : null;
+        }
     },
     watch: {
         model(value) {
@@ -83,6 +90,22 @@ export default {
         }
     },
     methods: {
+        onPermanentChange() {
+            // 如果不允许为空，需做特殊处理
+            if (!this.empty) {
+                if (!this.model.permanent && !this.model.value) { // 取消永久选项时日期值为空，则设置为默认值
+                    this.model.value = this.defaultDateValue;
+                }
+                // 重新进行字段校验，以清除可能的字段校验错误消息
+                let formItem = this.$parent;
+                while (formItem && !formItem.elForm) {
+                    formItem = formItem.$parent;
+                }
+                if (formItem && formItem.elForm && formItem.prop) {
+                    formItem.elForm.validateField(formItem.prop);
+                }
+            }
+        },
         getModel() {
             if (this.permanentable) {
                 this.value = this.value || {};
@@ -94,6 +117,8 @@ export default {
                 }
                 if (this.value.permanent) {
                     this.value.value = null;
+                } else if (!this.empty && !this.value.value) {
+                    this.value.value = this.defaultDateValue;
                 }
             } else {
                 if (this.value instanceof Date) {

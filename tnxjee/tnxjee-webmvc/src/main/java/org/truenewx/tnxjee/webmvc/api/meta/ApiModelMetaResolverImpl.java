@@ -12,7 +12,6 @@ import javax.validation.constraints.Email;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
@@ -87,7 +86,13 @@ public class ApiModelMetaResolverImpl implements ApiModelMetaResolver, ContextIn
             String propertyName = field.getName();
             // 未限制属性名或属性名在限制清单内，才添加属性元数据
             if (validPropertyNames == null || ArrayUtils.contains(validPropertyNames, propertyName)) {
-                if (BeanUtils.isSimpleValueType(fieldType)) { // 属性为简单类型，则可以直接获取元数据
+                if (Model.class.isAssignableFrom(fieldType)) { // 属性为模型类型，则通过引用约束注解获取元数据
+                    ReferenceConstraint referenceConstraint = field.getAnnotation(ReferenceConstraint.class);
+                    if (referenceConstraint != null) {
+                        addMetas(metas, fieldType.asSubclass(Model.class), locale, propertyName + Strings.DOT,
+                                referenceConstraint.value());
+                    }
+                } else { // 属性为其它类型的，直接获取元数据
                     String caption = this.propertyCaptionResolver.resolveCaption(modelClass, propertyName, locale);
                     if (propertyName.equals(caption) && !Locale.ENGLISH.getLanguage().equals(locale.getLanguage())) {
                         caption = null;
@@ -108,12 +113,6 @@ public class ApiModelMetaResolverImpl implements ApiModelMetaResolver, ContextIn
                     }
                     String key = propertyNamePrefix == null ? propertyName : propertyNamePrefix + propertyName;
                     metas.put(key, meta);
-                } else if (Model.class.isAssignableFrom(fieldType)) {
-                    ReferenceConstraint referenceConstraint = field.getAnnotation(ReferenceConstraint.class);
-                    if (referenceConstraint != null) {
-                        addMetas(metas, fieldType.asSubclass(Model.class), locale, propertyName + Strings.DOT,
-                                referenceConstraint.value());
-                    }
                 }
             }
             return true;

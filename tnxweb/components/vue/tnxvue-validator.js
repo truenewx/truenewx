@@ -62,14 +62,19 @@ function getRule(validationName, validationValue, fieldMeta) {
                             if (!blank) {
                                 if (Array.isArray(fieldValue)) {
                                     blank = fieldValue.length === 0; // 数组长度为0视为空
-                                } else if (fieldValue instanceof Date) {
-                                    blank = fieldValue === undefined || fieldValue === null; // 日期类型同时也是对象，仅当undefined或null时视为空
                                 } else if (typeof fieldValue === 'string') {
                                     blank = fieldValue.trim().length === 0; // 字符串去掉两端空格后长度为0视为空
                                 } else if (typeof fieldValue === 'number') {
                                     blank = isNaN(fieldValue); // 非法的数字视为空
                                 } else if (typeof fieldValue === 'object') {
-                                    blank = Object.keys(fieldValue).length === 0; // 没有字段的空对象视为空
+                                    // 对象非日期，且没有字段的视为空
+                                    blank = !(fieldValue instanceof Date) && Object.keys(fieldValue).length === 0;
+                                    if (!blank) {
+                                        // 可永久的日期对象，非永久且日期值为空时视为空
+                                        if (typeof fieldValue.permanent === 'boolean') {
+                                            blank = !fieldValue.permanent && !fieldValue.value;
+                                        }
+                                    }
                                 }
                             }
                             if (blank) {

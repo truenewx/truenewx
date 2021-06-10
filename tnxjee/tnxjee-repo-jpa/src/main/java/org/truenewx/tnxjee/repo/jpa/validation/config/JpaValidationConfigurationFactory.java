@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.model.Model;
 import org.truenewx.tnxjee.model.ValueModel;
 import org.truenewx.tnxjee.model.entity.Entity;
@@ -93,11 +94,7 @@ public class JpaValidationConfigurationFactory extends DefaultValidationConfigur
         }
         String propertyName = propertyDescriptor.getName();
         Class<?> propertyClass = propertyDescriptor.getPropertyType();
-        // 只处理字符串型、数值、日期型
-        if (CharSequence.class.isAssignableFrom(propertyClass) || Number.class.isAssignableFrom(propertyClass)
-                || (propertyClass.isPrimitive() && propertyClass != boolean.class)
-                || Date.class.isAssignableFrom(propertyClass) || Temporal.class.isAssignableFrom(propertyClass)
-                || propertyClass.isEnum()) {
+        if (supports(propertyClass)) {
             Iterator<Column> columns = property.getColumnIterator();
             // 只支持对应且仅对应一个物理字段的
             if (!columns.hasNext()) {
@@ -119,12 +116,13 @@ public class JpaValidationConfigurationFactory extends DefaultValidationConfigur
                 if (!column.isNullable()) { // 不允许为null的枚举型，添加不允许为空白的约束
                     configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                 }
-            } else if (Date.class.isAssignableFrom(propertyClass) || Temporal.class
-                    .isAssignableFrom(propertyClass)) { // 日期型
+            } else if (Date.class.isAssignableFrom(propertyClass)
+                    || Temporal.class.isAssignableFrom(propertyClass)
+                    || PermanentableDate.class.isAssignableFrom(propertyClass)) { // 日期型
                 if (!column.isNullable()) { // 不允许为null的日期型，添加不允许为空白的约束
                     configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                 }
-            } else { // 数值型
+            } else if (propertyClass.isPrimitive() || Number.class.isAssignableFrom(propertyClass)) { // 数值型
                 if (!column.isNullable()) { // 不允许为null的数值型，添加不允许为空白的约束
                     configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                 }
@@ -174,6 +172,28 @@ public class JpaValidationConfigurationFactory extends DefaultValidationConfigur
                 }
             }
         }
+    }
+
+    private boolean supports(Class<?> propertyClass) {
+        // 支持字符串
+        if (CharSequence.class.isAssignableFrom(propertyClass)) {
+            return true;
+        }
+        // 支持除布尔类型外的原生类型，也就是原生数值
+        if (propertyClass.isPrimitive() && propertyClass != boolean.class) {
+            return true;
+        }
+        // 支持数值类型
+        if (Number.class.isAssignableFrom(propertyClass)) {
+            return true;
+        }
+        // 支持日期型
+        if (Date.class.isAssignableFrom(propertyClass) || Temporal.class.isAssignableFrom(propertyClass)
+                || PermanentableDate.class.isAssignableFrom(propertyClass)) {
+            return true;
+        }
+        // 支持枚举
+        return propertyClass.isEnum();
     }
 
 }

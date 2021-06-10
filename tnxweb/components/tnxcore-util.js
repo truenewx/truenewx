@@ -420,10 +420,11 @@ export const DateUtil = {
     formatMinute(date) {
         return this.format(date, DATE_PATTERNS.minute);
     },
+    PERMANENT_DATE_TEXT: '长期',
     formatPermanentableDate(date) {
         if (date) {
             if (date.permanent) {
-                return '长期';
+                return this.PERMANENT_DATE_TEXT;
             }
             return new Date(date.value).formatDate();
         }

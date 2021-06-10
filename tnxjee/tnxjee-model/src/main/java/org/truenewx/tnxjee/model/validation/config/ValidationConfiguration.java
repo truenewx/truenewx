@@ -39,12 +39,8 @@ public class ValidationConfiguration {
     }
 
     public synchronized Set<ValidationRule> getRules(String propertyName) {
-        Set<ValidationRule> rules = this.ruleMapping.get(propertyName);
-        if (rules == null) {
-            rules = new LinkedHashSet<>(); // 保持规则加入的顺序
-            this.ruleMapping.put(propertyName, rules);
-        }
-        return rules;
+        // 保持规则加入的顺序
+        return this.ruleMapping.computeIfAbsent(propertyName, k -> new LinkedHashSet<>());
     }
 
     @SuppressWarnings("unchecked")
