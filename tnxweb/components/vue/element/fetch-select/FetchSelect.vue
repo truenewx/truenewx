@@ -2,7 +2,7 @@
     <el-select v-model="model" :loading="loading" :filterable="filterable" remote :remote-method="load"
         :placeholder="finalPlaceholder" :disabled="disabled" :title="title" :clearable="empty" default-first-option
         @clear="clear">
-        <el-option v-for="item in items" :key="item[valueName]" :value="item[valueName]" :label="item[textName]"/>
+        <el-option v-for="item in items" :key="item[valueName]" :value="item[valueName]" :label="label(item)"/>
         <el-option label="还有更多结果..." disabled v-if="more"/>
     </el-select>
 </template>
@@ -31,6 +31,7 @@ export default {
             type: String,
             default: () => 'name',
         },
+        descName: String,
         empty: Boolean,
         filterable: Boolean,
         placeholder: [String, Array],
@@ -73,7 +74,7 @@ export default {
             this.$emit('input', value);
             this.triggerChange(value);
         },
-        value(value) {
+        value() {
             this.model = this.getModel();
         },
         url() {
@@ -87,6 +88,13 @@ export default {
         this.load();
     },
     methods: {
+        label(item) {
+            let label = item[this.textName];
+            if (this.descName && item[this.descName]) {
+                label += ' (' + item[this.descName] + ')';
+            }
+            return label;
+        },
         triggerChange(value) {
             if (this.change) {
                 let item = this.getItem(value);
