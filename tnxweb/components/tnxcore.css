@@ -75,6 +75,10 @@ ul {
     line-height: 1;
 }
 
+.line-height-1rem {
+    line-height: 1rem;
+}
+
 span.nowrap {
     white-space: nowrap;
 }
