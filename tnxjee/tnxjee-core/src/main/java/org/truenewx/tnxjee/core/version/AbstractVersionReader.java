@@ -1,7 +1,9 @@
 package org.truenewx.tnxjee.core.version;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.truenewx.tnxjee.core.util.function.ProfileSupplier;
 
 /**
  * 抽象的版本号读取器
@@ -12,6 +14,9 @@ public abstract class AbstractVersionReader implements VersionReader, Applicatio
 
     private Version version;
 
+    @Autowired
+    private ProfileSupplier profileSupplier;
+
     @Override
     public void setApplicationContext(ApplicationContext context) {
         String fullVersion = readFullVersion(context);
@@ -21,6 +26,12 @@ public abstract class AbstractVersionReader implements VersionReader, Applicatio
     @Override
     public Version getVersion() {
         return this.version;
+    }
+
+    @Override
+    public String getVersionText() {
+        boolean formalProfile = this.profileSupplier.isFormal();
+        return this.version.toText(!formalProfile);
     }
 
     /**

@@ -14,4 +14,11 @@ public interface VersionReader {
      */
     Version getVersion();
 
+    /**
+     * 获取当前版本号的文本表示
+     *
+     * @return 当前版本号的文本表示
+     */
+    String getVersionText();
+
 }
