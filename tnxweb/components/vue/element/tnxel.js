@@ -239,20 +239,41 @@ tnxel.date = {
         return undefined;
     },
     formatTime: function(row, column, cellValue) {
-        if (cellValue) {
-            return new Date(cellValue).formatTime();
+        if (typeof cellValue === 'number') {
+            cellValue = new Date(cellValue);
+        }
+        if (cellValue instanceof Date) {
+            cellValue = cellValue.formatTime();
+        }
+        if (typeof cellValue === 'string') {
+            return cellValue;
         }
         return undefined;
     },
-    formatMinute: function(row, column, cellValue) {
-        if (cellValue) {
-            return new Date(cellValue).formatMinute();
+    formatTimeMinute: function(row, column, cellValue) {
+        if (typeof cellValue === 'number') {
+            cellValue = new Date(cellValue);
+        }
+        if (cellValue instanceof Date) {
+            cellValue = cellValue.formatTimeMinute();
+        }
+        if (typeof cellValue === 'string') {
+            let array = cellValue.split(':');
+            if (array.length > 1) {
+                return array[0] + ':' + array[1];
+            }
         }
         return undefined;
     },
-    formatMonth: function(row, column, cellValue) {
+    formatDateMinute: function(row, column, cellValue) {
         if (cellValue) {
-            return new Date(cellValue).formatMonth();
+            return new Date(cellValue).formatDateMinute();
+        }
+        return undefined;
+    },
+    formatDateMonth: function(row, column, cellValue) {
+        if (cellValue) {
+            return new Date(cellValue).formatDateMonth();
         }
         return undefined;
     },

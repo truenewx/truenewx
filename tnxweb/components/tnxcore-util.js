@@ -63,8 +63,9 @@ const DATE_PATTERNS = {
     dateTime: 'yyyy-MM-dd HH:mm:ss',
     date: 'yyyy-MM-dd',
     time: 'HH:mm:ss',
-    minute: 'yyyy-MM-dd HH:mm',
-    month: 'yyyy-MM',
+    timeMinute: 'HH:mm',
+    dateMinute: 'yyyy-MM-dd HH:mm',
+    dateMonth: 'yyyy-MM',
 }
 
 Object.assign(Date.prototype, {
@@ -98,11 +99,14 @@ Object.assign(Date.prototype, {
     formatTime() {
         return this.format(DATE_PATTERNS.time);
     },
-    formatMinute() {
-        return this.format(DATE_PATTERNS.minute);
+    formatTimeMinute() {
+        return this.format(DATE_PATTERNS.timeMinute);
     },
-    formatMonth() {
-        return this.format(DATE_PATTERNS.month);
+    formatDateMinute() {
+        return this.format(DATE_PATTERNS.dateMinute);
+    },
+    formatDateMonth() {
+        return this.format(DATE_PATTERNS.dateMonth);
     },
     plusDays(days) {
         let millis = this.getTime();
@@ -414,11 +418,14 @@ export const DateUtil = {
     formatTime(date) {
         return this.format(date, DATE_PATTERNS.time);
     },
+    formatTimeMinute(date) {
+        return this.format(date, DATE_PATTERNS.timeMinute);
+    },
     formatDateTime(date) {
         return this.format(date, DATE_PATTERNS.dateTime);
     },
-    formatMinute(date) {
-        return this.format(date, DATE_PATTERNS.minute);
+    formatDateMinute(date) {
+        return this.format(date, DATE_PATTERNS.dateMinute);
     },
     PERMANENT_DATE_TEXT: '长期',
     formatPermanentableDate(date) {
@@ -439,7 +446,7 @@ export const DateUtil = {
      */
     dateToMonth(date) {
         if (date instanceof Date) {
-            return this.format(date, this.pattern.month);
+            return this.format(date, this.pattern.dateMonth);
         }
         if (date) {
             return date.substr(0, date.lastIndexOf('-'));
