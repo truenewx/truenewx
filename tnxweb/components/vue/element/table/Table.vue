@@ -1,7 +1,7 @@
 <template>
     <div class="tnxel-table">
         <el-table :data="records" :empty-text="emptyRecordText" :border="border" :stripe="stripe"
-            @sort-change="sort" :default-sort="defaultSort" :key="defaultSort">
+            @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
         <tnxel-paged :value="paged" :change="query" :align="pagedAlign"/>
@@ -33,6 +33,7 @@ export default {
         },
         pagedAlign: String,
         success: Function,
+        rowClassName: String,
     },
     data() {
         return {
