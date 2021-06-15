@@ -18,11 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.truenewx.tnxjee.core.Strings;
@@ -135,16 +131,15 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             fileId = EncryptUtil.encryptByMd5(storageUrl);
         }
 
-        FssUploadedFileMeta result;
-        if (onlyStorage) { // 只需要存储地址
-            result = new FssUploadedFileMeta(fileId, null, storageUrl, null, null);
-        } else {
+        FssUploadedFileMeta result = new FssUploadedFileMeta(fileId, storageUrl);
+        if (!onlyStorage) { // 不只需要存储地址
+            result.setName(filename);
             String readUrl = this.service.getReadUrl(userIdentity, storageUrl, false);
-            readUrl = getFullReadUrl(readUrl);
+            result.setReadUrl(getFullReadUrl(readUrl));
             // 缩略读取地址附加的缩略参数对最终URL可能产生影响，故需要重新生成，而不能在读取URL上简单附加缩略参数
             String thumbnailReadUrl = this.service.getReadUrl(userIdentity, storageUrl, true);
-            thumbnailReadUrl = getFullReadUrl(thumbnailReadUrl);
-            result = new FssUploadedFileMeta(fileId, filename, storageUrl, readUrl, thumbnailReadUrl);
+            result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl));
+            result.setImageable(this.service.getUploadLimit(type, userIdentity).isImageable());
         }
         return result;
     }

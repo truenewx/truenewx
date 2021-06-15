@@ -79,10 +79,11 @@ public class FileUploadLimit {
         return this.sizes;
     }
 
-    public void enableImage(boolean croppable, FlatSize... sizes) {
+    public FileUploadLimit enableImage(boolean croppable, FlatSize... sizes) {
         this.imageable = true;
         this.croppable = croppable;
         this.sizes = sizes;
+        return this;
     }
 
     public String validate(long fileSize, String filename) {

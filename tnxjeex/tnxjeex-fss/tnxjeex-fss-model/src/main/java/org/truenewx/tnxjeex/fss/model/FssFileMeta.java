@@ -18,12 +18,10 @@ public class FssFileMeta {
     private String storageUrl;
     private String readUrl;
     private String thumbnailReadUrl;
+    private Boolean imageable;
 
-    public FssFileMeta(String name, String storageUrl, String readUrl, String thumbnailReadUrl) {
-        this.name = name;
+    public FssFileMeta(String storageUrl) {
         this.storageUrl = storageUrl;
-        this.readUrl = readUrl;
-        this.thumbnailReadUrl = thumbnailReadUrl;
     }
 
     public String getId() {
@@ -34,23 +32,35 @@ public class FssFileMeta {
         return this.name;
     }
 
-    public String getStorageUrl() {
-        return this.storageUrl;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setReadUrl(String readUrl) {
-        this.readUrl = readUrl;
+    public String getStorageUrl() {
+        return this.storageUrl;
     }
 
     public String getReadUrl() {
         return this.readUrl;
     }
 
-    public void setThumbnailReadUrl(String thumbnailReadUrl) {
-        this.thumbnailReadUrl = thumbnailReadUrl;
+    public void setReadUrl(String readUrl) {
+        this.readUrl = readUrl;
     }
 
     public String getThumbnailReadUrl() {
         return this.thumbnailReadUrl;
+    }
+
+    public void setThumbnailReadUrl(String thumbnailReadUrl) {
+        this.thumbnailReadUrl = thumbnailReadUrl;
+    }
+
+    public Boolean getImageable() {
+        return this.imageable;
+    }
+
+    public void setImageable(Boolean imageable) {
+        this.imageable = imageable;
     }
 }

@@ -35,7 +35,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void afterInitialized(ApplicationContext context) throws Exception {
+    public void afterInitialized(ApplicationContext context) {
         Map<String, FssAccessStrategy> strategies = context.getBeansOfType(FssAccessStrategy.class);
         for (FssAccessStrategy<I> strategy : strategies.values()) {
             this.strategies.put(strategy.getType(), strategy);
@@ -149,8 +149,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
     private FssAccessStrategy<I> validateUserRead(I userIdentity, FssStoragePath fsp) {
         if (fsp.isValid()) {
-            FssAccessStrategy<I> strategy = this.strategies.get(fsp.getType());
-            if (strategy != null && strategy.isReadable(userIdentity, fsp.getRelativeDir())) {
+            FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
+            if (strategy.isReadable(userIdentity, fsp.getRelativeDir())) {
                 return strategy;
             }
         }
@@ -167,9 +167,12 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 String path = strategy.getContextPath() + fsp.getRelativePath();
                 String filename = accessor.getOriginalFilename(path);
                 if (filename != null) {
-                    String thumbnailReadUrl = getReadUrl(userIdentity, fsp, true);
-                    String readUrl = getReadUrl(userIdentity, fsp, false);
-                    return new FssFileMeta(filename, storageUrl, readUrl, thumbnailReadUrl);
+                    FssFileMeta meta = new FssFileMeta(storageUrl);
+                    meta.setName(filename);
+                    meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
+                    meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
+                    meta.setImageable(strategy.getUploadLimit(userIdentity).isImageable());
+                    return meta;
                 }
             }
         }
