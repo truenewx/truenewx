@@ -149,7 +149,9 @@ public class AdditionalCaptionUtil {
                     Object rawValue = pd.getReadMethod().invoke(bean);
                     Object caption = getAdditionalCaption(meta, rawValue, enumDictResolver, regionSource, locale);
                     if (caption != null) {
-                        String captionPropertyName = getAdditionalCaptionPropertyName(pd.getName());
+                        String propertyName = pd.getName();
+                        map.put(propertyName, rawValue);
+                        String captionPropertyName = getAdditionalCaptionPropertyName(propertyName);
                         map.put(captionPropertyName, caption);
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
