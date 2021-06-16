@@ -72,7 +72,7 @@ const tnxvue = Object.assign({}, tnxcore, {
     },
     open(component, props, options) {
         if (component.methods.dialog) {
-            options = Object.assign({}, component.methods.dialog(), options);
+            options = Object.assign({}, component.methods.dialog(props), options);
         } else {
             options = options || {};
         }
