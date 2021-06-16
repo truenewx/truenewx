@@ -19,7 +19,7 @@ import FetchSelect from './fetch-select';
 import FetchCascader from './fetch-cascader';
 import RegionCascader from './region-cascader';
 import Paged from './paged';
-import Table from './table';
+import QueryTable from './query-table';
 import Transfer from './transfer';
 import Avatar from './avatar';
 import InputNumber from './input-number';
@@ -44,7 +44,7 @@ const components = Object.assign({}, tnxvue.components, {
     FetchCascader,
     RegionCascader,
     Paged,
-    Table,
+    QueryTable,
     Transfer,
     Avatar,
     InputNumber,

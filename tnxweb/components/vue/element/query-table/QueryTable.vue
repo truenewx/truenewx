@@ -1,5 +1,5 @@
 <template>
-    <div class="tnxel-table">
+    <div class="tnxel-query-table">
         <el-table :data="records" :empty-text="emptyRecordText" :border="border" :stripe="stripe"
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
@@ -15,7 +15,7 @@ export default {
     components: {
         'tnxel-paged': Paged
     },
-    name: 'TnxelTable',
+    name: 'TnxelQueryTable',
     props: {
         app: String,
         url: {
