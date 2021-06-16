@@ -86,6 +86,10 @@ public class OqlUtil {
                         if (comparison == Comparison.LIKE || comparison == Comparison.NOT_LIKE) {
                             params.put(paramName,
                                     StringUtils.join(Strings.PERCENT, fieldParamValue.toString(), Strings.PERCENT));
+                        } else if (comparison == Comparison.LIKE_LEFT || comparison == Comparison.NOT_LIKE_LEFT) {
+                            params.put(paramName, StringUtils.join(Strings.PERCENT, fieldParamValue.toString()));
+                        } else if (comparison == Comparison.LIKE_RIGHT || comparison == Comparison.NOT_LIKE_RIGHT) {
+                            params.put(paramName, StringUtils.join(fieldParamValue.toString(), Strings.PERCENT));
                         } else {
                             params.put(paramName, fieldParamValue);
                         }
@@ -94,7 +98,8 @@ public class OqlUtil {
                 if (fieldParamValues.size() == 1) { // 一个字段参数不需要添加括号
                     condition.delete(0, junction.length());
                 } else {
-                    condition.replace(0, junction.length(), Strings.LEFT_BRACKET).append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
+                    condition.replace(0, junction.length(), Strings.LEFT_BRACKET)
+                            .append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
                 }
             }
         }

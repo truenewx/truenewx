@@ -4,7 +4,6 @@ package org.truenewx.tnxjee.repo.jpa.util;
  * 比较操作符
  *
  * @author jianglei
- * 
  */
 public enum Comparison {
     /**
@@ -16,13 +15,29 @@ public enum Comparison {
      */
     NOT_EQUAL(true),
     /**
-     * like
+     * 两边都有%的like
      */
     LIKE(false),
     /**
-     * not like
+     * 两边都有%的not like
      */
     NOT_LIKE(true),
+    /**
+     * %在左边的like
+     */
+    LIKE_LEFT(false),
+    /**
+     * %在左边的not like
+     */
+    NOT_LIKE_LEFT(true),
+    /**
+     * %在右边的like
+     */
+    LIKE_RIGHT(false),
+    /**
+     * %在右边的not like
+     */
+    NOT_LIKE_RIGHT(true),
     /**
      * in
      */
@@ -87,30 +102,34 @@ public enum Comparison {
      */
     public String toQlString() {
         switch (this) {
-        case NOT_EQUAL:
-            return " <> ";
-        case LIKE:
-            return " like ";
-        case NOT_LIKE:
-            return " not like ";
-        case IN:
-            return " in ";
-        case NOT_IN:
-            return " not in ";
-        case GREATER:
-            return " > ";
-        case GREATER_EQUAL:
-            return " >= ";
-        case LESS:
-            return " < ";
-        case LESS_EQUAL:
-            return " <= ";
-        case IS_NULL:
-            return " is null";
-        case NOT_NULL:
-            return " is not null";
-        default:
-            return " = ";
+            case NOT_EQUAL:
+                return " <> ";
+            case LIKE:
+            case LIKE_LEFT:
+            case LIKE_RIGHT:
+                return " like ";
+            case NOT_LIKE:
+            case NOT_LIKE_LEFT:
+            case NOT_LIKE_RIGHT:
+                return " not like ";
+            case IN:
+                return " in ";
+            case NOT_IN:
+                return " not in ";
+            case GREATER:
+                return " > ";
+            case GREATER_EQUAL:
+                return " >= ";
+            case LESS:
+                return " < ";
+            case LESS_EQUAL:
+                return " <= ";
+            case IS_NULL:
+                return " is null";
+            case NOT_NULL:
+                return " is not null";
+            default:
+                return " = ";
         }
     }
 }
