@@ -16,9 +16,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserConfigAuthority;
-import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
-import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
-import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigPermission;
+import org.truenewx.tnxjee.webmvc.security.config.annotation.*;
 import org.truenewx.tnxjee.webmvc.security.web.access.ConfigAuthorityResolver;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
@@ -70,9 +68,20 @@ public class WebFilterInvocationSecurityMetadataSource
                         configAuthority.app(), configAuthority.permission(), configAuthority.intranet()));
             } else if (annotation instanceof ConfigPermission) {
                 ConfigPermission configPermission = (ConfigPermission) annotation;
-                authorities.add(new UserConfigAuthority(configPermission.type(),
-                        configPermission.rank(), configPermission.app(), getDefaultPermission(url),
-                        configPermission.intranet()));
+                authorities.add(new UserConfigAuthority(configPermission.type(), configPermission.rank(),
+                        configPermission.app(), getDefaultPermission(url), configPermission.intranet()));
+            } else if (annotation instanceof ConfigAuthorities) {
+                ConfigAuthorities configAuthorities = (ConfigAuthorities) annotation;
+                for (ConfigAuthority configAuthority : configAuthorities.value()) {
+                    authorities.add(new UserConfigAuthority(configAuthority.type(), configAuthority.rank(),
+                            configAuthority.app(), configAuthority.permission(), configAuthority.intranet()));
+                }
+            } else if (annotation instanceof ConfigPermissions) {
+                ConfigPermissions configPermissions = (ConfigPermissions) annotation;
+                for (ConfigPermission configPermission : configPermissions.value()) {
+                    authorities.add(new UserConfigAuthority(configPermission.type(), configPermission.rank(),
+                            configPermission.app(), getDefaultPermission(url), configPermission.intranet()));
+                }
             }
         }
         if (authorities.isEmpty()) { // 没有配置权限限定，则拒绝所有访问
