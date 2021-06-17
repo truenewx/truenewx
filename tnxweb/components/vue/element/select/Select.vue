@@ -1,23 +1,24 @@
 <template>
-    <el-checkbox-group v-model="model" :disabled="disabled" v-if="selector === 'checkbox'">
+    <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
         <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-checkbox>
     </el-checkbox-group>
-    <el-radio-group v-model="model" class="ignore-feedback" :disabled="disabled" v-else-if="selector === 'radio'">
+    <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
+        v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-radio>
     </el-radio-group>
-    <el-radio-group v-model="model" class="ignore-feedback" :disabled="disabled"
+    <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio-button'">
         <el-radio-button :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-radio-button>
     </el-radio-group>
-    <el-dropdown trigger="click" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
+    <el-dropdown trigger="click" :size="size" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
         <el-button :type="theme">{{ currentText }}
             <i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
@@ -27,7 +28,7 @@
             </el-dropdown-item>
         </el-dropdown-menu>
     </el-dropdown>
-    <el-dropdown :type="theme" trigger="click" split-button @command="onDropdownCommand"
+    <el-dropdown :type="theme" :size="size" trigger="click" split-button @command="onDropdownCommand"
         v-else-if="selector === 'split-dropdown'">
         <span>{{ currentText }}</span>
         <el-dropdown-menu slot="dropdown" v-if="items && items.length">
@@ -36,8 +37,8 @@
             </el-dropdown-item>
         </el-dropdown-menu>
     </el-dropdown>
-    <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :disabled="disabled"
-        :filterable="filterable" :filter-method="filter" v-else>
+    <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :theme="theme" :size="size"
+        :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
         <el-option class="text-muted" :value="emptyValue" :label="emptyText" v-if="empty"/>
         <template v-for="item in items">
             <el-option :key="item[valueName]" :value="item[valueName]" :label="item[textName]"
@@ -50,6 +51,7 @@
 export default {
     name: 'TnxelSelect',
     props: {
+        id: [Number, String],
         value: String,
         selector: String,
         items: {
@@ -82,6 +84,7 @@ export default {
         change: Function, // 选中值变化后的事件处理函数，由于比element的change事件传递更多参数，所以以prop的形式指定，以尽量节省性能
         filterable: Boolean,
         theme: String,
+        size: String,
     },
     data() {
         let model = this.getModel(this.items);
@@ -128,7 +131,7 @@ export default {
                 } else {
                     item = this.getItem(value);
                 }
-                this.change(item);
+                this.change(item, this.id);
             }
         },
         getItem(value) {
