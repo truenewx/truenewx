@@ -25,6 +25,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.caption.Caption;
 import org.truenewx.tnxjee.core.caption.CaptionUtil;
+import org.truenewx.tnxjee.core.enums.annotation.EnumSub;
 import org.truenewx.tnxjee.core.spec.BooleanEnum;
 import org.truenewx.tnxjee.core.spec.EnumGrouped;
 import org.truenewx.tnxjee.core.spec.Name;

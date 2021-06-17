@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.core.enums;
+package org.truenewx.tnxjee.core.enums.annotation;
 
 import java.lang.annotation.*;
 

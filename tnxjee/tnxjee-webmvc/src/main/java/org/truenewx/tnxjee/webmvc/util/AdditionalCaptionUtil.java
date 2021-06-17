@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
-import org.truenewx.tnxjee.core.enums.EnumItemKey;
+import org.truenewx.tnxjee.core.enums.annotation.EnumItemKey;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.SpringUtil;

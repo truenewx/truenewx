@@ -1,11 +1,13 @@
 package org.truenewx.tnxjee.model.spec.enums;
 
 import org.truenewx.tnxjee.core.caption.Caption;
+import org.truenewx.tnxjee.core.enums.annotation.EnumCaption;
 import org.truenewx.tnxjee.model.annotation.EnumValue;
 
 /**
  * 民族
  */
+@EnumCaption(suffix = "族")
 public enum Ethnicity {
 
     @Caption("汉族")
