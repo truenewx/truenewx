@@ -26,6 +26,7 @@ import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.caption.Caption;
 import org.truenewx.tnxjee.core.caption.CaptionUtil;
 import org.truenewx.tnxjee.core.enums.annotation.EnumSub;
+import org.truenewx.tnxjee.core.enums.annotation.EnumTypeCaption;
 import org.truenewx.tnxjee.core.spec.BooleanEnum;
 import org.truenewx.tnxjee.core.spec.EnumGrouped;
 import org.truenewx.tnxjee.core.spec.Name;
@@ -295,6 +296,8 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                     String caption = CaptionUtil.getCaption(field, locale);
                     if (caption == null) { // 默认用枚举常量名称作为显示名称
                         caption = enumConstant.name();
+                    } else {
+                        caption = roundTypeCaption(enumClass, caption);
                     }
                     enumType.addItem(new EnumItem(ordinal, enumConstant.name(), caption));
                 }
@@ -339,6 +342,21 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
         }
         String typeName = getEnumTypeName(enumClass);
         return new EnumType(typeName, subname, typeCaption);
+    }
+
+    private String roundTypeCaption(Class<?> enumClass, String caption) {
+        EnumTypeCaption enumTypeCaption = enumClass.getAnnotation(EnumTypeCaption.class);
+        if (enumTypeCaption != null) {
+            String captionPrefix = enumTypeCaption.prefix();
+            if (StringUtils.isNotBlank(captionPrefix) && !caption.startsWith(captionPrefix)) {
+                caption = captionPrefix + caption;
+            }
+            String captionSuffix = enumTypeCaption.suffix();
+            if (StringUtils.isNotBlank(captionSuffix) && !caption.endsWith(captionSuffix)) {
+                caption += captionSuffix;
+            }
+        }
+        return caption;
     }
 
     /**
@@ -409,6 +427,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
         }
         EnumType enumType = getEnumType(enumClass.getName(), subtype, locale);
         if (enumType != null) {
+            caption = roundTypeCaption(enumClass, caption);
             EnumItem enumItem = enumType.getItemByCaption(caption);
             if (enumItem != null) {
                 return EnumUtils.getEnum(enumClass, enumItem.getKey());
