@@ -17,6 +17,25 @@
             {{ item[textName] }}
         </el-radio-button>
     </el-radio-group>
+    <el-dropdown trigger="click" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
+        <el-button :type="theme">{{ currentText }}
+            <i class="el-icon-arrow-down el-icon--right"></i>
+        </el-button>
+        <el-dropdown-menu slot="dropdown" v-if="items && items.length">
+            <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
+                {{ item[textName] }}
+            </el-dropdown-item>
+        </el-dropdown-menu>
+    </el-dropdown>
+    <el-dropdown :type="theme" trigger="click" split-button @command="onDropdownCommand"
+        v-else-if="selector === 'split-dropdown'">
+        <span>{{ currentText }}</span>
+        <el-dropdown-menu slot="dropdown" v-if="items && items.length">
+            <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
+                {{ item[textName] }}
+            </el-dropdown-item>
+        </el-dropdown-menu>
+    </el-dropdown>
     <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :disabled="disabled"
         :filterable="filterable" :filter-method="filter" v-else>
         <el-option class="text-muted" :value="emptyValue" :label="emptyText" v-if="empty"/>
@@ -62,6 +81,7 @@ export default {
         disabled: Boolean,
         change: Function, // 选中值变化后的事件处理函数，由于比element的change事件传递更多参数，所以以prop的形式指定，以尽量节省性能
         filterable: Boolean,
+        theme: String,
     },
     data() {
         let model = this.getModel(this.items);
@@ -76,6 +96,10 @@ export default {
     computed: {
         emptyText() {
             return typeof this.empty === 'string' ? this.empty : '';
+        },
+        currentText() {
+            let item = this.getItem(this.model);
+            return item ? item[this.textName] : undefined;
         }
     },
     watch: {
@@ -162,6 +186,9 @@ export default {
             return !keyword || window.tnx.util.string.matchesForEach(item[this.valueName], keyword)
                 || window.tnx.util.string.matchesForEach(item[this.textName], keyword)
                 || window.tnx.util.string.matchesForEach(item[this.indexName], keyword)
+        },
+        onDropdownCommand(value) {
+            this.model = value;
         }
     }
 }
