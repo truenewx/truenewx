@@ -345,6 +345,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     private String roundTypeCaption(Class<?> enumClass, String caption) {
+        caption = caption.trim();
         EnumTypeCaption enumTypeCaption = enumClass.getAnnotation(EnumTypeCaption.class);
         if (enumTypeCaption != null) {
             String captionPrefix = enumTypeCaption.prefix();
@@ -417,20 +418,22 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <E extends Enum<E>> E getEnumConstantByCaption(Class<E> enumClass, String caption, String groupCaption,
             Locale locale) {
-        String subtype = null;
-        if (EnumGrouped.class.isAssignableFrom(enumClass)) {
-            Class<Enum> groupClass = ClassUtil.getActualGenericType(enumClass, EnumGrouped.class, 0);
-            Enum<?> group = getEnumConstantByCaption(groupClass, groupCaption, null, locale);
-            if (group != null) {
-                subtype = group.name();
+        if (StringUtils.isNotBlank(caption)) {
+            String subtype = null;
+            if (EnumGrouped.class.isAssignableFrom(enumClass)) {
+                Class<Enum> groupClass = ClassUtil.getActualGenericType(enumClass, EnumGrouped.class, 0);
+                Enum<?> group = getEnumConstantByCaption(groupClass, groupCaption, null, locale);
+                if (group != null) {
+                    subtype = group.name();
+                }
             }
-        }
-        EnumType enumType = getEnumType(enumClass.getName(), subtype, locale);
-        if (enumType != null) {
-            caption = roundTypeCaption(enumClass, caption);
-            EnumItem enumItem = enumType.getItemByCaption(caption);
-            if (enumItem != null) {
-                return EnumUtils.getEnum(enumClass, enumItem.getKey());
+            EnumType enumType = getEnumType(enumClass.getName(), subtype, locale);
+            if (enumType != null) {
+                caption = roundTypeCaption(enumClass, caption);
+                EnumItem enumItem = enumType.getItemByCaption(caption);
+                if (enumItem != null) {
+                    return EnumUtils.getEnum(enumClass, enumItem.getKey());
+                }
             }
         }
         return null;

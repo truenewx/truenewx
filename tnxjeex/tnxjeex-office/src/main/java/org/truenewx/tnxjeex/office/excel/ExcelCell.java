@@ -93,7 +93,8 @@ public class ExcelCell {
      */
     private String readStringValue() {
         try {
-            return this.origin.getStringCellValue();
+            String value = this.origin.getStringCellValue();
+            return value == null ? null : value.trim(); // Excel单元格里容易出现不易察觉的空格，读取时去掉首尾空格
         } catch (Exception e) {
             throw new ExcelCellFormatException(this.origin.getAddress());
         }

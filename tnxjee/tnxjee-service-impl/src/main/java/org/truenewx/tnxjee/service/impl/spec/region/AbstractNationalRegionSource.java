@@ -145,8 +145,12 @@ public abstract class AbstractNationalRegionSource implements NationalRegionSour
 
     @Override
     public RegionAddress parseAddress(String address, int level, Locale locale) {
+        if (address == null) {
+            return null;
+        }
+        address = address.trim();
         int normalProvinceCaptionLength = 2; // 一般的省级区划名称长度为2
-        if (address == null || address.length() < normalProvinceCaptionLength) { // 地址至少为一般省级区划名称长度
+        if (address.length() < normalProvinceCaptionLength) { // 地址至少为一般省级区划名称长度
             return null;
         }
         Region nationalRegion = getNationalRegion(locale);
