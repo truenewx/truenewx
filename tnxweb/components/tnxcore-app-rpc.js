@@ -158,7 +158,7 @@ export default {
                             originalUrl = array[1];
                         }
                         // 原始地址是登录验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
-                        if (originalUrl && (originalUrl === _this._ensureLoginedUrl || originalUrl.endsWith(
+                        if (originalUrl && (originalUrl === _this._ensureAuthorizedUrl || originalUrl.endsWith(
                             '/logout'))) {
                             originalUrl = undefined;
                             originalMethod = undefined;
@@ -268,9 +268,23 @@ export default {
         }
         return message.trim();
     },
-    _ensureLoginedUrl: '/authentication/validate',
+    _ensureAuthorizedUrl: '/authentication/validate',
+    /**
+     * 确保已登录
+     * @param callback 校验通过的回调
+     * @param options 请求选项集
+     */
     ensureLogined(callback, options) {
-        this.get(this._ensureLoginedUrl, callback, options);
+        this.get(this._ensureAuthorizedUrl, callback, options);
+    },
+    /**
+     * 确保已具有指定授权
+     * @param authority 授权：{type,rank,permission}
+     * @param callback 校验通过时的回调
+     * @param options 请求选项集
+     */
+    ensureAuthorized(authority, callback, options) {
+        this.get(this._ensureAuthorizedUrl, authority, callback, options);
     },
     _metas: {},
     getMeta(urlOrType, callback, app) {
