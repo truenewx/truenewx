@@ -52,7 +52,7 @@ export default {
     name: 'TnxelSelect',
     props: {
         id: [Number, String],
-        value: String,
+        value: [String, Number, Boolean],
         selector: String,
         items: {
             type: Array,
@@ -137,7 +137,7 @@ export default {
         getItem(value) {
             if (value !== undefined && value !== null && this.items) {
                 for (let item of this.items) {
-                    if (item[this.valueName] === value) {
+                    if ((item[this.valueName] + '') === (value + '')) {
                         return item;
                     }
                 }
@@ -158,7 +158,7 @@ export default {
             } else if (items && items.length) {
                 let item = this.getItem(this.value);
                 if (item) {
-                    return this.value;
+                    return item[this.valueName];
                 } else { // 如果当前值找不到匹配的选项，则需要考虑是设置为空还是默认选项
                     if (!this.empty) { // 如果不能为空，则默认选中第一个选项
                         let firstItem = items[0];
