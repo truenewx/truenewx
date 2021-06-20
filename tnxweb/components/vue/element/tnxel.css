@@ -17,6 +17,7 @@ el-header a img,
     margin-top: 4px;
 }
 
+el-header ul.tnxel-nav,
 .el-header ul.tnxel-nav {
     display: flex;
     flex-direction: row;
@@ -38,6 +39,12 @@ el-header a img,
 .el-header ul.tnxel-nav li a {
     padding-left: 1rem;
     padding-right: 1rem;
+    text-decoration: none;
+}
+
+.el-header ul.tnxel-nav li a:hover,
+.el-header ul.tnxel-nav li a:focus {
+    text-decoration: none;
 }
 
 .el-header ul.tnxel-nav li a i,
