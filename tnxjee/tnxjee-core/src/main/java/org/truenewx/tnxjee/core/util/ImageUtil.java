@@ -1,18 +1,8 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -28,7 +18,6 @@ import org.truenewx.tnxjee.core.Strings;
  * 图片工具类
  *
  * @author jianglei
- * 
  */
 public class ImageUtil {
 
@@ -54,7 +43,7 @@ public class ImageUtil {
      * @return 截取得到的图片数据
      * @throws IOException 如果截取过程中出现IO错误
      */
-    public static byte[] crop(InputStream in, String formatName, int x, int y, int width,
+    public static byte[] clip(InputStream in, String formatName, int x, int y, int width,
             int height) throws IOException {
         BufferedImage image = ImageIO.read(in);
         image = image.getSubimage(x, y, width, height);
@@ -66,7 +55,7 @@ public class ImageUtil {
         return b;
     }
 
-    public static BufferedImage crop(BufferedImage image, String formatName, int x, int y,
+    public static BufferedImage clip(BufferedImage image, String formatName, int x, int y,
             int width, int height) throws IOException {
         Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(formatName);
         if (!readers.hasNext()) {
@@ -83,10 +72,88 @@ public class ImageUtil {
     }
 
     /**
+     * 以圆切形式裁剪指定图片<br/>
+     * 注意：由于圆心坐标会在显示屏中占据一个像素位置，加上半径后，实际的圆切直径会比预期的大一个像素，不符合预期，故无法使用圆心定位方式
+     *
+     * @param source   被裁剪的源图片
+     * @param cornerX  裁剪圆所在正方形左上角坐标x轴
+     * @param cornerY  裁剪圆所在正方形左上角坐标y轴
+     * @param diameter 裁剪圆直径
+     * @return 裁剪出的图片
+     */
+    public static BufferedImage clipCircle(BufferedImage source, int cornerX, int cornerY, int diameter) {
+        diameter = Math.max(diameter, 2); // 直径至少要为2，否则无法形成一个最基本的圆
+        // 源图片大小
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+        // 实际裁剪所在矩形的左上角起点位置，不能超出源图片范围，最小为0
+        int beginX = Math.max(cornerX, 0);
+        int beginY = Math.max(cornerY, 0);
+        // 实际裁剪所在矩形的右下角终点位置，不能超出源图片范围，最大为源图片最大坐标位置
+        int endX = Math.min(cornerX + diameter, sourceWidth);
+        int endY = Math.min(cornerY + diameter, sourceHeight);
+
+        // 创建一个合适大小的基图
+        BufferedImage target = new BufferedImage(endX - beginX, endY - beginY, BufferedImage.TYPE_INT_ARGB);
+        // 计算半径，需偏移0.5，基于无大小的圆心计算半径
+        double radius = (diameter / 2d) - 0.5d;
+        // 无大小的圆心计算坐标
+        double centerX = cornerX + radius;
+        double centerY = cornerY + radius;
+        int nonTransparentAlpha = toAlpha(1); // 完全不透明的alpha值
+        boolean sourceAlpha = source.getColorModel().hasAlpha();
+        int transparentArgb = rgbToArgb(0xffffff, toAlpha(0));
+        // 源图片中实际裁剪所在矩形范围内的点才需要读取
+        for (int x = beginX; x < endX; x++) {
+            for (int y = beginY; y < endY; y++) {
+                int argb;
+
+                double distance = distance(x, y, centerX, centerY); // 点到圆心的距离
+                double ddr = distance - radius; // 距离与半径的差，用于权衡透明度
+                float opacityRatio;
+                if (ddr <= 0) { // 距离≤半径，则完全从源图片取色值
+                    opacityRatio = 1;
+                } else if (ddr >= 1) { // 距离半径差≥1，则完全透明
+                    opacityRatio = 0;
+                } else { // 距离超过半径但超过的不足1，则为过渡点位
+                    opacityRatio = (float) (1 - ddr);
+                }
+
+                if (opacityRatio == 0) {
+                    argb = transparentArgb;
+                } else {
+                    argb = source.getRGB(x, y);
+                    if (!sourceAlpha) {  // 如果源图片不包含alpha值，则需附加alpha值
+                        int alpha = nonTransparentAlpha;
+                        if (opacityRatio < 1) { // 过渡点位
+                            alpha = toAlpha(opacityRatio);
+                        }
+                        argb = rgbToArgb(argb, alpha);
+                    } else if (opacityRatio < 1) { // 如果源图片包含alpha值，且需降低当前透明度，则在源alpha值基础上降低透明度
+                        Color color = new Color(argb);
+                        int alpha = (int) (color.getAlpha() * opacityRatio);
+                        color = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+                        argb = color.getRGB();
+                    }
+                }
+                // 在目标图片中的位置
+                int targetX = x - beginX;
+                int targetY = y - beginY;
+                target.setRGB(targetX, targetY, argb);
+            }
+        }
+        return target;
+    }
+
+    private static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    }
+
+    /**
      * 保存图片
      *
      * @param image     图片
-     * @param dirsPath  存储位置
+     * @param dir       存储位置
      * @param filename  文件名
      * @param extension 后缀名
      * @throws IOException 系统没有写入权限
@@ -238,6 +305,93 @@ public class ImageUtil {
             } catch (IOException e) { // 无需处理该异常
             }
         }
+    }
+
+    /**
+     * 创建用RGB格式表示颜色值的纯色图片
+     *
+     * @param width  图片宽度
+     * @param height 图片高度
+     * @param rgb    red-green-blue形式的十六进制颜色值，形如：0x020507
+     * @return 创建的图片
+     */
+    public static BufferedImage createPureRgbImage(int width, int height, int rgb) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setRGB(x, y, rgb);
+            }
+        }
+        return image;
+    }
+
+    /**
+     * 创建用ARGB格式表示颜色值的纯色图片
+     *
+     * @param width  图片宽度
+     * @param height 图片高度
+     * @param argb   alpha-red-green-blue形式的十六进制颜色值，形如：0xff020507，其中ff为alpha值
+     * @return 创建的图片
+     */
+    public static BufferedImage createPureArgbImage(int width, int height, int argb) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setRGB(x, y, argb);
+            }
+        }
+        return image;
+    }
+
+    /**
+     * 创建纯色图片
+     *
+     * @param width   图片宽度
+     * @param height  图片高度
+     * @param rgb     red-green-blue形式的十六进制颜色值，形如：0x020507
+     * @param opacity 不透明度，1-完全不透明，0-完全透明
+     * @return 创建的图片
+     */
+    public static BufferedImage createPureColorImage(int width, int height, int rgb, float opacity) {
+        int argb = rgbToArgb(rgb, toAlpha(opacity));
+        return createPureArgbImage(width, height, argb);
+    }
+
+    /**
+     * 不透明度转换为alpha值
+     *
+     * @param opacity 不透明度，1-完全不透明，0-完全透明
+     * @return alpha值
+     */
+    public static int toAlpha(float opacity) {
+        // 不透明度在[0,1]之间
+        if (opacity < 0) {
+            opacity = 0;
+        } else if (opacity > 1) {
+            opacity = 1;
+        }
+        return Math.round(opacity * 255);
+    }
+
+    public static int rgbToArgb(int rgb, int alpha) {
+        Color color = new Color(rgb);
+        color = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+        return color.getRGB();
+    }
+
+    /**
+     * 将指定源图片覆盖至指定目标图片上的指定位置，返回新的图片<br/>
+     * 指定位置坐标如果不在目标图片内，则返回目标图片，没有变化；如果覆盖后超出目标图片范围，则超出的部分被裁剪忽略
+     *
+     * @param source 源图片
+     * @param target 目标图片
+     * @param x      源图片左上角位于目标图片中坐标的x轴
+     * @param y      源图片左上角位于目标图片中坐标的y轴
+     * @return 覆盖后生成的新图片
+     */
+    public static BufferedImage cover(BufferedImage source, BufferedImage target, int x, int y) {
+
+        return null;
     }
 
 }
