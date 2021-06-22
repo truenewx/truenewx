@@ -3,6 +3,8 @@ package org.truenewx.tnxjee.core.util;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -10,7 +12,6 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.util.FileCopyUtils;
 import org.truenewx.tnxjee.core.Strings;
 
@@ -246,61 +247,51 @@ public class ImageUtil {
     /**
      * 缩放图片
      *
-     * @param image 原图片
-     * @param width 缩放目标宽度
+     * @param source      源图片
+     * @param targetWidth 缩放目标宽度
      * @return 缩放后得到的图片
-     * @author jianglei
      */
-    public static BufferedImage zoom(Image image, int width) {
-        int originalWidth = image.getWidth(null);
-        if (originalWidth == width) {
-            if (image instanceof BufferedImage) {
-                return (BufferedImage) image;
-            }
+    public static BufferedImage zoom(BufferedImage source, int targetWidth) {
+        waitForLoading(source);
+        int sourceWidth = source.getWidth();
+        if (sourceWidth == targetWidth) {
+            return source;
         }
-        int originalHeight = image.getHeight(null);
-        checkSize(image);
+        int sourceHeight = source.getHeight();
+        // 目标高度 = 源高度 * 目标宽度 / 源宽度
+        int targetHeight = BigDecimal.valueOf(sourceHeight).multiply(BigDecimal.valueOf(targetWidth))
+                .divide(BigDecimal.valueOf(sourceWidth), 0, RoundingMode.HALF_UP).intValue();
 
-        // 计算等比高宽
-        int height = -1;
-        double scaleW = (double) originalWidth / (double) width;
-        double scaleY = (double) originalHeight / (double) height;
-        if (scaleW >= 0 && scaleY >= 0) {
-            if (scaleW > scaleY) {
-                height = -1;
-            } else {
-                width = -1;
-            }
+        // 获取缩略图
+        Image scaledImage = source.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        if (scaledImage instanceof BufferedImage) {
+            return (BufferedImage) scaledImage;
         }
-
-        // 渲染缩略图
-        Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        checkSize(newImage);
-        BufferedImage bi = new BufferedImage(newImage.getWidth(null), newImage.getHeight(null),
-                BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = bi.createGraphics();
-        graphics.drawImage(newImage, 0, 0, null);
-        return bi;
+        // 转换缩略图格式
+        BufferedImage target = new BufferedImage(targetWidth, targetHeight, source.getType());
+        Graphics graphics = target.getGraphics();
+        graphics.drawImage(scaledImage, 0, 0, null);
+        graphics.dispose();
+        return target;
     }
 
     /**
      * 缩放图片
      *
-     * @param in    原图片输入流
-     * @param width 缩放目标宽度
+     * @param source      原图片输入流
+     * @param targetWidth 缩放目标宽度
      * @return 缩放后得到的图片
      * @throws IOException 缩放异常(原文件损坏或指定缩放大小错误)
      */
-    public static BufferedImage zoom(InputStream in, int width) throws IOException {
+    public static BufferedImage zoom(InputStream source, int targetWidth) throws IOException {
         try {
-            byte[] bytes = IOUtils.toByteArray(in);// 将文件流转换为Byte数组
-            Image originalImage = Toolkit.getDefaultToolkit().createImage(bytes);// 将Byte数组转换为图片
-            waitForLoading(originalImage); // 等待图片加载
-            return zoom(originalImage, width);
+            BufferedImage sourceImage = ImageIO.read(source);
+            waitForLoading(sourceImage); // 等待图片加载
+            return zoom(sourceImage, targetWidth);
         } finally {
             try {
-                if (in != null) {
-                    in.close();
+                if (source != null) {
+                    source.close();
                 }
             } catch (IOException e) { // 无需处理该异常
             }
@@ -380,18 +371,30 @@ public class ImageUtil {
     }
 
     /**
-     * 将指定源图片覆盖至指定目标图片上的指定位置，返回新的图片<br/>
-     * 指定位置坐标如果不在目标图片内，则返回目标图片，没有变化；如果覆盖后超出目标图片范围，则超出的部分被裁剪忽略
+     * 将指定源图片覆盖至指定目标图片上的指定位置，目标图片内容被更改。<br/>
+     * 如果要覆盖的坐标区域与目标图片没有重合部分，则目标图片没有变化；如果要覆盖的坐标区域超出目标图片范围，则超出的部分被裁剪忽略
      *
      * @param source 源图片
-     * @param target 目标图片
+     * @param target 被覆盖的目标图片
      * @param x      源图片左上角位于目标图片中坐标的x轴
      * @param y      源图片左上角位于目标图片中坐标的y轴
-     * @return 覆盖后生成的新图片
      */
-    public static BufferedImage cover(BufferedImage source, BufferedImage target, int x, int y) {
+    public static void cover(BufferedImage source, BufferedImage target, int x, int y) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+        // 实际覆盖矩形区域的左上角起点位置，不能超出目标图片范围，最小为0
+        int beginX = Math.max(x, 0);
+        int beginY = Math.max(x, 0);
 
-        return null;
+        int targetWidth = target.getWidth();
+        int targetHeight = target.getHeight();
+        // 实际覆盖矩形区域的右下角终点位置，不能超出目标图片范围，最大为目标图片最大坐标位置
+        int endX = Math.min(x + sourceWidth, targetWidth);
+        int endY = Math.min(y + sourceHeight, targetHeight);
+
+        Graphics graphics = target.getGraphics();
+        graphics.drawImage(source, beginX, beginY, endX - beginX, endY - beginY, null);
+        graphics.dispose();
     }
 
 }
