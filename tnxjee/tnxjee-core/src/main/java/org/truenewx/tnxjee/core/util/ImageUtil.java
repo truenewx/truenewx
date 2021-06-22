@@ -431,4 +431,52 @@ public class ImageUtil {
         return new FileInputStream(file);
     }
 
+    public static BufferedImage newImage(int width, int height, boolean hasAlpha) {
+        int imageType = hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+        return new BufferedImage(width, height, imageType);
+    }
+
+    /**
+     * 环绕扩展图片
+     *
+     * @param source                 源图片
+     * @param targetWidthHeightRatio 目标宽高比
+     * @param fillColor              扩展部分的填充颜色，为null时默认用白色（源图片无alpha值）或完全透明色（源图片有alpha值）
+     * @return 扩展后的图片
+     */
+    public static BufferedImage expandRound(BufferedImage source, double targetWidthHeightRatio, Color fillColor) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+        double widthHeightRatio = sourceWidth / (double) sourceHeight;
+        int offsetX = 0;
+        int offsetY = 0;
+        int targetWidth = sourceWidth;
+        int targetHeight = sourceHeight;
+        if (widthHeightRatio < targetWidthHeightRatio) { // 当前宽高比小于标准，说明宽度不够，需两侧扩展
+            targetWidth = (int) Math.round(targetWidthHeightRatio * sourceHeight);
+            offsetX = (targetWidth - sourceWidth) / 2;
+        } else if (widthHeightRatio > targetWidthHeightRatio) { // 当前宽高比大于标准，说明高度不够，需上下扩展
+            targetHeight = (int) Math.round(sourceWidth / targetWidthHeightRatio);
+            offsetY = (targetHeight - sourceHeight) / 2;
+        } else {
+            return source;
+        }
+
+        boolean hasAlpha = source.getColorModel().hasAlpha();
+        BufferedImage target = newImage(targetWidth, targetHeight, hasAlpha);
+        if (fillColor == null) {
+            fillColor = hasAlpha ? new Color(0xff, 0xff, 0xff, toAlpha(0)) : new Color(0xffffff);
+        }
+        for (int x = 0; x < targetWidth; x++) {
+            for (int y = 0; y < targetHeight; y++) {
+                int rgb = fillColor.getRGB();
+                if (offsetX <= x && x < offsetX + sourceWidth && offsetY <= y && y < offsetY + sourceHeight) {
+                    rgb = source.getRGB(x - offsetX, y - offsetY);
+                }
+                target.setRGB(x, y, rgb);
+            }
+        }
+        return target;
+    }
+
 }
