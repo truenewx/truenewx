@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjeex.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -23,8 +24,8 @@ import org.truenewx.tnxjeex.office.excel.exports.ExcelExportUtil;
  */
 public class ExcelDoc {
 
-    public static final String EXTENSION_XLS = "xls";
-    public static final String EXTENSION_XLSX = "xlsx";
+    public static final String EXTENSION_XLS = FileExtensions.XLS;
+    public static final String EXTENSION_XLSX = FileExtensions.XLSX;
 
     private Workbook origin;
     private FormulaEvaluator evaluator;

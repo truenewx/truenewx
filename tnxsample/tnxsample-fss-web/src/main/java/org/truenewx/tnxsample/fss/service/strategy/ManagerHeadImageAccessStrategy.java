@@ -2,6 +2,7 @@ package org.truenewx.tnxsample.fss.service.strategy;
 
 import org.springframework.stereotype.Service;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.model.spec.FlatSize;
 import org.truenewx.tnxjee.model.spec.user.IntegerUserIdentity;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
@@ -22,7 +23,7 @@ public class ManagerHeadImageAccessStrategy extends AbstractFssAccessStrategy {
 
     @Override
     public FileUploadLimit getUploadLimit(IntegerUserIdentity userIdentity) {
-        FileUploadLimit limit = new FileUploadLimit(1, 1024 * 1024, "jpg", "png", "gif");
+        FileUploadLimit limit = new FileUploadLimit(1, 1024 * 1024, FileExtensions.IMAGES_ALL);
         limit.enableImage(true, new FlatSize(64, 64));
         return limit;
     }

@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,10 +24,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.config.CommonProperties;
-import org.truenewx.tnxjee.core.util.EncryptUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.NetUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
@@ -190,10 +186,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         if (StringUtils.isNotBlank(type) && url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
             try {
                 String filename = getFilename(url, command.getExtension());
-                File root = new ClassPathResource(".").getFile().getParentFile().getParentFile().getParentFile()
-                        .getParentFile();
                 String fileId = StringUtil.uuid32();
-                File file = new File(root, "/temp/" + fileId + Strings.UNDERLINE + filename);
+                File file = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
                 NetUtil.download(url, null, file);
                 FssUploadedFileMeta meta = write(type, command.getScope(), fileId, file.length(), filename,
                         new FileInputStream(file), true);

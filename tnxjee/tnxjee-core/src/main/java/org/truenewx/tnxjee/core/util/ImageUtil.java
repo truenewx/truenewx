@@ -80,7 +80,7 @@ public class ImageUtil {
      * @param cornerX  裁剪圆所在正方形左上角坐标x轴
      * @param cornerY  裁剪圆所在正方形左上角坐标y轴
      * @param diameter 裁剪圆直径
-     * @return 裁剪出的图片
+     * @return 裁剪出的图片，一定包含alpha值，保存为文件的话只能使用png格式
      */
     public static BufferedImage clipCircle(BufferedImage source, int cornerX, int cornerY, int diameter) {
         diameter = Math.max(diameter, 2); // 直径至少要为2，否则无法形成一个最基本的圆
@@ -148,6 +148,26 @@ public class ImageUtil {
 
     private static double distance(double x1, double y1, double x2, double y2) {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    }
+
+    /**
+     * 居中最大化圆切图片
+     *
+     * @param source 源图片
+     * @return 裁剪出的图片，一定包含alpha值，保存为文件的话只能使用png格式
+     */
+    public static BufferedImage clipCircle(BufferedImage source) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int x = 0;
+        int y = 0;
+        if (width > height) {
+            x = (width - height) / 2;
+        } else if (width < height) {
+            y = (height - width) / 2;
+        }
+        int diameter = Math.min(width, height);
+        return clipCircle(source, x, y, diameter);
     }
 
     /**
@@ -395,6 +415,20 @@ public class ImageUtil {
         Graphics graphics = target.getGraphics();
         graphics.drawImage(source, beginX, beginY, endX - beginX, endY - beginY, null);
         graphics.dispose();
+    }
+
+    public static InputStream getImageInputStream(BufferedImage image, String formatName) throws IOException {
+        // 粗略计算图片大致容量，未压缩情况下不超过1MB，则在内存中操作
+        long capacity = (long) image.getWidth() * (long) image.getHeight() * 4; // 每个像素用4个字节表示
+        if (capacity <= 1024 * 1024) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(image, formatName, out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+        // 否则借助临时文件操作
+        File file = new File(IOUtil.getTomcatTempDir(), StringUtil.uuid32() + Strings.DOT + formatName);
+        ImageIO.write(image, formatName, file);
+        return new FileInputStream(file);
     }
 
 }

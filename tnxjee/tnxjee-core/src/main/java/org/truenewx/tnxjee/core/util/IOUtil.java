@@ -1,22 +1,13 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -339,4 +330,11 @@ public class IOUtil {
         }
         return (strIndex == strLength);
     }
+
+    public static File getTomcatTempDir() throws IOException {
+        File root = new ClassPathResource(Strings.DOT).getFile().getParentFile().getParentFile().getParentFile()
+                .getParentFile();
+        return new File(root, "/temp");
+    }
+
 }

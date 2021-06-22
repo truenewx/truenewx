@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.ImageUtil;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
@@ -39,7 +40,7 @@ public class QrCodeGenerator {
     /**
      * 二维码图片扩展名
      */
-    private static String EXTENSION = "png";
+    private static String EXTENSION = FileExtensions.PNG;
 
     private String root;
 
