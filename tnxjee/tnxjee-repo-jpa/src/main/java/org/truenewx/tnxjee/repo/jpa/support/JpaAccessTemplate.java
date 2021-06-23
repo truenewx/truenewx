@@ -124,6 +124,24 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         return list(ql, (Map<String, ?>) null);
     }
 
+    /**
+     * 从多个实体或表中查询清单并简单汇总，无法保证结果排序和唯一性
+     *
+     * @param qlFormat           包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param params             查询参数
+     * @param entityOrTableNames 实体或表名清单
+     * @return 汇总清单
+     */
+    public <T> List<T> listMulti(CharSequence qlFormat, Map<String, ?> params, String... entityOrTableNames) {
+        List<T> result = new ArrayList<>();
+        String format = qlFormat.toString();
+        for (String entityOrTableName : entityOrTableNames) {
+            String ql = String.format(format, entityOrTableName);
+            result.addAll(list(ql, params));
+        }
+        return result;
+    }
+
     public <T> T first(CharSequence ql, String paramName, Object paramValue) {
         List<T> list = list(ql, paramName, paramValue, 1, 1);
         return CollectionUtil.getFirst(list, null);
@@ -160,6 +178,24 @@ public class JpaAccessTemplate implements DataAccessTemplate {
 
     public long count(CharSequence ql) {
         return count(ql, (Map<String, ?>) null);
+    }
+
+    /**
+     * 从多个实体或表中获取汇总总数
+     *
+     * @param qlFormat           包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param params             查询参数
+     * @param entityOrTableNames 实体或表名清单
+     * @return 总数
+     */
+    public long countMulti(CharSequence qlFormat, Map<String, ?> params, String... entityOrTableNames) {
+        long count = 0;
+        String format = qlFormat.toString();
+        for (String entityOrTableName : entityOrTableNames) {
+            String ql = String.format(format, entityOrTableName);
+            count += count(ql, params);
+        }
+        return count;
     }
 
     private Query createQuery(CharSequence ql) {
