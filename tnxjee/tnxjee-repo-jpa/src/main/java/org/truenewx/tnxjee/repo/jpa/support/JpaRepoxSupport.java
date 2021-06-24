@@ -57,14 +57,16 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         getAccessTemplate().refresh(entity);
     }
 
-    protected QueryResult<T> query(CharSequence ql, Map<String, Object> params, QueryIgnoring ignoring, int pageSize,
-            int pageNo, List<FieldOrder> orders) {
+    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, QueryIgnoring ignoring,
+            int pageSize, int pageNo, List<FieldOrder> orders) {
         Long total = null;
         if (pageSize > 0 && ignoring != QueryIgnoring.TOTAL) { // 需分页查询且不忽略总数时，才获取总数
-            total = getAccessTemplate().count("select count(*) " + ql, params);
+            String countQl = ql.toString();
+            countQl = "select count(*) " + countQl.substring(countQl.indexOf("from "));
+            total = getAccessTemplate().count(countQl, params);
         }
 
-        List<T> records;
+        List<E> records;
         // 已知总数为0或无需查询记录清单，则不查询记录清单
         if ((total != null && total == 0) || ignoring == QueryIgnoring.RECORD) {
             records = new ArrayList<>();
@@ -85,14 +87,14 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return QueryResult.of(records, pageSize, pageNo, total, orders);
     }
 
-    protected QueryResult<T> query(CharSequence ql, Map<String, Object> params, Paging paging) {
+    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, Paging paging) {
         if (paging == null) {
             return query(ql, params, null, 0, 1, null);
         }
         return query(ql, params, paging.getIgnoring(), paging.getPageSize(), paging.getPageNo(), paging.getOrders());
     }
 
-    protected QueryResult<T> query(CharSequence ql, Map<String, Object> params, int pageSize, int pageNo,
+    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, int pageSize, int pageNo,
             FieldOrder... orders) {
         return query(ql, params, null, pageSize, pageNo, Arrays.asList(orders));
     }
