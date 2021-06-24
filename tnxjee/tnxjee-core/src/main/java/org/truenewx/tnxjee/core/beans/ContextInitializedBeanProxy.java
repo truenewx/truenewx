@@ -12,7 +12,7 @@ public class ContextInitializedBeanProxy extends DelayContextInitializedBean {
 
     private ApplicationContext context;
     private ContextInitializedBean target;
-    private long delayMillis = DEFAULT_DELAY_MILLIS;
+    private long delayMillis = DEFAULT_MIN_DELAY_MILLIS;
 
     public void setTarget(ContextInitializedBean target) {
         Assert.isTrue(!(target instanceof ContextInitializedBeanProxy),
