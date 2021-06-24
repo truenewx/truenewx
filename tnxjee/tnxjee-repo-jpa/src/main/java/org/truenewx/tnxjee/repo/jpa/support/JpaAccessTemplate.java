@@ -68,6 +68,8 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     }
 
     public EntityManager getEntityManager() {
+        // 每次都重新获取，以免获取的实体管理器在事务会话已关闭后还继续使用，在同一个事务会话中有缓存，无需担心性能
+        // 如果此处报NullPointerException，请检查方法调用链上是否有事务注解
         return EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
     }
 
