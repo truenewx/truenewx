@@ -93,14 +93,12 @@ public class BeanUtil {
      * @param value        属性值
      * @return 是否设置成功，当指定属性不存在或无法设置值时返回false，否则返回true
      */
-    public static boolean setPropertyValue(@Nullable Object bean, String propertyName,
-            @Nullable Object value) {
+    public static boolean setPropertyValue(@Nullable Object bean, String propertyName, @Nullable Object value) {
         if (bean != null) {
             String[] names = propertyName.split("\\.");
             if (names.length > 1) {
                 try {
-                    bean = getRefPropertyValue(bean,
-                            ArrayUtils.subarray(names, 0, names.length - 1));
+                    bean = getRefPropertyValue(bean, ArrayUtils.subarray(names, 0, names.length - 1));
                     propertyName = names[names.length - 1];
                 } catch (Exception e) {
                     return false; // 忽略属性设置错误，不能设置则不设置
@@ -113,8 +111,7 @@ public class BeanUtil {
                     try {
                         writeMethod.invoke(bean, value);
                         return true;
-                    } catch (IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException e) {
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         return false; // 忽略属性设置错误，不能设置则不设置
                     }
                 }
@@ -133,20 +130,24 @@ public class BeanUtil {
     public static void setFieldValue(Object bean, String name, Object value) {
         if (bean != null) {
             Class<?> type = bean.getClass();
+            Field field = ClassUtil.findField(type, name);
+            setFieldValue(bean, field, value);
+        }
+    }
+
+    public static void setFieldValue(Object bean, Field field, Object value) {
+        if (field != null) {
+            boolean accessible = field.canAccess(bean);
+            if (!accessible) {
+                field.setAccessible(true);
+            }
             try {
-                Field field = ClassUtil.findField(type, name);
-                if (field != null) {
-                    boolean accessible = field.canAccess(bean);
-                    if (!accessible) {
-                        field.setAccessible(true);
-                    }
-                    field.set(bean, value);
-                    if (!accessible) {
-                        field.setAccessible(false);
-                    }
-                }
-            } catch (Exception e) {
-                // 忽略所有异常
+                field.set(bean, value);
+            } catch (IllegalAccessException e) {
+                LogUtil.warn(BeanUtil.class, e);
+            }
+            if (!accessible) {
+                field.setAccessible(false);
             }
         }
     }
@@ -160,7 +161,7 @@ public class BeanUtil {
         return null;
     }
 
-    private static Object getFieldValue(Object bean, Field field) {
+    public static Object getFieldValue(Object bean, Field field) {
         if (field != null) {
             try {
                 boolean accessible = field.canAccess(bean);
@@ -247,8 +248,7 @@ public class BeanUtil {
      * @param bean               bean
      * @param excludedProperties 排除的属性集
      */
-    public static void fromBean(Map<String, Object> map, Object bean,
-            String... excludedProperties) {
+    public static void fromBean(Map<String, Object> map, Object bean, String... excludedProperties) {
         PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(bean.getClass());
         for (PropertyDescriptor pd : pds) {
             try {
@@ -351,8 +351,7 @@ public class BeanUtil {
      * @param propertyClass 属性类型
      * @return true if 指定的bean对象具有指定属性的写方法, otherwise false
      */
-    public static boolean hasWritableProperty(Object bean, String propertyName,
-            Class<?> propertyClass) {
+    public static boolean hasWritableProperty(Object bean, String propertyName, Class<?> propertyClass) {
         try {
             String methodName = "set" + StringUtil.firstToUpperCase(propertyName);
             bean.getClass().getMethod(methodName, propertyClass);
@@ -369,16 +368,14 @@ public class BeanUtil {
      * @param target 目标对象
      */
     public static void copySimpleProperties(Object source, Object target) {
-        PropertyDescriptor[] propertyDescriptors = BeanUtils
-                .getPropertyDescriptors(source.getClass());
+        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(source.getClass());
         Class<?> targetClass = target.getClass();
         for (PropertyDescriptor pd : propertyDescriptors) {
             try {
                 if (BeanUtils.isSimpleValueType(pd.getPropertyType())) {
                     String name = pd.getDisplayName();
                     if (!"class".equals(name)) {
-                        PropertyDescriptor writePd = BeanUtils.getPropertyDescriptor(targetClass,
-                                name);
+                        PropertyDescriptor writePd = BeanUtils.getPropertyDescriptor(targetClass, name);
                         if (writePd != null) {
                             Method writeMethod = writePd.getWriteMethod();
                             if (writeMethod != null) {
@@ -405,6 +402,49 @@ public class BeanUtil {
             LogUtil.error(BeanUtil.class, e);
         }
         return bean;
+    }
+
+    public static void copyFields(Object source, Object target, String... ignoreFields) {
+        if (source != null && target != null) {
+            ClassUtil.loopDynamicFields(source.getClass(), field -> {
+                String fieldName = field.getName();
+                if (!ArrayUtils.contains(ignoreFields, fieldName)) {
+                    Object fieldValue = getFieldValue(source, field);
+                    setFieldValue(target, fieldName, fieldValue);
+                }
+                return true;
+            });
+        }
+    }
+
+    /**
+     * 复制字段值到指定类型的新建实例中
+     *
+     * @param source       源对象
+     * @param targetClass  目标对象类型，必须具有无参构造函数
+     * @param ignoreFields 忽略的字段名称集
+     * @param <T>          目标对象类型
+     * @return 新建并获得复制字段值的实例
+     */
+    public static <T> T copyFieldsToNewInstance(Object source, Class<T> targetClass, String... ignoreFields) {
+        if (source == null) {
+            return null;
+        }
+        try {
+            T target = targetClass.getConstructor().newInstance();
+            copyFields(source, target, ignoreFields);
+            return target;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T convert(Object source, @Nullable Class<T> targetClass) {
+        if (targetClass == null || targetClass.isInstance(source)) {
+            return (T) source;
+        }
+        return copyFieldsToNewInstance(source, targetClass);
     }
 
 }

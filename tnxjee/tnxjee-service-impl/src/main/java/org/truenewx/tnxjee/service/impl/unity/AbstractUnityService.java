@@ -43,9 +43,13 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
 
     private void doAdd(T unity) {
         if (unity != null) {
-            getRepository().save(unity);
+            save(unity);
             afterSave(unity);
         }
+    }
+
+    protected void save(T unity) {
+        getRepository().save(unity);
     }
 
     @Override
@@ -61,14 +65,14 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     private void doUpdate(K id, T unity) {
         if (unity != null) {
             Assert.isTrue(id.equals(unity.getId()), MESSAGE_ID_NOT_EQUAL);
-            getRepository().save(unity);
+            save(unity);
             afterSave(unity);
         }
     }
 
     /**
      * 在保存添加/修改单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存），且结果单体的标识等于传入的指定标识参数
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）
      *
      * @param id    要修改的单体标识，为null时表示是添加动作
      * @param unity 存放添加/修改数据的单体对象
@@ -105,7 +109,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
 
     /**
      * 在保存添加/修改单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存），且结果单体的标识等于传入的指定标识参数
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）
      *
      * @param id           要修改的单体标识，为null时表示是添加动作
      * @param commandModel 存放添加/修改数据的命令模型
@@ -122,10 +126,8 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
             if (unity == null) {
                 unity = find(id);
             }
-            if (unity != null) {
-                getRepository().delete(unity);
-                return unity;
-            }
+            delete(unity);
+            return unity;
         }
         return null;
     }
@@ -139,6 +141,12 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
      */
     protected T beforeDelete(K id) {
         throw new UnsupportedOperationException();
+    }
+
+    protected void delete(T unity) {
+        if (unity != null) {
+            getRepository().delete(unity);
+        }
     }
 
 }

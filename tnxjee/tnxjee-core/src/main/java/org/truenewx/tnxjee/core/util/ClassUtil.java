@@ -4,8 +4,19 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -185,8 +196,7 @@ public class ClassUtil {
      * @param index          要取的泛型位置索引
      * @return 实际泛型类型
      */
-    public static <T> Class<T> getActualGenericType(Class<?> clazz, Class<?> interfaceClass,
-            int index) {
+    public static <T> Class<T> getActualGenericType(Class<?> clazz, Class<?> interfaceClass, int index) {
         Collection<ParameterizedType> types = findParameterizedGenericInterfaces(clazz);
         ParameterizedType superInterface = getMatchedGenericType(types, interfaceClass);
         return getActualGenericType(superInterface, index);
@@ -198,8 +208,7 @@ public class ClassUtil {
      * @param clazz 类型
      * @return 带泛型的接口类型清单
      */
-    private static Collection<ParameterizedType> findParameterizedGenericInterfaces(
-            Class<?> clazz) {
+    private static Collection<ParameterizedType> findParameterizedGenericInterfaces(Class<?> clazz) {
         List<ParameterizedType> types = new ArrayList<>();
         Type[] interfaces = clazz.getGenericInterfaces();
         for (Type type : interfaces) {
@@ -226,8 +235,7 @@ public class ClassUtil {
      * @return 注解的value()值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getClassAnnotationValue(Class<?> clazz,
-            Class<? extends Annotation> annotationClass) {
+    public static <T> T getClassAnnotationValue(Class<?> clazz, Class<? extends Annotation> annotationClass) {
         Annotation annotation = AnnotationUtils.findAnnotation(clazz, annotationClass);
         return annotation == null ? null : (T) AnnotationUtils.getValue(annotation);
     }
@@ -379,15 +387,15 @@ public class ClassUtil {
      * @param includePredicate 属性包含判定
      * @return 属性元数据集
      */
-    public static Collection<PropertyMeta> findPropertyMetas(Class<?> clazz, boolean gettable,
-            boolean settable, boolean parent, BiPredicate<Class<?>, String> includePredicate) {
+    public static Collection<PropertyMeta> findPropertyMetas(Class<?> clazz, boolean gettable, boolean settable,
+            boolean parent, BiPredicate<Class<?>, String> includePredicate) {
         Map<String, PropertyMeta> result = new LinkedHashMap<>();
         if (gettable || settable) {
             if (parent) { // 先加入父类的属性
                 Class<?> superclass = clazz.getSuperclass();
                 if (superclass != null && superclass != Object.class) {
-                    Collection<PropertyMeta> propertyMetas = findPropertyMetas(superclass, gettable,
-                            settable, true, includePredicate);
+                    Collection<PropertyMeta> propertyMetas = findPropertyMetas(superclass, gettable, settable, true,
+                            includePredicate);
                     for (PropertyMeta propertyMeta : propertyMetas) {
                         result.put(propertyMeta.getName(), propertyMeta);
                     }
@@ -409,10 +417,9 @@ public class ClassUtil {
                             }
                         }
                         // 可取得属性类型，且通过包含判断，才加入
-                        if (propertyType != null && (includePredicate == null
-                                || includePredicate.test(propertyType, propertyName))) {
-                            addPropertyMeta(result, propertyName, propertyType,
-                                    method.getAnnotations());
+                        if (propertyType != null
+                                && (includePredicate == null || includePredicate.test(propertyType, propertyName))) {
+                            addPropertyMeta(result, propertyName, propertyType, method.getAnnotations());
                         }
                     }
                 }
@@ -444,8 +451,8 @@ public class ClassUtil {
         return result.values();
     }
 
-    private static void addPropertyMeta(Map<String, PropertyMeta> result, String propertyName,
-            Class<?> propertyType, Annotation[] annotations) {
+    private static void addPropertyMeta(Map<String, PropertyMeta> result, String propertyName, Class<?> propertyType,
+            Annotation[] annotations) {
         PropertyMeta propertyMeta = result.get(propertyName);
         if (propertyMeta == null) {
             propertyMeta = new PropertyMeta(propertyName, propertyType, annotations);
@@ -505,15 +512,12 @@ public class ClassUtil {
         // 必须是公开的非静态方法
         if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
             // 方法名称要匹配
-            String methodName = (getter ? "get" : "set")
-                    + StringUtil.firstToUpperCase(propertyName);
+            String methodName = (getter ? "get" : "set") + StringUtil.firstToUpperCase(propertyName);
             if (methodName.equals(method.getName())) {
                 if (getter) { // getter方法必须无参数且返回结果不为void
-                    return method.getParameterTypes().length == 0
-                            && method.getReturnType() != void.class;
+                    return method.getParameterTypes().length == 0 && method.getReturnType() != void.class;
                 } else { // setter方法必须有一个参数且返回结果为void
-                    return method.getParameterTypes().length == 1
-                            && method.getReturnType() == void.class;
+                    return method.getParameterTypes().length == 1 && method.getReturnType() == void.class;
                 }
             }
         }
@@ -622,10 +626,9 @@ public class ClassUtil {
     }
 
     public static boolean isNumeric(Class<?> type) {
-        return Number.class.isAssignableFrom(type) || type == int.class || type == long.class
-                || type == float.class || type == double.class || type == char.class || type == byte.class;
+        return Number.class.isAssignableFrom(type) || type == int.class || type == long.class || type == float.class
+                || type == double.class || type == char.class || type == byte.class;
     }
-
 
     /**
      * 获取指定类型（包括父类）中指定方法名称和参数个数的公开方法清单
@@ -718,23 +721,21 @@ public class ClassUtil {
     }
 
     /**
-     * 遍历指定对象类型中指定字段类型的字段
+     * 遍历指定类型中的动态（非static）字段
      *
-     * @param clazz     遍历对象类型
-     * @param fieldType 字段类型
+     * @param clazz     遍历类型
      * @param predicate 遍历断言，返回false则终止遍历
      */
-    public static void loopFieldsByType(Class<?> clazz, Class<?> fieldType, Predicate<Field> predicate) {
+    public static void loopDynamicFields(Class<?> clazz, Predicate<Field> predicate) {
         if (clazz != Object.class) {
             for (Field field : clazz.getDeclaredFields()) {
-                if (fieldType == null || fieldType.isAssignableFrom(field.getType())) {
-                    if (!predicate.test(field)) {
-                        return;
-                    }
+                // 不遍历静态字段
+                if (!Modifier.isStatic(field.getModifiers()) && !predicate.test(field)) {
+                    return;
                 }
             }
             // 再遍历父类
-            loopFieldsByType(clazz.getSuperclass(), fieldType, predicate);
+            loopDynamicFields(clazz.getSuperclass(), predicate);
         }
     }
 

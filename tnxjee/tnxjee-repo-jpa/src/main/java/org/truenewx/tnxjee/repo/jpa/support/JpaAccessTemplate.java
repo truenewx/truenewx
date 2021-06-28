@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.repo.jpa.support;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -10,6 +11,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.mapping.PersistentClass;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
@@ -78,6 +80,14 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         return metadata == null ? null : metadata.getEntityBinding(entityName);
     }
 
+    private String getTableName(String entityName) {
+        PersistentClass persistentClass = getPersistentClass(entityName);
+        if (persistentClass != null) {
+            return persistentClass.getTable().getName();
+        }
+        return null;
+    }
+
     /**
      * 创建对应的原生SQL方式的访问模板
      *
@@ -127,21 +137,41 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     }
 
     /**
-     * 从多个实体或表中查询清单并简单汇总，无法保证结果排序和唯一性
+     * 从多个实体或表中查询清单并简单汇总。由于从多个实体的查询结果合并而来，无法保证结果的排序，调用者如果关注顺序，需对结果重新排序
      *
-     * @param qlFormat           包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
-     * @param params             查询参数
-     * @param entityOrTableNames 实体或表名清单
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param params      查询参数
+     * @param entityNames 实体或表名清单
+     * @param converter   结果转换函数，将每一个查询结果对象转换为想要的结果类型，为null时不进行转换
      * @return 汇总清单
      */
-    public <T> List<T> listMulti(CharSequence qlFormat, Map<String, ?> params, String... entityOrTableNames) {
-        List<T> result = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public <T> List<T> list(CharSequence qlFormat, Map<String, ?> params, String[] entityNames,
+            @Nullable Function<Object, T> converter) {
         String format = qlFormat.toString();
-        for (String entityOrTableName : entityOrTableNames) {
-            String ql = String.format(format, entityOrTableName);
-            result.addAll(list(ql, params));
+        Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
+        List<T> result = new ArrayList<>();
+        for (String entityName : entityNames) {
+            String ql = formatQl(format, entityName);
+            List<Object> list = list(ql, params);
+            for (Object obj : list) {
+                if (converter != null) {
+                    obj = converter.apply(obj);
+                    if (obj == null) {
+                        continue;
+                    }
+                }
+                result.add((T) obj);
+            }
         }
         return result;
+    }
+
+    private String formatQl(String qlFormat, String entityName) {
+        if (this.nativeMode) { // 原生模式，实体名称转换为表名
+            entityName = getTableName(entityName);
+        }
+        return String.format(qlFormat, entityName);
     }
 
     public <T> T first(CharSequence ql, String paramName, Object paramValue) {
@@ -161,6 +191,26 @@ public class JpaAccessTemplate implements DataAccessTemplate {
 
     public <T> T first(CharSequence ql) {
         return first(ql, (Map<String, ?>) null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T first(CharSequence qlFormat, Map<String, ?> params, String[] entityNames,
+            @Nullable Function<Object, T> converter) {
+        String format = qlFormat.toString();
+        Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
+        for (String entityName : entityNames) {
+            String ql = formatQl(format, entityName);
+            Object obj = first(ql, params);
+            if (obj != null) {
+                if (converter != null) {
+                    obj = converter.apply(obj);
+                }
+                if (obj != null) {
+                    return (T) obj;
+                }
+            }
+        }
+        return null;
     }
 
     public long count(CharSequence ql, String paramName, Object paramValue) {
@@ -185,16 +235,17 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     /**
      * 从多个实体或表中获取汇总总数
      *
-     * @param qlFormat           包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
-     * @param params             查询参数
-     * @param entityOrTableNames 实体或表名清单
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param params      查询参数
+     * @param entityNames 实体或表名清单
      * @return 总数
      */
-    public long countMulti(CharSequence qlFormat, Map<String, ?> params, String... entityOrTableNames) {
-        long count = 0;
+    public long count(CharSequence qlFormat, Map<String, ?> params, String[] entityNames) {
         String format = qlFormat.toString();
-        for (String entityOrTableName : entityOrTableNames) {
-            String ql = String.format(format, entityOrTableName);
+        Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
+        long count = 0;
+        for (String entityName : entityNames) {
+            String ql = formatQl(format, entityName);
             count += count(ql, params);
         }
         return count;
@@ -295,6 +346,29 @@ public class JpaAccessTemplate implements DataAccessTemplate {
 
     public int update(CharSequence ul) {
         return update(ul, (Map<String, ?>) null);
+    }
+
+    /**
+     * 在多个实体或表上执行更新语句
+     *
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param params      执行参数
+     * @param entityNames 实体或表清单
+     * @param all         是否在全部实体或表上都执行一遍，false-一旦执行到有影响记录的语句，则停止执行后续语句
+     * @return 影响的记录数
+     */
+    public int update(CharSequence qlFormat, Map<String, ?> params, String[] entityNames, boolean all) {
+        String format = qlFormat.toString();
+        Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
+        int count = 0;
+        for (String entityName : entityNames) {
+            String ql = formatQl(format, entityName);
+            count += update(ql, params);
+            if (!all && count > 0) { // 如果不是全部执行且当前执行的语句有影响记录，则返回当前语句执行结果
+                break;
+            }
+        }
+        return count;
     }
 
     public void applyParamsToQuery(Query query, Map<String, ?> params) {

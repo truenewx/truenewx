@@ -52,7 +52,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
             if (!owner.equals(unity.getOwner())) {
                 LogUtil.warn(getClass(), MESSAGE_OWNER_NOT_EQUAL);
             }
-            getRepository().save(unity);
+            save(unity);
             afterSave(unity);
         }
     }
@@ -73,14 +73,14 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
             if (!owner.equals(unity.getOwner())) {
                 LogUtil.warn(getClass(), MESSAGE_OWNER_NOT_EQUAL);
             }
-            getRepository().save(unity);
+            save(unity);
             afterSave(unity);
         }
     }
 
     /**
      * 在保存添加/修改有所属者的单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存），且结果单体的标识等于传入的指定标识参数；<br/>
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br/>
      * 一般情况下子类不应修改单体的所属者，特殊业务场景下可以，但请务必确保业务逻辑的正确性
      *
      * @param owner 所属者
@@ -114,7 +114,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
 
     /**
      * 在保存添加/修改有所属者的单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存），且结果单体的标识等于传入的指定标识参数；<br/>
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br/>
      * 一般情况下子类不应修改单体的所属者，特殊业务场景下可以，但请务必确保业务逻辑的正确性
      *
      * @param owner        所属者
@@ -124,21 +124,6 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      */
     protected T beforeSave(O owner, K id, CommandModel<T> commandModel) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public T delete(O owner, K id) {
-        if (owner != null && id != null) {
-            T unity = beforeDelete(owner, id);
-            if (unity == null) {
-                unity = find(owner, id);
-            }
-            if (unity != null) {
-                getRepository().delete(unity);
-                return unity;
-            }
-        }
-        return null;
     }
 
     /**
@@ -151,6 +136,19 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      */
     protected T beforeDelete(O owner, K id) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public T delete(O owner, K id) {
+        if (owner != null && id != null) {
+            T unity = beforeDelete(owner, id);
+            if (unity == null) {
+                unity = find(owner, id);
+            }
+            delete(unity);
+            return unity;
+        }
+        return null;
     }
 
 }

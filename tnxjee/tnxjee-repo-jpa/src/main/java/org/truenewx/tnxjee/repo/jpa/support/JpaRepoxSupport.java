@@ -22,7 +22,7 @@ import org.truenewx.tnxjee.model.query.FieldOrder;
 import org.truenewx.tnxjee.model.query.Paging;
 import org.truenewx.tnxjee.model.query.QueryIgnoring;
 import org.truenewx.tnxjee.model.query.QueryResult;
-import org.truenewx.tnxjee.repo.jpa.JpaRepo;
+import org.truenewx.tnxjee.repo.jpa.JpaRepox;
 import org.truenewx.tnxjee.repo.jpa.util.OqlUtil;
 import org.truenewx.tnxjee.repo.support.RepoxSupport;
 import org.truenewx.tnxjee.repo.util.ModelPropertyLimitValueManager;
@@ -32,7 +32,7 @@ import org.truenewx.tnxjee.repo.util.ModelPropertyLimitValueManager;
  *
  * @author jianglei
  */
-public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> implements JpaRepo<T> {
+public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> implements JpaRepox<T> {
 
     @Autowired
     private ModelPropertyLimitValueManager propertyLimitValueManager;

@@ -81,7 +81,7 @@ public class ApiModelMetaResolverImpl implements ApiModelMetaResolver, ContextIn
             return;
         }
         ValidationConfiguration configuration = this.validationConfigurationFactory.getConfiguration(modelClass);
-        ClassUtil.loopFieldsByType(modelClass, null, field -> {
+        ClassUtil.loopDynamicFields(modelClass, field -> {
             Class<?> fieldType = field.getType();
             String propertyName = field.getName();
             // 未限制属性名或属性名在限制清单内，才添加属性元数据
