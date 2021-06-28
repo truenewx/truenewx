@@ -88,7 +88,7 @@ export default {
                 if (items && items.length) {
                     let item = this.getItem(items, this.value);
                     if (item) {
-                        return this.value;
+                        return item[this.valueName];
                     } else { // 如果当前值找不到匹配的选项，则需要考虑是设置为空还是默认选项
                         if (!this.empty) { // 如果不能为空，则默认选中第一个叶子节点选项
                             let firstItem = items[0];
