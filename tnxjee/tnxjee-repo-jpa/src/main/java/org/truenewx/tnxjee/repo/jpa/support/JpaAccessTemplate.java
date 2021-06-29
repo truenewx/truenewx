@@ -137,17 +137,17 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     }
 
     /**
-     * 从多个实体或表中查询清单并简单汇总。由于从多个实体的查询结果合并而来，无法保证结果的排序，调用者如果关注顺序，需对结果重新排序
+     * 依次从多个实体中查询清单并简单汇总。由于从多个实体的查询结果合并而来，无法保证结果的排序，调用者如果关注顺序，需对结果重新排序
      *
-     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体均有效
      * @param params      查询参数
-     * @param entityNames 实体或表名清单
      * @param converter   结果转换函数，将每一个查询结果对象转换为想要的结果类型，为null时不进行转换
+     * @param entityNames 实体名称清单
      * @return 汇总清单
      */
     @SuppressWarnings("unchecked")
-    public <T> List<T> list(CharSequence qlFormat, Map<String, ?> params, String[] entityNames,
-            @Nullable Function<Object, T> converter) {
+    public <T> List<T> list(CharSequence qlFormat, Map<String, ?> params, @Nullable Function<Object, T> converter,
+            String... entityNames) {
         String format = qlFormat.toString();
         Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
         List<T> result = new ArrayList<>();
@@ -193,9 +193,18 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         return first(ql, (Map<String, ?>) null);
     }
 
+    /**
+     * 依次从多个实体中查询首个符合条件的实体对象，一旦找到即返回结果，不在后续实体上继续执行
+     *
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体均有效
+     * @param params      查询参数
+     * @param converter   结果转换函数，将查询结果对象转换为想要的结果类型，为null时不进行转换
+     * @param entityNames 实体名称清单
+     * @return 汇总清单
+     */
     @SuppressWarnings("unchecked")
-    public <T> T first(CharSequence qlFormat, Map<String, ?> params, String[] entityNames,
-            @Nullable Function<Object, T> converter) {
+    public <T> T first(CharSequence qlFormat, Map<String, ?> params, @Nullable Function<Object, T> converter,
+            String... entityNames) {
         String format = qlFormat.toString();
         Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
         for (String entityName : entityNames) {
@@ -233,14 +242,14 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     }
 
     /**
-     * 从多个实体或表中获取汇总总数
+     * 从多个实体中获取汇总总数
      *
-     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体均有效
      * @param params      查询参数
-     * @param entityNames 实体或表名清单
+     * @param entityNames 实体名称清单
      * @return 总数
      */
-    public long count(CharSequence qlFormat, Map<String, ?> params, String[] entityNames) {
+    public long count(CharSequence qlFormat, Map<String, ?> params, String... entityNames) {
         String format = qlFormat.toString();
         Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
         long count = 0;
@@ -349,22 +358,22 @@ public class JpaAccessTemplate implements DataAccessTemplate {
     }
 
     /**
-     * 在多个实体或表上执行更新语句
+     * 在多个实体上执行更新语句
      *
-     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体或表均有效
+     * @param qlFormat    包含一个%s作为实体名或表名占位符的查询语句格式，必须对指定的所有实体均有效
      * @param params      执行参数
-     * @param entityNames 实体或表清单
-     * @param all         是否在全部实体或表上都执行一遍，false-一旦执行到有影响记录的语句，则停止执行后续语句
+     * @param allEntities 是否在全部实体上都执行一遍，false-一旦在一个实体上有影响记录，则停止在后续实体上执行
+     * @param entityNames 实体名称清单
      * @return 影响的记录数
      */
-    public int update(CharSequence qlFormat, Map<String, ?> params, String[] entityNames, boolean all) {
+    public int update(CharSequence qlFormat, Map<String, ?> params, boolean allEntities, String... entityNames) {
         String format = qlFormat.toString();
         Assert.isTrue(format.contains("%s"), "The qlFormat must contain '%s'");
         int count = 0;
         for (String entityName : entityNames) {
             String ql = formatQl(format, entityName);
             count += update(ql, params);
-            if (!all && count > 0) { // 如果不是全部执行且当前执行的语句有影响记录，则返回当前语句执行结果
+            if (!allEntities && count > 0) { // 如果不是全部执行且当前执行的语句有影响记录，则返回当前语句执行结果
                 break;
             }
         }

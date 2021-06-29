@@ -15,15 +15,22 @@ import org.truenewx.tnxjee.model.entity.unity.OwnedUnity;
 public abstract class JpaHistorizableOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
         extends JpaOwnedUnityRepoSupport<T, K, O> {
 
-    protected String[] getEntityNames(Boolean historized) {
-        if (historized == null) {
-            return new String[]{ getEntityName(), getHistoryEntityName() };
-        } else if (historized) {
-            return new String[]{ getHistoryEntityName() };
+    protected String getEntityName(boolean historized) {
+        if (historized) {
+            return getHistoryEntityName();
         } else {
-            return new String[]{ getEntityName() };
+            return getEntityName();
         }
     }
+
+    protected String[] getEntityNames(boolean historyFirst) {
+        if (historyFirst) {
+            return new String[]{ getHistoryEntityName(), getEntityName() };
+        } else {
+            return new String[]{ getEntityName(), getHistoryEntityName() };
+        }
+    }
+
 
     protected abstract Class<? extends HistoryEntity<T>> getHistoryEntityClass();
 
