@@ -2,7 +2,6 @@ package org.truenewx.tnxjee.repo.jpa.support;
 
 import java.io.Serializable;
 
-import org.truenewx.tnxjee.model.entity.Entity;
 import org.truenewx.tnxjee.model.entity.HistoryEntity;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
 
@@ -15,8 +14,14 @@ import org.truenewx.tnxjee.model.entity.unity.Unity;
 public abstract class JpaHistorizableUnityRepoxSupport<T extends Unity<K>, K extends Serializable>
         extends JpaUnityRepoxSupport<T, K> {
 
-    protected String[] getEntityNames() {
-        return new String[] { getEntityName(), getHistoryEntityName() };
+    protected String[] getEntityNames(Boolean historized) {
+        if (historized == null) {
+            return new String[]{ getEntityName(), getHistoryEntityName() };
+        } else if (historized) {
+            return new String[]{ getHistoryEntityName() };
+        } else {
+            return new String[]{ getEntityName() };
+        }
     }
 
     protected abstract Class<? extends HistoryEntity<T>> getHistoryEntityClass();
@@ -25,16 +30,8 @@ public abstract class JpaHistorizableUnityRepoxSupport<T extends Unity<K>, K ext
         return getHistoryEntityClass().getName();
     }
 
-    protected Class<? extends Entity> getEntityClass(boolean historized) {
-        return historized ? getHistoryEntityClass() : getEntityClass();
-    }
-
-    protected String getEntityName(boolean historized) {
-        return getEntityClass(historized).getName();
-    }
-
     @SuppressWarnings("unchecked")
-    protected T convert(Object obj) {
+    protected T toPresent(Object obj) {
         if (obj != null) {
             if (getHistoryEntityClass().isInstance(obj)) {
                 return ((HistoryEntity<T>) obj).toPresent();
