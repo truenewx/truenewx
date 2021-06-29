@@ -89,8 +89,10 @@ export default function(VueRouter, menu, fnImportPage) {
     router.afterEach((to, from) => {
         if (router._historied) {
             delete router._historied;
-            router.app.$route.meta.historyFrom = from.path;
-        } else {
+            if (router.app.$route.meta) {
+                router.app.$route.meta.historyFrom = from.path;
+            }
+        } else if (router.app.$route.meta) {
             delete router.app.$route.meta.historyFrom;
         }
         // 前后路径相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
