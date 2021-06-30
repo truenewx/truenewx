@@ -89,13 +89,14 @@ export default {
         getItem(items, value) {
             if (items && value !== undefined) {
                 for (let item of items) {
-                    if (item[this.valueName] === value) {
-                        return item;
-                    }
                     let children = item[this.childrenName];
-                    let child = this.getItem(children, value);
-                    if (child) {
-                        return child;
+                    if (children && children.length) {
+                        let child = this.getItem(children, value);
+                        if (child) {
+                            return child;
+                        }
+                    } else if (item[this.valueName] + '' === value + '') {
+                        return item;
                     }
                 }
             }

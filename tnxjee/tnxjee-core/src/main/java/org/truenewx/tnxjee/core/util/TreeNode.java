@@ -3,13 +3,13 @@ package org.truenewx.tnxjee.core.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * 树节点
  *
  * @author jianglei
- * 
  */
 public class TreeNode<K extends Serializable> implements Serializable {
 
@@ -38,7 +38,12 @@ public class TreeNode<K extends Serializable> implements Serializable {
     }
 
     public List<TreeNode<K>> getSubs() {
-        return Collections.unmodifiableList(this.subs);
+        // 不直接返回subs引用，以免直接添加子节点，导致不能自动设置子节点的父引用
+        return this.subs.isEmpty() ? null : Collections.unmodifiableList(this.subs);
+    }
+
+    public boolean isLeaf() {
+        return this.subs.isEmpty();
     }
 
     public K getParentId() {
@@ -48,6 +53,19 @@ public class TreeNode<K extends Serializable> implements Serializable {
     public void addSub(TreeNode<K> sub) {
         this.subs.add(sub);
         sub.parent = this;
+    }
+
+    public TreeNode<K> getSub(K subId) {
+        for (TreeNode<K> sub : this.subs) {
+            if (sub.getId().equals(subId)) {
+                return sub;
+            }
+        }
+        return null;
+    }
+
+    public void sortSubs(Comparator<TreeNode<K>> comparator) {
+        this.subs.sort(comparator);
     }
 
 }
