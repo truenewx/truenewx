@@ -31,6 +31,15 @@ public abstract class JpaHistorizableOwnedUnityRepoxSupport<T extends OwnedUnity
         }
     }
 
+    protected String[] getEntityNames(boolean historyFirst, Boolean historized) {
+        if (historized == null) {
+            return getEntityNames(historyFirst);
+        } else if (historized) {
+            return new String[]{ getHistoryEntityName() };
+        } else {
+            return new String[]{ getEntityName() };
+        }
+    }
 
     protected abstract Class<? extends HistoryEntity<T>> getHistoryEntityClass();
 
