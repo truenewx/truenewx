@@ -7,10 +7,10 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
-import com.aliyun.oss.ClientException;
 import com.aliyun.oss.model.ObjectMetadata;
 
 /**
@@ -83,7 +83,7 @@ public class AliyunFssAccessor implements FssAccessor {
             IOUtils.copy(in, out);
             in.close();
             return true;
-        } catch (ClientException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -91,7 +91,11 @@ public class AliyunFssAccessor implements FssAccessor {
     @Override
     public void delete(String path) {
         path = AliyunOssUtil.standardizePath(path);
-        this.account.getOssClient().deleteObject(getBucketName(), path);
+        try {
+            this.account.getOssClient().deleteObject(getBucketName(), path);
+        } catch (Exception e) {
+            LogUtil.warn(getClass(), e);
+        }
     }
 
 }
