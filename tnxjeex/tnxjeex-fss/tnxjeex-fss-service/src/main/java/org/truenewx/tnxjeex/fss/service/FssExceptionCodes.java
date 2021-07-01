@@ -26,6 +26,11 @@ public class FssExceptionCodes {
     public static final String NO_READ_AUTHORITY = "error.fss.no_read_authority";
 
     /**
+     * 没有删除权限
+     */
+    public static final String NO_DELETE_AUTHORITY = "error.fss.no_delete_authority";
+
+    /**
      * 未指定扩展名
      */
     public static final String NO_EXTENSION = "error.fss.no_extension";

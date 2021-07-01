@@ -204,4 +204,18 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         }
     }
 
+    @Override
+    public void delete(I userIdentity, String storageUrl) {
+        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+        if (fsp != null) {
+            FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
+            if (!strategy.isDeletable(userIdentity, fsp.getRelativeDir())) {
+                throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, fsp.getUrl());
+            }
+            FssAccessor accessor = this.accessors.get(strategy.getProvider());
+            String path = strategy.getContextPath() + fsp.getRelativePath();
+            accessor.delete(path);
+        }
+    }
+
 }

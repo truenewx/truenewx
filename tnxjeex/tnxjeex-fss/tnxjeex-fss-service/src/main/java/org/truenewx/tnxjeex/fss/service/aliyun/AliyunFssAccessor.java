@@ -31,6 +31,10 @@ public class AliyunFssAccessor implements FssAccessor {
         return FssProvider.ALIYUN;
     }
 
+    private String getBucketName() {
+        return this.account.getOssBucket();
+    }
+
     @Override
     public void write(InputStream in, String path, String filename) throws IOException {
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -39,14 +43,14 @@ public class AliyunFssAccessor implements FssAccessor {
             objectMetadata.getUserMetadata().put("filename", filename);
         }
         path = AliyunOssUtil.standardizePath(path);
-        this.account.getOssClient().putObject(this.account.getOssBucket(), path, in, objectMetadata);
+        this.account.getOssClient().putObject(getBucketName(), path, in, objectMetadata);
     }
 
     @Override
     public String getOriginalFilename(String path) {
         try {
             path = AliyunOssUtil.standardizePath(path);
-            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(this.account.getOssBucket(), path);
+            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(getBucketName(), path);
             String filename = meta.getUserMetadata().get("filename");
             if (StringUtils.isNotBlank(filename)) {
                 try {
@@ -64,7 +68,7 @@ public class AliyunFssAccessor implements FssAccessor {
     public Long getLastModifiedTime(String path) {
         try {
             path = AliyunOssUtil.standardizePath(path);
-            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(this.account.getOssBucket(), path);
+            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(getBucketName(), path);
             return meta.getLastModified().getTime();
         } catch (Exception e) {
             return null;
@@ -75,14 +79,19 @@ public class AliyunFssAccessor implements FssAccessor {
     public boolean read(String path, OutputStream out) throws IOException {
         try {
             path = AliyunOssUtil.standardizePath(path);
-            InputStream in = this.account.getOssClient().getObject(this.account.getOssBucket(), path)
-                    .getObjectContent();
+            InputStream in = this.account.getOssClient().getObject(getBucketName(), path).getObjectContent();
             IOUtils.copy(in, out);
             in.close();
             return true;
         } catch (ClientException e) {
             return false;
         }
+    }
+
+    @Override
+    public void delete(String path) {
+        path = AliyunOssUtil.standardizePath(path);
+        this.account.getOssClient().deleteObject(getBucketName(), path);
     }
 
 }

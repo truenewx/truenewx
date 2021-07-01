@@ -34,8 +34,8 @@ import org.truenewx.tnxjee.webmvc.bind.annotation.ResponseStream;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
+import org.truenewx.tnxjeex.fss.api.FssControlApi;
 import org.truenewx.tnxjeex.fss.api.FssMetaResolver;
-import org.truenewx.tnxjeex.fss.api.FssUploader;
 import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
@@ -49,7 +49,7 @@ import com.aliyun.oss.internal.Mimetypes;
  *
  * @author jianglei
  */
-public abstract class FssControllerTemplate<I extends UserIdentity<?>> implements FssMetaResolver, FssUploader {
+public abstract class FssControllerTemplate<I extends UserIdentity<?>> implements FssMetaResolver, FssControlApi {
 
     @Value(AppConstants.EL_SPRING_APP_NAME)
     private String appName;
@@ -292,6 +292,26 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         String downloadUrlPrefix = getDownloadUrlPrefix();
         int index = url.indexOf(downloadUrlPrefix + Strings.SLASH);
         return url.substring(index + downloadUrlPrefix.length()); // 通配符部分
+    }
+
+    @Override
+    @ResponseBody
+    @ConfigAuthority // 登录用户才可删除文件，访问策略可能还有更多限定
+    public void delete(String storageUrl) {
+        I userIdentity = getUserIdentity();
+        this.service.delete(userIdentity, storageUrl);
+    }
+
+    @Override
+    @ResponseBody
+    @ConfigAuthority // 登录用户才可删除文件，访问策略可能还有更多限定
+    public void delete(String[] storageUrls) {
+        if (storageUrls != null) {
+            I userIdentity = getUserIdentity();
+            for (String storageUrl : storageUrls) {
+                this.service.delete(userIdentity, storageUrl);
+            }
+        }
     }
 
     protected I getUserIdentity() {

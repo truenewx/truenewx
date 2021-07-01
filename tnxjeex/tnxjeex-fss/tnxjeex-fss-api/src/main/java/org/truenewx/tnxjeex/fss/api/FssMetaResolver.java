@@ -1,11 +1,8 @@
 package org.truenewx.tnxjeex.fss.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.truenewx.tnxjee.core.api.RpcApi;
-import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 
 /**
@@ -46,14 +43,5 @@ public interface FssMetaResolver {
     @GetMapping("/read-url")
     String resolveReadUrl(@RequestParam(value = "storageUrl", required = false) String storageUrl,
             @RequestParam("thumbnail") boolean thumbnail);
-
-    /**
-     * 转储外部资源为内部存储资源
-     *
-     * @param command 提交参数体
-     * @return 内部存储地址
-     */
-    @PostMapping("/transfer")
-    String transfer(@RequestBody FssTransferCommand command);
 
 }

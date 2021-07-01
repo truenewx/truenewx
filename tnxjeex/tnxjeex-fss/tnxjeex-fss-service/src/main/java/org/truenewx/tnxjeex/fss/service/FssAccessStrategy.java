@@ -73,4 +73,15 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
         return null;
     }
 
+    /**
+     * 判断指定用户对指定相对路径是否可删除
+     *
+     * @param userIdentity 用户标识
+     * @param relativeDir  相对目录，不包含文件名
+     * @return 指定用户对指定相对路径是否可删除
+     */
+    default boolean isDeletable(I userIdentity, String relativeDir) {
+        return false;
+    }
+
 }

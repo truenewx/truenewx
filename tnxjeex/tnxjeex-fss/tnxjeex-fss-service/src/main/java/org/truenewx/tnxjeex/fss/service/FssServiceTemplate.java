@@ -79,4 +79,5 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      */
     void read(I userIdentity, String path, OutputStream out) throws IOException;
 
+    void delete(I userIdentity, String storageUrl);
 }

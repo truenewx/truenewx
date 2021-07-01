@@ -130,4 +130,11 @@ public class OwnFssAccessor implements FssAccessor {
         return false;
     }
 
+    @Override
+    public void delete(String path) {
+        File file = getStorageFile(path);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 }
