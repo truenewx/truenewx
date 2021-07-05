@@ -32,7 +32,7 @@ public abstract class AbstractService<T extends Entity> extends ServiceSupport i
     }
 
     protected final <R extends Repox<T>> R getRepox() {
-        return this.repoFactory.getRepo(getEntityClass());
+        return this.repoFactory.getRepox(getEntityClass());
     }
 
     /**

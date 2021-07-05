@@ -13,6 +13,6 @@ public interface RepoFactory {
 
     <R extends CrudRepository<T, K>, T extends Entity, K> R getRepository(Class<T> entityClass);
 
-    <R extends Repox<T>, T extends Entity> R getRepo(Class<T> entityClass);
+    <R extends Repox<T>, T extends Entity> R getRepox(Class<T> entityClass);
 
 }

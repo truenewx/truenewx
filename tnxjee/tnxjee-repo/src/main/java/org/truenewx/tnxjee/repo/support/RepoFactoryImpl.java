@@ -80,7 +80,7 @@ public class RepoFactoryImpl implements RepoFactory, ContextInitializedBean {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <R extends Repox<T>, T extends Entity> R getRepo(Class<T> entityClass) {
+    public <R extends Repox<T>, T extends Entity> R getRepox(Class<T> entityClass) {
         return (R) this.repoxMapping.get(entityClass);
     }
 
