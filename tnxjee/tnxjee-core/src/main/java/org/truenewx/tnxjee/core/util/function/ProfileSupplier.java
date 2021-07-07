@@ -6,10 +6,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.ProfileProperties;
+import org.truenewx.tnxjee.core.util.SpringUtil;
 
 /**
  * 供应者：获取当前profile
@@ -25,10 +25,9 @@ public class ProfileSupplier implements Supplier<String>, ApplicationContextAwar
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        Environment env = context.getEnvironment();
-        String[] profiles = env.getActiveProfiles();
-        if (profiles.length > 0) {
-            this.profile = profiles[0];
+        String profile = SpringUtil.getActiveProfile(context);
+        if (profile != null) {
+            this.profile = profile;
         }
     }
 

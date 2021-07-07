@@ -3,26 +3,34 @@ package org.truenewx.tnxjee.core.util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
 /**
  * Spring工具类
  *
  * @author jianglei
- * 
  */
 public class SpringUtil {
 
     private SpringUtil() {
     }
 
-    public static String getActiveProfile(ApplicationContext context) {
-        String[] profiles = context.getEnvironment().getActiveProfiles();
+    public static String getActiveProfile(Environment env) {
+        String[] profiles = env.getActiveProfiles();
         return ArrayUtil.get(profiles, 0);
     }
 
-    public static boolean isActiveProfile(ApplicationContext context, String profile) {
-        String[] profiles = context.getEnvironment().getActiveProfiles();
+    public static String getActiveProfile(ApplicationContext context) {
+        return getActiveProfile(context.getEnvironment());
+    }
+
+    public static boolean isActiveProfile(Environment env, String profile) {
+        String[] profiles = env.getActiveProfiles();
         return ArrayUtils.contains(profiles, profile);
+    }
+
+    public static boolean isActiveProfile(ApplicationContext context, String profile) {
+        return isActiveProfile(context.getEnvironment(), profile);
     }
 
     /**
