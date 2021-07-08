@@ -123,13 +123,14 @@ function buildLevel(items, parentLevel) {
                 if (item.subVisible === false) {
                     return false;
                 }
-                let visible = true;
                 if (item.subs && item.subs.length) {
+                    let visible = true;
                     for (let sub of item.subs) {
                         visible = (sub.visible !== false) && visible;
                     }
+                    return visible;
                 }
-                return visible;
+                return false;
             };
             buildLevel(item.subs, level);
         }
