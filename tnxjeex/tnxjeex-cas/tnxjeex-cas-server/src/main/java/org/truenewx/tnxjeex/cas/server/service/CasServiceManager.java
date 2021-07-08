@@ -11,7 +11,7 @@ public interface CasServiceManager {
 
     String getAppName(String service);
 
-    String getService(String appName);
+    String getService(String appName, boolean withLoginedPath);
 
     String getUri(HttpServletRequest request, String service);
 

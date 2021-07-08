@@ -45,9 +45,16 @@ public class CasServiceManagerImpl implements CasServiceManager {
     }
 
     @Override
-    public String getService(String appName) {
+    public String getService(String appName, boolean withLoginedPath) {
         AppConfiguration app = this.commonProperties.getApp(appName);
-        return app == null ? null : app.getContextUri(false);
+        if (app != null) {
+            String service = app.getContextUri(false);
+            if (withLoginedPath) {
+                service += app.getLoginedPath();
+            }
+            return service;
+        }
+        return null;
     }
 
     private AppConfiguration loadAppConfigurationByService(String service) {

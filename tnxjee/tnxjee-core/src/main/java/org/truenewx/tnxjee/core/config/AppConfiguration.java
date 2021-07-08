@@ -21,6 +21,7 @@ public class AppConfiguration {
     private String contextPath = Strings.EMPTY;
     private String loginPath = "/login/cas";
     private String logoutPath = "/logout";
+    private String loginedPath = Strings.EMPTY;
 
     public String getCaption() {
         return this.caption;
@@ -80,6 +81,17 @@ public class AppConfiguration {
      */
     public void setLogoutPath(String logoutPath) {
         this.logoutPath = logoutPath;
+    }
+
+    public String getLoginedPath() {
+        return this.loginedPath;
+    }
+
+    /**
+     * @param loginedPath 登录后的默认跳转相对路径，默认为空字符串
+     */
+    public void setLoginedPath(String loginedPath) {
+        this.loginedPath = loginedPath;
     }
 
     /**

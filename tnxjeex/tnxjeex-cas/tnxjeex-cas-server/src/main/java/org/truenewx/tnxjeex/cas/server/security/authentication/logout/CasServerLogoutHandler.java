@@ -40,7 +40,7 @@ public class CasServerLogoutHandler implements LogoutHandler {
             String logoutService = WebUtil.getParameterOrAttribute(request, CasParameterNames.SERVICE);
             for (AppTicket ticket : appTickets) {
                 String app = ticket.getApp();
-                String service = this.serviceManager.getService(app);
+                String service = this.serviceManager.getService(app, false);
                 if (logoutService == null || !logoutService.equals(service)) {
                     String logoutProcessUrl = this.serviceManager.getLogoutProcessUrl(service);
                     if (logoutProcessUrl != null) {
