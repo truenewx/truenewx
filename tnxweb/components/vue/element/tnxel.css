@@ -122,6 +122,11 @@ el-header ul.tnxel-nav,
     line-height: 2rem;
 }
 
+.el-form--label-top .el-form-item__error {
+    margin-top: 0.25rem;
+    position: unset;
+}
+
 .el-form--label-top .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
     content: '';
     margin-right: 0;
