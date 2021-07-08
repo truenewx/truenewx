@@ -73,6 +73,10 @@ el-header ul.tnxel-nav,
     right: 24px;
 }
 
+.el-main {
+    overflow-x: hidden;
+}
+
 .el-table .cell .el-badge__content.is-dot {
     top: 2px;
     left: 3px;
