@@ -119,6 +119,18 @@ function buildLevel(items, parentLevel) {
         let level = parentLevel ? (parentLevel + 1) : 1;
         for (let item of items) {
             item.level = level;
+            item.isSubVisible = function() {
+                if (item.subVisible === false) {
+                    return false;
+                }
+                let visible = true;
+                if (item.subs && item.subs.length) {
+                    for (let sub of item.subs) {
+                        visible = (sub.visible !== false) && visible;
+                    }
+                }
+                return visible;
+            };
             buildLevel(item.subs, level);
         }
     }
@@ -168,8 +180,11 @@ Menu.prototype.findBelongingItem = function(path, level) {
     // 从后往前遍历结果清单，以便于取到级别不高于目标级别的菜单项
     for (let i = items.length - 1; i >= 0; i--) {
         let item = items[i];
-        if (item.level <= level) {
-            return item;
+        if (item.level <= level && item.visible !== false) {
+            let parentItem = items[i - 1];
+            if (!parentItem || parentItem.isSubVisible()) {
+                return item;
+            }
         }
     }
     return undefined;
