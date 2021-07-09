@@ -283,8 +283,9 @@ el-button {
     visibility: hidden;
 }
 
+.el-button [class*=el-icon-] + span,
 .el-button i + span {
-    margin-left: 5px;
+    margin-left: 0.25rem;
 }
 
 .el-button--text {
