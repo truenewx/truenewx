@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 
@@ -71,8 +73,15 @@ public class SecurityUtil {
     }
 
     public static Collection<? extends GrantedAuthority> getGrantedAuthorities() {
-        UserSpecificDetails<?> details = getAuthorizedUserDetails();
-        return details == null ? Collections.emptyList() : details.getAuthorities();
+        Authentication authentication = getAuthentication();
+        return authentication == null ? Collections.emptyList() : authentication.getAuthorities();
+    }
+
+    public static void setGrantedAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        Authentication authentication = getAuthentication();
+        if (authentication instanceof AbstractAuthenticationToken) {
+            BeanUtil.setFieldValue(authentication, "authorities", Collections.unmodifiableCollection(authorities));
+        }
     }
 
 }
