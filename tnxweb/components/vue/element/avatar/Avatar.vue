@@ -5,7 +5,7 @@
             <i class="el-icon-picture-outline"/>
         </div>
     </el-image>
-    <el-avatar :size="size" :style="style" icon="el-icon-user-solid" :shape="shape" fit="contain" :src="src" v-else/>
+    <el-avatar :size="size" :style="style" :icon="icon" :shape="shape" fit="contain" :src="src" v-else/>
 </template>
 
 <script>
@@ -17,6 +17,10 @@ export default {
         size: {
             type: Number,
             required: true,
+        },
+        icon: {
+            type: String,
+            default: 'el-icon-user-solid',
         },
         preview: {
             type: Boolean,
