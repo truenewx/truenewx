@@ -169,6 +169,7 @@ function addMatchedItemTo(items, path, targetItems) {
             addMatchedItemTo(item.subs, path, targetItems);
             if (targetItems.length > 0) { // 如果在下级菜单中找到匹配，则当前级别需要插入到目标清单的首位
                 targetItems.unshift(item);
+                return;
             }
         }
     }
