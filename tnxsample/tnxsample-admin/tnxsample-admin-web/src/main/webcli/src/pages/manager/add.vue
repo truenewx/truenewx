@@ -28,8 +28,7 @@
         </el-form-item>
         <el-form-item label="所属角色" prop="roleIds">
             <el-col :span="12">
-                <tnxel-tag-select ref="role" items="/role/list" key-name="id" text-name="name"
-                    type="warning"/>
+                <tnxel-fetch-tags v-model="model.roleIds" url="/role/list" theme="warning" empty="暂无角色" multi/>
             </el-col>
         </el-form-item>
     </tnxel-submit-form>
@@ -41,7 +40,7 @@ import {app, tnx, util} from '../../app';
 export default {
     components: {
         'tnxel-submit-form': tnx.components.SubmitForm,
-        'tnxel-tag-select': tnx.components.TagSelect,
+        'tnxel-fetch-tags': tnx.components.FetchTags,
     },
     data() {
         return {

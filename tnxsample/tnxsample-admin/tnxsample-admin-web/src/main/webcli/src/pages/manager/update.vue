@@ -18,8 +18,7 @@
         </el-form-item>
         <el-form-item label="所属角色" prop="roleIds">
             <el-col :span="12">
-                <tnxel-tag-select ref="role" items="/role/list" key-name="id" text-name="name"
-                    type="warning" :keys="roleIds"/>
+                <tnxel-fetch-tags v-model="model.roleIds" url="/role/list" theme="warning" empty="暂无角色" multi/>
             </el-col>
         </el-form-item>
     </tnxel-submit-form>
@@ -31,7 +30,7 @@ import {app, tnx} from '../../app';
 export default {
     components: {
         'tnxel-submit-form': tnx.components.SubmitForm,
-        'tnxel-tag-select': tnx.components.TagSelect,
+        'tnxel-fetch-tags': tnx.components.FetchTags,
     },
     data() {
         return {
@@ -64,10 +63,8 @@ export default {
         submit() {
             const vm = this;
             const managerId = vm.$route.params.id;
-            const model = Object.assign({}, vm.model, {
-                roles: undefined,
-                roleIds: vm.$refs.role.getSelectedKeys(),
-            });
+            const model = Object.assign({}, vm.model);
+            delete model.roles;
             app.rpc.post('/manager/' + managerId + '/update', model, function() {
                 vm.$refs.form.disable();
                 tnx.toast('修改成功', function() {

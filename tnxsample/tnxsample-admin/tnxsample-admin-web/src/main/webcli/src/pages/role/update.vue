@@ -18,8 +18,8 @@
         </el-form-item>
         <el-form-item label="包含管理员" prop="managerIds">
             <el-col :span="18">
-                <tnxel-tag-select ref="manager" items="/manager/list" :to-tag="toManagerTag"
-                    :keys="managerIds"/>
+                <tnxel-fetch-tags v-model="model.managerIds" url="/manager/list" text-name="caption"
+                    :formatter="toManagerTag" theme="primary" empty="暂无管理员" multi filterable/>
             </el-col>
         </el-form-item>
     </tnxel-submit-form>
@@ -33,6 +33,7 @@ export default {
     components: {
         'tnxel-submit-form': tnx.components.SubmitForm,
         'tnxel-permission-tree': tnx.components.PermissionTree,
+        'tnxel-fetch-tags': tnx.components.FetchTags,
     },
     data() {
         return {
