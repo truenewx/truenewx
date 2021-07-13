@@ -3,7 +3,24 @@
         <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-checkbox>
+        <template v-if="items.length === 0">
+            <slot name="empty" v-if="$slots.empty"></slot>
+            <span class="text-muted" v-else-if="emptyText">{{ emptyText }}</span>
+        </template>
     </el-checkbox-group>
+    <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
+        <template v-if="items">
+            <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
+                :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" @click="select(item[valueName])">
+                {{ item[textName] }}
+            </el-tag>
+            <template v-if="items.length === 0">
+                <slot name="empty" v-if="$slots.empty"></slot>
+                <span class="text-muted" v-else-if="emptyText">{{ emptyText }}</span>
+            </template>
+        </template>
+        <i class="el-icon-loading" v-else/>
+    </div>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio>
@@ -52,7 +69,7 @@ export default {
     name: 'TnxelSelect',
     props: {
         id: [Number, String],
-        value: [String, Number, Boolean],
+        value: [String, Number, Boolean, Array],
         selector: String,
         items: {
             type: Array,
@@ -103,6 +120,9 @@ export default {
         currentText() {
             let item = this.getItem(this.model);
             return item ? item[this.textName] : undefined;
+        },
+        multi() {
+            return this.selector === 'checkbox' || this.selector === 'tags';
         }
     },
     watch: {
@@ -121,7 +141,7 @@ export default {
         triggerChange(value) {
             if (this.change) {
                 let item = undefined;
-                if (this.selector === 'checkbox') {
+                if (this.multi) {
                     item = [];
                     if (Array.isArray(value)) {
                         for (let v of value) {
@@ -146,7 +166,7 @@ export default {
         },
         getModel(items) {
             let model = this.value || this.defaultValue;
-            if (this.selector === 'checkbox') { // 多选时需确保值为数组
+            if (this.multi) { // 多选时需确保值为数组
                 if (model) {
                     if (!Array.isArray(model)) {
                         model = [model];
@@ -192,7 +212,26 @@ export default {
         },
         onDropdownCommand(value) {
             this.model = value;
-        }
+        },
+        isSelected(value) {
+            if (Array.isArray(this.model)) {
+                return this.model.contains(value);
+            } else {
+                return this.model === value;
+            }
+        },
+        select(value) {
+            if (this.multi) {
+                let index = this.model.indexOf(value);
+                if (index >= 0) {
+                    this.model.splice(index, 1);
+                } else {
+                    this.model.push(value);
+                }
+            } else {
+                this.model = value;
+            }
+        },
     }
 }
 </script>

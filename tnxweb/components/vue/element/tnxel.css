@@ -611,3 +611,42 @@ span.el-tooltip {
 .el-table__row .is-center .cell .w-fit-content {
     width: auto !important;
 }
+
+.tnxel-tag-select .el-input {
+    margin-bottom: 5px;
+    width: 210px;
+}
+
+.tnxel-tag-select .tnxel-tag-group .el-tag {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.tnxel-tag-select .tnxel-tag-group .el-tag:not(:last-child) {
+    margin-right: 10px;
+}
+
+.tnxel-tag-select .el-pagination {
+    margin-top: 5px;
+    line-height: 28px;
+}
+
+.tnxel-tag-select .el-pagination .el-pager {
+    line-height: 28px;
+}
+
+.el-pagination .el-pagination__sizes .el-input__suffix {
+    display: none;
+}
+
+.el-pagination .el-pagination__sizes .el-select .el-input {
+    width: 66px;
+    margin: 0;
+}
+
+.el-pagination .el-pagination__sizes .el-select .el-input .el-input__inner {
+    border: none;
+    cursor: default;
+    padding: 0;
+}
