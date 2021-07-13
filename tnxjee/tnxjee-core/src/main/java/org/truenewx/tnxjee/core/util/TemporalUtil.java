@@ -227,7 +227,7 @@ public class TemporalUtil {
     public static Instant parseInstant(String s) {
         if (StringUtils.isNotBlank(s)) {
             try {
-                Long millis = MathUtil.parseLongObject(s, null);
+                Long millis = MathUtil.parseLongObject(s);
                 if (millis != null) { // 纯数字的视为毫秒数进行解析
                     return Instant.ofEpochMilli(millis);
                 }

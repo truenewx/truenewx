@@ -146,6 +146,10 @@ public class MathUtil {
         }
     }
 
+    public static Long parseLongObject(String s) {
+        return parseLongObject(s, null);
+    }
+
     /**
      * 以指定分隔符拆分指定字符串，并解析为长整数数组
      *
