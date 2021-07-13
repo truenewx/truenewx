@@ -52,6 +52,7 @@ export default {
         change: Function,
         theme: String,
         size: String,
+        formatter: Function,
     },
     data() {
         return {
@@ -95,12 +96,25 @@ export default {
             let vm = this;
             window.tnx.app.rpc.get(this.url, params, result => {
                 if (result instanceof Array) {
-                    vm.items = result;
+                    vm.items = vm.format(result);
                 } else if (result.records && result.paged) {
-                    vm.items = result.records;
+                    vm.items = vm.format(result.records);
                     vm.paged = result.paged;
                 }
             });
+        },
+        format(items) {
+            let result = items;
+            if (items && this.formatter) {
+                result = [];
+                for (let item of items) {
+                    item = this.formatter(item);
+                    if (item) {
+                        result.push(item);
+                    }
+                }
+            }
+            return result;
         }
     }
 }
