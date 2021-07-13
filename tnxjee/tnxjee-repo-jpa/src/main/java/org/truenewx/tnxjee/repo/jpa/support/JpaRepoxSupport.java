@@ -100,10 +100,10 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
     }
 
     protected final String getTableName() {
-        return getPersistentClass().getTable().getName();
+        return getAccessTemplate().getTableName(getEntityName());
     }
 
-    private PersistentClass getPersistentClass() {
+    private final PersistentClass getPersistentClass() {
         return getAccessTemplate().getPersistentClass(getEntityName());
     }
 

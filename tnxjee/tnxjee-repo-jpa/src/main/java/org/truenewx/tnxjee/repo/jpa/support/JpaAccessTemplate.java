@@ -1,6 +1,10 @@
 package org.truenewx.tnxjee.repo.jpa.support;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
@@ -78,7 +82,7 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         return metadata == null ? null : metadata.getEntityBinding(entityName);
     }
 
-    private String getTableName(String entityName) {
+    public String getTableName(String entityName) {
         PersistentClass persistentClass = getPersistentClass(entityName);
         if (persistentClass != null) {
             return persistentClass.getTable().getName();
