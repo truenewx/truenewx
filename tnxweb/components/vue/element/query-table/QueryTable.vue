@@ -4,7 +4,7 @@
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
-        <tnxel-paged :value="paged" :change="query" :align="pagedAlign"/>
+        <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged"/>
     </div>
 </template>
 
@@ -34,6 +34,7 @@ export default {
         pagedAlign: String,
         success: Function,
         rowClassName: String,
+        formatter: Function,
     },
     data() {
         return {
@@ -60,6 +61,13 @@ export default {
                     prop: fieldOrder.name,
                     order: fieldOrder.desc ? 'descending' : 'ascending',
                 };
+            }
+            if (this.params && this.params.orderBy) {
+                let array = this.params.orderBy.split(' ');
+                return {
+                    prop: array[0],
+                    order: (array[1] || 'asc').toLowerCase() === 'desc' ? 'descending' : 'ascending',
+                }
             }
             return undefined;
         },
@@ -89,14 +97,31 @@ export default {
             let vm = this;
             window.tnx.app.rpc.get(this.url, this.params, function(result) {
                 vm.querying = false;
-                vm.records = result.records;
-                vm.paged = result.paged;
+                if (Array.isArray(result)) {
+                    vm.records = vm.format(result);
+                } else {
+                    vm.records = vm.format(result.records);
+                    vm.paged = result.paged;
+                }
                 if (vm.success) {
                     vm.success(vm.records, vm.paged);
                 }
             }, {
                 app: this.app
             });
+        },
+        format(records) {
+            if (this.formatter) {
+                let result = [];
+                for (let record of records) {
+                    let obj = this.formatter(record);
+                    if (obj) {
+                        result.push(obj);
+                    }
+                }
+                return result;
+            }
+            return records;
         },
         sort(options) {
             if (options && options.prop && options.order) {
