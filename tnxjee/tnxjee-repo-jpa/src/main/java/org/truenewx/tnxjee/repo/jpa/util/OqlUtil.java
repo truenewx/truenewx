@@ -76,7 +76,7 @@ public class OqlUtil {
                         .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
-                String junction = comparison.isNot() ? " and " : " or ";
+                String junction = comparison.isNot() ? QlConstants.JUNCTION_AND : QlConstants.JUNCTION_OR;
                 int i = 0;
                 for (Object fieldParamValue : fieldParamValues) {
                     condition.append(junction).append(fieldName);
@@ -145,11 +145,11 @@ public class OqlUtil {
     public static String buildNullConditionString(String fieldName, Boolean ifNull) {
         StringBuilder condition = new StringBuilder();
         if (ifNull != null) {
-            condition.append(fieldName).append(" is");
+            condition.append(fieldName).append(QlConstants.KEYWORD_IS);
             if (!ifNull) {
-                condition.append(" not");
+                condition.append(QlConstants.KEYWORD_NOT);
             }
-            condition.append(" null");
+            condition.append(QlConstants.KEYWORD_NULL);
         }
         return condition.toString();
     }
@@ -164,11 +164,11 @@ public class OqlUtil {
     public static String buildNotNullConditionString(String fieldName, Boolean ifNotNull) {
         StringBuilder condition = new StringBuilder();
         if (ifNotNull != null) {
-            condition.append(fieldName).append(" is");
+            condition.append(fieldName).append(QlConstants.KEYWORD_IS);
             if (ifNotNull) {
-                condition.append(" not");
+                condition.append(QlConstants.KEYWORD_NOT);
             }
-            condition.append(" null");
+            condition.append(QlConstants.KEYWORD_NULL);
         }
         return condition.toString();
     }
@@ -185,7 +185,7 @@ public class OqlUtil {
             String fieldParamValue) {
         StringBuilder condition = new StringBuilder();
         if (StringUtils.isNotBlank(fieldParamValue)) {
-            condition.append(fieldName).append(" like :");
+            condition.append(fieldName).append(Comparison.LIKE.toQlString()).append(Strings.COLON);
             String paramName = getParamName(fieldName);
             condition.append(paramName);
             StringBuilder likeValue = new StringBuilder(Strings.PERCENT);
@@ -196,5 +196,18 @@ public class OqlUtil {
             params.put(paramName, likeValue.toString());
         }
         return condition.toString();
+    }
+
+    public static String appendAndCondition(String ql, String condition) {
+        if (StringUtils.isNotBlank(condition)) {
+            ql += QlConstants.JUNCTION_AND + condition;
+        }
+        return ql;
+    }
+
+    public static void appendAndCondition(StringBuilder ql, String condition) {
+        if (StringUtils.isNotBlank(condition)) {
+            ql.append(QlConstants.JUNCTION_AND).append(condition);
+        }
     }
 }
