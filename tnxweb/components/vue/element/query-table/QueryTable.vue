@@ -41,7 +41,7 @@ export default {
             params: this.getParams(this.value),
             records: null,
             querying: false,
-            paged: {},
+            paged: null,
         }
     },
     computed: {
