@@ -1,5 +1,5 @@
 <template>
-    <el-tooltip :content="tooltip" :placement="tooltipPlacement" v-if="tooltip && !disabled">
+    <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" v-if="tooltipContent && !disabled">
         <el-button :type="type" :icon="icon" @click="click" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle">
             <slot v-if="$slots.default"></slot>
@@ -7,7 +7,8 @@
         </el-button>
     </el-tooltip>
     <el-button :type="type" :icon="icon" @click="click" :disabled="disabled" :title="title" :size="size"
-        :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
+        :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle"
+        v-else-if="!disabled || disabledTip !== false">
         <slot v-if="$slots.default"></slot>
         <template v-else-if="item">{{ item.caption }}</template>
     </el-button>
@@ -33,13 +34,16 @@ export default {
         autofocus: Boolean,
         round: Boolean,
         circle: Boolean,
-        tooltip: String,
+        tooltip: {
+            type: [String, Boolean],
+            default: '',
+        },
         tooltipPlacement: {
             type: String,
             default: 'top',
         },
         disabledTip: {
-            type: String,
+            type: [String, Boolean],
             default: '没有操作权限',
         }
     },
@@ -50,6 +54,16 @@ export default {
         }
     },
     computed: {
+        tooltipContent() {
+            let content = this.tooltip;
+            if (content === false) {
+                return undefined;
+            }
+            if (!content && this.item) {
+                content = this.item.desc;
+            }
+            return content;
+        },
         title() {
             return this.disabled ? this.disabledTip : undefined;
         }
