@@ -110,6 +110,9 @@ function matches(item, path) {
                 return true;
             }
         }
+    } else if (typeof item.permission === 'string') { // 如果没有指定路径但指定了许可名，则将匹配路径按照默认规则转换为许可名尝试匹配
+        let permission = getDefaultPermission(path);
+        return item.permission === permission;
     }
     return false;
 }

@@ -30,6 +30,7 @@ import Upload from './upload';
 import FssUpload from './fss-upload';
 import FssView from './fss-view';
 import Curd from './curd';
+import Button from './button';
 
 const components = Object.assign({}, tnxvue.components, {
     Alert,
@@ -55,6 +56,7 @@ const components = Object.assign({}, tnxvue.components, {
     FssUpload,
     FssView,
     Curd,
+    Button,
 });
 
 const tnxel = Object.assign({}, tnxvue, {
