@@ -234,10 +234,18 @@ el-header ul.tnxel-nav,
 }
 
 .form-item-tip {
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1;
     color: #909399;
-    margin-top: 8px;
+}
+
+div.form-item-tip {
+    margin-top: 0.5rem;
+}
+
+span.form-item-tip {
+    margin-top: 0;
+    margin-left: 1rem;
 }
 
 .el-form > .form-item-tip {
