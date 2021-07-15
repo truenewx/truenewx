@@ -13,7 +13,7 @@ import org.truenewx.tnxjee.repo.OwnedUnityRepox;
  *
  * @author jianglei
  */
-public abstract class JpaOwnedUnityRepoSupport<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
+public abstract class JpaOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
         extends JpaUnityRepoxSupport<T, K> implements OwnedUnityRepox<T, K, O> {
 
     /**

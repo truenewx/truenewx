@@ -13,7 +13,7 @@ import org.truenewx.tnxjee.model.entity.unity.OwnedUnity;
  * @param <O> 所属者类型
  */
 public abstract class JpaHistorizableOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
-        extends JpaOwnedUnityRepoSupport<T, K, O> {
+        extends JpaOwnedUnityRepoxSupport<T, K, O> {
 
     protected String getEntityName(boolean historized) {
         if (historized) {
