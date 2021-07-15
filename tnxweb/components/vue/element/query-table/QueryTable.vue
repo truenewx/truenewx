@@ -112,14 +112,7 @@ export default {
         },
         format(records) {
             if (this.formatter) {
-                let result = [];
-                for (let record of records) {
-                    let obj = this.formatter(record);
-                    if (obj) {
-                        result.push(obj);
-                    }
-                }
-                return result;
+                return this.formatter(records);
             }
             return records;
         },
