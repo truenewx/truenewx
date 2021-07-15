@@ -27,7 +27,8 @@
     "element-ui": "^2.14.1",
     "jquery": "^3.5.1",
     "md5": "^2.3.0",
-    "vue": "^2.6.12"
+    "vue": "^2.6.12",
+    "vue-router": "^3.5.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.12",
