@@ -45,9 +45,10 @@ function getRuleType(metaType) {
 function getRule(validationName, validationValue, fieldMeta) {
     let rule = undefined;
     let fieldCaption = '';
-    if (fieldMeta && fieldMeta.caption) {
-        fieldCaption = fieldMeta.caption;
-    }
+    // 据目前观察，字段格式校验的错误消息均显示在字段旁，无需显示字段名称，未来如果出现不在字段旁显示的场景，再考虑扩展
+    // if (fieldMeta && fieldMeta.caption) {
+    //     fieldCaption = fieldMeta.caption;
+    // }
     switch (validationName) {
         case 'required':
         case 'notNull':
