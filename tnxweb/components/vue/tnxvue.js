@@ -78,6 +78,17 @@ const tnxvue = Object.assign({}, tnxcore, {
         }
         const title = component.title || options.title;
         const buttons = options.buttons || getDefaultDialogButtons(options.type, options.click, options.theme);
+        if (options.buttonText) {
+            if (!Array.isArray(options.buttonText)) {
+                options.buttonText = [options.buttonText];
+            }
+            for (let i = 0; i < buttons.length; i++) {
+                let buttonText = options.buttonText[i];
+                if (buttonText) {
+                    buttons[i].text = buttonText;
+                }
+            }
+        }
         delete options.title;
         delete options.type;
         delete options.click;
