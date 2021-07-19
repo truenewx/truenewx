@@ -60,6 +60,8 @@ export default {
         width() {
             if (typeof this.options.width === 'function') {
                 return this.options.width();
+            } else if (typeof this.options.width === 'number') {
+                return this.options.width + 'px';
             } else {
                 return this.options.width;
             }
