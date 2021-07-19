@@ -658,3 +658,7 @@ span.el-tooltip {
     cursor: default;
     padding: 0;
 }
+
+.el-submenu .el-menu-item {
+    min-width: unset;
+}
