@@ -1,11 +1,12 @@
 <template>
     <el-form :id="id" :inline="true" :model="value" :class="theme ? ('theme-' + theme) : null">
         <slot></slot>
-        <el-form-item v-if="query">
-            <el-button :type="theme || 'primary'" icon="el-icon-search" @click="toQuery" :plain="plain">
+        <el-form-item v-if="queryText || clearText">
+            <el-button :type="theme || 'primary'" icon="el-icon-search" @click="toQuery" :plain="plain"
+                v-if="queryText">
                 {{ queryText }}
             </el-button>
-            <el-button @click="toClear" :plain="plain" v-if="clearable">{{ clearText }}</el-button>
+            <el-button @click="toClear" :plain="plain" v-if="clearText">{{ clearText }}</el-button>
         </el-form-item>
     </el-form>
 </template>
@@ -26,10 +27,6 @@ export default {
         queryText: {
             type: String,
             default: () => '查询'
-        },
-        clearable: {
-            type: Boolean,
-            default: () => true
         },
         clearText: {
             type: String,
