@@ -1,12 +1,12 @@
 <template>
     <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" v-if="tooltipContent && !disabled">
-        <el-button :type="type" :icon="icon" @click="click" :size="size"
+        <el-button :type="type" :icon="icon" @click="toClick" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle">
             <slot v-if="$slots.default"></slot>
             <template v-else-if="item">{{ item.caption }}</template>
         </el-button>
     </el-tooltip>
-    <el-button :type="type" :icon="icon" @click="click" :disabled="disabled" :title="title" :size="size"
+    <el-button :type="type" :icon="icon" @click="toClick" :disabled="disabled" :title="title" :size="size"
         :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle"
         v-else-if="!disabled || disabledTip !== false">
         <slot v-if="$slots.default"></slot>
@@ -25,6 +25,10 @@ export default {
         path: {
             type: String,
             required: true,
+        },
+        click: {
+            type: [Function, Boolean],
+            default: false,
         },
         type: String,
         icon: String,
@@ -75,16 +79,20 @@ export default {
         });
     },
     methods: {
-        click() {
+        toClick() {
             if (!this.disabled && this.item && this.$router) {
-                if (this.item.path) {
+                if (typeof this.click === 'function') {
+                    this.click(this.path);
+                } else if (this.click) { // 简单指定click为true，则触发点击事件
+                    this.$emit('click', this.path);
+                } else if (this.item.path) {
                     let vm = this;
                     this.$router.push(this.path).catch(function() {
                         // 指定路径无法跳转，则触发点击事件
-                        vm.$emit('click');
+                        vm.$emit('click', this.path);
                     });
                 } else { // 匹配菜单项未配置路径，则触发点击事件
-                    this.$emit('click');
+                    this.$emit('click', this.path);
                 }
             }
         }
