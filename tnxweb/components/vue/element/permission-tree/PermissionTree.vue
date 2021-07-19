@@ -26,7 +26,7 @@ function addMenuItemToTreeNodes(parentId, menuItems, treeNodes, permissions) {
         let node = {
             id: (parentId || 'node') + '-' + i,
             parentId: parentId,
-            label: item.caption,
+            label: item.permissionCaption || item.caption,
             path: item.path,
             permission: item.permission,
             checked: item.permission && permissions && permissions.contains(item.permission),
