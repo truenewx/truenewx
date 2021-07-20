@@ -111,7 +111,7 @@ public class StringUtil {
     public static boolean regexMatch(String s, String pattern) {
         try {
             return Pattern.matches(pattern, s);
-        } catch (PatternSyntaxException e) {
+        } catch (PatternSyntaxException ignored) {
         }
         return false;
     }
@@ -136,9 +136,11 @@ public class StringUtil {
             case RANDOM_TYPE_LETTER: {
                 Random random = new Random();
                 for (int i = 0; i < b.length; i++) {
-                    b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
+                    // 随机决定大小写
                     if (random.nextBoolean()) {
                         b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
+                    } else {
+                        b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
                     }
                 }
                 break;
@@ -146,16 +148,19 @@ public class StringUtil {
             case RANDOM_TYPE_MIXED: {
                 Random random = new Random();
                 for (int i = 0; i < b.length; i++) {
-                    b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
-                    if (random.nextBoolean()) {
-                        b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
-                    }
+                    // 随机决定大小写还是数字
                     if (random.nextBoolean()) {
                         b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
+                    } else if (random.nextBoolean()) {
+                        b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
+                    } else {
+                        b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
                     }
                 }
                 break;
             }
+            default:
+                break;
         }
         return new String(b);
     }
@@ -184,12 +189,12 @@ public class StringUtil {
      * 生成纯字母组合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 纯字母组合的随机字符串
      */
-    public static String randomLetters(int length, String ingoredChars) {
+    public static String randomLetters(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_LETTER, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_LETTER, length);
         }
         return s;
@@ -199,12 +204,12 @@ public class StringUtil {
      * 生成纯数字组合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 纯数字组合的随机字符串
      */
-    public static String randomNumbers(int length, String ingoredChars) {
+    public static String randomNumbers(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_NUMBER, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_NUMBER, length);
         }
         return s;
@@ -214,15 +219,25 @@ public class StringUtil {
      * 生成数字和字母混合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 数字和字母混合的随机字符串
      */
-    public static String randomMixeds(int length, String ingoredChars) {
+    public static String randomMixeds(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_MIXED, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_MIXED, length);
         }
         return s;
+    }
+
+    /**
+     * 生成数字和字母混合的随机字符串，忽略常见的容易造成人工识别混淆的字符
+     *
+     * @param length 长度
+     * @return 数字和字母混合的随机字符串
+     */
+    public static String randomNormalMixeds(int length) {
+        return randomMixeds(length, "0125OoLlIiZzSs");
     }
 
     /**
@@ -235,7 +250,7 @@ public class StringUtil {
         if (StringUtils.isNotEmpty(s)) {
             char first = s.charAt(0);
             if (Character.isLowerCase(first)) {
-                StringBuffer sb = new StringBuffer(s);
+                StringBuilder sb = new StringBuilder(s);
                 sb.setCharAt(0, Character.toUpperCase(first));
                 return sb.toString();
             }
@@ -253,7 +268,7 @@ public class StringUtil {
         if (StringUtils.isNotEmpty(s)) {
             char first = s.charAt(0);
             if (Character.isUpperCase(first)) {
-                StringBuffer sb = new StringBuffer(s);
+                StringBuilder sb = new StringBuilder(s);
                 sb.setCharAt(0, Character.toLowerCase(first));
                 return sb.toString();
             }
@@ -373,9 +388,9 @@ public class StringUtil {
      * @param end   结束字符串
      * @return 子字符串集合
      */
-    public static String[] substringsBetweens(String s, String begin, String end) {
+    public static String[] substringsBetween(String s, String begin, String end) {
         List<String> list = new ArrayList<>();
-        if (begin.equals(end) && s.indexOf(begin) >= 0) {
+        if (begin.equals(end) && s.contains(begin)) {
             list.add(begin);
         }
         for (int index = s.indexOf(begin); index >= 0; index = s.indexOf(begin, index + 1)) {
@@ -677,8 +692,7 @@ public class StringUtil {
             if (locale == null) {
                 locale = Locale.getDefault();
             }
-            text = new MessageFormat(text, locale).format(args, new StringBuffer(), null)
-                    .toString();
+            text = new MessageFormat(text, locale).format(args, new StringBuffer(), null).toString();
         }
         return text;
     }
@@ -690,7 +704,6 @@ public class StringUtil {
      * @return 转换后的新字符串
      */
     public static String toHtml(String s) {
-        // s = s.replaceAll(" ", "&nbsp;");
         s = s.replaceAll("<", "&lt;");
         s = s.replaceAll(">", "&gt;");
         s = s.replaceAll("\n", "<br>");
@@ -792,7 +805,7 @@ public class StringUtil {
             if (s.length() <= length) {
                 return Strings.EMPTY;
             }
-            s = s.substring(length, s.length());
+            s = s.substring(length);
         }
         return s;
     }
@@ -837,7 +850,7 @@ public class StringUtil {
      * @return 连接后的字符串
      */
     public static String join(String separator, int... array) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i : array) {
             sb.append(i).append(separator);
         }
@@ -856,7 +869,7 @@ public class StringUtil {
      * @return 连接后的字符串
      */
     public static String join(String separator, long... array) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (long i : array) {
             sb.append(i).append(separator);
         }
@@ -877,7 +890,7 @@ public class StringUtil {
         if (separator == null) {
             separator = Strings.EMPTY;
         }
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         for (T obj : array) {
             String s = funcToString.apply(obj);
             if (s != null) {
@@ -898,7 +911,7 @@ public class StringUtil {
         if (separator == null) {
             separator = Strings.EMPTY;
         }
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         for (T obj : iterable) {
             result.append(funcToString.apply(obj)).append(separator);
         }
@@ -913,8 +926,8 @@ public class StringUtil {
         if (type == String.class) {
             return (T) s;
         }
-        if (type == StringBuffer.class) {
-            return (T) new StringBuffer(s);
+        if (type == StringBuilder.class) {
+            return (T) new StringBuilder(s);
         }
         if (type == BigDecimal.class) {
             return (T) new BigDecimal(s);
@@ -1005,7 +1018,7 @@ public class StringUtil {
         StringBuilder sb = new StringBuilder();
         for (char c : s.toCharArray()) {
             String pinyin = toPinyin(String.valueOf(c));
-            sb.append(pinyin.substring(0, 1));
+            sb.append(pinyin.charAt(0));
         }
         return sb.toString();
     }

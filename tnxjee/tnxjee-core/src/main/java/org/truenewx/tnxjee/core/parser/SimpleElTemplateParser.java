@@ -18,7 +18,6 @@ import org.truenewx.tnxjee.core.util.StringUtil;
  * 简单EL表达式模板的解析器。以简单方式解析模板内容中的EL表达式，生成实际内容
  *
  * @author jianglei
- * 
  */
 public class SimpleElTemplateParser implements TemplateParser {
 
@@ -34,7 +33,7 @@ public class SimpleElTemplateParser implements TemplateParser {
         if (params == null) {
             params = new HashMap<>(0);
         }
-        String[] replaceContents = StringUtil.substringsBetweens(templateContent,
+        String[] replaceContents = StringUtil.substringsBetween(templateContent,
                 REPLACE_KEY_PREFIX, REPLACE_KEY_SUFFIX);
         for (String replaceContent : replaceContents) {
             try {
@@ -52,7 +51,7 @@ public class SimpleElTemplateParser implements TemplateParser {
                     value = BeanUtil.getPropertyValue(value,
                             replaceKey.substring(propertyNames[0].length() + 1));
                 } else {
-                    String[] replaces = StringUtil.substringsBetweens(value.toString(),
+                    String[] replaces = StringUtil.substringsBetween(value.toString(),
                             REPLACE_KEY_PREFIX, REPLACE_KEY_SUFFIX);
                     if (replaces.length > 0) {
                         value = parse(value.toString(), params, locale);
