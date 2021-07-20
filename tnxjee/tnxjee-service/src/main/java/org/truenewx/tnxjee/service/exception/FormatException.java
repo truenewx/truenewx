@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.service.exception;
 
+import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 import org.truenewx.tnxjee.core.util.ClassUtil;
@@ -21,6 +22,11 @@ public class FormatException extends SingleException {
         this.code = code;
         this.modelClass = modelClass;
         this.property = property;
+    }
+
+    public <A extends Annotation> FormatException(Class<A> constraintAnnotationType, Class<?> modelClass,
+            String property) {
+        this(constraintAnnotationType.getName() + ".message", modelClass, property);
     }
 
     public FormatException(ExceptionError error) {
