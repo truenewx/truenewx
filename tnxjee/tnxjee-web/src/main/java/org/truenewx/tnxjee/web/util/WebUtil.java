@@ -219,7 +219,7 @@ public class WebUtil {
         }
         String begin = "${";
         String end = "}";
-        String[] placeholders = StringUtil.substringsBetweens(s, begin, end);
+        String[] placeholders = StringUtil.substringsBetween(s, begin, end);
         for (String placeholder : placeholders) {
             String key = placeholder.substring(begin.length(), placeholder.length() - end.length());
             Object value = servletContext.getAttribute(key);
@@ -259,16 +259,27 @@ public class WebUtil {
     /**
      * 从指定HTTP请求中获取访问的主机地址（协议://域名[:端口]）
      *
-     * @param request 指定请求
+     * @param request HTTP请求
      * @return 访问的主机地址含协议
      */
     public static String getProtocolAndHost(HttpServletRequest request) {
         String url = request.getRequestURL().toString();
-        String protocol = "http://";
-        if (url.startsWith("https:")) {
-            protocol = "https://";
+        return request.getScheme() + "://" + NetUtil.getHost(url, true);
+    }
+
+    /**
+     * 从指定HTTP请求中获取上下文地址（协议://域名[:端口]/[上下文根]）
+     *
+     * @param request HTTP请求
+     * @return 上下文地址
+     */
+    public static String getContextUrl(HttpServletRequest request) {
+        String contextUrl = getProtocolAndHost(request);
+        String contextPath = request.getContextPath();
+        if (!Strings.SLASH.equals(contextPath)) {
+            contextUrl += contextPath;
         }
-        return protocol + NetUtil.getHost(url, true);
+        return contextUrl;
     }
 
     /**
