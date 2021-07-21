@@ -3,6 +3,8 @@ package org.truenewx.tnxjee.model.entity.util;
 import java.io.Serializable;
 import java.util.*;
 
+import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
 
 /**
@@ -134,6 +136,33 @@ public class EntityUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * 将指定映射集转换为类JSON格式，与JSON的差别在于以,作为首尾，而不是{}
+     *
+     * @param map 映射集
+     * @return 类JSON
+     */
+    public static String toJsonLike(Map<String, Object> map) {
+        String json = JsonUtil.toJson(map);
+        if (json != null && json.startsWith(Strings.LEFT_BRACE) && json.endsWith(Strings.RIGHT_BRACE)) {
+            return Strings.COMMA + json.substring(1, json.length() - 1) + Strings.COMMA;
+        }
+        return json;
+    }
+
+    /**
+     * 解析类JSON格式字符串为映射集
+     *
+     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}
+     * @return 映射集
+     */
+    public static Map<String, Object> parseJsonLike(String json) {
+        if (json != null && json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
+            json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
+        }
+        return JsonUtil.json2Map(json);
     }
 
 }
