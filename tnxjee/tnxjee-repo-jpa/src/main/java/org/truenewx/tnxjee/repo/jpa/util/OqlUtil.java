@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ArrayUtil;
+import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.model.query.FieldOrder;
 import org.truenewx.tnxjee.model.query.Querying;
 
@@ -194,6 +195,39 @@ public class OqlUtil {
                 likeValue.append(c).append(Strings.PERCENT);
             }
             params.put(paramName, likeValue.toString());
+        }
+        return condition.toString();
+    }
+
+    /**
+     * 构建类JSON格式字段的条件子句
+     *
+     * @param params          查询参数映射集，相关查询参数会写入该映射集中
+     * @param fieldName       类JSON格式字段名，该字段的值存储格式类似JSON，但首尾为,而不是{}，这样设计是为了简化条件子句
+     * @param fieldParamValue 类JSON格式字段参数值，为包含多个值的映射集
+     * @return 类JSON格式字段的条件子句
+     */
+    public static String buildJsonLikeConditionString(Map<String, Object> params, String fieldName,
+            Map<String, Object> fieldParamValue) {
+        StringBuilder condition = new StringBuilder();
+        if (fieldParamValue != null && fieldParamValue.size() > 0) {
+            int index = 0;
+            for (Map.Entry<String, Object> entry : fieldParamValue.entrySet()) {
+                // 形如： and 字段名 like :字段参数名
+                condition.append(QlConstants.JUNCTION_AND).append(fieldName).append(Comparison.LIKE.toQlString())
+                        .append(Strings.COLON);
+                String paramName = fieldName + (index++);
+                condition.append(paramName);
+
+                String name = entry.getKey();
+                Object value = entry.getValue();
+                // 形如：%,"字段参数名":字段参数值JSON,%
+                String paramValue = Strings.PERCENT + Strings.COMMA + Strings.DOUBLE_QUOTES + name + Strings.DOUBLE_QUOTES
+                        + Strings.COLON + JsonUtil.toJson(value) + Strings.COMMA + Strings.PERCENT;
+                params.put(paramName, paramValue);
+            }
+            // 去掉头部的 and
+            condition.delete(0, QlConstants.JUNCTION_AND.length());
         }
         return condition.toString();
     }
