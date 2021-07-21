@@ -28,7 +28,8 @@ public class ExceptionErrorDecoder extends ErrorDecoder.Default {
     @Override
     public Exception decode(String methodKey, Response response) {
         try {
-            if (response.status() == HttpStatus.FORBIDDEN.value()) {
+            int status = response.status();
+            if (status == HttpStatus.FORBIDDEN.value() || status == HttpStatus.BAD_REQUEST.value()) {
                 String json = IOUtils.toString(response.body().asReader(StandardCharsets.UTF_8));
                 ExceptionErrorBody body = JsonUtil.json2Bean(json, ExceptionErrorBody.class);
                 ExceptionError[] errors = body.getErrors();

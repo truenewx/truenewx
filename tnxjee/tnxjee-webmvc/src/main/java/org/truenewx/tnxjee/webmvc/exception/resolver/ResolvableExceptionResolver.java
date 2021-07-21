@@ -9,6 +9,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -29,6 +30,18 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
     protected final ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
             Object handler, Exception ex) {
         if (handler instanceof HandlerMethod) {
+            if (ex instanceof TransactionSystemException) {
+                Throwable cause;
+                do {
+                    cause = ex.getCause();
+                    if (cause instanceof Exception) {
+                        ex = (Exception) cause;
+                        if (ex instanceof ConstraintViolationException || ex instanceof ResolvableException) {
+                            break;
+                        }
+                    }
+                } while (cause != null);
+            }
             if (ex instanceof ConstraintViolationException) {
                 ConstraintViolationException cve = (ConstraintViolationException) ex;
                 Set<ConstraintViolation<?>> violations = cve.getConstraintViolations();
