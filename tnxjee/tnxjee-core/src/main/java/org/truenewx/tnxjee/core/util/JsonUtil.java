@@ -2,10 +2,12 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.jackson.TypedPropertyFilter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,6 +25,9 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 public class JsonUtil {
 
     private static String toJson(Object obj, PropertyFilter filter) {
+        if (obj == null) {
+            return null;
+        }
         ObjectMapper mapper;
         if (filter != null) {
             mapper = JacksonUtil.buildMapper(filter, obj.getClass());
@@ -90,8 +95,14 @@ public class JsonUtil {
      * @return 转换形成的Map
      */
     public static Map<String, Object> json2Map(String json) {
+        if (json == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(json)) {
+            return Collections.emptyMap();
+        }
         try {
-            return JacksonUtil.DEFAULT_MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {
+            return JacksonUtil.DEFAULT_MAPPER.readValue(json, new TypeReference<>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -106,6 +117,9 @@ public class JsonUtil {
      * @return 转换形成的对象
      */
     public static <T> T json2Bean(String json, Class<T> beanClass) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
         try {
             return JacksonUtil.DEFAULT_MAPPER.readValue(json, beanClass);
         } catch (IOException e) {
@@ -121,8 +135,10 @@ public class JsonUtil {
      */
     public static void jsonCoverBean(String json, Object bean) {
         Map<String, Object> map = json2Map(json);
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            BeanUtil.setPropertyValue(bean, entry.getKey(), entry.getValue());
+        if (map != null) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                BeanUtil.setPropertyValue(bean, entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -133,8 +149,14 @@ public class JsonUtil {
      * @return 转换形成的对象List
      */
     public static List<Object> json2List(String json) {
+        if (json == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(json)) {
+            return Collections.emptyList();
+        }
         try {
-            return JacksonUtil.DEFAULT_MAPPER.readValue(json, new TypeReference<List<Object>>() {
+            return JacksonUtil.DEFAULT_MAPPER.readValue(json, new TypeReference<>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -149,6 +171,12 @@ public class JsonUtil {
      * @return 转换形成的对象List
      */
     public static <T> List<T> json2List(String json, Class<T> componentType) {
+        if (json == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(json)) {
+            return Collections.emptyList();
+        }
         CollectionType type = JacksonUtil.DEFAULT_MAPPER.getTypeFactory().constructCollectionType(List.class,
                 componentType);
         try {
@@ -169,7 +197,7 @@ public class JsonUtil {
         if (list == null) {
             return null;
         }
-        return list.toArray(new Object[list.size()]);
+        return list.toArray(new Object[0]);
     }
 
     /**
