@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
+import org.truenewx.tnxjee.core.util.ArrayUtil;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
@@ -171,7 +172,11 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                     meta.setName(filename);
                     meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
                     meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
-                    meta.setImageable(strategy.getUploadLimit(userIdentity).isImageable());
+                    FileUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+                    if (uploadLimit.isImageable()) {
+                        meta.setImageable(true);
+                        meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+                    }
                     return meta;
                 }
             }

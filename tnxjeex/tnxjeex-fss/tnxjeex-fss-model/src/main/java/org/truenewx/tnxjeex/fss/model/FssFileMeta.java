@@ -1,5 +1,6 @@
 package org.truenewx.tnxjeex.fss.model;
 
+import org.truenewx.tnxjee.core.spec.FlatSize;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 
 /**
@@ -19,6 +20,7 @@ public class FssFileMeta {
     private String readUrl;
     private String thumbnailReadUrl;
     private Boolean imageable;
+    private FlatSize size;
 
     protected FssFileMeta() {
     }
@@ -70,4 +72,13 @@ public class FssFileMeta {
     public void setImageable(Boolean imageable) {
         this.imageable = imageable;
     }
+
+    public FlatSize getSize() {
+        return this.size;
+    }
+
+    public void setSize(FlatSize size) {
+        this.size = size;
+    }
+
 }

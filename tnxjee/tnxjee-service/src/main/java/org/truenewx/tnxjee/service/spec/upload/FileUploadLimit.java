@@ -5,10 +5,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.spec.FlatSize;
 import org.truenewx.tnxjee.core.util.ArrayUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.core.util.Mimetypes;
-import org.truenewx.tnxjee.model.spec.FlatSize;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 
 /**

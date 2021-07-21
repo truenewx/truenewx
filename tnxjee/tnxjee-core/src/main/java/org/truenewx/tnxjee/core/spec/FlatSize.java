@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.model.spec;
+package org.truenewx.tnxjee.core.spec;
 
 import java.util.Objects;
 

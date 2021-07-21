@@ -135,7 +135,11 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             // 缩略读取地址附加的缩略参数对最终URL可能产生影响，故需要重新生成，而不能在读取URL上简单附加缩略参数
             String thumbnailReadUrl = this.service.getReadUrl(userIdentity, storageUrl, true);
             result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl));
-            result.setImageable(this.service.getUploadLimit(type, userIdentity).isImageable());
+            FileUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
+            if (uploadLimit.isImageable()) {
+                result.setImageable(true);
+                result.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+            }
         }
         return result;
     }

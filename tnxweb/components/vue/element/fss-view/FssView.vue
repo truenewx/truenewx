@@ -1,5 +1,6 @@
 <template>
-    <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain" v-if="meta.imageable">
+    <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain"
+        :style="{width: imageWidth, height: imageHeight}" v-if="meta.imageable">
         <div slot="error" class="text-muted h-100 flex-center">
             <i class="el-icon-picture-outline"/>
         </div>
@@ -16,12 +17,32 @@ export default {
         preview: {
             type: Boolean,
             default: false,
-        }
+        },
+        width: [String, Number],
+        height: [String, Number],
     },
     data() {
         return {
             meta: {},
         }
+    },
+    computed: {
+        imageWidth() {
+            let size = this.meta.size;
+            let width = this.width || (size ? size.width : undefined);
+            if (typeof width === 'number') {
+                width += 'px';
+            }
+            return width;
+        },
+        imageHeight() {
+            let size = this.meta.size;
+            let height = this.height || (size ? size.height : undefined);
+            if (typeof height === 'number') {
+                height += 'px';
+            }
+            return height;
+        },
     },
     watch: {
         url() {
