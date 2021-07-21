@@ -11,6 +11,9 @@ public class FssUploadedFileMeta extends FssFileMeta {
 
     private String id;
 
+    protected FssUploadedFileMeta() {
+    }
+
     public FssUploadedFileMeta(String id, String storageUrl) {
         super(storageUrl);
         this.id = id;
@@ -19,6 +22,10 @@ public class FssUploadedFileMeta extends FssFileMeta {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    protected void setId(String id) {
+        this.id = id;
     }
 
 }

@@ -20,6 +20,9 @@ public class FssFileMeta {
     private String thumbnailReadUrl;
     private Boolean imageable;
 
+    protected FssFileMeta() {
+    }
+
     public FssFileMeta(String storageUrl) {
         this.storageUrl = storageUrl;
     }
@@ -38,6 +41,10 @@ public class FssFileMeta {
 
     public String getStorageUrl() {
         return this.storageUrl;
+    }
+
+    protected void setStorageUrl(String storageUrl) {
+        this.storageUrl = storageUrl;
     }
 
     public String getReadUrl() {
