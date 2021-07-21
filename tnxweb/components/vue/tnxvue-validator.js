@@ -163,6 +163,13 @@ function getRule(validationName, validationValue, fieldMeta) {
                 validator(r, fieldValue, callback, source, options) {
                     if (fieldValue) {
                         let pattern = validationValue[0];
+                        // 服务端正则表达式无需以^$作为首尾，客户端需确保以^$作为首尾
+                        if (!pattern.startsWith('^')) {
+                            pattern = '^' + pattern;
+                        }
+                        if (!pattern.endsWith('$')) {
+                            pattern += '$';
+                        }
                         let regexp = new RegExp(pattern, 'gi');
                         if (!regexp.test(fieldValue)) {
                             let message = validationValue[1];
