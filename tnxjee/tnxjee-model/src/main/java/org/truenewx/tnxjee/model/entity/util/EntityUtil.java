@@ -1,16 +1,18 @@
-package org.truenewx.tnxjee.model.entity.unity;
+package org.truenewx.tnxjee.model.entity.util;
 
 import java.io.Serializable;
 import java.util.*;
 
+import org.truenewx.tnxjee.model.entity.unity.Unity;
+
 /**
- * 单体工具类
+ * 实体工具类
  *
  * @author jianglei
  */
-public class UnityUtil {
+public class EntityUtil {
 
-    private UnityUtil() {
+    private EntityUtil() {
     }
 
     /**

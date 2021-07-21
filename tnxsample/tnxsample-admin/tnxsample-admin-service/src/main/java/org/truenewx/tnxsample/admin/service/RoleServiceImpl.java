@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.model.CommandModel;
-import org.truenewx.tnxjee.model.entity.unity.UnityUtil;
+import org.truenewx.tnxjee.model.entity.util.EntityUtil;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.impl.unity.AbstractUnityService;
@@ -116,7 +116,7 @@ public class RoleServiceImpl extends AbstractUnityService<Role, Integer> impleme
             // 此时管理员清单中现存的均为已包含在新管理员中的，需要添加新加的管理员
             if (newManagerIds != null) {
                 for (int managerId : newManagerIds) {
-                    if (!UnityUtil.containsId(managers, managerId)) {
+                    if (!EntityUtil.containsId(managers, managerId)) {
                         this.managerRepo.findById(managerId).ifPresent(manager -> {
                             managers.add(manager);
                             manager.getRoles().add(role);

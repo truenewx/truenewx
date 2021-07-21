@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.caption.Caption;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
-import org.truenewx.tnxjee.model.entity.unity.UnityUtil;
+import org.truenewx.tnxjee.model.entity.util.EntityUtil;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.test.service.annotation.TestBusinessException;
@@ -204,7 +204,7 @@ public class ManagerServiceTest extends ServiceTestSupport {
         Assert.assertEquals(2, qr.getPaged().getTotal().intValue());
         List<Manager> records = qr.getRecords();
         Assert.assertEquals(2, records.size());
-        Assert.assertTrue(!UnityUtil.containsId(records.get(0).getRoles(), roleId));
+        Assert.assertTrue(!EntityUtil.containsId(records.get(0).getRoles(), roleId));
     }
 
 }

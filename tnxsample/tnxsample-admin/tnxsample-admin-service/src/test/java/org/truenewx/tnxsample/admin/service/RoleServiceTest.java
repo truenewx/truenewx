@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.caption.Caption;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
-import org.truenewx.tnxjee.model.entity.unity.UnityUtil;
+import org.truenewx.tnxjee.model.entity.util.EntityUtil;
 import org.truenewx.tnxjee.test.service.annotation.TestBusinessException;
 import org.truenewx.tnxsample.admin.model.entity.Manager;
 import org.truenewx.tnxsample.admin.model.entity.Role;
@@ -85,7 +85,7 @@ public class RoleServiceTest extends ServiceTestSupport {
         RoleCommand command = new RoleCommand();
         command.setName("NewRole");
         command.setManagerIds(managerIds);
-        command.setPermissions(new String[] { "a", "b", "c" });
+        command.setPermissions(new String[]{ "a", "b", "c" });
         command.setRemark("role remark1");
         int roleId = this.service.add(command).getId();
 
@@ -105,7 +105,7 @@ public class RoleServiceTest extends ServiceTestSupport {
         RoleCommand command = new RoleCommand();
         command.setName("UpdatedRole");
         command.setManagerIds(managerIds);
-        command.setPermissions(new String[] { "a", "c", "d" });
+        command.setPermissions(new String[]{ "a", "c", "d" });
         command.setRemark("role remark1");
         this.service.update(roleId1, command);
 
@@ -127,7 +127,7 @@ public class RoleServiceTest extends ServiceTestSupport {
 
         Assert.assertNull(this.service.find(roleId1));
         managers.forEach(manager -> {
-            Set<Integer> roleIds = UnityUtil.getIdSet(manager.getRoles());
+            Set<Integer> roleIds = EntityUtil.getIdSet(manager.getRoles());
             Assert.assertFalse(roleIds.contains(roleId1));
         });
     }
