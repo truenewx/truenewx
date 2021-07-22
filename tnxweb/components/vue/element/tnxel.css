@@ -625,13 +625,13 @@ span.el-tooltip {
     width: 210px;
 }
 
-.tnxel-tag-select .tnxel-tag-group .el-tag {
+.tnxel-tag-group .el-tag {
     margin-top: 5px;
     margin-bottom: 5px;
     cursor: pointer;
 }
 
-.tnxel-tag-select .tnxel-tag-group .el-tag:not(:last-child) {
+.tnxel-tag-group .el-tag:not(:last-child) {
     margin-right: 10px;
 }
 

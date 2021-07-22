@@ -10,7 +10,7 @@
         value-name="key" text-name="caption" index-name="searchIndex"
         :default-value="defaultValue" :empty="empty" :empty-value="emptyValue"
         :placeholder="placeholder" :disabled="disabled" :filterable="filterable"
-        :theme="theme" :size="size" :change="change" v-else/>
+        :theme="theme" :size="size" :tag-click="tagClick" :change="change" v-else/>
 </template>
 
 <script>
@@ -43,6 +43,7 @@ export default {
         },
         placeholder: String,
         disabled: Boolean,
+        tagClick: Function,
         change: Function,
         grouped: {
             type: Boolean,

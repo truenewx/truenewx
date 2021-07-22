@@ -98,6 +98,7 @@ export default {
         },
         placeholder: String,
         disabled: Boolean,
+        tagClick: Function, // 点击一个标签选项时调用，如果返回false，则选项不会被选中
         change: Function, // 选中值变化后的事件处理函数，由于比element的change事件传递更多参数，所以以prop的形式指定，以尽量节省性能
         filterable: Boolean,
         theme: String,
@@ -121,9 +122,6 @@ export default {
             let item = this.getItem(this.model);
             return item ? item[this.textName] : undefined;
         },
-        multi() {
-            return this.selector === 'checkbox' || this.selector === 'tags';
-        }
     },
     watch: {
         model(value) {
@@ -138,10 +136,13 @@ export default {
         },
     },
     methods: {
+        isMulti() {
+            return this.selector === 'checkbox' || this.selector === 'tags';
+        },
         triggerChange(value) {
             if (this.change) {
                 let item = undefined;
-                if (this.multi) {
+                if (this.isMulti()) {
                     item = [];
                     if (Array.isArray(value)) {
                         for (let v of value) {
@@ -166,7 +167,7 @@ export default {
         },
         getModel(items) {
             let model = this.value || this.defaultValue;
-            if (this.multi) { // 多选时需确保值为数组
+            if (this.isMulti()) { // 多选时需确保值为数组
                 if (model) {
                     if (!Array.isArray(model)) {
                         model = [model];
@@ -221,7 +222,15 @@ export default {
             }
         },
         select(value) {
-            if (this.multi) {
+            if (this.tagClick) {
+                let item = this.getItem(value);
+                if (item) {
+                    if (this.tagClick(item) === false) {
+                        return;
+                    }
+                }
+            }
+            if (this.isMulti()) {
                 let index = this.model.indexOf(value);
                 if (index >= 0) {
                     this.model.splice(index, 1);

@@ -76,7 +76,7 @@ export default {
     },
     methods: {
         filter(keyword, item) {
-            return item.label.contains(keyword) || (item.index && item.index.contains(keyword));
+            return (item.label && item.label.contains(keyword)) || (item.index && item.index.contains(keyword));
         }
     }
 }
