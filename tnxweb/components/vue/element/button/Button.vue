@@ -1,17 +1,12 @@
 <template>
-    <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" v-if="tooltipContent && !disabled">
-        <el-button :type="type" :icon="icon" @click="toClick" :size="size"
-            :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle">
+    <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" :disabled="disabled || !tooltipContent">
+        <el-button :type="type" :icon="icon" :disabled="disabled" :title="title" @click="toClick" :size="size"
+            :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle"
+            v-if="!disabled || disabledTip !== false">
             <slot v-if="$slots.default"></slot>
             <template v-else-if="item">{{ item.caption }}</template>
         </el-button>
     </el-tooltip>
-    <el-button :type="type" :icon="icon" @click="toClick" :disabled="disabled" :title="title" :size="size"
-        :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle"
-        v-else-if="!disabled || disabledTip !== false">
-        <slot v-if="$slots.default"></slot>
-        <template v-else-if="item">{{ item.caption }}</template>
-    </el-button>
 </template>
 
 <script>
