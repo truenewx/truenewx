@@ -168,7 +168,7 @@ export default {
         getModel(items) {
             let model = this.value || this.defaultValue;
             if (this.isMulti()) { // 多选时需确保值为数组
-                if (model) {
+                if (model !== undefined && model !== null) {
                     if (!Array.isArray(model)) {
                         model = [model];
                     }

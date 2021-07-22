@@ -6,7 +6,7 @@
             subtype:subtype,
             grouped: true,
         }" v-if="grouped"/>
-    <tnxel-select v-model="model" :id="id" :selector="selector" :items="items"
+    <tnxel-select ref="select" v-model="model" :id="id" :selector="selector" :items="items"
         value-name="key" text-name="caption" index-name="searchIndex"
         :default-value="defaultValue" :empty="empty" :empty-value="emptyValue"
         :placeholder="placeholder" :disabled="disabled" :filterable="filterable"
@@ -90,6 +90,9 @@ export default {
     },
     methods: {
         initModel() {
+            if (this.$refs.select.isMulti()) {
+                return;
+            }
             if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
                 this.model = this.items[0].key;
             }
