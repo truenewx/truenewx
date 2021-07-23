@@ -3,176 +3,176 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">
 
+    <description>Tnxjee标签库</description>
+    <display-name>Tnxjee Tags</display-name>
     <tlib-version>1.2</tlib-version>
     <short-name>tnxjee</short-name>
     <uri>/tnxjee-tags</uri>
-    <display-name>Tnxjee Tags</display-name>
-    <description>Tnxjee标签库</description>
 
     <tag>
+        <description>输出参数或属性值</description>
         <name>out</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.OutTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出参数或属性值</description>
         <attribute>
+            <description>参数或属性名称</description>
             <name>name</name>
             <required>true</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>参数或属性名称</description>
         </attribute>
         <attribute>
+            <description>参数或属性默认值</description>
             <name>value</name>
             <rtexprvalue>true</rtexprvalue>
-            <description>参数或属性默认值</description>
         </attribute>
         <attribute>
+            <description>是否在输出值后从session范围中删除该属性值</description>
             <name>remove</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>是否在输出值后从session范围中删除该属性值</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>输出验证字段错误信息</description>
         <name>errors</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.ErrorsTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出验证字段错误信息</description>
         <attribute>
+            <description>绑定字段名称</description>
             <name>field</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>绑定字段名称</description>
         </attribute>
         <attribute>
+            <description>分隔符显示多个错误消息,默认为br标记</description>
             <name>delimiter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>分隔符显示多个错误消息,默认为br标记</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>判断字段是否有错误信息</description>
         <name>iferror</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.IfErrorTag</tag-class>
         <body-content>JSP</body-content>
-        <description>判断字段是否有错误信息</description>
         <attribute>
+            <description>绑定字段名称</description>
             <name>field</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>绑定字段名称</description>
         </attribute>
         <attribute>
+            <description>是否反转判断，false（默认）-有错误时执行标签体，true-无错误时执行标签体</description>
             <name>inverse</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否反转判断，false（默认）-有错误时执行标签体，true-无错误时执行标签体</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>输出字段是否有错误信息</description>
         <name>haserror</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.HasErrorTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出字段是否有错误信息</description>
         <attribute>
+            <description>绑定字段名称</description>
             <name>field</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>绑定字段名称</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>输出字段是否没有错误信息</description>
         <name>noerror</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.NoErrorTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出字段是否没有错误信息</description>
         <attribute>
+            <description>绑定字段名称</description>
             <name>field</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>绑定字段名称</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>转换值为JSON字符串</description>
         <name>tojson</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.ToJsonTag</tag-class>
         <body-content>empty</body-content>
-        <description>转换值为JSON字符串</description>
         <attribute>
+            <description>值</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>值</description>
         </attribute>
         <attribute>
+            <description>是否转换双引号为单引号</description>
             <name>toSingleQuote</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>是否转换双引号为单引号</description>
         </attribute>
         <attribute>
+            <description>默认值，会被value和extend覆盖</description>
             <name>default</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>默认值，会被value和extend覆盖</description>
         </attribute>
         <attribute>
+            <description>扩展值，可覆盖default和value</description>
             <name>extend</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>扩展值，可覆盖default和value</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>获取当前访问的子域名</description>
         <name>subdomain</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.SubDomainTag</tag-class>
         <body-content>empty</body-content>
-        <description>获取当前访问的子域名</description>
         <attribute>
+            <description>非空时，子域名结果将保存在该属性指定的变量中</description>
             <name>id</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>非空时，子域名结果将保存在该属性指定的变量中</description>
         </attribute>
         <attribute>
+            <description>是否输出子域名，默认为true</description>
             <name>print</name>
             <rtexprvalue>false</rtexprvalue>
             <type>boolean</type>
-            <description>是否输出子域名，默认为true</description>
         </attribute>
         <attribute>
+            <description>顶级域名占位符。用于从占位符文件中获取实际顶级域名的关键字</description>
             <name>topDomainPlaceholder</name>
             <required>true</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>顶级域名占位符。用于从占位符文件中获取实际顶级域名的关键字</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>单选框</description>
         <name>radio</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.RadioTag</tag-class>
         <body-content>empty</body-content>
-        <description>单选框</description>
         <attribute>
+            <description>选项集</description>
             <name>items</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项集</description>
         </attribute>
         <attribute>
+            <description>选项值属性</description>
             <name>itemValueProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项值属性</description>
         </attribute>
         <attribute>
+            <description>选项文本属性</description>
             <name>itemTextProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项文本属性</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -185,16 +185,16 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>值</description>
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>值</description>
         </attribute>
         <attribute>
+            <description>选项分隔符</description>
             <name>separator</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项分隔符</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -209,19 +209,19 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>是否有空选项</description>
             <name>emptyItem</name>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否有空选项</description>
         </attribute>
         <attribute>
+            <description>自定义空选项取值，当emptyItem为true时有效</description>
             <name>emptyItemValue</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项取值，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
+            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
             <name>emptyItemText</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
             <name>tabIndex</name>
@@ -285,27 +285,27 @@
         </attribute>
     </tag>
     <tag>
+        <description>复选框</description>
         <name>checkbox</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.CheckBoxTag</tag-class>
         <body-content>empty</body-content>
-        <description>复选框</description>
         <attribute>
+            <description>选项集</description>
             <name>items</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项集</description>
         </attribute>
         <attribute>
+            <description>选项值属性</description>
             <name>itemValueProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项值属性</description>
         </attribute>
         <attribute>
+            <description>选项文本属性</description>
             <name>itemTextProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项文本属性</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -318,16 +318,16 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>当前值，可以是字符串数组用于选中多个选项</description>
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>当前值，可以是字符串数组用于选中多个选项</description>
         </attribute>
         <attribute>
+            <description>选项分隔符</description>
             <name>separator</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项分隔符</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -403,27 +403,27 @@
         </attribute>
     </tag>
     <tag>
+        <description>下拉框</description>
         <name>select</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.SelectTag</tag-class>
         <body-content>empty</body-content>
-        <description>下拉框</description>
         <attribute>
+            <description>选项集</description>
             <name>items</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项集</description>
         </attribute>
         <attribute>
+            <description>选项值属性</description>
             <name>itemValueProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项值属性</description>
         </attribute>
         <attribute>
+            <description>选项文本属性</description>
             <name>itemTextProperty</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项文本属性</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -436,10 +436,10 @@
             <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
+            <description>值</description>
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>值</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -454,19 +454,19 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>是否有空选项</description>
             <name>emptyItem</name>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否有空选项</description>
         </attribute>
         <attribute>
+            <description>自定义空选项取值，当emptyItem为true时有效</description>
             <name>emptyItemValue</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项取值，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
+            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
             <name>emptyItemText</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
             <name>tabIndex</name>
@@ -535,51 +535,51 @@
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
     <tag>
+        <description>枚举值转换为文本显示标签</description>
         <name>enumtext</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.enums.tag.EnumTextTag</tag-class>
         <body-content>empty</body-content>
-        <description>枚举值转换为文本显示标签</description>
         <attribute>
+            <description>枚举类型</description>
             <name>type</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举类型</description>
         </attribute>
         <attribute>
+            <description>枚举子类型</description>
             <name>subtype</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举子类型</description>
         </attribute>
         <attribute>
+            <description>枚举值</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举值</description>
         </attribute>
     </tag>
     <tag>
+        <description>基于枚举的单选框</description>
         <name>enumradio</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.enums.tag.EnumRadioTag</tag-class>
         <body-content>empty</body-content>
-        <description>基于枚举的单选框</description>
         <attribute>
+            <description>枚举类型</description>
             <name>type</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举类型</description>
         </attribute>
         <attribute>
+            <description>枚举子类型</description>
             <name>subtype</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举子类型</description>
         </attribute>
         <attribute>
+            <description>无用，待废弃</description>
             <name>id</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>无用，待废弃</description>
         </attribute>
         <attribute>
             <name>name</name>
@@ -587,16 +587,16 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>枚举值</description>
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举值</description>
         </attribute>
         <attribute>
+            <description>选项分隔符</description>
             <name>separator</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项分隔符</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -611,19 +611,19 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>是否有空选项</description>
             <name>emptyItem</name>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否有空选项</description>
         </attribute>
         <attribute>
+            <description>自定义空选项取值，当emptyItem为true时有效</description>
             <name>emptyItemValue</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项取值，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
+            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
             <name>emptyItemText</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
             <name>tabIndex</name>
@@ -687,21 +687,21 @@
         </attribute>
     </tag>
     <tag>
+        <description>基于枚举的复选框</description>
         <name>enumcheckbox</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.enums.tag.EnumCheckBoxTag</tag-class>
         <body-content>empty</body-content>
-        <description>基于枚举的复选框</description>
         <attribute>
+            <description>枚举类型</description>
             <name>type</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举类型</description>
         </attribute>
         <attribute>
+            <description>枚举子类型</description>
             <name>subtype</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举子类型</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -714,16 +714,16 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>枚举值数组</description>
             <name>values</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举值数组</description>
         </attribute>
         <attribute>
+            <description>选项分隔符</description>
             <name>separator</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项分隔符</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -799,21 +799,21 @@
         </attribute>
     </tag>
     <tag>
+        <description>基于枚举的下拉框</description>
         <name>enumselect</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.enums.tag.EnumSelectTag</tag-class>
         <body-content>empty</body-content>
-        <description>基于枚举的下拉框</description>
         <attribute>
+            <description>枚举类型</description>
             <name>type</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举类型</description>
         </attribute>
         <attribute>
+            <description>枚举子类型</description>
             <name>subtype</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举子类型</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -826,10 +826,10 @@
             <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
+            <description>枚举值</description>
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举值</description>
         </attribute>
         <attribute>
             <name>className</name>
@@ -844,19 +844,19 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>是否有空选项</description>
             <name>emptyItem</name>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否有空选项</description>
         </attribute>
         <attribute>
+            <description>自定义空选项取值，当emptyItem为true时有效</description>
             <name>emptyItemValue</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项取值，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
+            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
             <name>emptyItemText</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>自定义空选项显示文本，当emptyItem为true时有效</description>
         </attribute>
         <attribute>
             <name>tabIndex</name>
@@ -924,214 +924,214 @@
         </attribute>
     </tag>
     <tag>
+        <description>枚举遍历</description>
         <name>enumForEach</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.enums.tag.EnumForEachTag</tag-class>
         <body-content>JSP</body-content>
-        <description>枚举遍历</description>
         <attribute>
+            <description>枚举类型</description>
             <name>type</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举类型</description>
         </attribute>
         <attribute>
+            <description>枚举子类型</description>
             <name>subtype</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>枚举子类型</description>
         </attribute>
         <attribute>
+            <description>遍历时的当前对象变量名</description>
             <name>var</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>遍历时的当前对象变量名</description>
         </attribute>
         <attribute>
+            <description>遍历时的当前状态变量名</description>
             <name>varStatus</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>遍历时的当前状态变量名</description>
         </attribute>
     </tag>
     <tag>
+        <description>转调自定义组件</description>
         <name>include</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.IncludeTag</tag-class>
         <body-content>empty</body-content>
-        <description>转调自定义组件</description>
         <attribute>
+            <description>转调链接</description>
             <name>url</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>转调链接</description>
         </attribute>
         <attribute>
+            <description>是否缓存</description>
             <name>cached</name>
             <required>false</required>
-            <rtexprvalue>fales</rtexprvalue>
-            <description>是否缓存</description>
+            <rtexprvalue>false</rtexprvalue>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
     <tag>
+        <description>处理超长文本组件</description>
         <name>omit</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.OmitTag</tag-class>
         <body-content>empty</body-content>
-        <description>处理超长文本组件</description>
         <attribute>
+            <description>长度</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>长度</description>
         </attribute>
         <attribute>
+            <description>最大长度</description>
             <name>size</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>最大长度</description>
             <type>int</type>
         </attribute>
     </tag>
     <tag>
+        <description>通过FreeMarker加载内容，动态属性作为参数传递</description>
         <name>ftl</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.FtlTag</tag-class>
         <body-content>empty</body-content>
-        <description>通过FreeMarker加载内容，动态属性作为参数传递</description>
         <attribute>
+            <description>ftl文件在i18n规则下的基本路径，不包含扩展名.ftl</description>
             <name>basePath</name>
             <required>true</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>ftl文件在i18n规则下的基本路径，不包含扩展名.ftl</description>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
     <tag>
+        <description>调用对象的带参数的方法，可通过动态参数设置多个参数，如：arg1=***, arg2=***</description>
         <name>invoke</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.InvokeTag</tag-class>
         <body-content>empty</body-content>
-        <description>调用对象的带参数的方法，可通过动态参数设置多个参数，如：arg1=***, arg2=***</description>
         <attribute>
+            <description>被调用方法的对象</description>
             <name>object</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>被调用方法的对象</description>
         </attribute>
         <attribute>
+            <description>调用的方法名称</description>
             <name>method</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>调用的方法名称</description>
         </attribute>
         <attribute>
+            <description>调用方法的参数值</description>
             <name>arg</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>调用方法的参数值</description>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
 
     <tag>
+        <description>输出分页控件信息</description>
         <name>pager</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.pager.PagerTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出分页控件信息</description>
         <attribute>
+            <description>对齐方式(left|center|right),默认为left</description>
             <name>align</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>对齐方式(left|center|right),默认为left</description>
         </attribute>
         <attribute>
+            <description>是否显示页码输入框,默认为false</description>
             <name>pageNoInputtable</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>是否显示页码输入框,默认为false</description>
         </attribute>
         <attribute>
+            <description>每页显示数选项集，如：10,20,50</description>
             <name>pageSizeOptions</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>每页显示数选项集，如：10,20,50</description>
         </attribute>
         <attribute>
+            <description>显示数字按钮个数,默认为5个（前后各5个）</description>
             <name>pageNoSpan</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>显示数字按钮个数,默认为5个（前后各5个）</description>
         </attribute>
         <attribute>
+            <description>跳转按钮上的文本,默认为false</description>
             <name>goText</name>
             <rtexprvalue>false</rtexprvalue>
-            <description>跳转按钮上的文本,默认为false</description>
         </attribute>
         <attribute>
+            <description>跳转连接模板,以href方式跳转页面</description>
             <name>tempHref</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>跳转连接模板,以href方式跳转页面</description>
         </attribute>
         <attribute>
+            <description>分页信息</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>分页信息</description>
         </attribute>
         <attribute>
+            <description>附加样式</description>
             <name>className</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>附加样式</description>
         </attribute>
         <attribute>
+            <description>是否显示总记录条数</description>
             <name>showCount</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>是否显示总记录条数</description>
         </attribute>
         <attribute>
+            <description>页面跳转的方法名，在不采用默认方式跳转时指定</description>
             <name>toPage</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>页面跳转的方法名，在不采用默认方式跳转时指定</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>显示指定行政区划代号的各级名称</description>
         <name>regions</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.RegionsTag</tag-class>
         <body-content>empty</body-content>
-        <description>显示指定行政区划代号的各级名称</description>
         <attribute>
+            <description>指定行政区划代号</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>指定行政区划代号</description>
         </attribute>
         <attribute>
+            <description>选项分隔符</description>
             <name>delimiter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>选项分隔符</description>
         </attribute>
         <attribute>
+            <description>起始层级</description>
             <name>startLevel</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>起始层级</description>
         </attribute>
         <attribute>
+            <description>结束层级</description>
             <name>endLevel</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>结束层级</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>显示指定字符串的二维码</description>
         <name>qrcode</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.QrCodeTag</tag-class>
         <body-content>empty</body-content>
-        <description>显示指定字符串的二维码</description>
         <attribute>
             <name>id</name>
             <required>false</required>
@@ -1155,22 +1155,22 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>指定字符串</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>指定字符串</description>
         </attribute>
         <attribute>
+            <description>访问前缀</description>
             <name>context</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>访问前缀</description>
         </attribute>
         <attribute>
+            <description>二维码大小</description>
             <name>size</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>二维码大小</description>
         </attribute>
         <attribute>
             <name>logo</name>
@@ -1179,96 +1179,96 @@
     </tag>
 
     <tag>
+        <description>输出前一个请求的URL</description>
         <name>prevurl</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.PrevUrlTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出前一个请求的URL</description>
         <attribute>
+            <description>默认值</description>
             <name>default</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>默认值</description>
         </attribute>
         <attribute>
+            <description>是否包含站点上下文根路径，默认为true</description>
             <name>context</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否包含站点上下文根路径，默认为true</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>输出指定内容的HTML格式内容</description>
         <name>tohtml</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.ToHtmlTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出指定内容的HTML格式内容</description>
         <attribute>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
+            <description>是否不能为null，true-至少输出一个html空格</description>
             <name>notNull</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>是否不能为null，true-至少输出一个html空格</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>输出国际化消息</description>
         <name>message</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.MessageTag</tag-class>
         <body-content>empty</body-content>
-        <description>输出国际化消息</description>
         <attribute>
+            <description>消息代码</description>
             <name>code</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>消息代码</description>
         </attribute>
         <attribute>
+            <description>消息参数，多个参数之间用英文逗号,分隔</description>
             <name>args</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>消息参数，多个参数之间用英文逗号,分隔</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>掩盖部分字符串</description>
         <name>cover</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.CoverTag</tag-class>
         <body-content>empty</body-content>
-        <description>掩盖部分字符串</description>
         <attribute>
+            <description>待掩盖的字符串值</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>待掩盖的字符串值</description>
         </attribute>
         <attribute>
+            <description>用于掩盖的字符</description>
             <name>coverChar</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>用于掩盖的字符</description>
         </attribute>
     </tag>
 
     <tag>
+        <description>格式化输出</description>
         <name>format</name>
         <tag-class>org.truenewx.tnxjee.webmvc.view.tag.FormatTag</tag-class>
         <body-content>empty</body-content>
-        <description>格式化输出</description>
         <attribute>
+            <description>需要格式化的值</description>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>需要格式化的值</description>
         </attribute>
         <attribute>
+            <description>格式</description>
             <name>pattern</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>格式</description>
         </attribute>
     </tag>
     <!--
