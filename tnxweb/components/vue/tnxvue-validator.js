@@ -105,6 +105,21 @@ function getRule(validationName, validationValue, fieldMeta) {
                 }
             };
             break;
+        case 'number':
+            if (validationValue === true) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (typeof fieldValue === 'string') {
+                            if (!/^[0-9]+$/.test(fieldValue)) {
+                                const message = validator.getErrorMessage(validationName, fieldCaption);
+                                return callback(new Error(message));
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
         case 'notContainsHtmlChars':
             if (validationValue === true) {
                 rule = {
@@ -223,4 +238,9 @@ export function getRules(meta) {
     return rules;
 }
 
-export default {validateRegExp, getRule, getRules}
+export default {
+    validateRegExp,
+    getRule,
+    getRules,
+    getErrorMessage: validator.getErrorMessage
+}
