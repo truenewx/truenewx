@@ -91,7 +91,13 @@ export default {
         }
     },
     mounted() {
-        this.topOffset = $('#' + this.id).offset().top - $(this.container).offset().top - 16;
+        let vm = this;
+        this.$nextTick(function() {
+            let container = $(vm.container);
+            if (container.length) {
+                vm.topOffset = $('#' + vm.id).offset().top - container.offset().top - 16;
+            }
+        });
     },
     methods: {
         disable(disabled) {
