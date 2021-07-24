@@ -109,7 +109,7 @@ function getRule(validationName, validationValue, fieldMeta) {
             if (validationValue === true) {
                 rule = {
                     validator(r, fieldValue, callback, source, options) {
-                        if (typeof fieldValue === 'string') {
+                        if (fieldValue && typeof fieldValue === 'string') {
                             if (!/^[0-9]+$/.test(fieldValue)) {
                                 const message = validator.getErrorMessage(validationName, fieldCaption);
                                 return callback(new Error(message));
