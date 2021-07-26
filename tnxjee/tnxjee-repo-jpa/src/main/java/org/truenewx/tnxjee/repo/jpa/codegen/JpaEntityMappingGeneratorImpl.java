@@ -7,6 +7,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -237,7 +239,7 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
             if (fieldType == String.class) { // 字段类型为字符串，则需获取其长度
                 column.setLength(rs.getInt("COLUMN_SIZE"));
             }
-            column.setDefinition(getColumnDefinition(rs.getInt("DATA_TYPE")));
+            column.setDefinition(getColumnDefinition(fieldType, rs.getInt("DATA_TYPE")));
             if (fieldType == BigDecimal.class || fieldType == double.class || fieldType == float.class) { // 小数需获取精度
                 column.setPrecision(rs.getInt("COLUMN_SIZE"));
                 column.setScale(rs.getInt("DECIMAL_DIGITS"));
@@ -258,13 +260,16 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
         }
     }
 
-    private String getColumnDefinition(int dataType) {
+    private String getColumnDefinition(Class<?> fieldType, int dataType) {
         switch (dataType) {
             case Types.CHAR:
                 return "char";
             case Types.DATE:
                 return "date";
             case Types.TIME:
+                if (fieldType == Instant.class || fieldType == LocalDateTime.class) {
+                    return null;
+                }
                 return "time";
             default:
                 return null;
