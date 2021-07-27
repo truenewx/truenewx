@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.service.spec.fsm;
+package org.truenewx.tnxjee.service.impl.spec.fsm;
 
 import java.io.Serializable;
 import java.util.*;
@@ -8,6 +8,10 @@ import org.springframework.util.Assert;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.NoAccessAuthority;
+import org.truenewx.tnxjee.service.impl.ServiceSupport;
+import org.truenewx.tnxjee.service.spec.fsm.StateIntransitableException;
+import org.truenewx.tnxjee.service.spec.fsm.StateMachine;
+import org.truenewx.tnxjee.service.spec.fsm.StateTransitAction;
 import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
 
 /**
@@ -21,7 +25,7 @@ import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
  * @author jianglei
  */
 public abstract class AbstractStateMachine<U extends Unity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity<?>>
-        implements StateMachine<U, K, S, T, I> {
+        extends ServiceSupport implements StateMachine<U, K, S, T, I> {
     /**
      * 起始状态
      */

@@ -1,10 +1,11 @@
-package org.truenewx.tnxjee.service.spec.fsm;
+package org.truenewx.tnxjee.service.impl.spec.fsm;
 
 import java.io.Serializable;
 
 import org.springframework.context.event.EventListener;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
+import org.truenewx.tnxjee.service.spec.fsm.StateTransitEvent;
 
 /**
  * 事件驱动的有限状态机
