@@ -45,7 +45,7 @@ public class ApiModelMetaResolverImpl implements ApiModelMetaResolver, ContextIn
     private static final Class<?>[] DECIMAL_CLASSES = { double.class, float.class, Double.class, Float.class,
             BigDecimal.class };
 
-    @Autowired(required = false) // 如果工程未依赖tnxjee-repo-jpa，则可能没有该bean
+    @Autowired(required = false) // 如果工程未依赖tnxjee-repo，则可能没有该bean
     private ValidationConfigurationFactory validationConfigurationFactory;
     @Autowired
     private EnumDictResolver enumDictResolver;

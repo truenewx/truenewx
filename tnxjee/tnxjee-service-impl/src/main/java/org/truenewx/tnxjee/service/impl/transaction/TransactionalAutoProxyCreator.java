@@ -57,7 +57,7 @@ public class TransactionalAutoProxyCreator
         this.beanFactory = beanFactory;
     }
 
-    @Autowired
+    @Autowired(required = false) // 如果应用具有Service层但没有Repo层，则没有该实例
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
@@ -101,11 +101,13 @@ public class TransactionalAutoProxyCreator
     }
 
     protected Object wrapIfNecessary(Object bean, String beanName) {
-        if (isProxiable(bean, beanName)) {
-            return createProxy(bean, beanName);
-        }
-        if (AopUtils.isAopProxy(bean)) {
-            this.proxies.put(beanName, bean);
+        if (this.transactionManager != null) {
+            if (isProxiable(bean, beanName)) {
+                return createProxy(bean, beanName);
+            }
+            if (AopUtils.isAopProxy(bean)) {
+                this.proxies.put(beanName, bean);
+            }
         }
         return bean;
     }

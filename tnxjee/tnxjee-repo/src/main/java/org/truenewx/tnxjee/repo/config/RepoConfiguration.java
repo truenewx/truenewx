@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.repo.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,8 @@ import org.springframework.context.annotation.Role;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.message.PropertiesMessageSource;
+import org.truenewx.tnxjee.model.validation.config.ValidationConfigurationFactory;
+import org.truenewx.tnxjee.repo.validation.config.DefaultValidationConfigurationFactory;
 
 /**
  * 数据层配置
@@ -37,6 +40,12 @@ public class RepoConfiguration {
         LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
         factoryBean.setValidationMessageSource(messageSource);
         return factoryBean;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ValidationConfigurationFactory.class)
+    public ValidationConfigurationFactory validationConfigurationFactory() {
+        return new DefaultValidationConfigurationFactory();
     }
 
 }
