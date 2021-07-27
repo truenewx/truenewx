@@ -3,7 +3,9 @@ package org.truenewx.tnxjee.model.spec.user.security;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
+import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -105,5 +107,12 @@ public class SimpleUserSpecificDetails<I extends UserIdentity<?>> implements Use
         this.credentialsNonExpired = credentialsNonExpired;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public UserSpecificDetails<I> clone() {
+        SimpleUserSpecificDetails<I> details = ClassUtil.newInstance(getClass());
+        BeanUtils.copyProperties(this, details);
+        return details;
+    }
 
 }

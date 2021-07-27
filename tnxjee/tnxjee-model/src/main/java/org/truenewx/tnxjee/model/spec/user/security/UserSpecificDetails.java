@@ -14,4 +14,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface UserSpecificDetails<I extends UserIdentity<?>> extends UserSpecific<I>, UserDetails {
 
+    UserSpecificDetails<I> clone();
+
 }

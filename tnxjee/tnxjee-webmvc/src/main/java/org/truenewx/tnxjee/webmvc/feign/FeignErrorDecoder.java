@@ -18,12 +18,12 @@ import feign.Response;
 import feign.codec.ErrorDecoder;
 
 /**
- * 异常错误解码器
+ * Feign错误解码器
  *
  * @author jianglei
  */
 @Component
-public class ExceptionErrorDecoder extends ErrorDecoder.Default {
+public class FeignErrorDecoder extends ErrorDecoder.Default {
 
     @Override
     public Exception decode(String methodKey, Response response) {

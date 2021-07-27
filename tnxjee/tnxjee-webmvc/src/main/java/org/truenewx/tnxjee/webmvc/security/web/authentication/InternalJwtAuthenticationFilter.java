@@ -51,24 +51,20 @@ public class InternalJwtAuthenticationFilter extends GenericFilterBean {
         if (this.verifier != null) {
             SecurityContext securityContext = SecurityContextHolder.getContext();
             if (securityContext != null) {
-                Authentication authentication = securityContext.getAuthentication();
-                if (authentication == null) {
-                    HttpServletRequest request = (HttpServletRequest) req;
-                    String token = RpcUtil.getInternalJwt(request);
-                    if (token != null) {
-                        try {
-                            DecodedJWT jwt = this.verifier.verify(token);
-                            String audienceJson = CollectionUtil.getFirst(jwt.getAudience(), null);
-                            if (StringUtils.isNotBlank(audienceJson)) {
-                                UserSpecificDetails<?> details = (UserSpecificDetails<?>) JacksonUtil.CLASSED_MAPPER
-                                        .readValue(audienceJson, UserSpecificDetails.class);
-                                Authentication authResult = new UserSpecificDetailsAuthenticationToken(details);
-                                securityContext.setAuthentication(authResult);
-                                clearAuthentication = true; // 设置的一次性授权，需要在后续处理完之后清除
-                            }
-                        } catch (Exception e) { // 出现任何错误均只打印日志，视为没有授权
-                            LogUtil.error(getClass(), e);
+                String token = RpcUtil.getInternalJwt((HttpServletRequest) req);
+                if (token != null) {
+                    try {
+                        DecodedJWT jwt = this.verifier.verify(token);
+                        String audienceJson = CollectionUtil.getFirst(jwt.getAudience(), null);
+                        if (StringUtils.isNotBlank(audienceJson)) {
+                            UserSpecificDetails<?> details = (UserSpecificDetails<?>) JacksonUtil.CLASSED_MAPPER
+                                    .readValue(audienceJson, UserSpecificDetails.class);
+                            Authentication authResult = new UserSpecificDetailsAuthenticationToken(details);
+                            securityContext.setAuthentication(authResult);
+                            clearAuthentication = true; // 设置的一次性授权，需要在后续处理完之后清除
                         }
+                    } catch (Exception e) { // 出现任何错误均只打印日志，视为没有授权
+                        LogUtil.error(getClass(), e);
                     }
                 }
             }

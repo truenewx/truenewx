@@ -25,12 +25,12 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
 /**
- * 请求头信息传递拦截器
+ * Feign请求拦截器
  *
  * @author jianglei
  */
 @Component
-public class RequestHeaderDeliverInterceptor implements RequestInterceptor {
+public class FeignRequestInterceptor implements RequestInterceptor {
 
     @Autowired(required = false)
     private InternalJwtConfiguration internalJwtConfiguration;
@@ -87,6 +87,8 @@ public class RequestHeaderDeliverInterceptor implements RequestInterceptor {
                         if (userDetails == null) {
                             userDetails = buildGrantUserSpecificDetails(grantAuthority);
                         } else {
+                            // 不能将临时权限追加到会话级用户特性细节中，只能追加到用户特性细节克隆体中
+                            userDetails = userDetails.clone();
                             addGrantedAuthorities(userDetails, grantAuthority);
                         }
                         break;
