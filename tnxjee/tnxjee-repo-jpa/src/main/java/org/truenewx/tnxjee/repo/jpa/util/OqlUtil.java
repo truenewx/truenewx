@@ -123,7 +123,7 @@ public class OqlUtil {
      */
     public static String buildOrConditionString(Map<String, Object> params, String fieldName, Object[] fieldParamValues,
             Comparison comparison) {
-        return buildOrConditionString(params, fieldName, Arrays.asList(fieldParamValues), comparison);
+        return buildOrConditionString(params, fieldName, ArrayUtil.toList(fieldParamValues), comparison);
     }
 
     public static String buildOrConditionString(Map<String, Object> params, String fieldName, int[] fieldParamValues,
