@@ -79,7 +79,6 @@ export default {
             const roleId = this.$route.params.id;
             const model = Object.assign({}, this.model, {
                 permissions: this.$refs.permissionTree.getPermissions(),
-                managerIds: this.$refs.manager.getSelectedKeys(),
             });
             const vm = this;
             app.rpc.post('/role/' + roleId + '/update', model, function() {

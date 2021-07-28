@@ -87,7 +87,6 @@ export default {
                 if (yes) {
                     const model = Object.assign({}, vm.model, {
                         password: vm.md5Password,
-                        roleIds: vm.$refs.role.getSelectedKeys(),
                     });
                     app.rpc.post(vm.url, model, function() {
                         vm.$refs.form.disable();
