@@ -17,7 +17,7 @@ import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.core.util.function.ProfileSupplier;
 import org.truenewx.tnxjee.model.spec.user.security.UserConfigAuthority;
-import org.truenewx.tnxjee.webmvc.security.access.GrantedAuthorityDecider;
+import org.truenewx.tnxjee.service.security.access.GrantedAuthorityDecider;
 import org.truenewx.tnxjee.webmvc.security.web.access.ConfigAuthorityResolver;
 import org.truenewx.tnxjee.webmvc.view.menu.config.MenuProperties;
 import org.truenewx.tnxjee.webmvc.view.menu.model.Menu;

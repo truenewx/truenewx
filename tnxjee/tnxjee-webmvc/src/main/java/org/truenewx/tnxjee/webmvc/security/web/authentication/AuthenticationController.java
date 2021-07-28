@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.truenewx.tnxjee.core.config.AppConstants;
-import org.truenewx.tnxjee.webmvc.security.access.GrantedAuthorityDecider;
+import org.truenewx.tnxjee.service.security.access.GrantedAuthorityDecider;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;

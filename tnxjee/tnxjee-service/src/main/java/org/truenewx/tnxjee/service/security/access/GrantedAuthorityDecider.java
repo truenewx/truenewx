@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.webmvc.security.access;
+package org.truenewx.tnxjee.service.security.access;
 
 import java.util.Collection;
 
@@ -19,7 +19,7 @@ public interface GrantedAuthorityDecider {
      * @param permission  许可
      * @return 是否为已获权
      */
-    boolean isGranted(Collection<? extends GrantedAuthority> authorities, String type, String rank,
-            String app, String permission);
+    boolean isGranted(Collection<? extends GrantedAuthority> authorities, String type, String rank, String app,
+            String permission);
 
 }

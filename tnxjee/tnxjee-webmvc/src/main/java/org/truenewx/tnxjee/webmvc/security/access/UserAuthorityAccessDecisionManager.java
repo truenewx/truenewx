@@ -17,6 +17,7 @@ import org.truenewx.tnxjee.model.spec.user.security.UserConfigAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.exception.NoAccessAuthority;
+import org.truenewx.tnxjee.service.security.access.GrantedAuthorityDecider;
 import org.truenewx.tnxjee.web.util.WebUtil;
 
 /**
@@ -84,6 +85,7 @@ public class UserAuthorityAccessDecisionManager extends UnanimousBased implement
                 UserGrantedAuthority userAuthority = (UserGrantedAuthority) authority;
                 if (userAuthority.matches(type, rank, app, permission)) {
                     return true;
+
                 }
             }
         }
