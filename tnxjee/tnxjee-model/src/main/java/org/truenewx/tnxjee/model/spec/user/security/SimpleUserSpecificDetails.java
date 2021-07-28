@@ -97,7 +97,6 @@ public class SimpleUserSpecificDetails<I extends UserIdentity<?>> implements Use
         this.accountNonExpired = accountNonExpired;
     }
 
-
     @Override
     public boolean isCredentialsNonExpired() {
         return this.credentialsNonExpired;
@@ -109,7 +108,7 @@ public class SimpleUserSpecificDetails<I extends UserIdentity<?>> implements Use
 
     @Override
     @SuppressWarnings("unchecked")
-    public UserSpecificDetails<I> clone() {
+    public SimpleUserSpecificDetails<I> clone() {
         SimpleUserSpecificDetails<I> details = ClassUtil.newInstance(getClass());
         BeanUtils.copyProperties(this, details);
         return details;
