@@ -268,6 +268,9 @@ export default {
         }
         return message.trim();
     },
+    isLogined(callback, options) {
+        this.get('/authentication/authorized', callback, options);
+    },
     _ensureAuthorizedUrl: '/authentication/validate',
     /**
      * 确保已登录
@@ -283,7 +286,7 @@ export default {
      * @param callback 校验通过时的回调
      * @param options 请求选项集
      */
-    ensureAuthorized(authority, callback, options) {
+    ensureGranted(authority, callback, options) {
         this.get(this._ensureAuthorizedUrl, authority, callback, options);
     },
     _metas: {},

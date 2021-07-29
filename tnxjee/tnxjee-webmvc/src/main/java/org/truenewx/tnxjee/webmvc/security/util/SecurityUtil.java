@@ -84,4 +84,8 @@ public class SecurityUtil {
         }
     }
 
+    public static boolean isAuthorized() {
+        return getAuthorizedUserDetails() != null;
+    }
+
 }
