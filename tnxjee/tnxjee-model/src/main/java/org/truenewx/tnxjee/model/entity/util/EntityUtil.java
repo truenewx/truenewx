@@ -139,13 +139,14 @@ public class EntityUtil {
     }
 
     /**
-     * 将指定映射集转换为类JSON格式，与JSON的差别在于以,作为首尾，而不是{}
+     * 将指定对象转换为类JSON格式，与JSON的差别在于以,作为首尾，而不是{}
      *
-     * @param map 映射集
+     * @param bean              对象
+     * @param ignoredProperties 忽略的属性名称集
      * @return 类JSON
      */
-    public static String toJsonLike(Map<String, Object> map) {
-        String json = JsonUtil.toJson(map);
+    public static String toJsonLike(Object bean, String... ignoredProperties) {
+        String json = JsonUtil.toJson(bean, ignoredProperties);
         if (json != null && json.startsWith(Strings.LEFT_BRACE) && json.endsWith(Strings.RIGHT_BRACE)) {
             return Strings.COMMA + json.substring(1, json.length() - 1) + Strings.COMMA;
         }
@@ -163,6 +164,21 @@ public class EntityUtil {
             json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
         }
         return JsonUtil.json2Map(json);
+    }
+
+    /**
+     * 解析类JSON格式字符串为指定类型的对象
+     *
+     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}
+     * @param type 结果对象类型
+     * @param <T>  结果对象类型
+     * @return 结果对象
+     */
+    public static <T> T parseJsonLike(String json, Class<T> type) {
+        if (json != null && json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
+            json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
+        }
+        return JsonUtil.json2Bean(json, type);
     }
 
 }
