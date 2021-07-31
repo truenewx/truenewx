@@ -205,29 +205,36 @@ public class OqlUtil {
      * @param params          查询参数映射集，相关查询参数会写入该映射集中
      * @param fieldName       类JSON格式字段名，该字段的值存储格式类似JSON，但首尾为,而不是{}，这样设计是为了简化条件子句
      * @param fieldParamValue 类JSON格式字段参数值，为包含多个值的映射集
+     * @param fuzzy           是否模糊查询，true-模糊查询，字段参数只要有一个模糊匹配则条件匹配，false-字段参数必须全部精确等于才条件匹配
      * @return 类JSON格式字段的条件子句
      */
     public static String buildJsonLikeConditionString(Map<String, Object> params, String fieldName,
-            Map<String, Object> fieldParamValue) {
+            Map<String, Object> fieldParamValue, boolean fuzzy) {
         StringBuilder condition = new StringBuilder();
         if (fieldParamValue != null && fieldParamValue.size() > 0) {
+            String junction = fuzzy ? QlConstants.JUNCTION_OR : QlConstants.JUNCTION_AND;
             int index = 0;
             for (Map.Entry<String, Object> entry : fieldParamValue.entrySet()) {
                 // 形如： and 字段名 like :字段参数名
-                condition.append(QlConstants.JUNCTION_AND).append(fieldName).append(Comparison.LIKE.toQlString())
+                condition.append(junction).append(fieldName).append(Comparison.LIKE.toQlString())
                         .append(Strings.COLON);
                 String paramName = fieldName + (index++);
                 condition.append(paramName);
 
                 String name = entry.getKey();
                 Object value = entry.getValue();
+                if (fuzzy && value instanceof String) { // 模糊查询，则字符串类型的字段参数值两端加%
+                    value = Strings.PERCENT + value + Strings.PERCENT;
+                }
                 // 形如：%,"字段参数名":字段参数值JSON,%
                 String paramValue = Strings.PERCENT + Strings.COMMA + Strings.DOUBLE_QUOTES + name + Strings.DOUBLE_QUOTES
                         + Strings.COLON + JsonUtil.toJson(value) + Strings.COMMA + Strings.PERCENT;
                 params.put(paramName, paramValue);
             }
-            // 去掉头部的 and
-            condition.delete(0, QlConstants.JUNCTION_AND.length());
+            // 去掉头部的 and/or
+            condition.delete(0, junction.length());
+            // 前后加()以免与其它条件的关系造成混乱
+            condition.insert(0, Strings.LEFT_BRACKET).append(Strings.RIGHT_BRACKET);
         }
         return condition.toString();
     }
