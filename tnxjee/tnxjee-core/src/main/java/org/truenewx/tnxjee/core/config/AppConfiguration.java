@@ -10,11 +10,6 @@ import org.truenewx.tnxjee.core.Strings;
  */
 public class AppConfiguration {
 
-    /**
-     * 用户类型：全部。表示服务不限定用户类型，支持所有可能的用户类型
-     */
-    public static final String USER_TYPE_ALL = Strings.ASTERISK;
-
     private String caption;
     private String gatewayUri;
     private String directUri;

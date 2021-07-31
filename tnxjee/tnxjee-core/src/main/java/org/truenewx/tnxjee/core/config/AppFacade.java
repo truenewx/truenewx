@@ -8,6 +8,7 @@ public class AppFacade {
     private String name;
     private String caption;
     private String contextUri;
+    private String loginedUri;
 
     public String getName() {
         return this.name;
@@ -31,6 +32,14 @@ public class AppFacade {
 
     public void setContextUri(String contextUri) {
         this.contextUri = contextUri;
+    }
+
+    public String getLoginedUri() {
+        return this.loginedUri;
+    }
+
+    public void setLoginedUri(String loginedUri) {
+        this.loginedUri = loginedUri;
     }
 
 }
