@@ -21,6 +21,9 @@ export default {
                 if (typeof this.value === 'function') {
                     return this.value();
                 }
+                if (typeof this.value === 'boolean') {
+                    return this.value.toText();
+                }
                 return this.value;
             }
             return '';
