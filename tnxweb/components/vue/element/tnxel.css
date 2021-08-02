@@ -339,6 +339,7 @@ el-button {
 }
 
 .el-message .el-message__content {
+    text-align: center;
     line-height: 120%;
     max-width: 17.5rem; /* 刚好容纳20个汉字的宽度，以尽可能让一行文本的左右空白宽度一致。rem=14n/16 */
 }
