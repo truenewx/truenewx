@@ -1,7 +1,9 @@
 package org.truenewx.tnxjee.webmvc.security.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -11,6 +13,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
+import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 
 /**
@@ -75,6 +78,20 @@ public class SecurityUtil {
     public static Collection<? extends GrantedAuthority> getGrantedAuthorities() {
         Authentication authentication = getAuthentication();
         return authentication == null ? Collections.emptyList() : authentication.getAuthorities();
+    }
+
+    public static Collection<? extends GrantedAuthority> getGrantedAuthorities(String type, String app) {
+        List<GrantedAuthority> filteredAuthorities = new ArrayList<>();
+        Collection<? extends GrantedAuthority> grantedAuthorities = getGrantedAuthorities();
+        for (GrantedAuthority grantedAuthority : grantedAuthorities) {
+            if (grantedAuthority instanceof UserGrantedAuthority) {
+                UserGrantedAuthority authority = (UserGrantedAuthority) grantedAuthority;
+                if (authority.matches(type, null, app, null)) {
+                    filteredAuthorities.add(authority);
+                }
+            }
+        }
+        return filteredAuthorities;
     }
 
     public static void setGrantedAuthorities(Collection<? extends GrantedAuthority> authorities) {
