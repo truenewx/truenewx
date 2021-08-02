@@ -200,6 +200,19 @@ function getRule(validationName, validationValue, fieldMeta) {
                 }
             }
             break;
+        case 'custom':
+            if (typeof validationValue === 'function') {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        let message = validationValue(fieldValue);
+                        if (message) {
+                            return callback(new Error(message));
+                        }
+                        return callback();
+                    }
+                }
+            }
+            break;
     }
     if (rule) {
         let metaType = 'text';
