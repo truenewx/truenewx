@@ -61,13 +61,13 @@ public class SimpleUserSpecificDetails<I extends UserIdentity<?>> implements Use
         return this.authorities;
     }
 
+    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
     @Override
     public String getPassword() {
         return null;
-    }
-
-    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        this.authorities = authorities;
     }
 
     @Override

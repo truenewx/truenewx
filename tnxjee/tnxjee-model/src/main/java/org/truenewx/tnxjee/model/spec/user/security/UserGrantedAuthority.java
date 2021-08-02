@@ -30,10 +30,27 @@ public class UserGrantedAuthority implements GrantedAuthority {
     public UserGrantedAuthority() {
     }
 
-    public UserGrantedAuthority(String type, String rank, String app) {
+    public UserGrantedAuthority(String type, String rank) {
         setType(type);
         setRank(rank);
+    }
+
+    public UserGrantedAuthority(String type, String rank, String app) {
+        this(type, rank);
         setApp(app);
+    }
+
+    /**
+     * 构建具有指定用户类型和级别所有权限的获权对象
+     *
+     * @param type 用户类型
+     * @param rank
+     * @return 具有指定用户类型和级别所有权限的获权对象
+     */
+    public static UserGrantedAuthority ofAll(String type, String rank) {
+        UserGrantedAuthority authority = new UserGrantedAuthority(type, rank, Strings.ASTERISK);
+        authority.addPermission(Strings.ASTERISK);
+        return authority;
     }
 
     public String getType() {

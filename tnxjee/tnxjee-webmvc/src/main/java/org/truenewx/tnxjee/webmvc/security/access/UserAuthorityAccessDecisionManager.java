@@ -85,7 +85,6 @@ public class UserAuthorityAccessDecisionManager extends UnanimousBased implement
                 UserGrantedAuthority userAuthority = (UserGrantedAuthority) authority;
                 if (userAuthority.matches(type, rank, app, permission)) {
                     return true;
-
                 }
             }
         }

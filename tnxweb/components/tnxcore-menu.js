@@ -2,22 +2,28 @@
  * 菜单组件
  * 菜单配置中的权限配置不是服务端权限判断的依据，仅用于生成具有权限的客户端菜单，以及分配权限时展示可分配的权限范围
  */
-function isGranted(authority, item) {
+function isGranted(authorities, item) {
     prepareItem(item);
+
     if (item.rank || item.permission) {
-        if (item.rank) {
-            if (authority.rank !== item.rank) {
-                return false;
+        for (let authority of authorities) {
+            // 菜单不限定级别视为级别匹配；已获级别权限为全部视为级别匹配；已获级别等于菜单限定级别视为级别匹配
+            let rankMatched = !item.rank || authority.rank === '*' || authority.rank === item.rank;
+            if (rankMatched) {
+                // 级别匹配，还需进一步比较许可
+                if (item.permission) {
+                    // 权限许可集包含全部许可，或菜单项许可，则视为结果匹配
+                    if (authority.permissions && (authority.permissions.contains('*')
+                        || authority.permissions.containsIgnoreCase(item.permission))) {
+                        return true;
+                    }
+                } else { // 级别匹配，且未限定许可，则视为结果匹配
+                    return true;
+                }
             }
+            // 级别不匹配，则检查下一条权限
         }
-        if (item.permission) {
-            if (authority.permissions.contains('*')) {
-                return true;
-            }
-            if (!authority.permissions.containsIgnoreCase(item.permission)) {
-                return false;
-            }
-        }
+        return false;
     } else if (item.subs && item.subs.length) {
         return undefined;
     }
@@ -52,8 +58,8 @@ function getDefaultPermission(path) {
     return permission;
 }
 
-function applyGrantedItemToItems(authority, item, items) {
-    const granted = isGranted(authority, item);
+function applyGrantedItemToItems(authorities, item, items) {
+    const granted = isGranted(authorities, item);
     if (granted === true) { // 授权匹配
         items.push(Object.assign({}, item));
     } else if (granted === false) { // 授权不匹配
@@ -62,7 +68,7 @@ function applyGrantedItemToItems(authority, item, items) {
         if (item.subs && item.subs.length) {
             const subs = [];
             for (let sub of item.subs) {
-                if (isGranted(authority, sub)) {
+                if (isGranted(authorities, sub)) {
                     subs.push(Object.assign({}, sub));
                 }
             }
@@ -147,12 +153,7 @@ const Menu = function Menu(config) {
     this.items = buildLevel(config.items);
     this._url = config.url;
     this._grantedItems = null;
-    this.authority = {
-        type: null,
-        rank: null,
-        app: null,
-        permissions: [],
-    };
+    this.authorities = [];
 }
 
 Menu.prototype.getItemByPath = function(path) {
@@ -253,7 +254,7 @@ Menu.prototype.getBreadcrumbItems = function(path) {
 Menu.prototype.isGranted = function(path) {
     const _this = this;
     return findItem(path, this.items, (item, sub) => {
-        return isGranted(_this.authority, sub || item);
+        return isGranted(_this.authorities, sub || item);
     });
 };
 
@@ -262,17 +263,15 @@ Menu.prototype.loadGrantedItems = function(callback) {
         callback(this._grantedItems);
     } else {
         const _this = this;
-        window.tnx.app.rpc.get(this._url, function(authority) {
-            if (authority && authority.length) {
-                authority = authority[0];
+        window.tnx.app.rpc.get(this._url, function(authorities) {
+            if (!Array.isArray(authorities)) {
+                authorities = [authorities];
             }
-            authority = authority || {};
-            authority.permissions = authority.permissions || [];
-            _this.authority = authority;
+            _this.authorities = authorities;
 
             _this._grantedItems = [];
             _this.items.forEach(item => {
-                applyGrantedItemToItems(_this.authority, item, _this._grantedItems);
+                applyGrantedItemToItems(_this.authorities, item, _this._grantedItems);
             });
             callback(_this._grantedItems);
         });

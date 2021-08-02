@@ -45,13 +45,13 @@ public class UserMenuResolverImpl implements UserMenuResolver {
                 if (StringUtils.isNotBlank(sessionAttributeName)) {
                     menu = SpringWebContext.getFromSession(sessionAttributeName);
                     if (menu == null) {
-                        menu = this.manager.getGrantedMenu(details.getAuthorities());
+                        menu = this.manager.getGrantedMenu(SecurityUtil.getGrantedAuthorities());
                         if (menu != null) {
                             SpringWebContext.setToSession(sessionAttributeName, menu);
                         }
                     }
                 } else {
-                    menu = this.manager.getGrantedMenu(details.getAuthorities());
+                    menu = this.manager.getGrantedMenu(SecurityUtil.getGrantedAuthorities());
                 }
                 return menu;
             }
