@@ -4,6 +4,7 @@ import axios from "axios";
 
 export default {
     loginSuccessRedirectParameter: '_next',
+    logoutProcessUrl: '/logout',
     baseApp: undefined,
     apps: {},
     setBaseUrl(baseUrl) {
@@ -138,17 +139,6 @@ export default {
                 }
                 switch (response.status) {
                     case 401: {
-                        let loginUrl = util.net.getHeader(response.headers, 'Login-Url');
-                        if (loginUrl) {
-                            // 默认登录后跳转回当前页面
-                            if (loginUrl.contains('?')) {
-                                loginUrl += '&';
-                            } else {
-                                loginUrl += '?';
-                            }
-                            const loginSuccessRedirectUrl = encodeURIComponent(window.location.href);
-                            loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
-                        }
                         const originalRequest = util.net.getHeader(response.headers, 'Original-Request');
                         let originalMethod;
                         let originalUrl;
@@ -157,9 +147,22 @@ export default {
                             originalMethod = array[0];
                             originalUrl = array[1];
                         }
-                        // 原始地址是登录验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
-                        if (originalUrl && (originalUrl === _this._ensureAuthorizedUrl || originalUrl.endsWith(
-                            '/logout'))) {
+                        let loginUrl = util.net.getHeader(response.headers, 'Login-Url');
+                        if (loginUrl) {
+                            // 默认登录后跳转回当前页面
+                            if (loginUrl.contains('?')) {
+                                loginUrl += '&';
+                            } else {
+                                loginUrl += '?';
+                            }
+                            let loginSuccessRedirectUrl = originalUrl === _this.logoutProcessUrl ? window.location.origin
+                                : window.location.href;
+                            loginSuccessRedirectUrl = encodeURIComponent(loginSuccessRedirectUrl);
+                            loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
+                        }
+                        // 原始地址是授权验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
+                        if (originalUrl && (originalUrl.startsWith(_this._authenticationUrlPrefix + '/')
+                            || originalUrl === _this.logoutProcessUrl)) {
                             originalUrl = undefined;
                             originalMethod = undefined;
                         }
@@ -268,17 +271,17 @@ export default {
         }
         return message.trim();
     },
+    _authenticationUrlPrefix: '/authentication',
     isLogined(callback, options) {
-        this.get('/authentication/authorized', callback, options);
+        this.get(this._authenticationUrlPrefix + '/authorized', callback, options);
     },
-    _ensureAuthorizedUrl: '/authentication/validate',
     /**
      * 确保已登录
      * @param callback 校验通过的回调
      * @param options 请求选项集
      */
     ensureLogined(callback, options) {
-        this.get(this._ensureAuthorizedUrl, callback, options);
+        this.get(this._authenticationUrlPrefix + '/validate', callback, options);
     },
     /**
      * 确保已具有指定授权
@@ -287,7 +290,7 @@ export default {
      * @param options 请求选项集
      */
     ensureGranted(authority, callback, options) {
-        this.get(this._ensureAuthorizedUrl, authority, callback, options);
+        this.get(this._authenticationUrlPrefix + '/validate', authority, callback, options);
     },
     _metas: {},
     getMeta(urlOrType, callback, app) {

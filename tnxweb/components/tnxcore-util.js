@@ -2,6 +2,10 @@
 import md5 from 'md5';
 import base64 from 'base-64';
 
+if (window && window.location && !window.location.origin) {
+    window.location.origin = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+}
+
 // 不要在Object.prototype中添加函数，否则vue会报错
 
 Object.assign(Number.prototype, {
