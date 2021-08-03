@@ -33,7 +33,10 @@ export default {
             if (this.type === 'danger') {
                 return 'error';
             }
-            return this.type;
+            if (this.type === 'warning' || this.type === 'success') {
+                return this.type;
+            }
+            return 'info';
         },
         typeClass() {
             return 'el-alert--' + this.alertType;
