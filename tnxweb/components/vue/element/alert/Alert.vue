@@ -29,14 +29,20 @@ export default {
         contentClass: String,
     },
     computed: {
+        alertType() {
+            if (this.type === 'danger') {
+                return 'error';
+            }
+            return this.type;
+        },
         typeClass() {
-            return 'el-alert--' + this.type;
+            return 'el-alert--' + this.alertType;
         },
         effectClass() {
             return 'is-' + this.effect;
         },
         iconClass() {
-            return 'el-icon-' + this.type;
+            return 'el-icon-' + this.alertType;
         },
         iconStyle() {
             let style = {};
