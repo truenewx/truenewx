@@ -1,6 +1,6 @@
 <template>
     <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" :disabled="disabled || !tooltipContent"
-        v-if="!disabled || disabledTip !== false">
+        v-if="disabled === false || disabledTip !== false">
         <el-dropdown split-button :type="type" :disabled="disabled" :title="title" :size="size" @click="clickButton"
             @command="clickItem" v-if="dropdownItems.length">
             <i :class="icon" style="margin-right: 0.5rem;" v-if="icon"></i>
@@ -63,7 +63,7 @@ export default {
     data() {
         return {
             menuItem: this.menu.getItemByPath(this.path),
-            disabled: false,
+            disabled: null,
             dropdownItems: [],
         }
     },
