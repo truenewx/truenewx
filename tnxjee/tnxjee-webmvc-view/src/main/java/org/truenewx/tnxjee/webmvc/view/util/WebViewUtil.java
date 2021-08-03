@@ -55,7 +55,7 @@ public class WebViewUtil {
     public static String getPreviousUrl(HttpServletRequest request) {
         String prevUrl = getRelativePreviousUrl(request, true);
         if (prevUrl != null) {
-            if (isLoginUrl(request, prevUrl)) { // 如果前一页为登录页，则执行默认的前一页规则，以避免跳转相同页
+            if (isLoginFormUrl(request, prevUrl)) { // 如果前一页为登录表单页，则执行默认的前一页规则，以避免跳转相同页
                 prevUrl = null;
             } else {
                 String action = WebUtil.getRelativeRequestAction(request);
@@ -67,7 +67,7 @@ public class WebViewUtil {
         return prevUrl;
     }
 
-    public static boolean isLoginUrl(HttpServletRequest request, String url) {
+    public static boolean isLoginFormUrl(HttpServletRequest request, String url) {
         ApplicationContext context = SpringWebMvcUtil.getApplicationContext(request);
         SecurityUrlProvider securityUrlProvider = SpringUtil.getFirstBeanByClass(context, SecurityUrlProvider.class);
         if (securityUrlProvider != null) {

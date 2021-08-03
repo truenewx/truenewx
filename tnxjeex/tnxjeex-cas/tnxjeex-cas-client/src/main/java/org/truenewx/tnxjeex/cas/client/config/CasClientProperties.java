@@ -44,8 +44,8 @@ public class CasClientProperties extends ServiceProperties {
     public void afterPropertiesSet() {
         if (StringUtils.isBlank(getService())) {
             AppConfiguration app = this.commonProperties.getApp(this.appName);
-            String contextUri = app.getContextUri(false);
-            setService(URLEncoder.encode(contextUri, StandardCharsets.UTF_8));
+            String service = app.getContextUri(false) + app.getLoginedPath();
+            setService(service);
         }
         super.afterPropertiesSet();
     }
@@ -57,7 +57,8 @@ public class CasClientProperties extends ServiceProperties {
 
     public String getLoginFormUrl() {
         String url = getServerContextUrl();
-        return url + "/login?" + getServiceParameter() + Strings.EQUAL + getService();
+        String service = URLEncoder.encode(getService(), StandardCharsets.UTF_8);
+        return url + "/login?" + getServiceParameter() + Strings.EQUAL + service;
     }
 
     private String getServerContextUrl() {
@@ -75,7 +76,8 @@ public class CasClientProperties extends ServiceProperties {
         if (this.appName.equals(this.serverAppName)) { // 当前应用同时也是CAS服务端，则登出成功后默认跳转到登录表单页
             return getLoginFormUrl();
         } else { // 否则当前客户端登出后，跳转到服务端执行执行登出
-            return getServerContextUrl() + "/logout?" + getServiceParameter() + Strings.EQUAL + getService();
+            String service = URLEncoder.encode(getService(), StandardCharsets.UTF_8);
+            return getServerContextUrl() + "/logout?" + getServiceParameter() + Strings.EQUAL + service;
         }
     }
 

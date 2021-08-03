@@ -103,7 +103,7 @@ public abstract class CasServerLoginControllerSupport {
     public String getDefaultService() {
         String appName = getDefaultAppName();
         if (StringUtils.isNotBlank(appName)) {
-            return this.serviceManager.getService(appName, true);
+            return this.serviceManager.getService(appName);
         }
         return null;
     }

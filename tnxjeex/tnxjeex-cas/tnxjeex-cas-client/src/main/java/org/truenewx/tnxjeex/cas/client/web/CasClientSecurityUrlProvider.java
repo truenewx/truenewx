@@ -1,14 +1,14 @@
 package org.truenewx.tnxjeex.cas.client.web;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
@@ -36,10 +36,12 @@ public class CasClientSecurityUrlProvider implements SecurityUrlProvider {
     @Override
     public String getLoginFormUrl(HttpServletRequest request) {
         String loginFormUrl = getDefaultLoginFormUrl();
-        if (!WebUtil.isAjaxRequest(request)) { // 不是AJAX请求，才需要附加当前执行动作
-            String action = WebUtil.getRelativeRequestAction(request);
-            if (StringUtils.isNotBlank(action) && !action.equals(Strings.SLASH)) {
-                loginFormUrl += action;
+        if (!WebUtil.isAjaxRequest(request)) {
+            String service = this.casClientProperties.getService();
+            String url = request.getRequestURL().toString();
+            // 当前访问URL如果以当前service开头但不相等，则将除service外的后缀部分附加到登录表单URL后，以便于登录后跳转到当前访问URL
+            if (url.startsWith(service) && !url.equals(service)) {
+                loginFormUrl += URLEncoder.encode(url.substring(service.length()), StandardCharsets.UTF_8);
             }
         }
         return loginFormUrl;
