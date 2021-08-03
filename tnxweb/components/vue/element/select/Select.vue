@@ -5,7 +5,7 @@
         </el-checkbox>
         <template v-if="items.length === 0">
             <slot name="empty" v-if="$slots.empty"></slot>
-            <span class="text-muted" v-else-if="emptyText">{{ emptyText }}</span>
+            <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
         </template>
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
@@ -16,21 +16,21 @@
             </el-tag>
             <template v-if="items.length === 0">
                 <slot name="empty" v-if="$slots.empty"></slot>
-                <span class="text-muted" v-else-if="emptyText">{{ emptyText }}</span>
+                <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
             </template>
         </template>
         <i class="el-icon-loading" v-else/>
     </div>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio'">
-        <el-radio :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio>
+        <el-radio :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-radio>
     </el-radio-group>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio-button'">
-        <el-radio-button :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
+        <el-radio-button :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]">
             {{ item[textName] }}
         </el-radio-button>
@@ -56,10 +56,12 @@
     </el-dropdown>
     <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :theme="theme" :size="size"
         :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
-        <el-option class="text-muted" :value="emptyValue" :label="emptyText" v-if="empty"/>
+        <el-option class="text-muted" :value="emptyValue" :label="emptyText" :class="emptyClass" v-if="empty"/>
         <template v-for="item in items">
             <el-option :key="item[valueName]" :value="item[valueName]" :label="item[textName]"
-                v-if="!hiddenValues.contains(item[valueName])"/>
+                v-if="!hiddenValues.contains(item[valueName])">
+                <slot name="option" :item="item"></slot>
+            </el-option>
         </template>
     </el-select>
 </template>
@@ -96,6 +98,7 @@ export default {
             type: [String, Boolean, Number],
             default: () => null,
         },
+        emptyClass: String,
         placeholder: String,
         disabled: Boolean,
         tagClick: Function, // 点击一个标签选项时调用，如果返回false，则选项不会被选中
