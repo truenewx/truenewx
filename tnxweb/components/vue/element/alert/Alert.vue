@@ -33,7 +33,7 @@ export default {
             if (this.type === 'danger') {
                 return 'error';
             }
-            if (this.type === 'warning' || this.type === 'success') {
+            if (this.type === 'error' || this.type === 'warning' || this.type === 'success') {
                 return this.type;
             }
             return 'info';
