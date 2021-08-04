@@ -4,8 +4,10 @@
         <el-dropdown split-button :type="type" :disabled="disabled" :title="title" :size="size" @click="clickButton"
             @command="clickItem" v-if="dropdownItems.length">
             <i :class="icon" style="margin-right: 0.5rem;" v-if="icon"></i>
-            <slot v-if="$slots.default"></slot>
-            <template v-else-if="menuItem">{{ menuItem.caption }}</template>
+            <template v-if="!hiddenCaption">
+                <slot v-if="$slots.default"></slot>
+                <template v-else-if="menuItem">{{ menuItem.caption }}</template>
+            </template>
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item v-for="dropdownItem of dropdownItems" :key="dropdownItem.path"
                     :icon="dropdownItem.icon" :disabled="dropdownItem.disabled" :title="dropdownItem.title"
@@ -16,8 +18,10 @@
         </el-dropdown>
         <el-button :type="type" :icon="icon" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
-            <slot v-if="$slots.default"></slot>
-            <template v-else-if="menuItem">{{ menuItem.caption }}</template>
+            <template v-if="!hiddenCaption">
+                <slot v-if="$slots.default"></slot>
+                <template v-else-if="menuItem">{{ menuItem.caption }}</template>
+            </template>
         </el-button>
     </el-tooltip>
 </template>
@@ -58,6 +62,7 @@ export default {
             type: [String, Boolean],
             default: '没有操作权限',
         },
+        hiddenCaption: Boolean,
         dropdown: [Object, Array],
     },
     data() {
@@ -73,10 +78,13 @@ export default {
             if (content === false) {
                 return undefined;
             }
-            if (!content && this.menuItem) {
-                content = this.menuItem.desc;
+            if (typeof content === 'string' && content) {
+                return content;
             }
-            return content;
+            if (content === true && this.menuItem) {
+                return this.menuItem.desc || this.menuItem.caption;
+            }
+            return undefined;
         },
         title() {
             return this.disabled ? this.disabledTip : undefined;
