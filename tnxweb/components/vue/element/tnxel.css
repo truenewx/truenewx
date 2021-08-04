@@ -555,7 +555,7 @@ i.el-tooltip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
 .el-upload-list--picture-card {
@@ -565,10 +565,8 @@ i.el-tooltip {
 }
 
 .el-upload-list--picture-card .el-upload-list__item {
-    width: 1rem;
-    height: 1rem;
     transition: none;
-    border-radius: 4px;
+    border-radius: .25rem;
 }
 
 .el-upload-list__panel {

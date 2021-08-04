@@ -1,7 +1,7 @@
 <template>
-    <el-upload ref="upload" class="d-none"
+    <el-upload ref="upload" name="file"
         :id="id"
-        name="file"
+        :hidden="hiddenContainer"
         :action="action"
         :before-upload="beforeUpload"
         :on-progress="onProgress"
@@ -88,6 +88,7 @@ export default {
             uploadHeaders: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
+            hiddenContainer: true,
         };
     },
     computed: {
@@ -126,9 +127,15 @@ export default {
         uploadFiles() {
             return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
         },
+        uploadable() {
+            return this.uploadLimit && this.fileList.length < this.uploadLimit.number;
+        },
     },
     watch: {
         uploadLimit() {
+            this.render();
+        },
+        fileList() {
             this.render();
         }
     },
@@ -162,12 +169,16 @@ export default {
             $('.el-icon-plus', $upload).css({
                 fontSize: plusSize + 'px'
             });
-            $container.removeClass('d-none');
+            this.hiddenContainer = false;
 
             if (this.fileList && this.fileList.length) {
-                for (let file of this.fileList) {
-                    this._resizeFilePanel(file, this.fileList);
-                }
+                let _this = this;
+                this.$nextTick(function() {
+                    for (let file of _this.fileList) {
+                        _this._resizeFilePanel(file, _this.fileList);
+                    }
+                });
+
             }
         },
         getFileId: function(file) {
@@ -271,7 +282,7 @@ export default {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
             if (fileList.length >= this.uploadLimit.number) {
-                // 隐藏添加按钮
+                // 隐藏添加框
                 $upload.hide();
             }
             const fileId = this.getFileId(file);

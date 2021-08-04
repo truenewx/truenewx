@@ -1,6 +1,6 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-limit="uploadLimit" :file-list="fileList" :read-only="readOnly"
-        :width="width" :height="height" :on-success="onSuccess" :on-removed="emitInput"/>
+        :width="width" :height="height" :on-success="onSuccess" :on-removed="onRemove"/>
 </template>
 
 <script>
@@ -45,7 +45,7 @@ export default {
     },
     watch: {
         value(newValue, oldValue) {
-            if (!oldValue && newValue && !this.equals(this.fileList, newValue)) {
+            if (oldValue !== newValue && !this.equals(this.fileList, newValue)) {
                 this._init();
             }
         }
@@ -85,10 +85,10 @@ export default {
                     vm.tnx.app.rpc.get(vm.tnx.fss.getBaseUrl() + '/metas', {
                         storageUrls: storageUrls
                     }, function(metas) {
-                        vm.fileList = [];
+                        let fileList = [];
                         metas.forEach(meta => {
                             if (meta) {
-                                vm.fileList.push({
+                                fileList.push({
                                     name: meta.name,
                                     url: vm._getFullReadUrl(meta.thumbnailReadUrl || meta.readUrl),
                                     previewUrl: vm._getFullReadUrl(meta.readUrl),
@@ -96,6 +96,7 @@ export default {
                                 });
                             }
                         });
+                        vm.fileList = fileList;
                         vm.$nextTick(function() {
                             vm._loadUploadLimit();
                         });
@@ -133,6 +134,16 @@ export default {
                 this.fileList = fileList;
                 this.emitInput();
             }
+        },
+        onRemove: function(file) {
+            for (let i = 0; i < this.fileList.length; i++) {
+                let _file = this.fileList[i];
+                if (_file.id === file.id) {
+                    this.fileList.splice(i, 1);
+                    break;
+                }
+            }
+            this.emitInput();
         },
         emitInput: function() {
             let storageUrls = [];
