@@ -53,6 +53,14 @@ a.plain:focus {
     font-size: 80%;
 }
 
+.fs-p90 {
+    font-size: 90%;
+}
+
+.fs-p110 {
+    font-size: 110%;
+}
+
 .fs-p120 {
     font-size: 120%;
 }
