@@ -15,6 +15,7 @@ export default {
             type: String,
             required: true,
         },
+        params: [Object, Array],
         title: {
             type: [String, Array]
         },
@@ -55,7 +56,13 @@ export default {
     },
     created() {
         let vm = this;
-        window.tnx.app.rpc.get(this.url, function(list) {
+        let params;
+        if (typeof this.params === 'function') {
+            params = this.params();
+        } else {
+            params = this.params;
+        }
+        window.tnx.app.rpc.get(this.url, params, function(list) {
             vm.selectable = [];
             list.forEach(item => {
                 vm.selectable.push({
