@@ -434,6 +434,10 @@ span.el-tooltip {
     cursor: default;
 }
 
+i.el-tooltip {
+    cursor: pointer;
+}
+
 .el-dropdown-menu__item .el-avatar--icon i {
     margin: 0;
 }
