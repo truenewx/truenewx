@@ -106,7 +106,8 @@ export default function(VueRouter, menu, fnImportPage) {
     router.back = FunctionUtil.around(router.back, function(back, path) {
         let route = router.app.$route;
         // 如果上一页路径为指定路径，或匹配上级菜单路径，则直接返回上一页
-        if (router.prev && (router.prev.path === path || matchesPath(router.prev.path, route.meta.superiorPath))) {
+        if (router.prev && (router.prev.path === path
+            || matchesPath(path || router.prev.path, route.meta.superiorPath))) {
             back.call(router);
             return;
         }
