@@ -50,6 +50,7 @@ public class ServletContextInitializedBean implements ServletContextAware, Conte
         boolean formalProfile = this.profileSupplier.isFormal();
         this.servletContext.setAttribute("formalProfile", formalProfile);
         this.servletContext.setAttribute("resourceMin", formalProfile ? ".min" : Strings.EMPTY);
+        this.servletContext.setAttribute("context", this.servletContext.getContextPath());
     }
 
 }
