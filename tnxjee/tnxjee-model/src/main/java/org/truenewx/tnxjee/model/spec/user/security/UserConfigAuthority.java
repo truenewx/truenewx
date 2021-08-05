@@ -56,6 +56,7 @@ public class UserConfigAuthority implements ConfigAttribute {
      * 构建没有权限限制、登录即可访问的必备权限
      */
     public UserConfigAuthority() {
+        this(null, null, null, null, false);
     }
 
     /**
