@@ -7,7 +7,7 @@ import org.truenewx.tnxjee.repo.OwnedUnityRepox;
 import ${entityClassName};
 
 /**
-* @author tnxjee-code-generator
-*/
+ * @author tnxjee-code-generator
+ */
 public interface ${repoClassSimpleName} extends OwnedUnityRepox<${entityClassSimpleName}, ${keyClassSimpleName}, ${ownerClassSimpleName}>{
 }

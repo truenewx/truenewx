@@ -9,12 +9,12 @@ import ${entityClassName};
 import ${repoClassName};
 
 /**
-* @author tnxjee-code-generator
-*/
+ * @author tnxjee-code-generator
+ */
 @Service
 public class ${serviceClassSimpleName} extends AbstractUnityService<${entityClassSimpleName}, ${keyClassSimpleName}> implements ${serviceInterfaceSimpleName} {
 
-@Autowired
-private ${repoClassSimpleName} repo;
+    @Autowired
+    private ${repoClassSimpleName} repo;
 
 }
