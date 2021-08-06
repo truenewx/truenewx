@@ -47,7 +47,7 @@ public class DatabaseTableDataSourceInitializer extends SmartDataSourceInitializ
         return lastVersion;
     }
 
-    private String getKey() {
+    protected String getKey() {
         String appName = this.environment.getProperty(AppConstants.PROPERTY_SPRING_APP_NAME);
         return appName + ".sql_last_version";
     }
