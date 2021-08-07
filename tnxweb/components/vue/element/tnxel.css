@@ -228,6 +228,12 @@ el-header ul.tnxel-nav,
     line-height: 1;
 }
 
+.el-form-item__content > .el-radio-group {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
 .form-item-tip {
     font-size: 0.75rem;
     line-height: 1;
@@ -236,6 +242,10 @@ el-header ul.tnxel-nav,
 
 div.form-item-tip {
     margin-top: 0.5rem;
+}
+
+.el-radio-group + div.form-item-tip {
+    margin-top: 0;
 }
 
 span.form-item-tip {
@@ -284,11 +294,6 @@ span.form-item-tip {
 
 el-button {
     visibility: hidden;
-}
-
-.el-button [class*=el-icon-] + span,
-.el-button i + span {
-    margin-left: 0.25rem;
 }
 
 .el-button--text {
@@ -461,7 +466,7 @@ i.el-tooltip {
 }
 
 .list-group .list-group-item {
-    border: 1px solid #DCDFE6;
+    border: 1px solid #dcdfe6;
     position: relative;
     display: block;
     padding: .75rem 1.25rem;
@@ -659,4 +664,14 @@ i.el-tooltip {
 
 .el-submenu .el-menu-item {
     min-width: unset;
+}
+
+.el-drawer__header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dcdfe6;
+    margin-bottom: 0.5rem;
+}
+
+.el-drawer__body {
+    padding: 1rem;
 }
