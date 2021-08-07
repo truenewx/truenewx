@@ -90,7 +90,7 @@ export default {
     },
     methods: {
         initModel() {
-            if (this.$refs.select.isMulti()) {
+            if (this.$refs.select && this.$refs.select.isMulti()) {
                 return;
             }
             if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
