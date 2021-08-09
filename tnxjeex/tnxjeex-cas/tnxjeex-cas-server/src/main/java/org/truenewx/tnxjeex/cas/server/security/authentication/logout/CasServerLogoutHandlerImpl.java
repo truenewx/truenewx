@@ -46,14 +46,14 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
                 // 排除当前CAS服务端应用，之所以需要在此排除是考虑到一个应用同时作为CAS服务端和客户端的场景
                 if (!appTicket.getApp().equals(this.appName)) {
                     this.executor.execute(() -> {
-                        logoutApp(appTicket, logoutService);
+                        noticeAppLogout(appTicket, logoutService);
                     });
                 }
             }
         }
     }
 
-    private void logoutApp(AppTicket appTicket, String excludedService) {
+    private void noticeAppLogout(AppTicket appTicket, String excludedService) {
         String appName = appTicket.getApp();
         String logoutProcessUrl = this.serviceManager.getLogoutProcessUrl(appName, excludedService);
         if (logoutProcessUrl != null) {
@@ -68,7 +68,7 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
         // 排除当前CAS服务端应用，之所以需要在此排除是考虑到一个应用同时作为CAS服务端和客户端的场景
         List<AppTicket> appTickets = this.ticketManager.deleteAppTickets(request, this.appName);
         for (AppTicket appTicket : appTickets) {
-            logoutApp(appTicket, null);
+            noticeAppLogout(appTicket, null);
         }
     }
 

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
-import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerUserSpecificDetailsScopeSwitch;
+import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeApplicator;
 import org.truenewx.tnxjeex.cas.server.security.authentication.logout.CasServerLogoutHandler;
 
 /**
@@ -18,12 +18,12 @@ public abstract class CasServerScopeControllerSupport {
     @Autowired
     private CasServerLogoutHandler logoutHandler;
     @Autowired
-    private CasServerUserSpecificDetailsScopeSwitch scopeSwitch;
+    private CasServerScopeApplicator scopeApplicator;
 
     @ConfigAuthority
     public boolean scope(@RequestParam(value = "scope", required = false) String scope, HttpServletRequest request) {
         UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
-        boolean switched = this.scopeSwitch.switchScope(userDetails, scope);
+        boolean switched = this.scopeApplicator.applyScope(userDetails, scope);
         if (switched) {
             this.logoutHandler.logoutClients(request);
         }
