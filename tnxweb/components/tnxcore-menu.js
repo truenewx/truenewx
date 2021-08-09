@@ -151,6 +151,7 @@ const Menu = function Menu(config) {
     this.app = config.app;
     this.caption = config.caption;
     this.items = buildLevel(config.items);
+    this.scope = config.scope;
     this._url = config.url;
     this._grantedItems = null;
     this.authorities = [];
@@ -258,7 +259,14 @@ Menu.prototype.isGranted = function(path) {
     });
 };
 
-Menu.prototype.loadGrantedItems = function(callback) {
+Menu.prototype.loadGrantedItems = function(scope, callback) {
+    if (typeof scope === 'function') {
+        callback = scope;
+        scope = null;
+    }
+    if (scope && scope !== this.scope) {
+        this._grantedItems = null;
+    }
     if (this._grantedItems) {
         callback(this._grantedItems);
     } else {
@@ -269,6 +277,7 @@ Menu.prototype.loadGrantedItems = function(callback) {
             }
             _this.authorities = authorities;
 
+            _this.scope = scope;
             _this._grantedItems = [];
             _this.items.forEach(item => {
                 applyGrantedItemToItems(_this.authorities, item, _this._grantedItems);
