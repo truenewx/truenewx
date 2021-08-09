@@ -1,6 +1,6 @@
 package org.truenewx.tnxjeex.cas.server.repo;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
@@ -16,6 +16,6 @@ public interface AppTicketRepo {
 
     AppTicket findByTicketGrantingTicketIdAndApp(String ticketGrantingTicketId, String app);
 
-    Collection<AppTicket> deleteByTicketGrantingTicketId(String ticketGrantingTicketId);
+    List<AppTicket> deleteByTicketGrantingTicketIdAndAppNot(String ticketGrantingTicketId, String appNot);
 
 }

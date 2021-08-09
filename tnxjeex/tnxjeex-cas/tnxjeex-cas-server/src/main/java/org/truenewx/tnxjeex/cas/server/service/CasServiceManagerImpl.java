@@ -13,7 +13,7 @@ import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
-import org.truenewx.tnxjeex.cas.core.validation.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
 
 /**
@@ -47,18 +47,17 @@ public class CasServiceManagerImpl implements CasServiceManager {
     @Override
     public String getService(String appName) {
         AppConfiguration app = this.commonProperties.getApp(appName);
+        return getService(app);
+    }
+
+    private String getService(AppConfiguration app) {
         if (app != null) {
             return app.getContextUri(false) + app.getLoginedPath();
         }
         return null;
     }
 
-    private AppConfiguration loadAppConfigurationByService(String service) {
-        String appName = getAppName(service);
-        return loadAppConfigurationByName(appName);
-    }
-
-    private AppConfiguration loadAppConfigurationByName(String appName) {
+    private AppConfiguration loadAppConfiguration(String appName) {
         AppConfiguration appConfiguration = this.commonProperties.getApp(appName);
         if (appConfiguration == null) {
             throw new BusinessException(CasServerExceptionCodes.INVALID_SERVICE);
@@ -68,13 +67,14 @@ public class CasServiceManagerImpl implements CasServiceManager {
 
     @Override
     public String getUri(HttpServletRequest request, String service) {
-        return loadAppConfigurationByService(service).getDirectUri();
+        String appName = getAppName(service);
+        return loadAppConfiguration(appName).getDirectUri();
     }
 
     @Override
     public String getLoginProcessUrl(HttpServletRequest request, String service, String scope) {
         String appName = getAppName(service);
-        AppConfiguration app = loadAppConfigurationByName(appName);
+        AppConfiguration app = loadAppConfiguration(appName);
         String loginUrl = app.getLoginProcessUrl();
         int index = loginUrl.indexOf(Strings.QUESTION);
         if (index < 0) {
@@ -101,8 +101,12 @@ public class CasServiceManagerImpl implements CasServiceManager {
     }
 
     @Override
-    public String getLogoutProcessUrl(String service) {
-        return loadAppConfigurationByService(service).getLogoutProcessUrl();
+    public String getLogoutProcessUrl(String appName, String serviceNot) {
+        AppConfiguration app = loadAppConfiguration(appName);
+        if (serviceNot != null && getService(app).equals(serviceNot)) {
+            return null;
+        }
+        return app.getLogoutProcessUrl();
     }
 
 }

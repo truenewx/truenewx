@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.cas.core.validation.constant;
+package org.truenewx.tnxjeex.cas.core.constant;
 
 /**
  * CAS参数名称集

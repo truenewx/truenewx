@@ -1,6 +1,6 @@
 package org.truenewx.tnxjeex.cas.server.ticket;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +14,6 @@ import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
  */
 public interface CasTicketManager extends Service {
 
-    String TGT_NAME = "CASTGC";
     String TICKET_GRANTING_TICKET_PREFIX = "TGT-";
     String SERVICE_TICKET_PREFIX = "ST-";
 
@@ -24,8 +23,9 @@ public interface CasTicketManager extends Service {
 
     String getAppTicketId(HttpServletRequest request, String app, String scope);
 
-    Collection<AppTicket> deleteTicketGrantingTicket(HttpServletRequest request,
-            HttpServletResponse response);
+    List<AppTicket> deleteAppTickets(HttpServletRequest request, String excludedApp);
+
+    List<AppTicket> deleteTicketGrantingTicket(HttpServletRequest request, HttpServletResponse response);
 
     Assertion validateAppTicket(String app, String appTicketId);
 }

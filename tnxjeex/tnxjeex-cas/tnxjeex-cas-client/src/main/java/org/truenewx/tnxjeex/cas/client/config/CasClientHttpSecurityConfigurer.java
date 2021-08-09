@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.web.configuration.WebHttpSecurityConfigurer;
+import org.truenewx.tnxjeex.cas.client.web.CasClientSecurityContextPrepareFilter;
 
 /**
  * Cas客户端HTTP安全配置器
@@ -21,6 +23,10 @@ public class CasClientHttpSecurityConfigurer implements WebHttpSecurityConfigure
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        // 在安全上下文持久化过滤器之前插入Cas客户端安全上下文准备过滤器
+        CasClientSecurityContextPrepareFilter securityContextPrepareFilter = new CasClientSecurityContextPrepareFilter();
+        http.addFilterBefore(securityContextPrepareFilter, SecurityContextPersistenceFilter.class);
+
         // 在默认的登出过滤器之前插入单点登出过滤器，确保后者执行
         SingleSignOutFilter logoutFilter = new SingleSignOutFilter();
         logoutFilter.setCasServerUrlPrefix(this.casClientProperties.getServerContextUri(false));

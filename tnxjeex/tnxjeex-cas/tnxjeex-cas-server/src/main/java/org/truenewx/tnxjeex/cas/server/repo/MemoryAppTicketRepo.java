@@ -45,16 +45,31 @@ public class MemoryAppTicketRepo implements AppTicketRepo {
     }
 
     @Override
-    public Collection<AppTicket> deleteByTicketGrantingTicketId(String ticketGrantingTicketId) {
-        Collection<AppTicket> result = new ArrayList<>();
+    public List<AppTicket> deleteByTicketGrantingTicketIdAndAppNot(String ticketGrantingTicketId, String appNot) {
+        List<AppTicket> result = new ArrayList<>();
         synchronized (this.ticketIdMapping) {
+            // 先移除，如果存在需要排除的应用，则再加回去
             Set<String> ids = this.ticketIdMapping.remove(ticketGrantingTicketId);
             if (ids != null) {
-                for (String id : ids) {
+                // 用迭代器遍历，以便于遍历的同时移除元素
+                Iterator<String> idIterator = ids.iterator();
+                while (idIterator.hasNext()) {
+                    String id = idIterator.next();
+                    // 先移除，如果是需要排除的应用，则再加回去
                     AppTicket appTicket = this.dataMapping.remove(id);
                     if (appTicket != null) {
-                        result.add(appTicket);
+                        if (appTicket.getApp().equals(appNot)) {
+                            this.dataMapping.put(id, appTicket);
+                        } else {
+                            idIterator.remove();
+                            result.add(appTicket);
+                        }
+                    } else {
+                        idIterator.remove();
                     }
+                }
+                if (ids.size() > 0) {
+                    this.ticketIdMapping.put(ticketGrantingTicketId, ids);
                 }
             }
         }

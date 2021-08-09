@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.truenewx.tnxjee.web.util.WebUtil;
-import org.truenewx.tnxjeex.cas.core.validation.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
 
 /**
  * CasServiceAuthenticationDetails源
