@@ -161,23 +161,23 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             // 加上下载路径前缀
             readUrl = getDownloadUrlPrefix() + readUrl;
             // 加上上下文根路径
-            readUrl = getContextUri() + readUrl;
+            readUrl = getContextUrl() + readUrl;
         }
         return readUrl;
     }
 
-    private String getContextUri() {
+    private String getContextUrl() {
         AppConfiguration app = this.commonProperties.getApp(this.appName);
         if (app != null) { // 有配置多应用的，从配置中获取上下文根路径
             return app.getContextUri(false);
         } else { // 否则取当前请求的上下文根路径
             HttpServletRequest request = Objects.requireNonNull(SpringWebContext.getRequest());
-            String contextUri = "//" + WebUtil.getHost(request, true);
+            String contextUrl = "//" + WebUtil.getHost(request, true);
             String contextPath = request.getContextPath();
             if (!contextPath.equals(Strings.SLASH)) {
-                contextUri += contextPath;
+                contextUrl += contextPath;
             }
-            return contextUri;
+            return contextUrl;
         }
     }
 

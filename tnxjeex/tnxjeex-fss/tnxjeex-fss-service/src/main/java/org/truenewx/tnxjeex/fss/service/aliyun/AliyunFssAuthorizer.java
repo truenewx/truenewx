@@ -27,10 +27,13 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
     private AliyunAccount account;
     private AliyunPolicyBuilder policyBuilder;
     private AliyunStsRoleAssumer readStsRoleAssumer;
+    private String contextUrl;
 
     public AliyunFssAuthorizer(AliyunAccount account) {
         this.account = account;
         this.policyBuilder = new AliyunPolicyBuilder(account);
+        // 默认的上下文地址以//开头，不包含具体访问协议，与访问者当前使用协议相同
+        this.contextUrl = "//" + this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
     }
 
     /**
@@ -66,8 +69,11 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
     }
 
     protected String getContextUrl() {
-        // 默认的上下文地址以//开头，不包含具体访问协议，与访问者当前使用协议相同
-        return "//" + this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
+        return this.contextUrl;
+    }
+
+    protected void setContextUrl(String contextUrl) {
+        this.contextUrl = contextUrl;
     }
 
     @Override
@@ -108,7 +114,7 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
                         }
                     }
                     String url = oss.generatePresignedUrl(request).toString();
-                    url = replaceHost(url, getContextUrl());
+                    url = replaceContextUrl(url, getContextUrl());
                     return url;
                 }
             }
@@ -118,11 +124,10 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
         return null;
     }
 
-    private String replaceHost(String url, String host) {
+    private String replaceContextUrl(String url, String contextUrl) {
         int index = url.indexOf("://");
-        String protocol = url.substring(0, index);
         url = url.substring(url.indexOf(Strings.SLASH, index + 3));
-        return protocol + "://" + host + url;
+        return contextUrl + url;
     }
 
 }
