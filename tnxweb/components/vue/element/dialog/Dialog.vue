@@ -13,10 +13,10 @@
         :top="top"
         :before-close="beforeClose"
         @closed="onClosed">
-        <div slot="title" class="dialog-title" :class="{'border-bottom': title}" v-html="title"></div>
+        <div slot="title" class="dialog-title" :class="{'border-bottom': title}" v-html="title" v-if="title"></div>
         <div v-if="contentValue" v-html="contentValue"></div>
         <tnxel-dialog-content ref="content" v-bind="contentProps" v-else></tnxel-dialog-content>
-        <div slot="footer" class="dialog-footer" :class="{'border-top': buttons && buttons.length}">
+        <div slot="footer" class="dialog-footer border-top" v-if="buttons && buttons.length">
             <el-button v-for="(button, index) in buttons" :type="button.type" :key="index"
                 @click="btnClick(index)">{{ button.caption || button.text }}
             </el-button>

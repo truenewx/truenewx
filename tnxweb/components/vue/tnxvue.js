@@ -92,7 +92,7 @@ const tnxvue = Object.assign({}, tnxcore, {
         delete options.title;
         delete options.type;
         delete options.click;
-        this.dialog(component, title, buttons, options, props);
+        return this.dialog(component, title, buttons, options, props);
     }
 });
 

@@ -32,4 +32,5 @@ export default function(content, title, buttons, options, contentProps) {
         }
     }).$mount('#' + dialogId);
     dialog.options = Object.assign(dialog.options, options);
+    return dialog;
 }

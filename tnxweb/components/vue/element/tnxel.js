@@ -71,7 +71,7 @@ const tnxel = Object.assign({}, tnxvue, {
     },
     dialog() {
         this._closeMessage();
-        dialog.apply(this, arguments);
+        return dialog.apply(this, arguments);
     },
     _closeMessage() {
         Message.closeAll();

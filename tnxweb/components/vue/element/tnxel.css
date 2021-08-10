@@ -242,10 +242,7 @@ el-header ul.tnxel-nav,
 
 div.form-item-tip {
     margin-top: 0.5rem;
-}
-
-.el-radio-group + div.form-item-tip {
-    margin-top: 0;
+    width: 100%;
 }
 
 span.form-item-tip {
