@@ -65,8 +65,9 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
         return permission == ObjectPermission.PublicRead || permission == ObjectPermission.PublicReadWrite;
     }
 
-    protected String getReadHost() {
-        return this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
+    protected String getContextUrl() {
+        // 默认的上下文地址以//开头，不包含具体访问协议，与访问者当前使用协议相同
+        return "//" + this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
     }
 
     @Override
@@ -81,8 +82,7 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
         }
         try {
             if (isPublicRead(path)) {
-                // 以双斜杠开头，表示采用当前上下文的相同协议
-                StringBuilder url = new StringBuilder("//").append(getReadHost()).append(Strings.SLASH).append(path);
+                StringBuilder url = new StringBuilder(getContextUrl()).append(Strings.SLASH).append(path);
                 if (parameterString.length() > 0) {
                     url.append(Strings.QUESTION).append(parameterString);
                 }
@@ -108,7 +108,7 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
                         }
                     }
                     String url = oss.generatePresignedUrl(request).toString();
-                    url = replaceHost(url, getReadHost());
+                    url = replaceHost(url, getContextUrl());
                     return url;
                 }
             }
