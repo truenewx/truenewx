@@ -30,14 +30,8 @@
 export default {
     name: 'TnxelButton',
     props: {
-        menu: {
-            type: Object,
-            required: true,
-        },
-        path: {
-            type: String,
-            required: true,
-        },
+        menu: Object,
+        path: String,
         click: {
             type: [Function, Boolean],
             default: false,
@@ -66,8 +60,12 @@ export default {
         dropdown: [Object, Array],
     },
     data() {
+        let menuItem = null;
+        if (this.menu && this.path) {
+            menuItem = this.menu.getItemByPath(this.path);
+        }
         return {
-            menuItem: this.menu.getItemByPath(this.path),
+            menuItem: menuItem,
             disabled: null,
             dropdownItems: [],
         }
@@ -91,11 +89,13 @@ export default {
         }
     },
     created() {
-        let vm = this;
-        this.menu.loadGrantedItems(function() {
-            vm.disabled = !vm.menu.isGranted(vm.path);
-            vm.buildDropdownItems();
-        });
+        if (this.menu && this.path) {
+            let vm = this;
+            this.menu.loadGrantedItems(function() {
+                vm.disabled = !vm.menu.isGranted(vm.path);
+                vm.buildDropdownItems();
+            });
+        }
     },
     watch: {
         dropdown() {
@@ -112,7 +112,7 @@ export default {
                         path: dropdown
                     } : (dropdown || {});
 
-                    if (dropdownItem.path) {
+                    if (this.menu && dropdownItem.path) {
                         dropdownItem.disabled = !this.menu.isGranted(dropdownItem.path);
                         if (dropdownItem.disabled && typeof this.disabledTip === 'string') {
                             dropdownItem.title = this.disabledTip;
@@ -129,18 +129,16 @@ export default {
             this.clickItem(this);
         },
         clickItem(item) {
-            if (!item.disabled && item.menuItem && this.$router) {
+            if (!item.disabled && this.$router) {
                 if (typeof this.click === 'function') {
                     this.click(item.path);
-                } else if (this.click) { // 简单指定click为true，则触发点击事件
-                    this.$emit('click', item.path);
-                } else if (item.menuItem.path) {
+                } else if (this.click !== true && item.menuItem && item.menuItem.path) { // click属性为true时执行点击动作而不是跳转
                     let vm = this;
                     this.$router.push(item.path).catch(function() {
                         // 指定路径无法跳转，则触发点击事件
                         vm.$emit('click', item.path);
                     });
-                } else { // 匹配菜单项未配置路径，则触发点击事件
+                } else { // 触发点击事件兜底
                     this.$emit('click', item.path);
                 }
             }
