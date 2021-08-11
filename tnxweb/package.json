@@ -23,9 +23,9 @@
   "dependencies": {
     "axios": "^0.21.1",
     "base-64": "^1.0.0",
-    "core-js": "^3.6.5",
-    "element-ui": "^2.14.1",
-    "jquery": "^3.5.1",
+    "core-js": "^3.16.1",
+    "element-ui": "^2.15.5",
+    "jquery": "^3.6.0",
     "md5": "^2.3.0",
     "vue": "^2.6.12",
     "vue-router": "^3.5.2"
