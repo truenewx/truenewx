@@ -38,7 +38,8 @@ export default {
         indexName: {
             type: String,
             default: () => 'index',
-        }
+        },
+        formatter: Function,
     },
     data() {
         return {
@@ -65,6 +66,9 @@ export default {
         window.tnx.app.rpc.get(this.url, params, function(list) {
             vm.selectable = [];
             list.forEach(item => {
+                if (vm.formatter) {
+                    vm.formatter(item);
+                }
                 vm.selectable.push({
                     key: item[vm.keyName],
                     label: item[vm.labelName],
