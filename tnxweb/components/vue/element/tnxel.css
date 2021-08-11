@@ -672,3 +672,7 @@ i.el-tooltip {
 .el-drawer__body {
     padding: 1rem;
 }
+
+.el-empty__description {
+    margin-top: 1rem;
+}
