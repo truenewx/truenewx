@@ -1,7 +1,8 @@
 <template>
     <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
         <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
-            {{ item[textName] }}
+            <i :class="item[iconName]" v-if="item[iconName]"></i>
+            <span>{{ item[textName] }}</span>
         </el-checkbox>
         <template v-if="items.length === 0">
             <slot name="empty" v-if="$slots.empty"></slot>
@@ -12,7 +13,8 @@
         <template v-if="items">
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
                 :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" @click="select(item[valueName])">
-                {{ item[textName] }}
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
             </el-tag>
             <template v-if="items.length === 0">
                 <slot name="empty" v-if="$slots.empty"></slot>
@@ -25,14 +27,16 @@
         v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]">
-            {{ item[textName] }}
+            <i :class="item[iconName]" v-if="item[iconName]"></i>
+            <span>{{ item[textName] }}</span>
         </el-radio>
     </el-radio-group>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio-button'">
         <el-radio-button :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]">
-            {{ item[textName] }}
+            <i :class="item[iconName]" v-if="item[iconName]"></i>
+            <span>{{ item[textName] }}</span>
         </el-radio-button>
     </el-radio-group>
     <el-dropdown trigger="click" :size="size" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
@@ -41,7 +45,8 @@
         </el-button>
         <el-dropdown-menu slot="dropdown" v-if="items && items.length">
             <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
-                {{ item[textName] }}
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
             </el-dropdown-item>
         </el-dropdown-menu>
     </el-dropdown>
@@ -50,7 +55,8 @@
         <span>{{ currentText }}</span>
         <el-dropdown-menu slot="dropdown" v-if="items && items.length">
             <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
-                {{ item[textName] }}
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
             </el-dropdown-item>
         </el-dropdown-menu>
     </el-dropdown>
@@ -88,6 +94,10 @@ export default {
         indexName: {
             type: String,
             default: 'index',
+        },
+        iconName: {
+            type: String,
+            default: 'icon',
         },
         defaultValue: String,
         empty: {

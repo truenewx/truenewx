@@ -94,3 +94,7 @@ span.nowrap {
 .text-transparent {
     color: transparent !important;
 }
+
+i + span {
+    margin-left: 0.25rem;
+}
