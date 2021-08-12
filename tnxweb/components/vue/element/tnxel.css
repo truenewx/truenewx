@@ -676,3 +676,7 @@ i.el-tooltip {
 .el-empty__description {
     margin-top: 1rem;
 }
+
+.el-popover__reference-wrapper {
+    cursor: pointer;
+}
