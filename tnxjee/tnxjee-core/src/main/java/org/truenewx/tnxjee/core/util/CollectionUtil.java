@@ -1,17 +1,6 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -123,7 +112,7 @@ public class CollectionUtil {
             return ((Map<?, ?>) iterable).size();
         } else {
             int size = 0;
-            for (Iterator<?> iterator = iterable.iterator(); iterator.hasNext();) {
+            for (Iterator<?> iterator = iterable.iterator(); iterator.hasNext(); ) {
                 size++;
             }
             return size;
@@ -459,6 +448,26 @@ public class CollectionUtil {
         List<E> list = new ArrayList<>(set);
         Collections.sort(list);
         return list;
+    }
+
+    /**
+     * 往指定集合的指定位置插入指定元素，并移除除指定元素外满足指定排除断言的元素
+     *
+     * @param list    集合
+     * @param index   插入位置
+     * @param element 插入元素
+     * @param exclude 排除断言
+     * @param <E>     元素类型
+     */
+    public static <E> void add(List<E> list, int index, E element, Predicate<E> exclude) {
+        if (list != null) {
+            list.add(index, element);
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (i != index && exclude.test(list.get(i))) {
+                    list.remove(i);
+                }
+            }
+        }
     }
 
 }
