@@ -19,6 +19,8 @@ public interface RelationRepox<T extends Relation<L, R>, L extends Serializable,
 
     boolean exists(L leftId, R rightId);
 
+    void delete(L leftId, R rightId);
+
     /**
      * 递增指定关系的指定数值属性值
      *

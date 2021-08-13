@@ -57,6 +57,16 @@ public abstract class JpaRelationRepoxSupport<T extends Relation<L, R>, L extend
     }
 
     @Override
+    public void delete(L leftId, R rightId) {
+        if (leftId != null && rightId != null) {
+            Map<String, Object> params = new HashMap<>();
+            StringBuffer ql = buildQlById(params, leftId, rightId);
+            ql.insert(0, "delete ");
+            getAccessTemplate().update(ql, params);
+        }
+    }
+
+    @Override
     public <N extends Number> T increaseNumber(L leftId, R rightId, String propertyName, N step, N limit) {
         double stepValue = step.doubleValue();
         if (stepValue != 0) { // 增量不为0时才处理
