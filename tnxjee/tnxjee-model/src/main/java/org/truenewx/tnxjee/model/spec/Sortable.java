@@ -10,4 +10,9 @@ public interface Sortable {
      */
     long getOrdinal();
 
+    /**
+     * @param ordinal 排序号
+     */
+    void setOrdinal(long ordinal);
+
 }
