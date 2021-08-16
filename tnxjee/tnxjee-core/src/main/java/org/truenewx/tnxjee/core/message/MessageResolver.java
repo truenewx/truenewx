@@ -64,8 +64,11 @@ public class MessageResolver {
                 String argString = (String) arg;
                 if (argString.startsWith(Strings.PLACEHOLDER_PREFIX) && argString.endsWith(
                         Strings.PLACEHOLDER_SUFFIX)) {
-                    String argCode = argString.substring(2, argString.length() - 1);
+                    String argCode = argString.substring(Strings.PLACEHOLDER_PREFIX.length(),
+                            argString.length() - Strings.PLACEHOLDER_SUFFIX.length());
                     result[i] = this.messageSource.getMessage(argCode, null, argCode, locale);
+                } else {
+                    result[i] = argString;
                 }
             } else if (arg != null) {
                 result[i] = arg.toString();
