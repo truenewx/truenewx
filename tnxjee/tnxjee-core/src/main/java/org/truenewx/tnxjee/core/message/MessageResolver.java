@@ -21,17 +21,27 @@ public class MessageResolver {
     @Autowired
     private EnumDictResolver enumDictResolver;
 
+    /**
+     * 将消息码转换为占位符形式，以便于作为占位符形式的消息参数
+     *
+     * @param code 消息码
+     * @return 占位符
+     */
+    public static String getPlaceholder(String code) {
+        return Strings.PLACEHOLDER_PREFIX + code + Strings.PLACEHOLDER_SUFFIX;
+    }
+
     public String resolveMessage(String code, Object... args) {
         return resolveMessage(code, null, args);
     }
 
     /**
-     * 解析指定异常错误码得到异常消息
+     * 解析指定消息码得到消息文本
      *
-     * @param code   异常错误码
+     * @param code   消息码
      * @param locale 区域
      * @param args   异常参数
-     * @return 异常消息
+     * @return 消息文本
      */
     public String resolveMessage(String code, Locale locale, Object... args) {
         if (locale == null) {
@@ -50,6 +60,13 @@ public class MessageResolver {
             Object arg = args[i];
             if (arg instanceof Enum<?>) {
                 result[i] = this.enumDictResolver.getText((Enum<?>) arg, locale);
+            } else if (arg instanceof String) {
+                String argString = (String) arg;
+                if (argString.startsWith(Strings.PLACEHOLDER_PREFIX) && argString.endsWith(
+                        Strings.PLACEHOLDER_SUFFIX)) {
+                    String argCode = argString.substring(2, argString.length() - 1);
+                    result[i] = this.messageSource.getMessage(argCode, null, argCode, locale);
+                }
             } else if (arg != null) {
                 result[i] = arg.toString();
             }

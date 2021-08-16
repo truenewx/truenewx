@@ -16,7 +16,7 @@ import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserConfigAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjee.service.exception.NoAccessAuthority;
+import org.truenewx.tnxjee.service.exception.NoOperationAuthorityException;
 import org.truenewx.tnxjee.service.security.access.GrantedAuthorityDecider;
 import org.truenewx.tnxjee.web.util.WebUtil;
 
@@ -39,7 +39,7 @@ public class UserAuthorityAccessDecisionManager extends UnanimousBased implement
         FilterInvocation fi = (FilterInvocation) object;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         if (!contains(fi, authorities, configAttributes)) {
-            BusinessException be = new NoAccessAuthority();
+            BusinessException be = new NoOperationAuthorityException();
             throw new AccessDeniedException(be.getLocalizedMessage(), be);
         }
     }

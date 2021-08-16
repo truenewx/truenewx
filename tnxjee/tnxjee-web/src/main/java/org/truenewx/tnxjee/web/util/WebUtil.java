@@ -217,8 +217,8 @@ public class WebUtil {
         if (StringUtils.isEmpty(s)) {
             return s;
         }
-        String begin = "${";
-        String end = "}";
+        String begin = Strings.PLACEHOLDER_PREFIX;
+        String end = Strings.PLACEHOLDER_SUFFIX;
         String[] placeholders = StringUtil.substringsBetween(s, begin, end);
         for (String placeholder : placeholders) {
             String key = placeholder.substring(begin.length(), placeholder.length() - end.length());

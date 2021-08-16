@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.core;
 
+import org.springframework.util.SystemPropertyUtils;
+
 /**
  * 字符串常量集
  *
@@ -142,7 +144,6 @@ public class Strings {
      */
     public static final String ENCODING_GBK = "GBK";
 
-
     /**
      * 简体中文
      */
@@ -157,5 +158,9 @@ public class Strings {
      * 英文
      */
     public static final String LOCALE_EN = "en";
+
+    public static final String PLACEHOLDER_PREFIX = SystemPropertyUtils.PLACEHOLDER_PREFIX;
+
+    public static final String PLACEHOLDER_SUFFIX = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
 }
