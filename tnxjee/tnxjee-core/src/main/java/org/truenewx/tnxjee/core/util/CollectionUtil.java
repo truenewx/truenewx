@@ -450,24 +450,4 @@ public class CollectionUtil {
         return list;
     }
 
-    /**
-     * 往指定集合的指定位置插入指定元素，并移除除指定元素外满足指定排除断言的元素
-     *
-     * @param list    集合
-     * @param index   插入位置
-     * @param element 插入元素
-     * @param exclude 排除断言
-     * @param <E>     元素类型
-     */
-    public static <E> void add(List<E> list, int index, E element, Predicate<E> exclude) {
-        if (list != null) {
-            list.add(index, element);
-            for (int i = list.size() - 1; i >= 0; i--) {
-                if (i != index && exclude.test(list.get(i))) {
-                    list.remove(i);
-                }
-            }
-        }
-    }
-
 }
