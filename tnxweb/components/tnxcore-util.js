@@ -716,6 +716,14 @@ export const NetUtil = {
             + '(/[0-9a-z_!~*\'().;?:@&=+$,%#-]+)+/?)$';
         return new RegExp(regex).test(s);
     },
+    /**
+     * 判断是否移动端，包括手机和平板
+     * @returns {boolean} 是否移动端
+     */
+    isMobile() {
+        let userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.contains('android') || userAgent.contains('iphone') || userAgent.contains('ipad');
+    },
 }
 
 export const DomUtil = {
