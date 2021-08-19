@@ -23,20 +23,22 @@
 function addMenuItemToTreeNodes(parentId, menuItems, treeNodes, permissions) {
     for (let i = 0; i < menuItems.length; i++) {
         const item = menuItems[i];
-        let node = {
-            id: (parentId || 'node') + '-' + i,
-            parentId: parentId,
-            label: item.permissionCaption || item.caption,
-            path: item.path,
-            permission: item.permission,
-            checked: item.permission && permissions && permissions.contains(item.permission),
-            remark: item.desc,
-        };
-        if (item.subs && item.subs.length) {
-            node.children = node.children || [];
-            addMenuItemToTreeNodes(node.id, item.subs, node.children, permissions);
+        if (item.caption) { // 有显示名称才可进行权限分配，否则只是一个隐藏的菜单项
+            let node = {
+                id: (parentId || 'node') + '-' + i,
+                parentId: parentId,
+                label: item.caption,
+                path: item.path,
+                permission: item.permission,
+                checked: item.permission && permissions && permissions.contains(item.permission),
+                remark: item.desc || item.permissionCaption,
+            };
+            if (item.subs && item.subs.length) {
+                node.children = node.children || [];
+                addMenuItemToTreeNodes(node.id, item.subs, node.children, permissions);
+            }
+            treeNodes.push(node);
         }
-        treeNodes.push(node);
     }
 }
 
