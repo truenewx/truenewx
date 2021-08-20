@@ -17,12 +17,12 @@
 }(window, document);
 // 以上来自于 http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js
 
-export const WebApp = function WebApp(appId, productContextUri) {
+export const Wechat = function Wechat(appId, productContextUri) {
     this.appId = appId;
     this.productContextUri = productContextUri; // 微信接口要求必须为生产环境域名
 }
 
-WebApp.prototype.login = function(containerId, redirectUri, options) {
+Wechat.prototype.login = function(containerId, redirectUri, options) {
     options = options || {};
     const protocol = window.location.protocol;
     const host = window.location.host;
@@ -64,4 +64,4 @@ WebApp.prototype.login = function(containerId, redirectUri, options) {
     });
 };
 
-export default WebApp;
+export default Wechat;
