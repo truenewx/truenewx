@@ -724,6 +724,14 @@ export const NetUtil = {
         let userAgent = navigator.userAgent.toLowerCase();
         return userAgent.contains('android') || userAgent.contains('iphone') || userAgent.contains('ipad');
     },
+    /**
+     * 判断是否在微信中
+     * @returns 是否在微信中
+     */
+    isWechat() {
+        let userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.contains('micromessenger');
+    }
 }
 
 export const DomUtil = {
