@@ -22,46 +22,55 @@ export const Wechat = function Wechat(appId, productContextUri) {
     this.productContextUri = productContextUri; // 微信接口要求必须为生产环境域名
 }
 
-Wechat.prototype.login = function(containerId, redirectUri, options) {
-    options = options || {};
-    const protocol = window.location.protocol;
-    const host = window.location.host;
-
-    let url = protocol + '//' + this.productContextUri;
+Wechat.prototype._standardizeRedirectUri = function(redirectUri) {
+    let protocol = window.location.protocol;
+    let host = window.location.host;
+    let uri = protocol + '//' + this.productContextUri;
     if (this.productContextUri.startsWith(host)) {
-        url += redirectUri;
+        uri += redirectUri;
     } else { // 不是生产环境则借助于生产环境的直接重定向能力进行再跳转
-        url += '/redirect/';
+        uri += '/redirect/';
         if (redirectUri.startsWith('/')) { // 目标跳转地址是相对地址，则加上当前网站根地址
-            url += protocol.substr(0, protocol.length - 1) + '/' + host + redirectUri;
+            uri += protocol.substr(0, protocol.length - 1) + '/' + host + redirectUri;
         } else { // 不以/开头，视为绝对地址
             let index = redirectUri.indexOf('://');
             if (index < 0) { // 绝对地址中一定包含://
                 console.error('错误的跳转目标地址：' + redirectUri);
                 return;
             }
-            url += redirectUri.substr(0, index); // 协议部分
-            url += redirectUri.substr(index + 2);
+            uri += redirectUri.substr(0, index); // 协议部分
+            uri += redirectUri.substr(index + 2);
         }
     }
+    return encodeURI(uri);
+}
 
-    let state = undefined;
-    if (options.state) {
-        state = JSON.stringify(options.state);
+Wechat.prototype._standardizeState = function(state) {
+    if (state) {
+        state = JSON.stringify(state);
         state = window.tnx.util.base64.encode(state);
     }
+    return state;
+}
+
+Wechat.prototype.login = function(containerId, redirectUri, options) {
+    options = options || {};
     if (options.cssHref && options.cssHref.startsWith('/')) {
-        options.cssHref = protocol + '//' + host + options.cssHref;
+        options.cssHref = window.location.protocol + '//' + window.location.host + options.cssHref;
     }
 
     new window.WxLogin({
         id: containerId,
         appid: this.appId,
         scope: "snsapi_login",
-        redirect_uri: encodeURI(url),
+        redirect_uri: this._standardizeRedirectUri(redirectUri),
         href: options.cssHref,
-        state: state,
+        state: this._standardizeState(options.state),
     });
 };
+
+Wechat.prototype.authorize = function(redirectUri, silent, state) {
+
+}
 
 export default Wechat;
