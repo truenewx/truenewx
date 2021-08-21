@@ -22,11 +22,11 @@ export const Wechat = function Wechat(appId, productContextUri) {
     this.productContextUri = productContextUri; // 微信接口要求必须为生产环境域名
 }
 
-Wechat.prototype._standardizeRedirectUri = function(redirectUri) {
+function standardizeRedirectUri(redirectUri, productContextUri) {
     let protocol = window.location.protocol;
     let host = window.location.host;
-    let uri = protocol + '//' + this.productContextUri;
-    if (this.productContextUri.startsWith(host)) {
+    let uri = protocol + '//' + productContextUri;
+    if (productContextUri.startsWith(host)) {
         uri += redirectUri;
     } else { // 不是生产环境则借助于生产环境的直接重定向能力进行再跳转
         uri += '/redirect/';
@@ -45,10 +45,12 @@ Wechat.prototype._standardizeRedirectUri = function(redirectUri) {
     return encodeURI(uri);
 }
 
-Wechat.prototype._standardizeState = function(state) {
+function standardizeState(state) {
     if (state) {
         state = JSON.stringify(state);
         state = window.tnx.util.base64.encode(state);
+    } else {
+        state = '';
     }
     return state;
 }
@@ -63,14 +65,23 @@ Wechat.prototype.login = function(containerId, redirectUri, options) {
         id: containerId,
         appid: this.appId,
         scope: "snsapi_login",
-        redirect_uri: this._standardizeRedirectUri(redirectUri),
+        redirect_uri: standardizeRedirectUri(redirectUri, this.productContextUri),
         href: options.cssHref,
-        state: this._standardizeState(options.state),
+        state: standardizeState(options.state),
     });
 };
 
-Wechat.prototype.authorize = function(redirectUri, silent, state) {
-
+Wechat.prototype.authorize = function(redirectUri, state, silent) {
+    // 请求参数有严格的顺序要求，不能更改参数顺序
+    let url = window.location.protocol + '//open.weixin.qq.com/connect/oauth2/authorize?appid=' + this.appId;
+    url += '&redirect_uri=' + standardizeRedirectUri(redirectUri, this.productContextUri);
+    url += '&response_type=code';
+    url += '&scope=' + (silent ? 'snsapi_base' : 'snsapi_userinfo');
+    state = standardizeState(state);
+    if (state) {
+        url += '&state=' + state;
+    }
+    window.location.href = url;
 }
 
 export default Wechat;
