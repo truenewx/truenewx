@@ -450,4 +450,13 @@ public class CollectionUtil {
         return list;
     }
 
+    public static <E> int indexOf(List<E> list, Predicate<E> predicate) {
+        for (int i = 0; i < list.size(); i++) {
+            if (predicate.test(list.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 }
