@@ -190,6 +190,12 @@ el-header ul.tnxel-nav,
     line-height: 48px;
 }
 
+.el-form-item--feedback.is-success .el-input__inner,
+.el-form-item--feedback.is-error .el-input__inner {
+    padding-right: 2rem;
+    text-overflow: ellipsis;
+}
+
 .el-form-item--feedback .ignore-feedback .el-input__inner {
     border-color: #DCDFE6;
 }
@@ -198,25 +204,16 @@ el-header ul.tnxel-nav,
     display: none;
 }
 
-.el-form-item__error--inline {
-    margin: 2px 0;
-    padding-top: 0;
-}
-
-.el-col-24 + .el-form-item__error--inline {
-    position: absolute;
-    top: 100%;
-}
-
-:not(.el-col-24) + .el-form-item__error--inline {
-    margin-left: 10px;
-}
-
 .el-form-item__content {
     min-height: 40px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+}
+
+.el-form-item__content > :first-child:not(.w-100),
+.el-form-item__content > :first-child:not(.el-col-24) {
+    margin-right: 0.5rem;
 }
 
 .el-form-item__content > p {
@@ -234,6 +231,27 @@ el-header ul.tnxel-nav,
     align-items: center;
 }
 
+/*
+ * 垂直表单的字段错误
+ */
+.el-form-item__error {
+    padding-top: 0.5rem;
+}
+
+/*
+ * 水平表单的字段错误
+ */
+.el-form-item__error--inline {
+    margin: 2px 0;
+    padding-top: 0;
+}
+
+.w-100 + .el-form-item__error--inline,
+.el-col-24 + .el-form-item__error--inline {
+    position: absolute;
+    top: 100%;
+}
+
 .form-item-tip {
     font-size: 0.75rem;
     line-height: 1;
@@ -243,6 +261,10 @@ el-header ul.tnxel-nav,
 div.form-item-tip {
     margin-top: 0.5rem;
     width: 100%;
+}
+
+div.form-item-tip + .el-form-item__error {
+    position: relative;
 }
 
 span.form-item-tip {
