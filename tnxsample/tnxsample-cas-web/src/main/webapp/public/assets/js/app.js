@@ -10,7 +10,7 @@ const appInitIntervalNo = setInterval(function() {
         util = tnx.util;
         app = tnx.app;
         app.init(function() {
-            app.rpc.setBaseUrl(app.context);
+            app.rpc.loadConfig(app.context);
         });
     }
 }, 500);

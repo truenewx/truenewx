@@ -197,7 +197,7 @@ const app = {
         }
         return href;
     },
-    init(container, callback) {
+    init(container, beforeLoad, afterLoad) {
         // 初始化app环境
         const context = util.dom.getMetaContent('app.context');
         if (context) {
@@ -206,14 +206,18 @@ const app = {
         this.version = util.dom.getMetaContent('app.version');
 
         if (typeof container === 'function') {
-            callback = container;
+            afterLoad = afterLoad;
+            beforeLoad = container;
             container = undefined;
+        }
+        if (typeof beforeLoad === 'function') {
+            beforeLoad();
         }
         const _this = this;
         this._loadLinks(container, function() {
             _this._loadScripts(container, function() {
-                if (typeof callback === 'function') {
-                    callback.call();
+                if (typeof afterLoad === 'function') {
+                    afterLoad();
                 }
             });
         });
