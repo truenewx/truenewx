@@ -43,6 +43,8 @@ import org.truenewx.tnxjee.model.spec.enums.Program;
  */
 public class WebUtil {
 
+    private static final String HEADER_UNKNOWN = "unknown";
+
     private WebUtil() {
     }
 
@@ -245,6 +247,27 @@ public class WebUtil {
     }
 
     /**
+     * 从指定HTTP请求中获取访问的协议名称，如：http、https<br/>
+     * 如果使用了nginx，则nginx配置中需添加：proxy_set_header X-Forwarded-Proto $scheme;
+     *
+     * @param request HTTP请求
+     * @return 访问的协议名称
+     */
+    public static String getProtocol(HttpServletRequest request) {
+        String protocol = request.getHeader("X-Forwarded-Proto");
+        if (StringUtils.isNotBlank(protocol) && !HEADER_UNKNOWN.equalsIgnoreCase(protocol)) {
+            // 多次反向代理后会有多个值，第一个为真实值。
+            int index = protocol.indexOf(Strings.COMMA);
+            if (index >= 0) {
+                return protocol.substring(0, index);
+            } else {
+                return protocol;
+            }
+        }
+        return request.getScheme();
+    }
+
+    /**
      * 从指定HTTP请求中获取访问的主机地址（域名/IP[:端口]）
      *
      * @param request      HTTP请求
@@ -263,8 +286,7 @@ public class WebUtil {
      * @return 访问的主机地址含协议
      */
     public static String getProtocolAndHost(HttpServletRequest request) {
-        String url = request.getRequestURL().toString();
-        return request.getScheme() + "://" + NetUtil.getHost(url, true);
+        return getProtocol(request) + "://" + getHost(request, true);
     }
 
     /**
@@ -506,25 +528,24 @@ public class WebUtil {
 
     /**
      * 获取访问者ip地址<br>
-     * 如果使用了nginx，则nginx配置中需添加 proxy_set_header X-Real-IP $remote_addr;
+     * 如果使用了nginx，则nginx配置中需添加：proxy_set_header X-Real-IP $remote_addr;
      */
     public static String getRemoteAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-Real-IP");
-        if (!StringUtils.isEmpty(ip) && !"unknown".equalsIgnoreCase(ip)) {
+        if (StringUtils.isNotBlank(ip) && !HEADER_UNKNOWN.equalsIgnoreCase(ip)) {
             return ip;
         }
         ip = request.getHeader("X-Forwarded-For");
-        if (!StringUtils.isEmpty(ip) && !"unknown".equalsIgnoreCase(ip)) {
-            // 多次反向代理后会有多个IP值，第一个为真实IP。
-            int index = ip.indexOf(',');
+        if (StringUtils.isNotBlank(ip) && !HEADER_UNKNOWN.equalsIgnoreCase(ip)) {
+            // 多次反向代理后会有多个值，第一个为真实值。
+            int index = ip.indexOf(Strings.COMMA);
             if (index >= 0) {
                 return ip.substring(0, index);
             } else {
                 return ip;
             }
-        } else {
-            return request.getRemoteAddr();
         }
+        return request.getRemoteAddr();
     }
 
     /**

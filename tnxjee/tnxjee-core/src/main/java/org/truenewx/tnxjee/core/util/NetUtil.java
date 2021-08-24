@@ -311,11 +311,6 @@ public class NetUtil {
         return url;
     }
 
-    public static void main(String[] args) {
-        String url = "http://localhost:8881/user/login?service=user";
-        System.out.println(removeParams(url, Arrays.asList("service")));
-    }
-
     /**
      * 下载指定URL和参数表示的资源到指定本地文件
      *
@@ -521,11 +516,16 @@ public class NetUtil {
         if (index >= 0) {
             url = url.substring(0, index);
         }
-        if (!portPossible) {
-            index = url.indexOf(Strings.COLON);
-            if (index >= 0) {
-                url = url.substring(0, index);
+        index = url.indexOf(Strings.COLON);
+        if (index >= 0 && portPossible) { // 即使需要带上可能的端口号，但80和443端口必须忽略
+            String portString = url.substring(index + 1);
+            int port = MathUtil.parseInt(portString);
+            if (port != 80 && port != 443) {
+                index = -1;
             }
+        }
+        if (index >= 0) {
+            url = url.substring(0, index);
         }
         return url;
     }
