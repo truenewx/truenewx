@@ -46,13 +46,17 @@ function standardizeRedirectUri(redirectUri, productContextUri) {
 }
 
 function standardizeState(state) {
-    if (state) {
-        state = JSON.stringify(state);
-        state = window.tnx.util.base64.encode(state);
-    } else {
-        state = '';
+    let stateString = '';
+    if (typeof state === 'object') {
+        stateString = JSON.stringify(state);
+        stateString = window.tnx.util.base64.encode(stateString);
+        if (stateString.length > 128) {
+            delete state._next;
+            stateString = JSON.stringify(state);
+            stateString = window.tnx.util.base64.encode(stateString);
+        }
     }
-    return state;
+    return stateString;
 }
 
 Wechat.prototype.login = function(containerId, redirectUri, options) {
