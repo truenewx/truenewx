@@ -68,9 +68,9 @@ public abstract class WechatAuthenticationTokenResolver
 
     public WechatUser resolveUser(HttpServletRequest request) {
         String loginCode = getParam(request, PARAMETER_CODE);
-        return getAccessor().loadUser(loginCode);
+        return getAccessor(request).loadUser(loginCode);
     }
 
-    protected abstract WechatAppAccessor getAccessor();
+    protected abstract WechatAppAccessor getAccessor(HttpServletRequest request);
 
 }
