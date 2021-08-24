@@ -702,3 +702,7 @@ i.el-tooltip {
 .el-popover__reference-wrapper {
     cursor: pointer;
 }
+
+.el-button.w-100 + .el-button {
+    margin-left: 0;
+}
