@@ -206,7 +206,7 @@ const app = {
         this.version = util.dom.getMetaContent('app.version');
 
         if (typeof container === 'function') {
-            afterLoad = afterLoad;
+            afterLoad = beforeLoad;
             beforeLoad = container;
             container = undefined;
         }
