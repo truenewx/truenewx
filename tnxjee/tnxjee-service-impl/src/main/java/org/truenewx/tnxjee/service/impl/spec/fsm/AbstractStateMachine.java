@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
-import org.truenewx.tnxjee.service.exception.NoOperationAuthorityException;
+import org.truenewx.tnxjee.service.exception.NoDataOperateAuthorityException;
 import org.truenewx.tnxjee.service.impl.ServiceSupport;
 import org.truenewx.tnxjee.service.spec.fsm.StateIntransitableException;
 import org.truenewx.tnxjee.service.spec.fsm.StateMachine;
@@ -84,7 +84,7 @@ public abstract class AbstractStateMachine<U extends Unity<K>, K extends Seriali
             throw new StateIntransitableException(state, transition);
         }
         if (!action.check(userIdentity, unity)) {
-            throw new NoOperationAuthorityException();
+            throw new NoDataOperateAuthorityException();
         }
         Object condition = getCondition(userIdentity, unity, context);
         S endState = action.getEndState(state, condition);

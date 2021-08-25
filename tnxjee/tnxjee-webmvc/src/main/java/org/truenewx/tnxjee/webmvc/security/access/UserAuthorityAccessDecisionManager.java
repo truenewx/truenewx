@@ -3,7 +3,10 @@ package org.truenewx.tnxjee.webmvc.security.access;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.vote.UnanimousBased;
@@ -12,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.web.method.HandlerMethod;
+import org.truenewx.tnxjee.core.caption.CaptionUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserConfigAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
@@ -19,11 +24,15 @@ import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.exception.NoOperationAuthorityException;
 import org.truenewx.tnxjee.service.security.access.GrantedAuthorityDecider;
 import org.truenewx.tnxjee.web.util.WebUtil;
+import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 
 /**
  * 基于用户权限的访问判定管理器
  */
 public class UserAuthorityAccessDecisionManager extends UnanimousBased implements GrantedAuthorityDecider {
+
+    @Autowired
+    private HandlerMethodMapping handlerMethodMapping;
 
     public UserAuthorityAccessDecisionManager() {
         // 让父类判断方法校验Web表达式形式的权限
@@ -39,7 +48,13 @@ public class UserAuthorityAccessDecisionManager extends UnanimousBased implement
         FilterInvocation fi = (FilterInvocation) object;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         if (!contains(fi, authorities, configAttributes)) {
-            BusinessException be = new NoOperationAuthorityException();
+            HttpServletRequest request = fi.getRequest();
+            HandlerMethod handlerMethod = this.handlerMethodMapping.getHandlerMethod(request);
+            String operation = CaptionUtil.getCaption(handlerMethod.getMethod(), request.getLocale());
+            if (operation == null) {
+                operation = WebUtil.getRelativeRequestAction(request);
+            }
+            BusinessException be = new NoOperationAuthorityException(operation);
             throw new AccessDeniedException(be.getLocalizedMessage(), be);
         }
     }
