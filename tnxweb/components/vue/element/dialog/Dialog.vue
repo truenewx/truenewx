@@ -158,12 +158,4 @@ export default {
 .dialog-footer .el-button {
     margin-left: 10px;
 }
-
-.el-message-box {
-    width: unset;
-    min-width: 256px;
-    max-width: 512px;
-    word-wrap: break-word;
-    word-break: normal;
-}
 </style>

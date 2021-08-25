@@ -339,6 +339,11 @@ el-button {
 
 .el-message-box {
     vertical-align: unset;
+    width: unset;
+    min-width: 256px;
+    max-width: min(100vw, 512px);
+    word-wrap: break-word;
+    word-break: normal;
 }
 
 .el-message-box .el-message-box__btns {
