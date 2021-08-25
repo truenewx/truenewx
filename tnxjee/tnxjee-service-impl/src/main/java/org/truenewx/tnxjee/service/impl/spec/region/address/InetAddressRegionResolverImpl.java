@@ -14,10 +14,9 @@ import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 
 /**
- * 网络地址->区划解决器实现
+ * 网络地址转换为行政区划的解决器实现
  *
  * @author jianglei
- * 
  */
 public class InetAddressRegionResolverImpl implements InetAddressRegionResolver {
     private RegionInetAddressSetMapSource regionInetAddressSetMapSource;
@@ -25,8 +24,7 @@ public class InetAddressRegionResolverImpl implements InetAddressRegionResolver 
     private File cacheFile;
     private int storeCachePerSize = 10;
 
-    public void setRegionInetAddressSetMapSource(
-            RegionInetAddressSetMapSource regionInetAddressSetMapSource) {
+    public void setRegionInetAddressSetMapSource(RegionInetAddressSetMapSource regionInetAddressSetMapSource) {
         this.regionInetAddressSetMapSource = regionInetAddressSetMapSource;
     }
 

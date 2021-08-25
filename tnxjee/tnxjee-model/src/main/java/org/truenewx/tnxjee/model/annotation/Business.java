@@ -1,17 +1,12 @@
 package org.truenewx.tnxjee.model.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 import org.springframework.core.annotation.AliasFor;
 import org.truenewx.tnxjee.core.Strings;
 
 /**
- * 标注类、方法、构造函数具有业务逻辑<br/>
+ * 标注类、方法、构造函数具有业务逻辑<br>
  * 一般用于原则上不应该具有业务逻辑的地方，由于某些原因具有了业务逻辑，标注出来以便于维护
  *
  * @author jianglei

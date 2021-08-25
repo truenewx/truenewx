@@ -21,20 +21,20 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * 财付通http或者https网络通信客户端<br/>
- * ========================================================================<br/>
- * api说明：<br/>
- * setReqContent($reqContent),设置请求内容，无论post和get，都用get方式提供<br/>
- * getResContent(), 获取应答内容<br/>
- * setMethod(method),设置请求方法,post或者get<br/>
- * getErrInfo(),获取错误信息<br/>
- * setCertInfo(certFile, certPasswd),设置证书，双向https时需要使用<br/>
- * setCaInfo(caFile), 设置CA，格式未pem，不设置则不检查<br/>
- * setTimeOut(timeOut)， 设置超时时间，单位秒<br/>
- * getResponseCode(), 取返回的http状态码<br/>
- * call(),真正调用接口<br/>
- * getCharset()/setCharset(),字符集编码<br/>
- * ========================================================================<br/>
+ * 财付通http或者https网络通信客户端<br>
+ * ========================================================================<br>
+ * api说明：<br>
+ * setReqContent($reqContent),设置请求内容，无论post和get，都用get方式提供<br>
+ * getResContent(), 获取应答内容<br>
+ * setMethod(method),设置请求方法,post或者get<br>
+ * getErrInfo(),获取错误信息<br>
+ * setCertInfo(certFile, certPasswd),设置证书，双向https时需要使用<br>
+ * setCaInfo(caFile), 设置CA，格式未pem，不设置则不检查<br>
+ * setTimeOut(timeOut)， 设置超时时间，单位秒<br>
+ * getResponseCode(), 取返回的http状态码<br>
+ * call(),真正调用接口<br>
+ * getCharset()/setCharset(),字符集编码<br>
+ * ========================================================================<br>
  */
 class TenpayHttpClient {
 

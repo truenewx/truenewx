@@ -224,7 +224,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     }
 
     /**
-     * 获取下载路径前缀<br/>
+     * 获取下载路径前缀<br>
      * 子类如果覆写，必须与download()方法的路径前缀相同
      *
      * @return 下载路径前缀

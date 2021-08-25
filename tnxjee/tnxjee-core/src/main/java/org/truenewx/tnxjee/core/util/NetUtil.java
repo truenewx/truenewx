@@ -1,8 +1,27 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,8 +163,7 @@ public class NetUtil {
      * @return 指定主机地址是否本机地址
      */
     public static boolean isLocalHost(String host) {
-        return "localhost".equals(host) || "127.0.0.1".equals(host)
-                || "0:0:0:0:0:0:0:1".equals(host);
+        return "localhost".equals(host) || "127.0.0.1".equals(host) || "0:0:0:0:0:0:0:1".equals(host);
     }
 
     /**
@@ -157,8 +175,7 @@ public class NetUtil {
     public static boolean isIntranetAddress(InetAddress address) {
         byte[] b = address.getAddress();
         // 暂只考虑IPv4
-        return b.length == 4 && ((b[0] == 192 && b[1] == 168) || b[0] == 10
-                || (b[0] == 172 && b[1] >= 16 && b[1] <= 31)
+        return b.length == 4 && ((b[0] == 192 && b[1] == 168) || b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31)
                 || (b[0] == 127 && b[1] == 0 && b[2] == 0 && b[3] == 1));
     }
 
@@ -174,7 +191,7 @@ public class NetUtil {
     }
 
     /**
-     * 将指定参数集合转换为参数字符串，形如: a=1&b=true
+     * 将指定参数集合转换为参数字符串，形如: a=1&amp;b=true
      *
      * @param params   参数集合
      * @param encoding 字符编码
@@ -189,17 +206,14 @@ public class NetUtil {
             if (value != null) {
                 if (value instanceof Collection) {
                     for (Object o : (Collection<Object>) value) {
-                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding))
-                                .append(Strings.AND);
+                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding)).append(Strings.AND);
                     }
                 } else if (value instanceof Object[]) {
                     for (Object o : (Object[]) value) {
-                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding))
-                                .append(Strings.AND);
+                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding)).append(Strings.AND);
                     }
                 } else {
-                    result.append(key).append(Strings.EQUAL).append(encodeParam(value, encoding))
-                            .append(Strings.AND);
+                    result.append(key).append(Strings.EQUAL).append(encodeParam(value, encoding)).append(Strings.AND);
                 }
             }
         }
@@ -221,7 +235,7 @@ public class NetUtil {
     }
 
     /**
-     * 将指定参数字符串（形如: a=1&b=true）转换为Map参数集合
+     * 将指定参数字符串（形如: a=1&amp;b=true）转换为Map参数集合
      *
      * @param paramString 参数字符串
      * @return 参数集合

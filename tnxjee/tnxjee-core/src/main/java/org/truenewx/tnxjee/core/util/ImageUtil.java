@@ -1,19 +1,8 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Iterator;
@@ -84,7 +73,7 @@ public class ImageUtil {
     }
 
     /**
-     * 以圆切形式裁剪指定图片<br/>
+     * 以圆切形式裁剪指定图片<br>
      * 注意：由于圆心坐标会在显示屏中占据一个像素位置，加上半径后，实际的圆切直径会比预期的大一个像素，不符合预期，故无法使用圆心定位方式
      *
      * @param source   被裁剪的源图片
@@ -386,7 +375,7 @@ public class ImageUtil {
     }
 
     /**
-     * 将指定源图片覆盖至指定目标图片上的指定位置，目标图片内容被更改。<br/>
+     * 将指定源图片覆盖至指定目标图片上的指定位置，目标图片内容被更改。<br>
      * 如果要覆盖的坐标区域与目标图片没有重合部分，则目标图片没有变化；如果要覆盖的坐标区域超出目标图片范围，则超出的部分被裁剪忽略
      *
      * @param source 源图片

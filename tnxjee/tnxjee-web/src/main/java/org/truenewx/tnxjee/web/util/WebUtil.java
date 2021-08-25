@@ -247,7 +247,7 @@ public class WebUtil {
     }
 
     /**
-     * 从指定HTTP请求中获取访问的协议名称，如：http、https<br/>
+     * 从指定HTTP请求中获取访问的协议名称，如：http、https<br>
      * 如果使用了nginx，则nginx配置中需添加：proxy_set_header X-Forwarded-Proto $scheme;
      *
      * @param request HTTP请求

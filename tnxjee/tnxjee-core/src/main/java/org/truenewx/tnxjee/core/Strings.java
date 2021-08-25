@@ -113,9 +113,6 @@ public class Strings {
      */
     public static final String AND = "&";
 
-    /**
-     * @
-     */
     public static final String AT = "@";
 
     /**
@@ -137,7 +134,6 @@ public class Strings {
      * 字符编码：UTF-8
      */
     public static final String ENCODING_UTF8 = "UTF-8";
-
 
     /**
      * 字符编码：GBK

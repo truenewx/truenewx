@@ -22,7 +22,7 @@ public class OqlUtil {
     }
 
     /**
-     * 根据指定查询排序序列构建排序语句，以 order by 开头<br/>
+     * 根据指定查询排序序列构建排序语句，以 order by 开头<br>
      * 如果无排序设置，则返回空字符串
      *
      * @param orders 查询排序序列
@@ -33,7 +33,7 @@ public class OqlUtil {
     }
 
     /**
-     * 根据指定查询排序序列构建排序语句，以 order by 开头<br/>
+     * 根据指定查询排序序列构建排序语句，以 order by 开头<br>
      * 如果无排序设置，则返回空字符串
      *
      * @param orders 查询排序序列

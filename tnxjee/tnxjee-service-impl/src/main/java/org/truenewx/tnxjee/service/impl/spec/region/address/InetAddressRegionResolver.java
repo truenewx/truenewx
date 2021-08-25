@@ -3,10 +3,9 @@ package org.truenewx.tnxjee.service.impl.spec.region.address;
 import java.net.InetAddress;
 
 /**
- * 网络地址->区划解决器
+ * 网络地址转换为行政区划的解决器
  *
  * @author jianglei
- * 
  */
 public interface InetAddressRegionResolver {
     /**

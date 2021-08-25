@@ -15,7 +15,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * 不能包含字符串约束<br/>
+ * 不能包含字符串约束<br>
  * 注意：不支持限制空格
  *
  * @author jianglei

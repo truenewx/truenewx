@@ -17,7 +17,7 @@ public interface RegionSource {
     NationalRegionSource getNationalRegionSource(String nationCode);
 
     /**
-     * 获取指定行政区划，其显示名为指定显示区域下的文本<br/>
+     * 获取指定行政区划，其显示名为指定显示区域下的文本<br>
      *
      * @param regionCode 行政区划代号
      * @param locale     显示区域

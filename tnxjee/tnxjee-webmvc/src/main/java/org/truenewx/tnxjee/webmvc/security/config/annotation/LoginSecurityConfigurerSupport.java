@@ -49,7 +49,7 @@ public abstract class LoginSecurityConfigurerSupport<F extends AbstractAuthentic
     }
 
     /**
-     * 创建处理过滤器<br/>
+     * 创建处理过滤器<br>
      * 注意：该过滤器创建后还需经过框架的后续配置才可使用，所以不能通过从它处注入后获取返回
      *
      * @return 处理过滤器

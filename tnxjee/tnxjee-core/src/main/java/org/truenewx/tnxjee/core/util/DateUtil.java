@@ -36,8 +36,7 @@ public class DateUtil {
     /**
      * 长日期格式
      */
-    public static final String LONG_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + Strings.SPACE
-            + DateUtil.TIME_PATTERN;
+    public static final String LONG_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + Strings.SPACE + DateUtil.TIME_PATTERN;
     /**
      * 没分隔符长日期格式
      */
@@ -291,8 +290,7 @@ public class DateUtil {
      * @param millisecond 毫秒
      * @return 日期
      */
-    public static Date createDate(int year, int month, int day, int hour, int minute, int second,
-            int millisecond) {
+    public static Date createDate(int year, int month, int day, int hour, int minute, int second, int millisecond) {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, month - 1); // 月份从0开始
@@ -323,8 +321,8 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定月数后的日期值。若月数为负，则实际进行减操作。
      *
-     * @param date 原日期
-     * @param days 月数
+     * @param date   原日期
+     * @param months 月数
      * @return 计算后的新日期
      */
     public static Date addMonths(Date date, int months) {
@@ -371,8 +369,8 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定分钟数后的日期值。若分钟数为负，则实际进行减操作。
      *
-     * @param date  原日期
-     * @param hours 分钟数
+     * @param date    原日期
+     * @param minutes 分钟数
      * @return 计算后的新日期
      */
     public static Date addMinutes(Date date, int minutes) {
@@ -432,8 +430,7 @@ public class DateUtil {
         return c == null ? null : c.getTime();
     }
 
-    private static Calendar setTimeToCalendar(Date date, int hour, int minute, int second,
-            int millisecond) {
+    private static Calendar setTimeToCalendar(Date date, int hour, int minute, int second, int millisecond) {
         Calendar c = getCalendar(date);
         if (c == null) {
             return null;

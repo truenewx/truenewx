@@ -212,7 +212,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     /**
-     * 从指定文件中读取内容并构建枚举类型<br/>
+     * 从指定文件中读取内容并构建枚举类型<br>
      * 如果指定配置文件不存在，或文件中没有指定的枚举类型，则返回null
      *
      * @param reader   XML读取器

@@ -125,7 +125,7 @@ public class AdditionalCaptionUtil {
     }
 
     /**
-     * 抽取指定bean中的所有附加显示名称字段为Map<br/>
+     * 抽取指定bean中的所有附加显示名称字段为Map<br>
      *
      * @param bean Bean对象
      * @return 附加显示名称Map

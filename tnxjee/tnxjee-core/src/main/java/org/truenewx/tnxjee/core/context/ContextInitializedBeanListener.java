@@ -12,7 +12,7 @@ import org.truenewx.tnxjee.core.beans.ContextInitializedBeanProxy;
 import org.truenewx.tnxjee.core.util.LogUtil;
 
 /**
- * 容器初始化完成后执行bean的监听器，找出所有容器初始化完成后执行bean并在容器初始化完成后执行。<br/>
+ * 容器初始化完成后执行bean的监听器，找出所有容器初始化完成后执行bean并在容器初始化完成后执行。<br>
  * 如果一个bean具有代理，则只执行代理
  *
  * @author jianglei

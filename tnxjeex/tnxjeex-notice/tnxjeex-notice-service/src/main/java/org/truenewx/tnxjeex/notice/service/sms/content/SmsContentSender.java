@@ -3,7 +3,7 @@ package org.truenewx.tnxjeex.notice.service.sms.content;
 import org.truenewx.tnxjeex.notice.model.sms.SmsNotifyResult;
 
 /**
- * 短信内容发送器<br/>
+ * 短信内容发送器<br>
  * 仅负责发送提供的短信内容，不管内容如何生成
  *
  * @author jianglei

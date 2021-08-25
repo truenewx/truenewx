@@ -20,7 +20,7 @@ public interface EnumDictResolver extends TextResolver {
     EnumType getEnumType(String type, Locale locale);
 
     /**
-     * 获取指定类型和子类型确定的枚举子类型<br/>
+     * 获取指定类型和子类型确定的枚举子类型<br>
      * 如果无法找到则尝试构建，如果构建也失败，则返回null
      *
      * @param type    枚举类型

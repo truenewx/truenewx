@@ -12,16 +12,16 @@ import org.jdom.JDOMException;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 
 /**
- * 后台应答类<br/>
- * ========================================================================<br/>
- * api说明：<br/>
- * getKey()/setKey(),获取/设置密钥<br/>
- * getContent() / setContent(), 获取/设置原始内容<br/>
- * getParameter()/setParameter(),获取/设置参数值<br/>
- * getAllParameters(),获取所有参数<br/>
- * isTenpaySign(),是否财付通签名,true:是 false:否<br/>
- * getDebugInfo(),获取debug信息<br/>
- * ========================================================================<br/>
+ * 后台应答类<br>
+ * ========================================================================<br>
+ * api说明：<br>
+ * getKey()/setKey(),获取/设置密钥<br>
+ * getContent() / setContent(), 获取/设置原始内容<br>
+ * getParameter()/setParameter(),获取/设置参数值<br>
+ * getAllParameters(),获取所有参数<br>
+ * isTenpaySign(),是否财付通签名,true:是 false:否<br>
+ * getDebugInfo(),获取debug信息<br>
+ * ========================================================================<br>
  */
 class ClientResponseHandler {
 

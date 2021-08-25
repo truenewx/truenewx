@@ -1,16 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.10.RELEASE</version>
-        <relativePath/>
+        <groupId>org.truenewx</groupId>
+        <artifactId>truenewx</artifactId>
+        <version>2.2.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.truenewx</groupId>
     <artifactId>tnxjee</artifactId>
-    <version>2.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>tnxjee-core</module>
@@ -31,12 +28,11 @@
         <url>https://github.com/truenewx</url>
     </organization>
     <name>tnxjee</name>
-    <url>https://github.com/truenewx/tnxjee</url>
     <description>互联网技术解决方案：服务端JavaEE技术框架</description>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <tnxjee.version>2.2.0</tnxjee.version>
+        <tnxjee.version>2.2.1</tnxjee.version>
         <feign.version>10.10.1</feign.version>
         <swagger.version>2.9.2</swagger.version>
     </properties>

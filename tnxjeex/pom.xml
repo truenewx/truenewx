@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.truenewx</groupId>
         <artifactId>tnxjee</artifactId>
-        <version>2.2.0</version>
-        <relativePath/>
+        <version>2.2.1</version>
+        <relativePath>../tnxjee/pom.xml</relativePath>
     </parent>
     <artifactId>tnxjeex</artifactId>
     <packaging>pom</packaging>
@@ -19,6 +18,12 @@
         <module>tnxjeex-payment</module>
         <module>tnxjeex-seata</module>
     </modules>
+    <name>tnxjeex</name>
+    <description>基于tnxjee的通用业务支持框架集</description>
+    <organization>
+        <name>truenewx</name>
+        <url>https://github.com/truenewx</url>
+    </organization>
     <dependencyManagement>
         <dependencies><!-- ${project.version}是实际子工程的版本号，此处不能采用 -->
             <dependency>

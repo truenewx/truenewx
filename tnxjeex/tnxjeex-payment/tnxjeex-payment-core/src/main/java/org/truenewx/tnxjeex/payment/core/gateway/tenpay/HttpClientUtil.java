@@ -27,7 +27,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 /**
- * Http客户端工具类<br/>
+ * Http客户端工具类<br>
  * 这是内部调用类，请不要在外部调用。
  */
 class HttpClientUtil {
@@ -105,7 +105,7 @@ class HttpClientUtil {
     }
 
     /**
-     * 查询字符串转换成Map<br/>
+     * 查询字符串转换成Map<br>
      * name1=key1&name2=key2&...
      *
      * @param queryString
@@ -128,7 +128,7 @@ class HttpClientUtil {
     }
 
     /**
-     * 把键值添加至Map<br/>
+     * 把键值添加至Map<br>
      * pair:name=value
      *
      * @param pair name=value
@@ -153,7 +153,7 @@ class HttpClientUtil {
     }
 
     /**
-     * BufferedReader转换成String<br/>
+     * BufferedReader转换成String<br>
      * 注意:流关闭需要自行处理
      *
      * @param reader
@@ -172,7 +172,7 @@ class HttpClientUtil {
     }
 
     /**
-     * 处理输出<br/>
+     * 处理输出<br>
      * 注意:流关闭需要自行处理
      *
      * @param out

@@ -6,7 +6,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
 
 /**
- * 只包含一个异常信息的单异常<br/>
+ * 只包含一个异常信息的单异常<br>
  * 仅作为标识，在进行异常处理时便于判断
  *
  * @author jianglei

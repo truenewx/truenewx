@@ -4,19 +4,8 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -36,7 +25,7 @@ import org.springframework.util.ClassUtils;
 import org.truenewx.tnxjee.core.Strings;
 
 /**
- * 类的工具类<br/>
+ * 类的工具类<br>
  * 本类中的方法只与Class有关，不与某个具体Object相关
  *
  * @author jianglei
@@ -102,7 +91,7 @@ public class ClassUtil {
     }
 
     /**
-     * 获取指定类的源于其父类的实际泛型类型集<br/>
+     * 获取指定类的源于其父类的实际泛型类型集<br>
      * 如果指定类没有父类，或者父类没有泛型，则返回长度为0的空数组
      *
      * @param clazz 指定了父类实际泛型的类

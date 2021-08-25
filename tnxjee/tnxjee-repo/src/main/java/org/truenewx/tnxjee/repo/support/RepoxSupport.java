@@ -21,7 +21,7 @@ public abstract class RepoxSupport<T extends Entity> implements Repox<T> {
     private DataAccessTemplateFactory accessTemplateFactory;
 
     /**
-     * 获取实体类型<br/>
+     * 获取实体类型<br>
      * 默认实现通过反射机制获取，子类可覆写直接返回具体实体的类型以优化性能
      *
      * @return 实体类型

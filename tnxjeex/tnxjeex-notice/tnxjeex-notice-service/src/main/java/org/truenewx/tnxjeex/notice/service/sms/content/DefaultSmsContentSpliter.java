@@ -7,7 +7,7 @@ import java.util.List;
 import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
- * 默认的短信内容分割器<br/>
+ * 默认的短信内容分割器<br>
  * 数字、英文字母、英文标点可设置计为1个字符还是半个字符，其它字符均计为1个字符
  *
  * @author jianglei

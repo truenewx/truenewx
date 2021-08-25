@@ -17,8 +17,8 @@ public abstract class JpaOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K ex
         extends JpaUnityRepoxSupport<T, K> implements OwnedUnityRepox<T, K, O> {
 
     /**
-     * 获取所属者属性名<br/>
-     * 默认返回null，此时通过标识获取单体后判断所属者是否匹配，可由子类覆写返回非null的值，从而通过所属字段限制单体查询<br/>
+     * 获取所属者属性名<br>
+     * 默认返回null，此时通过标识获取单体后判断所属者是否匹配，可由子类覆写返回非null的值，从而通过所属字段限制单体查询<br>
      * 建议：当所属者为引用对象下的属性时 ，子类覆写提供非null的返回值，否则不覆写
      *
      * @return 所属者属性

@@ -32,7 +32,7 @@ public interface SmsContentProvider {
     String getContent(Map<String, Object> params, Locale locale);
 
     /**
-     * @return 允许发送的最大条数，<=0时不限
+     * @return 允许发送的最大条数，&lt;=0时不限
      */
     int getMaxCount();
 }

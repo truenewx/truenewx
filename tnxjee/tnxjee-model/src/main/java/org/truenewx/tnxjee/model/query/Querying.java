@@ -72,7 +72,7 @@ public class Querying extends Pagination implements QueryModel, Paging {
     }
 
     /**
-     * 将指定查询排序序列转换排序语句，不含order by<br/>
+     * 将指定查询排序序列转换排序语句，不含order by<br>
      * 如果无排序设置，则返回空字符串
      *
      * @param orders 查询排序序列

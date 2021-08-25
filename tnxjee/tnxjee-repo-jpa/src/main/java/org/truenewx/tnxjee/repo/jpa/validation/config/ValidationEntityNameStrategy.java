@@ -1,7 +1,7 @@
 package org.truenewx.tnxjee.repo.jpa.validation.config;
 
 /**
- * 校验实体名称策略<br/>
+ * 校验实体名称策略<br>
  * 可通过子类实现更复杂的实体名称获取策略
  *
  * @author jianglei

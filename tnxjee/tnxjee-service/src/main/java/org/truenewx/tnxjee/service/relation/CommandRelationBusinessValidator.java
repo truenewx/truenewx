@@ -1,11 +1,12 @@
 package org.truenewx.tnxjee.service.relation;
 
 import java.io.Serializable;
+
 import org.truenewx.tnxjee.model.CommandModel;
 import org.truenewx.tnxjee.model.entity.relation.Relation;
 
 /**
- * 通过命令模型传递数据的关系业务逻辑校验器<br/>
+ * 通过命令模型传递数据的关系业务逻辑校验器<br>
  * 字段格式校验由格式校验框架完成，本接口的实现仅负责通过读取持久化数据验证字段数据的业务逻辑合法性
  *
  * @author jianglei

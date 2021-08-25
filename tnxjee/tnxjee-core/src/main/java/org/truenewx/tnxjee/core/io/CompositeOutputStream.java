@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * 复合输出流<br/>
+ * 复合输出流<br>
  * 同时往多个输出流中输出内容
  *
  * @author jianglei

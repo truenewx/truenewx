@@ -71,7 +71,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     }
 
     /**
-     * 在保存添加/修改单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br/>
+     * 在保存添加/修改单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br>
      * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）
      *
      * @param id    要修改的单体标识，为null时表示是添加动作
@@ -108,7 +108,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     }
 
     /**
-     * 在保存添加/修改单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br/>
+     * 在保存添加/修改单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br>
      * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）
      *
      * @param id           要修改的单体标识，为null时表示是添加动作
@@ -133,7 +133,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     }
 
     /**
-     * 根据标识删除单体前调用，由子类覆写<br/>
+     * 根据标识删除单体前调用，由子类覆写<br>
      * 不覆写或子类调用父类的本方法，将无法删除单体
      *
      * @param id 要删除的单体的标识

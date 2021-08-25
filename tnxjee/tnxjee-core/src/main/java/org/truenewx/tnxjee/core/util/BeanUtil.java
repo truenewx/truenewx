@@ -322,7 +322,7 @@ public class BeanUtil {
     }
 
     /**
-     * 获取静态属性表达式所表示的静态属性值，静态属性表达式形如：@org.truenewx.tnxjee.core.util.DateUtil@SHORT_DATE_PATTERN <br/>
+     * 获取静态属性表达式所表示的静态属性值，静态属性表达式形如：@org.truenewx.tnxjee.core.util.DateUtil@SHORT_DATE_PATTERN <br>
      * 如果表达式错误或所表示的属性为非静态或不可访问 ，则返回null
      *
      * @param propertyExpression 静态属性表达式

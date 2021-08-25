@@ -79,8 +79,8 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 在保存添加/修改有所属者的单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br/>
+     * 在保存添加/修改有所属者的单体前调用，负责验证改动的单体数据，并写入返回的结果单体中<br>
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br>
      * 一般情况下子类不应修改单体的所属者，特殊业务场景下可以，但请务必确保业务逻辑的正确性
      *
      * @param owner 所属者
@@ -113,8 +113,8 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 在保存添加/修改有所属者的单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br/>
-     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br/>
+     * 在保存添加/修改有所属者的单体前调用，负责验证改动的模型数据，并写入返回的结果单体中<br>
+     * <strong>注意：</strong>子类覆写时应确保结果不为null（否则将不保存）<br>
      * 一般情况下子类不应修改单体的所属者，特殊业务场景下可以，但请务必确保业务逻辑的正确性
      *
      * @param owner        所属者
@@ -127,7 +127,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 根据标识删除从属单体前调用，由子类覆写<br/>
+     * 根据标识删除从属单体前调用，由子类覆写<br>
      * 子类不覆写或调用父类的本方法，将无法删除单体
      *
      * @param owner 所属者

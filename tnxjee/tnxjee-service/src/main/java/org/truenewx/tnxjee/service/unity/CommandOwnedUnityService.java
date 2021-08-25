@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.service.unity;
 
 import java.io.Serializable;
+
 import org.truenewx.tnxjee.model.CommandModel;
 import org.truenewx.tnxjee.model.entity.unity.OwnedUnity;
 
@@ -22,7 +23,7 @@ public interface CommandOwnedUnityService<T extends OwnedUnity<K, O>, K extends 
     T add(O owner, CommandModel<T> commandModel);
 
     /**
-     * 修改从属单体<br/>
+     * 修改从属单体<br>
      * 注意：不应修改单体的所属者
      *
      * @param owner        所属者
