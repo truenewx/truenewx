@@ -5,8 +5,10 @@ import javax.servlet.DispatcherType;
 import org.apache.commons.lang3.StringUtils;
 import org.sitemesh.builder.SiteMeshFilterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.webmvc.config.WebMvcConfigurerSupport;
+import org.truenewx.tnxjee.webmvc.view.servlet.error.SimpleErrorViewResolver;
 import org.truenewx.tnxjee.webmvc.view.servlet.filter.ForbidAccessFilter;
 import org.truenewx.tnxjee.webmvc.view.servlet.resource.AntPatternResourceResolver;
 import org.truenewx.tnxjee.webmvc.view.sitemesh.config.BuildableSiteMeshFilter;
@@ -45,6 +48,12 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
         frb.addUrlPatterns("/*");
         frb.setDispatcherTypes(DispatcherType.FORWARD, DispatcherType.REQUEST, DispatcherType.ERROR);
         return frb;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ErrorViewResolver.class)
+    public ErrorViewResolver errorViewResolver() {
+        return new SimpleErrorViewResolver(this.mvcProperties);
     }
 
     protected void buildSiteMeshFilter(SiteMeshFilterBuilder builder) {
