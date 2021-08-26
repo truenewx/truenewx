@@ -17,17 +17,27 @@ import org.truenewx.tnxjee.core.Strings;
  * 相对于Web项目根目录的上下文资源
  *
  * @author jianglei
- * 
  */
 public class WebContextResource implements ContextResource {
+
+    /**
+     * 相对于工程源代码目录的Web项目根目录，业务工程可根据实际情况进行修改
+     */
+    public static String WEB_CONTEXT_SRC = "/src/main/webapp";
+    private static final String WEB_INF = "WEB-INF";
 
     private FileSystemResource file;
     private String path;
 
     public WebContextResource(String path) {
         try {
-            String contextRoot = new ClassPathResource(Strings.SLASH).getFile().getParentFile()
-                    .getParentFile().getAbsolutePath();
+            File classpathParentDir = new ClassPathResource(Strings.SLASH).getFile().getParentFile();
+            File contextDir = classpathParentDir.getParentFile();
+            if (!WEB_INF.equals(classpathParentDir.getName())) {
+                // 类路径父目录不是WEB-INF，说明当前是开发环境，需找到源代码中的Web项目根目录
+                contextDir = new File(contextDir, WEB_CONTEXT_SRC);
+            }
+            String contextRoot = contextDir.getAbsolutePath();
             contextRoot = StringUtils.cleanPath(contextRoot);
             this.path = StringUtils.cleanPath(path);
             this.file = new FileSystemResource(contextRoot + Strings.SLASH + this.path);
