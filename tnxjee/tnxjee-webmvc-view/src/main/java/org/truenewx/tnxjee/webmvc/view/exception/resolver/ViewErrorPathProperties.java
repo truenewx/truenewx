@@ -9,6 +9,7 @@ public class ViewErrorPathProperties {
 
     private String business = "/error/business";
     private String format = "/error/format";
+    private String notFound = "/error/404";
 
     public String getBusiness() {
         return this.business;
@@ -24,6 +25,14 @@ public class ViewErrorPathProperties {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getNotFound() {
+        return this.notFound;
+    }
+
+    public void setNotFound(String notFound) {
+        this.notFound = notFound;
     }
 
 }
