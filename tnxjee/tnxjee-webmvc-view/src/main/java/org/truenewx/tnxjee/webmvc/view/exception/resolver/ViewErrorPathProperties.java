@@ -10,6 +10,7 @@ public class ViewErrorPathProperties {
     private String business = "/error/business";
     private String format = "/error/format";
     private String notFound = "/error/404";
+    private String internal = "/error/500";
 
     public String getBusiness() {
         return this.business;
@@ -33,6 +34,14 @@ public class ViewErrorPathProperties {
 
     public void setNotFound(String notFound) {
         this.notFound = notFound;
+    }
+
+    public String getInternal() {
+        return this.internal;
+    }
+
+    public void setInternal(String internal) {
+        this.internal = internal;
     }
 
 }

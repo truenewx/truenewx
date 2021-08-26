@@ -40,29 +40,45 @@ public class ViewErrorController extends BasicErrorController {
     @Override
     protected ModelAndView resolveErrorView(HttpServletRequest request, HttpServletResponse response, HttpStatus status,
             Map<String, Object> model) {
-        if (status == HttpStatus.NOT_FOUND) {
-            String path = this.pathProperties.getNotFound();
-            if (supports(path)) {
-                String url = "http://localhost:" + request.getServerPort() + path;
-                String content = NetUtil.requestByGet(url, null, Strings.ENCODING_UTF8);
-                if (StringUtils.isNotBlank(content)) {
-                    try {
-                        response.getWriter().println(content);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+        String url = getUrl(request, status);
+        if (url != null) {
+            // 后台请求自身的错误页面地址，以获得被装饰后的页面内容，解决错误页面无法被SiteMesh装饰的问题
+            // 尤其是404错误，经研究确认无论如何设置，均无法被SiteMesh装饰
+            String content = NetUtil.requestByGet(url, null, Strings.ENCODING_UTF8);
+            if (StringUtils.isNotBlank(content)) {
+                try {
+                    response.getWriter().println(content);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
         return null;
     }
 
-    private boolean supports(String path) {
-        WebMvcProperties.View viewProperties = this.mvcProperties.getView();
-        path = viewProperties.getPrefix() + path + viewProperties.getSuffix();
-        path = path.replaceAll("//", Strings.SLASH);
-        WebContextResource resource = new WebContextResource(path);
-        return resource.exists();
+    // 获取后台请求地址，由于此场景为非常低频的访问，故不进行内存缓存，节省内存空间
+    private String getUrl(HttpServletRequest request, HttpStatus status) {
+        String path = null;
+        if (status == HttpStatus.INTERNAL_SERVER_ERROR) {
+            path = this.pathProperties.getInternal();
+        } else if (status == HttpStatus.NOT_FOUND) {
+            path = this.pathProperties.getNotFound();
+        }
+        if (exists(path)) {
+            return "http://localhost:" + request.getServerPort() + path;
+        }
+        return null;
+    }
+
+    private boolean exists(String path) {
+        if (path != null) {
+            WebMvcProperties.View viewProperties = this.mvcProperties.getView();
+            path = viewProperties.getPrefix() + path + viewProperties.getSuffix();
+            path = path.replaceAll("//", Strings.SLASH);
+            WebContextResource resource = new WebContextResource(path);
+            return resource.exists();
+        }
+        return false;
     }
 
     @GetMapping("/*")
