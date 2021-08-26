@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.truenewx</groupId>
     <artifactId>truenewx</artifactId>
-    <version>2.2.1</version>
+    <version>2.2.2</version>
     <packaging>pom</packaging>
     <modules>
         <module>tnxjee</module>
@@ -17,6 +17,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <truenewx.version>2.2.2</truenewx.version>
     </properties>
     <name>truenewx</name>
     <url>https://github.com/truenewx/truenewx</url>

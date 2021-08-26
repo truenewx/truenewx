@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.truenewx.tnxjeex</groupId>
         <artifactId>tnxjeex-notice</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
     </parent>
     <groupId>org.truenewx.tnxjeex.notice</groupId>
     <artifactId>tnxjeex-notice-model</artifactId>
