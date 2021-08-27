@@ -105,14 +105,17 @@ export default function(VueRouter, menu, fnImportPage) {
     });
     router.back = FunctionUtil.around(router.back, function(back, path) {
         let route = router.app.$route;
-        // 如果上一页路径为指定路径，或匹配上级菜单路径，则直接返回上一页
-        if (router.prev && (router.prev.path === path
-            || matchesPath(path || router.prev.path, route.meta.superiorPath))) {
-            back.call(router);
-            return;
+        // 如果上一页路径为指定路径，或匹配上级菜单路径，则执行原始的返回
+        if (router.prev) {
+            if (router.prev.path === path || matchesPath(path || router.prev.path, route.meta.superiorPath)) {
+                back.call(router);
+                return;
+            }
         }
-        // 否则替换到上级菜单页面
-        path = path || route.meta.superiorPath;
+        // 如果没有上一页路径，或者上一页路径为根目录，则替换到上级菜单页面
+        if (!router.prev || router.prev.path === '/') {
+            path = path || route.meta.superiorPath;
+        }
         path = instantiatePath(path, route.params);
         if (path) {
             router._historied = true; // 标记路由器正在执行历史动作
