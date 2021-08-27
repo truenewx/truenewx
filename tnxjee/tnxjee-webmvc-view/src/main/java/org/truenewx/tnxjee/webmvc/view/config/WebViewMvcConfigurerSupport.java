@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.webmvc.view.config;
 
+import java.util.List;
+
 import javax.servlet.DispatcherType;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,11 +13,15 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.webmvc.config.WebMvcConfigurerSupport;
+import org.truenewx.tnxjee.webmvc.function.WebContextPathPredicate;
+import org.truenewx.tnxjee.webmvc.view.exception.resolver.ViewDefaultExceptionResolver;
+import org.truenewx.tnxjee.webmvc.view.exception.resolver.ViewErrorPathProperties;
 import org.truenewx.tnxjee.webmvc.view.servlet.filter.ForbidAccessFilter;
 import org.truenewx.tnxjee.webmvc.view.servlet.resource.AntPatternResourceResolver;
 
@@ -28,6 +34,10 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
     private WebMvcProperties mvcProperties;
     @Autowired
     private ResourceProperties resourceProperties;
+    @Autowired
+    private ViewErrorPathProperties pathProperties;
+    @Autowired
+    private WebContextPathPredicate webContextPathPredicate;
 
     @Bean
     public FilterRegistrationBean<ForbidAccessFilter> forbidAccessFilter() {
@@ -44,17 +54,22 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
         frb.setFilter(new ConfigurableSiteMeshFilter() {
             @Override
             protected void applyCustomConfiguration(SiteMeshFilterBuilder builder) {
-                builder.setIncludeErrorPages(true);
                 buildSiteMeshFilter(builder);
             }
         });
         frb.addUrlPatterns("/*");
         frb.setDispatcherTypes(DispatcherType.FORWARD, DispatcherType.REQUEST, DispatcherType.ERROR);
+        frb.setOrder(Ordered.LOWEST_PRECEDENCE - 1);
         return frb;
     }
 
     protected void buildSiteMeshFilter(SiteMeshFilterBuilder builder) {
         builder.addExcludedPath("/swagger-ui.html");
+    }
+
+    @Override
+    public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(new ViewDefaultExceptionResolver(this.pathProperties, this.webContextPathPredicate));
     }
 
     @Override

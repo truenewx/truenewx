@@ -26,29 +26,38 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
     @Autowired
     private ResolvableExceptionMessageSaver messageSaver;
 
+    public static boolean supports(Exception ex) {
+        ex = prepare(ex);
+        return ex instanceof ConstraintViolationException || ex instanceof ResolvableException;
+    }
+
+    private static Exception prepare(Exception ex) {
+        if (ex instanceof TransactionSystemException) {
+            Throwable cause;
+            do {
+                cause = ex.getCause();
+                if (cause instanceof Exception) {
+                    ex = (Exception) cause;
+                    if (ex instanceof ConstraintViolationException || ex instanceof ResolvableException) {
+                        break;
+                    }
+                }
+            } while (cause != null);
+        }
+        return ex;
+    }
+
     @Override
     protected final ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
             Object handler, Exception ex) {
         if (handler instanceof HandlerMethod) {
-            if (ex instanceof TransactionSystemException) {
-                Throwable cause;
-                do {
-                    cause = ex.getCause();
-                    if (cause instanceof Exception) {
-                        ex = (Exception) cause;
-                        if (ex instanceof ConstraintViolationException || ex instanceof ResolvableException) {
-                            break;
-                        }
-                    }
-                } while (cause != null);
-            }
+            ex = prepare(ex);
             if (ex instanceof ConstraintViolationException) {
                 ConstraintViolationException cve = (ConstraintViolationException) ex;
                 Set<ConstraintViolation<?>> violations = cve.getConstraintViolations();
                 if (violations != null && violations.size() > 0) {
                     if (violations.size() == 1) {
-                        ConstraintViolation<?> violation =
-                                CollectionUtil.getFirst(violations, null);
+                        ConstraintViolation<?> violation = CollectionUtil.getFirst(violations, null);
                         ex = buildFormatException(violation, request);
                     } else {
                         MultiException me = new MultiException();
@@ -92,7 +101,7 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
             me.forEach(se -> {
                 String singleMessage = buildLogMessage(se);
                 if (StringUtils.isNotBlank(singleMessage)) {
-                    message.append(singleMessage).append("/n");
+                    message.append(singleMessage).append(Strings.ENTER);
                 }
             });
             return message.toString().trim();

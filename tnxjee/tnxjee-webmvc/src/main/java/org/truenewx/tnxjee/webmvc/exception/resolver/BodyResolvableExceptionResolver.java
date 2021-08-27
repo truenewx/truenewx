@@ -18,7 +18,7 @@ import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 public class BodyResolvableExceptionResolver extends ResolvableExceptionResolver {
 
     public BodyResolvableExceptionResolver() {
-        setOrder(getOrder() + 2); // 默认顺序提升2
+        setOrder(-2);  // 比 HandlerExceptionResolverComposite 先两位
     }
 
     @Override

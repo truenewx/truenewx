@@ -31,7 +31,7 @@ public class ViewResolvableExceptionResolver extends ResolvableExceptionResolver
     }
 
     public ViewResolvableExceptionResolver() {
-        setOrder(getOrder() + 1); // 默认顺序提升1
+        setOrder(-1); // 比 HandlerExceptionResolverComposite 先一位
     }
 
     @Override
