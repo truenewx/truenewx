@@ -36,10 +36,12 @@ import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeApp
 public class CasTicketManagerImpl implements CasTicketManager {
     @Autowired
     private ServerProperties serverProperties;
-    @Autowired(required = false) // 没有登录范围区别的系统没有范围切换器实现
+    @Autowired(required = false) // 没有登录范围区别的系统没有范围应用者实现
     private CasServerScopeApplicator scopeApplicator;
     private TicketGrantingTicketRepo ticketGrantingTicketRepo = new MemoryTicketGrantingTicketRepo();
     private AppTicketRepo appTicketRepo = new MemoryAppTicketRepo();
+    @Autowired(required = false) // 一般情况下无需进行转换，没有该转换器实现
+    private CasUserDetailsConverter userDetailsConverter;
 
     @Autowired(required = false)
     public void setTicketGrantingTicketRepo(TicketGrantingTicketRepo ticketGrantingTicketRepo) {
@@ -181,6 +183,12 @@ public class CasTicketManagerImpl implements CasTicketManager {
             return null;
         }
         UserSpecificDetails<?> userDetails = appTicket.getTicketGrantingTicket().getUserDetails();
+        if (this.userDetailsConverter != null) {
+            UserSpecificDetails<?> newUserDetails = this.userDetailsConverter.convert(app, userDetails);
+            if (newUserDetails != null) {
+                userDetails = newUserDetails;
+            }
+        }
         SimpleAssertion assertion = new SimpleAssertion();
         assertion.setUserDetails(userDetails);
         assertion.setValidFromDate(appTicket.getCreateTime());
