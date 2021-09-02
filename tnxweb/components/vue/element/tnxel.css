@@ -712,3 +712,13 @@ i.el-tooltip {
 .el-button.w-100 + .el-button {
     margin-left: 0;
 }
+
+.tnxel-tabs .el-tabs__item {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.tnxel-tabs-pane-label {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}

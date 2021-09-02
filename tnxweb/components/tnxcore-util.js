@@ -318,7 +318,7 @@ export const StringUtil = {
         if (length >= 0) {
             chars = chars || 'abcdefghijklmnopqrstuvwxyz0123456789'; // 默认取值范围为所有小写字母和数字
             let s = '';
-            for (let i = 0; i < length; i++) {
+            while (s.length < length) {
                 s += chars.charAt(MathUtil.randomInt(0, chars.length));
             }
             return s;
