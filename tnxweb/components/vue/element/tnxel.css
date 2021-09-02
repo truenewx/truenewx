@@ -83,6 +83,7 @@ el-header ul.tnxel-nav,
 }
 
 .el-table .cell > .el-button--text {
+    font-family: inherit;
     padding: 3px 0;
 }
 
