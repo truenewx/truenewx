@@ -1,6 +1,6 @@
 <template>
     <div class="tnxel-query-table">
-        <el-table :data="records" :empty-text="emptyRecordText" :border="border" :stripe="stripe"
+        <el-table :data="records" :empty-text="emptyRecordText" :size="size" :border="border" :stripe="stripe"
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
@@ -23,6 +23,7 @@ export default {
             required: true,
         },
         value: Object,
+        size: String,
         border: {
             type: Boolean,
             default: true,
