@@ -82,6 +82,7 @@ public class Pagination implements Serializable {
             if (this.orders == null) {
                 this.orders = new ArrayList<>();
             }
+            this.orders.removeIf(o -> o.getName().equals(order.getName()));
             this.orders.add(order);
         }
     }
@@ -91,9 +92,13 @@ public class Pagination implements Serializable {
     }
 
     public void setOrderDefault(String fieldName, boolean desc) {
-        if (this.orders == null || this.orders.isEmpty()) {
+        if (isEmptyOrders()) {
             addOrder(fieldName, desc);
         }
+    }
+
+    public boolean isEmptyOrders() {
+        return this.orders == null || this.orders.isEmpty();
     }
 
 }
