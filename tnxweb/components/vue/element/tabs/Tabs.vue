@@ -42,6 +42,10 @@ export default {
     },
     watch: {
         model(model) {
+            let cache = this.getCache();
+            if (cache) {
+                cache[this.id] = model;
+            }
             this.$emit('input', model);
         },
         value(value) {
@@ -49,18 +53,14 @@ export default {
         }
     },
     mounted() {
-        if (this.$router && typeof this.$router.beforeLeave === 'function') {
-            this.$router.beforeLeave(this.beforeLeave);
-
-            let cache = this.getCache();
-            if (cache && this.$route.meta.isHistory()) {
-                let model = cache[this.id];
-                if (model) {
-                    let vm = this;
-                    this.$nextTick(function() {
-                        vm.model = model;
-                    });
-                }
+        let cache = this.getCache();
+        if (cache && this.$route.meta.isHistory()) {
+            let model = cache[this.id];
+            if (model) {
+                let vm = this;
+                this.$nextTick(function() {
+                    vm.model = model;
+                });
             }
         }
     },
@@ -75,12 +75,6 @@ export default {
                 return cache;
             }
             return undefined;
-        },
-        beforeLeave() {
-            let cache = this.getCache();
-            if (cache) {
-                cache[this.id] = this.model;
-            }
         },
         clickTab(tab, event) {
             this.$emit('tab-click', tab, event);
