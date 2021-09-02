@@ -82,9 +82,25 @@ export default function(VueRouter, menu, fnImportPage) {
         }, false);
     }
 
+    // 注册离开页面前事件处理支持
+    router.$beforeLeaveHandlers = {};
+    router.beforeLeave = function(handler) {
+        if (typeof handler === 'function') {
+            let path = router.app.$route.path;
+            router.$beforeLeaveHandlers[path] = handler;
+        }
+    };
     router.beforeEach((to, from, next) => {
         window.tnx.app.page.stopCache(router, from.path);
-        next();
+
+        let allow = true;
+        let beforeLeaveHandler = router.$beforeLeaveHandlers[from.path];
+        if (beforeLeaveHandler) {
+            allow = beforeLeaveHandler(to);
+        }
+        if (allow !== false) {
+            next();
+        }
     });
     router.afterEach((to, from) => {
         let $route = router.app.$route;
