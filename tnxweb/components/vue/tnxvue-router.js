@@ -87,25 +87,17 @@ export default function(VueRouter, menu, fnImportPage) {
     router.beforeLeave = function(handler) {
         if (typeof handler === 'function') {
             let path = router.app.$route.path;
-            let handlers = router.$beforeLeaveHandlers[path];
-            if (!handlers) {
-                handlers = [];
-                router.$beforeLeaveHandlers[path] = handlers;
-            }
-            handlers.push(handler);
+            router.$beforeLeaveHandlers[path] = handler;
         }
     };
     router.beforeEach((to, from, next) => {
         window.tnx.app.page.stopCache(router, from.path);
 
         let allow = true;
-        let beforeLeaveHandlers = router.$beforeLeaveHandlers[from.path];
-        if (beforeLeaveHandlers) {
-            // 所有事件处理都可以执行，但只要有一个返回false，则不执行页面跳转
-            for (let beforeLeaveHandler of beforeLeaveHandlers) {
-                if (beforeLeaveHandler(to) === false) {
-                    allow = false;
-                }
+        let beforeLeaveHandler = router.$beforeLeaveHandlers[from.path];
+        if (beforeLeaveHandler) {
+            if (beforeLeaveHandler(to) === false) {
+                allow = false;
             }
         }
         if (allow) {
