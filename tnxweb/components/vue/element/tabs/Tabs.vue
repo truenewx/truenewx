@@ -1,8 +1,11 @@
 <template>
-    <el-tabs class="tnxel-tabs" :id="id" v-model="model" @tab-click="clickTab">
-        <el-tab-pane :name="pane.name" v-for="pane of panes" :key="pane.name">
-            <span class="tnxel-tabs-pane-label" slot="label">{{ pane.label }}</span>
-        </el-tab-pane>
+    <el-tabs class="tnxel-tabs" :id="id" :type="type" v-model="model" @tab-click="clickTab">
+        <slot v-if="$slots.default"></slot>
+        <template v-else>
+            <el-tab-pane :name="pane.name" v-for="pane of panes" :key="pane.name">
+                <span class="tnxel-tabs-pane-label" slot="label">{{ pane.label }}</span>
+            </el-tab-pane>
+        </template>
     </el-tabs>
 </template>
 
@@ -10,6 +13,7 @@
 export default {
     name: 'TnxelTabs',
     props: {
+        type: String,
         value: String,
         items: Object,
         id: {

@@ -713,7 +713,7 @@ i.el-tooltip {
     margin-left: 0;
 }
 
-.tnxel-tabs .el-tabs__item {
+.tnxel-tabs:not(.el-tabs--border-card):not(.el-tabs--card) .el-tabs__item {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
