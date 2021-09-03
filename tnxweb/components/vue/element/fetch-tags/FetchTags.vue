@@ -1,5 +1,5 @@
 <template>
-    <div class="tnxel-tag-select">
+    <div class="tnxel-tag-select" v-if="items">
         <el-input v-model="keyword" prefix-icon="el-icon-search" :placeholder="placheholder" clearable
             v-if="filterable"/>
         <tnxel-select v-model="model" :selector="multi ? 'tags' : 'tag'" :items="items" :value-name="valueName"

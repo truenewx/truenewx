@@ -1,7 +1,7 @@
 <template>
     <el-cascader v-model="model" class="ignore-feedback" :options="items" :props="options"
         :placeholder="placeholder" :show-all-levels="showAllLevels" :clearable="empty" :disabled="disabled"
-        :filterable="filterable" :filter-method="filter"/>
+        :filterable="filterable" :filter-method="filter" v-if="items"/>
 </template>
 
 <script>

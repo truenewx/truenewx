@@ -5,12 +5,12 @@
             type: type,
             subtype:subtype,
             grouped: true,
-        }" v-if="grouped"/>
+        }" v-if="items && grouped"/>
     <tnxel-select ref="select" v-model="model" :id="id" :selector="selector" :items="items"
         value-name="key" text-name="caption" index-name="searchIndex"
         :default-value="defaultValue" :empty="empty" :empty-value="emptyValue"
         :placeholder="placeholder" :disabled="disabled" :filterable="filterable"
-        :theme="theme" :size="size" :tag-click="tagClick" :change="change" v-else/>
+        :theme="theme" :size="size" :tag-click="tagClick" :change="change" v-else-if="items"/>
 </template>
 
 <script>
