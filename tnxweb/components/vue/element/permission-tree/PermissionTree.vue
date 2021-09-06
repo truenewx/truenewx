@@ -1,21 +1,22 @@
 <template>
-    <el-tree
+    <el-tree class="permission-tree px-1 py-2"
         ref="tree"
         :data="nodes"
         :default-expand-all="true"
         :expand-on-click-node="false"
         node-key="id"
-        class="px-1 py-2"
         :style="{'max-height': maxHeight}"
     >
-        <div class="permission-node" slot-scope="{node, data}">
-            <el-checkbox v-model="data.checked" v-if="data.permission" @change="()=>{
-                onCheckChange(data);
-            }">{{ data.label }}
-            </el-checkbox>
-            <span v-else-if="node">{{ data.label }}</span>
-            <span class="text-muted" :class="{'d-none': !data.remark}">({{ data.remark }})</span>
-        </div>
+        <template #default="{node, data}">
+            <div class="permission-node">
+                <el-checkbox v-model="data.checked" v-if="data.permission" @change="()=>{
+                    onCheckChange(data);
+                }">{{ data.label }}
+                </el-checkbox>
+                <span v-else-if="node">{{ data.label }}</span>
+                <span class="text-muted" :class="{'d-none': !data.remark}">({{ data.remark }})</span>
+            </div>
+        </template>
     </el-tree>
 </template>
 
@@ -146,6 +147,10 @@ export default {
 </script>
 
 <style scoped>
+.permission-tree {
+    overflow-y: auto;
+}
+
 .permission-node {
     width: 100%;
 }
@@ -153,9 +158,5 @@ export default {
 .permission-node span:last-child {
     float: right;
     margin-right: 6px;
-}
-
-.el-tree {
-    overflow-y: auto;
 }
 </style>

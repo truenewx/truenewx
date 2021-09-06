@@ -13,28 +13,32 @@
         :headers="uploadHeaders"
         :multiple="uploadLimit ? uploadLimit.number > 1 : false"
         :accept="uploadAccept">
-        <i slot="default" class="el-icon-plus"></i>
-        <div slot="file" slot-scope="{file}" class="el-upload-list__panel" :data-file-id="getFileId(file)">
-            <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
-            <div v-else>
-                <i class="el-icon-document"></i> {{ file.name }}
+        <template #default>
+            <i class="el-icon-plus"></i>
+        </template>
+        <template #file="{file}">
+            <div class="el-upload-list__panel" :data-file-id="getFileId(file)">
+                <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
+                <div v-else>
+                    <i class="el-icon-document"></i> {{ file.name }}
+                </div>
+                <label class="el-upload-list__item-status-label">
+                    <i class="el-icon-upload-success el-icon-check"></i>
+                </label>
+                <span class="el-upload-list__item-uploading" v-if="file.uploading">
+                    <i class="el-icon-loading"></i>
+                </span>
+                <span class="el-upload-list__item-actions">
+                    <span class="el-upload-list__item-preview" @click="previewFile(file)"
+                        v-if="uploadLimit && uploadLimit.imageable">
+                        <i class="el-icon-zoom-in"></i>
+                    </span>
+                    <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
+                        <i class="el-icon-delete"></i>
+                    </span>
+                </span>
             </div>
-            <label class="el-upload-list__item-status-label">
-                <i class="el-icon-upload-success el-icon-check"></i>
-            </label>
-            <span class="el-upload-list__item-uploading" v-if="file.uploading">
-                <i class="el-icon-loading"></i>
-            </span>
-            <span class="el-upload-list__item-actions">
-                <span class="el-upload-list__item-preview" @click="previewFile(file)"
-                    v-if="uploadLimit && uploadLimit.imageable">
-                    <i class="el-icon-zoom-in"></i>
-                </span>
-                <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
-                    <i class="el-icon-delete"></i>
-                </span>
-            </span>
-        </div>
+        </template>
         <div slot="tip" class="el-upload__tip" v-if="tip" v-text="tip"></div>
     </el-upload>
 </template>

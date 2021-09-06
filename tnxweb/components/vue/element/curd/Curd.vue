@@ -5,7 +5,7 @@
             <slot></slot>
             <el-table-column label="操作" header-align="center" align="center" width="100px"
                 v-if="updatable || removeable">
-                <template slot-scope="scope">
+                <template #default="scope">
                     <el-button type="text" @click="toUpdate(scope.$index)" v-if="updatable">
                         {{ updateText }}
                     </el-button>
