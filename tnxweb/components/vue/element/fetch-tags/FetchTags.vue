@@ -4,7 +4,7 @@
             v-if="filterable"/>
         <tnxel-select v-model="model" :selector="multi ? 'tags' : 'tag'" :items="items" :value-name="valueName"
             :text-name="textName" :change="change" :empty="empty" :theme="theme" :size="size">
-            <template slot="empty">
+            <template #empty>
                 <slot name="empty"></slot>
             </template>
         </tnxel-select>

@@ -8,7 +8,7 @@
                 <slot v-if="$slots.default"></slot>
                 <template v-else-if="menuItem">{{ menuItem.caption }}</template>
             </template>
-            <el-dropdown-menu slot="dropdown">
+            <el-dropdown-menu #dropdown>
                 <el-dropdown-item v-for="dropdownItem of dropdownItems" :key="dropdownItem.path"
                     :icon="dropdownItem.icon" :disabled="dropdownItem.disabled" :title="dropdownItem.title"
                     :command="dropdownItem">

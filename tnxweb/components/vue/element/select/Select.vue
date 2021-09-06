@@ -43,7 +43,7 @@
         <el-button :type="theme">{{ currentText }}
             <i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
-        <el-dropdown-menu slot="dropdown" v-if="items && items.length">
+        <el-dropdown-menu #dropdown v-if="items && items.length">
             <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
@@ -53,7 +53,7 @@
     <el-dropdown :type="theme" :size="size" trigger="click" split-button @command="onDropdownCommand"
         v-else-if="selector === 'split-dropdown'">
         <span>{{ currentText }}</span>
-        <el-dropdown-menu slot="dropdown" v-if="items && items.length">
+        <el-dropdown-menu #dropdown v-if="items && items.length">
             <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>

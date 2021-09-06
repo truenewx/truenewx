@@ -3,7 +3,9 @@
         <slot v-if="$slots.default"></slot>
         <template v-else>
             <el-tab-pane :name="pane.name" v-for="pane of panes" :key="pane.name">
-                <span class="tnxel-tabs-pane-label" slot="label">{{ pane.label }}</span>
+                <template #label>
+                    <span class="tnxel-tabs-pane-label">{{ pane.label }}</span>
+                </template>
             </el-tab-pane>
         </template>
     </el-tabs>

@@ -1,9 +1,11 @@
 <template>
     <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain"
         :style="{width: imageWidth, height: imageHeight}" v-if="meta.imageable">
-        <div slot="error" class="text-muted h-100 flex-center">
-            <i class="el-icon-picture-outline"/>
-        </div>
+        <template #error>
+            <div class="text-muted h-100 flex-center">
+                <i class="el-icon-picture-outline"/>
+            </div>
+        </template>
     </el-image>
     <a :href="meta.readUrl" target="_blank" v-else-if="preview">{{ meta.name }}</a>
     <span v-else>{{ meta.name }}</span>

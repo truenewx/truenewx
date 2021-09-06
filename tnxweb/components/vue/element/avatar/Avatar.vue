@@ -1,9 +1,11 @@
 <template>
     <el-image :class="shape === 'square' ? 'rounded' : 'rounded-circle'" :style="style" :src="src"
         :preview-src-list="previewSrcList" v-if="preview && src">
-        <div slot="error" class="text-muted h-100 flex-center">
-            <i class="el-icon-picture-outline"/>
-        </div>
+        <template #error>
+            <div class="text-muted h-100 flex-center">
+                <i class="el-icon-picture-outline"/>
+            </div>
+        </template>
     </el-image>
     <el-avatar :size="size" :style="style" :icon="icon" :shape="shape" :src="src" v-else/>
 </template>

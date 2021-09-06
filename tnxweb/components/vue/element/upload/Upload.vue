@@ -13,9 +13,7 @@
         :headers="uploadHeaders"
         :multiple="uploadLimit ? uploadLimit.number > 1 : false"
         :accept="uploadAccept">
-        <template #default>
-            <i class="el-icon-plus"></i>
-        </template>
+        <i class="el-icon-plus"></i>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
@@ -39,7 +37,9 @@
                 </span>
             </div>
         </template>
-        <div slot="tip" class="el-upload__tip" v-if="tip" v-text="tip"></div>
+        <template #tip>
+            <div class="el-upload__tip" v-if="tip" v-text="tip"></div>
+        </template>
     </el-upload>
 </template>
 
