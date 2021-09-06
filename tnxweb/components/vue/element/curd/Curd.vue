@@ -6,12 +6,14 @@
             <el-table-column label="操作" header-align="center" align="center" width="100px"
                 v-if="updatable || removeable">
                 <template #default="scope">
+                    <slot name="actionPrepend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
                     <el-button type="text" @click="toUpdate(scope.$index)" v-if="updatable">
                         {{ updateText }}
                     </el-button>
                     <el-button type="text" @click="toRemove(scope.$index)" v-if="removeable">
                         {{ removeText }}
                     </el-button>
+                    <slot name="actionAppend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
                 </template>
             </el-table-column>
         </el-table>
