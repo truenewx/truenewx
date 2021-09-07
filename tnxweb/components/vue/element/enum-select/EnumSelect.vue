@@ -63,39 +63,51 @@ export default {
         model(value) {
             this.$emit('input', value);
         },
-        value(value) {
-            this.model = value;
+        value() {
             this.initModel();
+        },
+        type() {
+            this.init();
+        },
+        subtype() {
+            this.init();
         }
     },
     created() {
-        if (typeof this.type === 'string') {
-            if (this.type.toLowerCase() === 'boolean') {
-                this.items = [{
-                    key: true,
-                    caption: true.toText(),
-                }, {
-                    key: false,
-                    caption: false.toText(),
-                }];
-                this.initModel();
-            } else {
-                let vm = this;
-                window.tnx.app.rpc.loadEnumItems(this.type, this.subtype, function(items) {
-                    vm.items = items;
-                    vm.initModel();
-                });
-            }
-        }
+        this.init();
     },
     methods: {
+        init() {
+            if (typeof this.type === 'string') {
+                if (this.type.toLowerCase() === 'boolean') {
+                    this.items = [{
+                        key: true,
+                        caption: true.toText(),
+                    }, {
+                        key: false,
+                        caption: false.toText(),
+                    }];
+                    this.initModel();
+                } else {
+                    let vm = this;
+                    window.tnx.app.rpc.loadEnumItems(this.type, this.subtype, function(items) {
+                        vm.items = items;
+                        vm.initModel();
+                    });
+                }
+            }
+        },
         initModel() {
-            if (this.$refs.select && this.$refs.select.isMulti()) {
-                return;
-            }
-            if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
-                this.model = this.items[0].key;
-            }
+            this.model = this.value;
+            let vm = this;
+            this.$nextTick(function() { // 确保$refs.select已被渲染
+                if (vm.$refs.select.isMulti()) {
+                    return;
+                }
+                if ((vm.model === undefined || vm.model === null) && !vm.empty && vm.items && vm.items.length) {
+                    vm.model = vm.items[0].key;
+                }
+            });
         }
     }
 }
