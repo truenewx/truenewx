@@ -226,10 +226,17 @@ el-header ul.tnxel-nav,
     line-height: 1;
 }
 
-.el-form-item__content > .el-radio-group {
+.el-form-item__content .el-radio-group,
+.el-form-item__content .el-checkbox-group {
     min-height: 40px;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.el-form-item__content .el-radio-group .el-radio,
+.el-form-item__content .el-checkbox-group .el-checkbox {
+    line-height: 40px;
 }
 
 /*
