@@ -4,13 +4,13 @@
         <el-table :data="list" border stripe v-if="showEmpty || (list && list.length)">
             <slot></slot>
             <el-table-column label="操作" header-align="center" align="center" width="100px"
-                v-if="updatable || removeable">
+                v-if="updatable || removable">
                 <template #default="scope">
                     <slot name="actionPrepend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
                     <el-button type="text" @click="toUpdate(scope.$index)" v-if="updatable">
                         {{ updateText }}
                     </el-button>
-                    <el-button type="text" @click="toRemove(scope.$index)" v-if="removeable">
+                    <el-button type="text" @click="toRemove(scope.$index)" v-if="removable">
                         {{ removeText }}
                     </el-button>
                     <slot name="actionAppend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
@@ -55,7 +55,7 @@ export default {
             default: '修改',
         },
         update: Function,
-        removeable: {
+        removable: {
             type: Boolean,
             default: true,
         },
@@ -69,7 +69,13 @@ export default {
         showEmpty: {
             type: Boolean,
             default: false,
-        }
+        },
+        toast: {
+            type: Boolean,
+            default() {
+                return null;
+            }
+        },
     },
     data() {
         return {
@@ -120,6 +126,9 @@ export default {
             this.list = this.list || [];
             this.list.push(model);
             this._sort();
+            if (this.toast === true || (this.toast !== false && this.add)) {
+                window.tnx.toast(this.addText + '成功');
+            }
             close();
         },
         _sort() {
@@ -174,6 +183,9 @@ export default {
         _onUpdated(index, model, close) {
             Object.assign(this.list[index], model);
             this._sort();
+            if (this.toast === true || (this.toast !== false && this.update)) {
+                window.tnx.toast(this.updateText + '成功');
+            }
             close();
         },
         toRemove(index) {
@@ -193,6 +205,9 @@ export default {
         },
         _onRemoved(index) {
             this.list.splice(index, 1);
+            if (this.toast === true || (this.toast !== false && this.remove)) {
+                window.tnx.toast(this.removeText + '成功');
+            }
         }
     }
 }
