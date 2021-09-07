@@ -1,7 +1,11 @@
 package org.truenewx.tnxjee.core.util;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * 数组工具类
@@ -250,6 +254,25 @@ public class ArrayUtil {
             }
         }
         return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] removeIf(T[] array, BiPredicate<T, Integer> predicate) {
+        if (ArrayUtils.isNotEmpty(array)) {
+            List<T> list = new ArrayList<>();
+            Class<T> componentType = null;
+            for (int i = 0; i < array.length; i++) {
+                T t = array[i];
+                componentType = (Class<T>) t.getClass();
+                if (!predicate.test(t, i)) {
+                    list.add(t);
+                }
+            }
+            if (list.size() < array.length) {
+                return list.toArray((T[]) Array.newInstance(componentType, 0));
+            }
+        }
+        return array;
     }
 
 }
