@@ -342,7 +342,7 @@ public class ClassUtil {
     }
 
     /**
-     * 获取指定类的所有简单属性字段。简单属性包括：原始类型，字符串，数字，日期，URI，URL，Locale
+     * 获取指定类的所有简单属性字段。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，Class，以及这些类型的数组
      *
      * @param clazz 类
      * @return 指定类的所有简单属性字段
@@ -353,12 +353,17 @@ public class ClassUtil {
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
         for (PropertyDescriptor pd : propertyDescriptors) {
             Class<?> propertyType = pd.getPropertyType();
-            if (propertyType != null && BeanUtils.isSimpleValueType(propertyType)) {
-                String name = pd.getName();
-                if (!"class".equals(name)) {
-                    Field field = findField(clazz, name);
-                    if (field != null) {
-                        fields.add(field);
+            if (propertyType != null) {
+                if (propertyType.isArray()) {
+                    propertyType = propertyType.getComponentType();
+                }
+                if (BeanUtils.isSimpleValueType(propertyType)) {
+                    String name = pd.getName();
+                    if (!"class".equals(name)) {
+                        Field field = findField(clazz, name);
+                        if (field != null) {
+                            fields.add(field);
+                        }
                     }
                 }
             }
