@@ -322,22 +322,47 @@ public class ClassUtil {
     }
 
     /**
-     * 获取指定类的简单属性名。简单属性包括：原始类型，字符串，数字，日期，URI，URL，Locale
+     * 在指定类型中遍历属性描述符
+     *
+     * @param clazz    类型
+     * @param consumer 遍历消费者
+     */
+    public static void loopPropertyDescriptors(Class<?> clazz, Consumer<PropertyDescriptor> consumer) {
+        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
+        for (PropertyDescriptor pd : pds) {
+            Class<?> propertyType = pd.getPropertyType();
+            // 带参数的get方法会导致属性类型为null的属性描述，应忽略
+            if (propertyType != null && propertyType != Class.class) {
+                consumer.accept(pd);
+            }
+        }
+    }
+
+    /**
+     * 在指定类型中遍历简单类型的属性描述符。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，以及这些类型的数组
+     *
+     * @param clazz    类型
+     * @param consumer 遍历消费者
+     */
+    public static void loopSimplePropertyDescriptors(Class<?> clazz, Consumer<PropertyDescriptor> consumer) {
+        loopPropertyDescriptors(clazz, pd -> {
+            if (BeanUtils.isSimpleProperty(pd.getPropertyType())) {
+                consumer.accept(pd);
+            }
+        });
+    }
+
+    /**
+     * 获取指定类的简单属性名。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，以及这些类型的数组
      *
      * @param clazz 类
      * @return 指定类的简单属性名
      */
     public static Set<String> getSimplePropertyNames(Class<?> clazz) {
         Set<String> names = new HashSet<>();
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
-        for (PropertyDescriptor pd : propertyDescriptors) {
-            if (BeanUtils.isSimpleValueType(pd.getPropertyType())) {
-                String name = pd.getName();
-                if (!"class".equals(name)) {
-                    names.add(name);
-                }
-            }
-        }
+        loopSimplePropertyDescriptors(clazz, pd -> {
+            names.add(pd.getName());
+        });
         return names;
     }
 
@@ -349,25 +374,12 @@ public class ClassUtil {
      */
     public static List<Field> getSimplePropertyField(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
-        // 在所有有效属性中识别简单类型字段
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
-        for (PropertyDescriptor pd : propertyDescriptors) {
-            Class<?> propertyType = pd.getPropertyType();
-            if (propertyType != null) {
-                if (propertyType.isArray()) {
-                    propertyType = propertyType.getComponentType();
-                }
-                if (BeanUtils.isSimpleValueType(propertyType)) {
-                    String name = pd.getName();
-                    if (!"class".equals(name)) {
-                        Field field = findField(clazz, name);
-                        if (field != null) {
-                            fields.add(field);
-                        }
-                    }
-                }
+        loopSimplePropertyDescriptors(clazz, pd -> {
+            Field field = findField(clazz, pd.getName());
+            if (field != null) {
+                fields.add(field);
             }
-        }
+        });
         return fields;
     }
 
@@ -558,27 +570,6 @@ public class ClassUtil {
             }
         }
         return list;
-    }
-
-    /**
-     * 在指定类型中遍历指定属性类型的属性描述
-     *
-     * @param clazz        类型
-     * @param propertyType 期望的属性类型，为空时忽略属性类型限制
-     * @param predicate    遍历断言，返回false则终止遍历
-     */
-    public static void loopPropertyDescriptors(Class<?> clazz, Class<?> propertyType,
-            Predicate<PropertyDescriptor> predicate) {
-        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
-        for (PropertyDescriptor pd : pds) {
-            Class<?> pt = pd.getPropertyType();
-            // 带参数的get方法会导致属性类型为null的属性描述，应忽略
-            if (pt != null && (propertyType == null || propertyType.isAssignableFrom(pt))) {
-                if (!predicate.test(pd)) {
-                    return;
-                }
-            }
-        }
     }
 
     /**

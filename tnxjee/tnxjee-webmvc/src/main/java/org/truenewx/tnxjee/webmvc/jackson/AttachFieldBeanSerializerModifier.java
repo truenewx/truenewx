@@ -1,16 +1,18 @@
 package org.truenewx.tnxjee.webmvc.jackson;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
 import org.truenewx.tnxjee.core.enums.annotation.EnumItemKey;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.SpringUtil;
 import org.truenewx.tnxjee.model.annotation.ComponentType;
 import org.truenewx.tnxjee.model.validation.constraint.RegionCode;
 import org.truenewx.tnxjee.service.spec.region.RegionSource;
-import org.truenewx.tnxjee.webmvc.util.AdditionalCaptionUtil;
+import org.truenewx.tnxjee.webmvc.util.AttachFieldUtil;
 import org.truenewx.tnxjee.webmvc.util.BeanPropertyMeta;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -22,15 +24,15 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
 /**
- * 附加显示名称的Bean序列化修改器
+ * 附加字段的Bean序列化修改器
  */
-public class AdditionalCaptionBeanSerializerModifier extends BeanSerializerModifier {
+public class AttachFieldBeanSerializerModifier extends BeanSerializerModifier {
 
     private EnumDictResolver enumDictResolver;
     private RegionSource regionSource;
     private Map<Class<?>, Collection<String>> ignoredPropertyNamesMapping = new HashMap<>();
 
-    public AdditionalCaptionBeanSerializerModifier(ApplicationContext context) {
+    public AttachFieldBeanSerializerModifier(ApplicationContext context) {
         this.enumDictResolver = context.getBean(EnumDictResolver.class); // 一定有
         this.regionSource = SpringUtil.getFirstBeanByClass(context, RegionSource.class); // 可能没有
     }
@@ -70,18 +72,31 @@ public class AdditionalCaptionBeanSerializerModifier extends BeanSerializerModif
                         String propertyName = meta.getName();
                         if (!isIgnored(bean, propertyName)) {
                             Object rawValue = getMember().getValue(bean);
-                            Object caption = AdditionalCaptionUtil.getAdditionalCaption(meta, rawValue,
-                                    AdditionalCaptionBeanSerializerModifier.this.enumDictResolver,
-                                    AdditionalCaptionBeanSerializerModifier.this.regionSource, prov.getLocale());
+                            Object caption = AttachFieldUtil.getAttachedCaptionValue(meta, rawValue,
+                                    AttachFieldBeanSerializerModifier.this.enumDictResolver,
+                                    AttachFieldBeanSerializerModifier.this.regionSource, prov.getLocale());
                             if (caption != null) {
-                                String captionPropertyName = AdditionalCaptionUtil
-                                        .getAdditionalCaptionPropertyName(propertyName);
+                                String captionFieldName = AttachFieldUtil.getAttachedCaptionFieldName(propertyName);
                                 if (caption instanceof String) {
-                                    gen.writeStringField(captionPropertyName, (String) caption);
+                                    gen.writeStringField(captionFieldName, (String) caption);
                                 } else {
-                                    gen.writeObjectField(captionPropertyName, caption);
+                                    gen.writeObjectField(captionFieldName, caption);
                                 }
                             }
+                            // 附加除显示名称外的其它附加字段
+                            AttachFieldUtil.loopAttachedField(meta, rawValue,
+                                    (attachedFieldName, attachedFieldValue) -> {
+                                        try {
+                                            if (attachedFieldValue instanceof String) {
+                                                gen.writeStringField(attachedFieldName,
+                                                        (String) attachedFieldValue);
+                                            } else {
+                                                gen.writeObjectField(attachedFieldName, attachedFieldValue);
+                                            }
+                                        } catch (IOException e) {
+                                            LogUtil.error(getClass(), e);
+                                        }
+                                    });
                         }
                     }
 

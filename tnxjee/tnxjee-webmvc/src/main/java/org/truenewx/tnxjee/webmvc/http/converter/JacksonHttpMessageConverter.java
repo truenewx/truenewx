@@ -29,7 +29,7 @@ import org.truenewx.tnxjee.core.util.PropertyMeta;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.webmvc.http.annotation.ResultFilter;
 import org.truenewx.tnxjee.webmvc.http.annotation.ResultWithClassField;
-import org.truenewx.tnxjee.webmvc.jackson.AdditionalCaptionBeanSerializerModifier;
+import org.truenewx.tnxjee.webmvc.jackson.AttachFieldBeanSerializerModifier;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 import org.truenewx.tnxjee.webmvc.util.RpcUtil;
 
@@ -59,8 +59,8 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // 默认外部输出器需要附加显示名称输出能力
-        withSerializerModifier(this.defaultExternalWriter, new AdditionalCaptionBeanSerializerModifier(this.context));
+        // 默认外部输出器需要附加字段输出能力
+        withSerializerModifier(this.defaultExternalWriter, new AttachFieldBeanSerializerModifier(this.context));
     }
 
     private void withSerializerModifier(ObjectMapper mapper, BeanSerializerModifier modifier) {
@@ -128,8 +128,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
 
     private ObjectMapper buildWriter(boolean internal, Class<?> resultType, ResultFilter[] resultFilters) {
         TypedPropertyFilter filter = new TypedPropertyFilter();
-        AdditionalCaptionBeanSerializerModifier additionalCaptionModifier = new AdditionalCaptionBeanSerializerModifier(
-                this.context);
+        AttachFieldBeanSerializerModifier attachFieldModifier = new AttachFieldBeanSerializerModifier(this.context);
         for (ResultFilter resultFilter : resultFilters) {
             Class<?> filteredType = resultFilter.type();
             if (filteredType == Object.class) {
@@ -137,20 +136,20 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             }
             filter.addIncludedProperties(filteredType, resultFilter.included());
             filter.addExcludedProperties(filteredType, resultFilter.excluded());
-            additionalCaptionModifier.addIgnoredPropertiesNames(filteredType, resultFilter.pureEnum());
+            attachFieldModifier.addIgnoredPropertiesNames(filteredType, resultFilter.pureEnum());
         }
         // 被过滤的类型中如果不包含结果类型，则加入结果类型，以确保至少包含结果类型
         Class<?>[] filteredTypes = filter.getTypes();
         if (!ArrayUtils.contains(filteredTypes, resultType)) {
             filteredTypes = ArrayUtils.add(filteredTypes, resultType);
         }
-        ObjectMapper mapper = JacksonUtil.buildMapper(filter, filteredTypes);
+        ObjectMapper writer = JacksonUtil.buildMapper(filter, filteredTypes);
         if (internal) { // 内部输出器需要附加类型属性输出能力
-            JacksonUtil.withNonConcreteClassProperty(mapper);
-        } else { // 外部输出器需要附加显示名称输出能力
-            withSerializerModifier(mapper, additionalCaptionModifier);
+            JacksonUtil.withNonConcreteClassProperty(writer);
+        } else { // 外部输出器需要附加字段输出能力
+            withSerializerModifier(writer, attachFieldModifier);
         }
-        return mapper;
+        return writer;
     }
 
 }
