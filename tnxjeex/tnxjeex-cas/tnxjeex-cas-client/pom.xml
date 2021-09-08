@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.truenewx.tnxjeex</groupId>
         <artifactId>tnxjeex-cas</artifactId>
-        <version>2.2.2</version>
+        <version>2.3.1</version>
     </parent>
     <groupId>org.truenewx.tnxjeex.cas</groupId>
     <artifactId>tnxjeex-cas-client</artifactId>
