@@ -99,15 +99,12 @@ export default {
         },
         initModel() {
             this.model = this.value;
-            let vm = this;
-            this.$nextTick(function() { // 确保$refs.select已被渲染
-                if (vm.$refs.select.isMulti()) {
-                    return;
-                }
-                if ((vm.model === undefined || vm.model === null) && !vm.empty && vm.items && vm.items.length) {
-                    vm.model = vm.items[0].key;
-                }
-            });
+            if (this.$refs.select && this.$refs.select.isMulti()) {
+                return;
+            }
+            if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
+                this.model = this.items[0].key;
+            }
         }
     }
 }
