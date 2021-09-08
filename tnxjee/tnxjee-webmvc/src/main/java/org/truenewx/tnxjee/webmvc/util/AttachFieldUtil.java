@@ -4,7 +4,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -92,7 +96,8 @@ public class AttachFieldUtil {
                             if (caption != null) {
                                 StringBuilder sb = new StringBuilder(caption);
                                 Region parentRegion = region.getParent();
-                                while (parentRegion != null && parentRegion.getLevel() >= regionCode.captionBeginLevel()) {
+                                while (parentRegion != null
+                                        && parentRegion.getLevel() >= regionCode.captionBeginLevel()) {
                                     String parentCaption = parentRegion.getCaption(regionCode.withSuffix());
                                     if (parentCaption != null) {
                                         sb.insert(0, parentCaption);
@@ -129,6 +134,7 @@ public class AttachFieldUtil {
      * @param rawValue 属性值
      * @param consumer 附加字段消费者
      */
+    @SuppressWarnings("unchecked")
     public static void loopAttachedField(BeanPropertyMeta meta, Object rawValue, BiConsumer<String, Object> consumer) {
         Class<?> rawClass = meta.getRawClass();
         if (rawClass.isEnum()) { // 枚举或枚举集合附加枚举中的额外属性
