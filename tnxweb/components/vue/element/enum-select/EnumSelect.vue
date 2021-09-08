@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import Select from '../select';
+import Select, {isMultiSelector} from '../select/Select';
 import FetchCascader from '../fetch-cascader';
 
 export default {
@@ -100,7 +100,7 @@ export default {
         initModel() {
             let oldModel = this.model;
             this.model = this.value;
-            if (this.$refs.select && this.$refs.select.isMulti()) {
+            if (isMultiSelector(this.selector)) {
                 return;
             }
             if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
