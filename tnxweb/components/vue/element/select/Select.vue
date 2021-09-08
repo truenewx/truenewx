@@ -73,6 +73,9 @@
 </template>
 
 <script>
+export const isMultiSelector = function(selector) {
+    return selector === 'checkbox' || selector === 'tags';
+}
 export default {
     name: 'TnxelSelect',
     props: {
@@ -150,7 +153,7 @@ export default {
     },
     methods: {
         isMulti() {
-            return this.selector === 'checkbox' || this.selector === 'tags';
+            return isMultiSelector(this.selector);
         },
         triggerChange(value) {
             if (this.change) {
