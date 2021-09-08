@@ -29,7 +29,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Hoxton.SR8</version><!-- 适配spring-boot-2.2/2.3 -->
+                <version>Hoxton.SR12</version><!-- 适配spring-boot-2.3 -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -107,11 +107,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>1.64</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi</artifactId>
-                <version>5.0.0</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.oss</groupId>
