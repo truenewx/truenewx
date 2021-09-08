@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.enums;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -299,7 +300,21 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                     } else {
                         caption = roundTypeCaption(enumClass, caption);
                     }
-                    enumType.addItem(new EnumItem(ordinal, enumConstant.name(), caption));
+                    EnumItem item = new EnumItem(ordinal, enumConstant.name(), caption);
+                    // 枚举如果有额外属性，则添加为枚举项的附加项
+                    ClassUtil.loopSimplePropertyDescriptors(enumClass, pd -> {
+                        Method readMethod = pd.getReadMethod();
+                        if (readMethod != null) {
+                            try {
+                                Object attachedFieldValue = readMethod.invoke(enumConstant);
+                                if (attachedFieldValue != null) {
+                                    item.addAttachedField(pd.getName(), attachedFieldValue);
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    });
+                    enumType.addItem(item);
                 }
             }
         }

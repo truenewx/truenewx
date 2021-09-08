@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.core.enums;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
@@ -16,7 +17,8 @@ public class EnumItem implements Comparable<EnumItem> {
     private String key;
     private String caption;
     private String searchIndex;
-    private Map<String, EnumItem> children = new LinkedHashMap<>();
+    private Map<String, Object> attachment;
+    private final Map<String, EnumItem> children = new LinkedHashMap<>();
 
     public EnumItem(int ordinal, String key, String caption) {
         if (key == null) {
@@ -48,6 +50,17 @@ public class EnumItem implements Comparable<EnumItem> {
 
     public void setSearchIndex(String searchIndex) {
         this.searchIndex = searchIndex;
+    }
+
+    public Map<String, Object> getAttachment() {
+        return this.attachment;
+    }
+
+    public void addAttachedField(String name, Object value) {
+        if (this.attachment == null) {
+            this.attachment = new HashMap<>();
+        }
+        this.attachment.put(name, value);
     }
 
     public boolean matches(String keyword) {
@@ -164,7 +177,8 @@ public class EnumItem implements Comparable<EnumItem> {
 
     @Override
     public String toString() {
-        return "[" + this.ordinal + "]" + this.key + "=" + this.caption;
+        // 形如：[ordinal]key=caption
+        return Strings.LEFT_SQUARE_BRACKET + this.ordinal + Strings.RIGHT_SQUARE_BRACKET + this.key + Strings.EQUAL + this.caption;
     }
 
     @Override
@@ -176,7 +190,7 @@ public class EnumItem implements Comparable<EnumItem> {
                 return this.caption.compareTo(other.caption);
             }
         } else { // 优先用序号排序
-            return Integer.valueOf(this.ordinal).compareTo(other.ordinal);
+            return Integer.compare(this.ordinal, other.ordinal);
         }
     }
 

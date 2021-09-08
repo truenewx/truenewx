@@ -111,7 +111,7 @@ public class ApiMetaController {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @GetMapping("/enums")
-    @ResultFilter(type = EnumItem.class, included = { "key", "caption", "searchIndex", "children" })
+    @ResultFilter(type = EnumItem.class, included = { "key", "caption", "searchIndex", "children", "attachment" })
     public Collection<EnumItem> enumItems(@RequestParam("type") String type,
             @RequestParam(value = "subtype", required = false) String subtype,
             @RequestParam(value = "grouped", defaultValue = "false") boolean grouped, HttpServletRequest request) {
