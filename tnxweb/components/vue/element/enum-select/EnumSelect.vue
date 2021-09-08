@@ -73,7 +73,7 @@ export default {
             this.init();
         }
     },
-    created() {
+    mounted() {
         this.init();
     },
     methods: {
@@ -98,12 +98,17 @@ export default {
             }
         },
         initModel() {
+            let oldModel = this.model;
             this.model = this.value;
             if (this.$refs.select && this.$refs.select.isMulti()) {
                 return;
             }
             if ((this.model === undefined || this.model === null) && !this.empty && this.items && this.items.length) {
-                this.model = this.items[0].key;
+                let item = this.items[0];
+                this.model = item.key;
+                if (this.model !== oldModel && this.change) {
+                    this.change(item);
+                }
             }
         }
     }
