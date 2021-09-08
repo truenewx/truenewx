@@ -336,37 +336,51 @@ export default {
             });
         }
     },
-    resolveEnumCaption(type, subtype, key, callback) {
+    resolveEnumItem(type, subtype, key, callback) {
         if (typeof key === 'function') {
             callback = key;
             key = subtype;
             subtype = undefined;
         }
         if (key === undefined || key === null) {
-            callback('');
+            callback(null);
         } else {
             const mappingKey = subtype ? (type + '-' + subtype) : type;
             let items = this._enumItemsMapping[mappingKey];
-            let caption = this._getEnumCaption(items, key);
-            if (caption) {
-                callback(caption);
+            let item = this._getEnumItem(items, key);
+            if (item) {
+                callback(item);
             } else {
                 let _this = this;
                 this.loadEnumItems(type, function(items) {
-                    callback(_this._getEnumCaption(items, key));
+                    let item = _this._getEnumItem(items, key);
+                    if (item) {
+                        callback(item);
+                    }
                 });
             }
         }
     },
-    _getEnumCaption(items, key) {
+    _getEnumItem(items, key) {
         if (Array.isArray(items)) {
             for (let item of items) {
                 if (item.key === key) {
-                    return item.caption;
+                    return item;
                 }
             }
         }
         return undefined;
+    },
+    resolveEnumCaption(type, subtype, key, callback) {
+        if (typeof key === 'function') {
+            callback = key;
+            key = subtype;
+            subtype = undefined;
+        }
+        this.resolveEnumItem(type, subtype, key, function(item) {
+            let caption = item ? item.caption : '';
+            callback(caption);
+        });
     },
     _regionMapping: {},
     loadRegion(regionCode, level, callback) {
