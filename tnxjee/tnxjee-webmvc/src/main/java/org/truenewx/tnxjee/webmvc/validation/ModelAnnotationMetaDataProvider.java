@@ -8,9 +8,10 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.internal.engine.ConstraintCreationContext;
 import org.hibernate.validator.internal.engine.ValidatorImpl;
-import org.hibernate.validator.internal.engine.valueextraction.ValueExtractorManager;
 import org.hibernate.validator.internal.metadata.BeanMetaDataManager;
+import org.hibernate.validator.internal.metadata.BeanMetaDataManagerImpl;
 import org.hibernate.validator.internal.metadata.core.AnnotationProcessingOptions;
 import org.hibernate.validator.internal.metadata.core.MetaConstraint;
 import org.hibernate.validator.internal.metadata.core.MetaConstraints;
@@ -21,7 +22,7 @@ import org.hibernate.validator.internal.metadata.provider.MetaDataProvider;
 import org.hibernate.validator.internal.metadata.raw.BeanConfiguration;
 import org.hibernate.validator.internal.metadata.raw.ConstrainedElement;
 import org.hibernate.validator.internal.metadata.raw.ConstrainedField;
-import org.hibernate.validator.internal.util.TypeResolutionHelper;
+import org.hibernate.validator.internal.properties.javabean.JavaBeanField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -41,23 +42,23 @@ import org.truenewx.tnxjee.model.validation.annotation.InheritConstraint;
 public class ModelAnnotationMetaDataProvider implements MetaDataProvider {
 
     private AnnotationMetaDataProvider delegate;
-    private TypeResolutionHelper typeResolutionHelper;
-    private ValueExtractorManager valueExtractorManager;
+    private ConstraintCreationContext constraintCreationContext;
 
     @Autowired
     public ModelAnnotationMetaDataProvider(LocalValidatorFactoryBean validator) {
         // 将自身介入字段校验体系中
         ValidatorImpl targetValidator = BeanUtil.getFieldValue(validator, "targetValidator");
         BeanMetaDataManager beanMetaDataManager = BeanUtil.getFieldValue(targetValidator, "beanMetaDataManager");
-        List<MetaDataProvider> metaDataProviders = BeanUtil.getFieldValue(beanMetaDataManager, "metaDataProviders");
-        for (int i = 0; i < metaDataProviders.size(); i++) {
-            MetaDataProvider metaDataProvider = metaDataProviders.get(i);
-            if (metaDataProvider instanceof AnnotationMetaDataProvider) {
-                this.delegate = (AnnotationMetaDataProvider) metaDataProvider;
-                metaDataProviders.set(i, this);
-                this.typeResolutionHelper = BeanUtil.getFieldValue(this.delegate, "typeResolutionHelper");
-                this.valueExtractorManager = BeanUtil.getFieldValue(this.delegate, "valueExtractorManager");
-                break;
+        if (beanMetaDataManager instanceof BeanMetaDataManagerImpl) {
+            List<MetaDataProvider> metaDataProviders = BeanUtil.getFieldValue(beanMetaDataManager, "metaDataProviders");
+            for (int i = 0; i < metaDataProviders.size(); i++) {
+                MetaDataProvider metaDataProvider = metaDataProviders.get(i);
+                if (metaDataProvider instanceof AnnotationMetaDataProvider) {
+                    this.delegate = (AnnotationMetaDataProvider) metaDataProvider;
+                    metaDataProviders.set(i, this);
+                    this.constraintCreationContext = BeanUtil.getFieldValue(this.delegate, "constraintCreationContext");
+                    break;
+                }
             }
         }
     }
@@ -77,33 +78,46 @@ public class ModelAnnotationMetaDataProvider implements MetaDataProvider {
                 for (ConstrainedElement constrainedElement : configuration.getConstrainedElements()) {
                     if (constrainedElement instanceof ConstrainedField) { // 为简化计，仅考虑字段上的约束
                         ConstrainedField constrainedField = (ConstrainedField) constrainedElement;
-                        Field field = constrainedField.getField();
-                        Set<MetaConstraint<?>> entityFieldConstraints = getFieldMetaConstraints(entityConfiguration,
-                                field);
-                        if (CollectionUtils.isNotEmpty(entityFieldConstraints)) { // 存在有对应的实体类型字段约束才需要合并
-                            Set<MetaConstraint<?>> constraints = new HashSet<>(constrainedField.getConstraints());
-                            for (MetaConstraint<?> constraint : entityFieldConstraints) {
-                                // 从实体类型得到的字段约束不能直接使用，需复制一份后再修改其中的字段定位，才可用于命令模型字段
-                                // 否则会改动实体类型的字段约束，导致数据层校验失效
-                                ConstraintDescriptorImpl<?> constraintDescriptor = constraint.getDescriptor();
-                                try {
-                                    Constructor<FieldConstraintLocation> constructor = FieldConstraintLocation.class
-                                            .getDeclaredConstructor(Field.class);
-                                    constructor.setAccessible(true);
-                                    FieldConstraintLocation location = constructor.newInstance(field);
-                                    constraints.add(MetaConstraints.create(this.typeResolutionHelper,
-                                            this.valueExtractorManager, constraintDescriptor, location));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                        Field field = getField(constrainedField);
+                        if (field != null) {
+                            Set<MetaConstraint<?>> entityFieldConstraints = getFieldMetaConstraints(entityConfiguration,
+                                    field);
+                            if (CollectionUtils.isNotEmpty(entityFieldConstraints)) { // 存在有对应的实体类型字段约束才需要合并
+                                Set<MetaConstraint<?>> constraints = new HashSet<>(constrainedField.getConstraints());
+                                for (MetaConstraint<?> constraint : entityFieldConstraints) {
+                                    // 从实体类型得到的字段约束不能直接使用，需复制一份后再修改其中的字段定位，才可用于命令模型字段
+                                    // 否则会改动实体类型的字段约束，导致数据层校验失效
+                                    ConstraintDescriptorImpl<?> constraintDescriptor = constraint.getDescriptor();
+                                    try {
+                                        Constructor<FieldConstraintLocation> constructor = FieldConstraintLocation.class
+                                                .getDeclaredConstructor(Field.class);
+                                        constructor.setAccessible(true);
+                                        FieldConstraintLocation location = constructor.newInstance(field);
+                                        constraints.add(MetaConstraints.create(
+                                                this.constraintCreationContext.getTypeResolutionHelper(),
+                                                this.constraintCreationContext.getValueExtractorManager(),
+                                                this.constraintCreationContext.getConstraintValidatorManager(),
+                                                constraintDescriptor, location));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
+                                BeanUtil.setFieldValue(constrainedField, "constraints", constraints);
                             }
-                            BeanUtil.setFieldValue(constrainedField, "constraints", constraints);
                         }
                     }
                 }
             }
         }
         return configuration;
+    }
+
+    private Field getField(ConstrainedField constrainedField) {
+        org.hibernate.validator.internal.properties.Field propertyField = constrainedField.getField();
+        if (propertyField instanceof JavaBeanField) {
+            return BeanUtil.getFieldValue(propertyField, "field");
+        }
+        return null;
     }
 
     private Set<MetaConstraint<?>> getFieldMetaConstraints(BeanConfiguration<?> configuration, Field field) {

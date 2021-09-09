@@ -5,9 +5,9 @@ import java.util.Collections;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoClientDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoDriverInformation;
@@ -17,7 +17,6 @@ import com.mongodb.client.internal.MongoClientImpl;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
-
 
 @AutoConfigureBefore(MongoDataAutoConfiguration.class)
 public abstract class EmbeddedMongoConfigurerSupport {
@@ -39,13 +38,13 @@ public abstract class EmbeddedMongoConfigurerSupport {
     }
 
     @Bean
-    public MongoDbFactory mongoDbFactory(MongoClient mongoClient) {
-        return new SimpleMongoClientDbFactory(mongoClient, "test");
+    public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
+        return new SimpleMongoClientDatabaseFactory(mongoClient, "test");
     }
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory) {
-        return new MongoTemplate(mongoDbFactory);
+    public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
+        return new MongoTemplate(mongoDatabaseFactory);
     }
 
 }

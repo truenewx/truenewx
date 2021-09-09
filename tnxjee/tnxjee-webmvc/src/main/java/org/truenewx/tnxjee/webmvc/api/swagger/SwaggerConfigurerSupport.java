@@ -12,12 +12,12 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 /**
  * Swagger配置器支持
  */
-@EnableSwagger2
+@EnableSwagger2WebMvc
 public abstract class SwaggerConfigurerSupport {
 
     @Autowired
@@ -27,10 +27,8 @@ public abstract class SwaggerConfigurerSupport {
 
     @Bean
     public Docket docket() {
-        return new Docket(DocumentationType.SWAGGER_2).groupName(this.appName).apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage(getBasePackage()))
-                .paths(PathSelectors.any()).build();
+        return new Docket(DocumentationType.SWAGGER_2).groupName(this.appName).apiInfo(apiInfo()).select()
+                .apis(RequestHandlerSelectors.basePackage(getBasePackage())).paths(PathSelectors.any()).build();
     }
 
     private ApiInfo apiInfo() {
