@@ -24,7 +24,6 @@ import org.hibernate.validator.internal.metadata.raw.ConstrainedElement;
 import org.hibernate.validator.internal.metadata.raw.ConstrainedField;
 import org.hibernate.validator.internal.properties.javabean.JavaBeanField;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.ClassUtil;
@@ -37,9 +36,8 @@ import org.truenewx.tnxjee.model.validation.annotation.InheritConstraint;
  * 使得控制层得以校验模型中的字段约束，值得注意的是，这里并不包含ORM层的字段约束校验，后者交给数据层执行。<br>
  * 这样控制层校验命令模型和实体的字段约束，数据层校验实体和ORM的字段约束
  */
-@Component
-// TODO 注意：本类大量使用反射机制，越权访问框架类内部的属性，不是值得推荐的方式，后续依赖的底层框架版本更新时，需留意是否需要同步更新
 public class ModelAnnotationMetaDataProvider implements MetaDataProvider {
+    // TODO 注意：本类大量使用反射机制，越权访问框架类内部的属性，不是值得推荐的方式，后续依赖的底层框架版本更新时，需留意是否需要同步更新
 
     private AnnotationMetaDataProvider delegate;
     private ConstraintCreationContext constraintCreationContext;
