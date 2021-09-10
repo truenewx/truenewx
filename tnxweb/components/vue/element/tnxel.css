@@ -212,8 +212,8 @@ el-header ul.tnxel-nav,
     flex-wrap: wrap;
 }
 
-.el-form-item__content > :first-child:not(.w-100),
-.el-form-item__content > :first-child:not(.el-col-24) {
+.el-form:not(.el-form--label-top) .el-form-item__content > :first-child:not(.w-100),
+.el-form:not(.el-form--label-top) .el-form-item__content > :first-child:not(.el-col-24) {
     margin-right: 0.5rem;
 }
 
