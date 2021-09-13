@@ -4,13 +4,13 @@
             <h1>{{ title }}</h1>
             <p>首页</p>
             <p>
-                <el-button @click="showAlert">Alert</el-button>
-                <el-button @click="showSuccess">Success</el-button>
-                <el-button @click="showError">Error</el-button>
-                <el-button @click="showConfirm">Confirm</el-button>
-                <el-button @click="showToast">Toast</el-button>
-                <el-button @click="showLoading">Loading</el-button>
-                <el-button @click="showOpen">Open</el-button>
+                <a-button @click="showAlert">Alert</a-button>
+                <a-button @click="showSuccess">Success</a-button>
+                <a-button @click="showError">Error</a-button>
+                <a-button @click="showConfirm">Confirm</a-button>
+                <a-button @click="showToast">Toast</a-button>
+                <a-button @click="showLoading">Loading</a-button>
+                <a-button @click="showOpen">Open</a-button>
             </p>
         </div>
     </div>
@@ -28,12 +28,12 @@ export default {
         };
     },
     created() {
-        if (!this.uploadBaseUrl) {
-            const vm = this;
-            app.rpc.loadConfig(function(context) {
-                vm.uploadBaseUrl = context.apps.fss;
-            });
-        }
+        // if (!this.uploadBaseUrl) {
+        //     const vm = this;
+        //     app.rpc.loadConfig(function(context) {
+        //         vm.uploadBaseUrl = context.apps.fss;
+        //     });
+        // }
     },
     methods: {
         showAlert() {
@@ -73,15 +73,6 @@ export default {
                 opener: this,
             });
         },
-        uploadOk() {
-            this.$refs.headImageUpload.getStorageUrls().then(function(storageUrls) {
-                if (storageUrls.length) {
-                    tnx.success(storageUrls.join('\n'));
-                }
-            }).catch(function(file) {
-                tnx.alert('文件"' + file.name + '"还未上传完毕，请稍候');
-            });
-        }
     }
 }
 </script>

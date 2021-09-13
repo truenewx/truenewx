@@ -1,14 +1,11 @@
 import '../components/tnxcore.css';
-import '../components/bootstrap/base-4.5.3.css';
-import 'element-ui/lib/theme-chalk/index.css';
+import 'bootstrap/dist/css/bootstrap-reboot.min.css';
+import 'bootstrap/dist/css/bootstrap-grid.min.css';
+import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 import '../components/vue/tnxvue.css';
-import '../components/vue/element/tnxel.css';
-import tnx from '../components/vue/element/tnxel';
+import 'ant-design-vue/dist/antd.min.css';
+import '../components/vue/ant-design/tnxad.css';
+import {tnx} from './app';
 import App from './App.vue';
 
-const Vue = tnx.libs.Vue;
-Vue.config.productionTip = false;
-
-new Vue({
-    render: h => h(App),
-}).$mount('#app');
+tnx.createApp(App).mount('#app');

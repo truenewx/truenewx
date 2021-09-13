@@ -2,12 +2,12 @@
 /**
  * 基于Vue的扩展支持
  */
-import Vue from 'vue';
 import tnxcore from '../tnxcore.js';
 import validator from './tnxvue-validator';
 import buildRouter from './tnxvue-router';
 import Text from './text';
 import Percent from './percent';
+import {createApp} from "vue";
 
 const components = {
     Div: {
@@ -57,14 +57,19 @@ function getDefaultDialogButtons(type, callback, theme) {
 }
 
 const tnxvue = Object.assign({}, tnxcore, {
-    libs: Object.assign({}, tnxcore.libs, {Vue}),
+    libs: Object.assign({}, tnxcore.libs),
     components,
     buildRouter,
-    install(Vue) {
+    install(app) {
         Object.keys(components).forEach(key => {
             const component = components[key];
-            Vue.component(component.name, component);
+            app.component(component.name, component);
         });
+    },
+    createApp(rootComponent, rootProps) {
+        let app = createApp(rootComponent, rootProps);
+        app.use(this);
+        return app;
     },
     dialog(content, title, buttons, options, contentProps) {
         // 默认不实现，由UI框架扩展层实现
@@ -268,8 +273,6 @@ Object.assign(tnxvue.app.page, {
         return expanded;
     }
 });
-
-Vue.use(tnxvue);
 
 window.tnx = tnxvue;
 

@@ -1,6 +1,6 @@
 {
   "name": "@truenewx/tnxweb",
-  "version": "2.2.2",
+  "version": "2.3.1",
   "description": "互联网技术解决方案：Web扩展支持",
   "private": false,
   "publishConfig": {
@@ -8,6 +8,7 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
+  "main": "sample/main.js",
   "keywords": [
     "truenewx",
     "tnxweb",
@@ -20,24 +21,25 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "core-js": "^3.17.3",
     "axios": "^0.21.1",
     "base-64": "^1.0.0",
-    "core-js": "^3.16.1",
-    "element-ui": "^2.15.5",
-    "jquery": "^3.6.0",
     "md5": "^2.3.0",
-    "vue": "^2.6.12",
-    "vue-router": "^3.5.2"
+    "jquery": "^3.6.0",
+    "bootstrap": "^5.1.1",
+    "ant-design-vue": "^2.2.7",
+    "vue": "^3.2.11",
+    "vue-router": "^4.0.11"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.12",
-    "@vue/cli-plugin-eslint": "~4.5.12",
-    "@vue/cli-service": "~4.5.12",
+    "@vue/cli-plugin-babel": "~4.5.13",
+    "@vue/cli-plugin-eslint": "~4.5.13",
+    "@vue/cli-plugin-router": "~4.5.13",
+    "@vue/cli-service": "~4.5.13",
+    "@vue/compiler-sfc": "^3.2.11",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
-    "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.12",
-    "chokidar": "^3.5.2"
+    "eslint-plugin-vue": "^7.0.0"
   },
   "eslintConfig": {
     "root": true,
