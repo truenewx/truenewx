@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 import '../components/vue/tnxvue.css';
 import 'ant-design-vue/dist/antd.min.css';
 import '../components/vue/ant-design/tnxad.css';
-import {tnx} from './app';
+import tnx from './tnx';
 import App from './App.vue';
 
-tnx.createApp(App).mount('#app');
+tnx.createVueInstance(App).mount('#app');

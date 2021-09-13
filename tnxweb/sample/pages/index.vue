@@ -4,20 +4,20 @@
             <h1>{{ title }}</h1>
             <p>首页</p>
             <p>
-                <a-button @click="showAlert">Alert</a-button>
-                <a-button @click="showSuccess">Success</a-button>
-                <a-button @click="showError">Error</a-button>
-                <a-button @click="showConfirm">Confirm</a-button>
-                <a-button @click="showToast">Toast</a-button>
-                <a-button @click="showLoading">Loading</a-button>
-                <a-button @click="showOpen">Open</a-button>
+                <a-button class="mx-1" @click="showAlert">Alert</a-button>
+                <a-button class="mx-1" @click="showSuccess">Success</a-button>
+                <a-button class="mx-1" @click="showError">Error</a-button>
+                <a-button class="mx-1" @click="showConfirm">Confirm</a-button>
+                <a-button class="mx-1" @click="showToast">Toast</a-button>
+                <a-button class="mx-1" @click="showLoading">Loading</a-button>
+                <a-button class="mx-1" @click="showOpen">Open</a-button>
             </p>
         </div>
     </div>
 </template>
 
 <script>
-import {app, tnx} from '../app.js';
+import {app, tnx} from '../tnx.js';
 import info from './info.vue';
 
 export default {

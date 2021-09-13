@@ -1,6 +1,6 @@
 // tnxad.js
 /**
- * 基于AntDesign的扩展支持
+ * 基于AntDesign 2的扩展支持
  */
 import tnxvue from '../tnxvue.js';
 import AntDesign from 'ant-design-vue';
@@ -12,9 +12,9 @@ const tnxad = Object.assign({}, tnxvue, {
     components,
 });
 
-tnxad.install = tnxad.util.function.around(tnxad.install, function(install, app) {
-    app.use(AntDesign);
-    install.call(window.tnx, app);
+tnxad.install = tnxad.util.function.around(tnxad.install, function(install, vue) {
+    vue.use(AntDesign);
+    install.call(window.tnx, vue);
 });
 
 window.tnx = tnxad;

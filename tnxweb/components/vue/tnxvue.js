@@ -1,13 +1,13 @@
 // tnxvue.js
 /**
- * 基于Vue的扩展支持
+ * 基于Vue 3的扩展支持
  */
 import tnxcore from '../tnxcore.js';
 import validator from './tnxvue-validator';
 import buildRouter from './tnxvue-router';
 import Text from './text';
 import Percent from './percent';
-import {createApp} from "vue";
+import {createApp} from 'vue';
 
 const components = {
     Div: {
@@ -60,16 +60,17 @@ const tnxvue = Object.assign({}, tnxcore, {
     libs: Object.assign({}, tnxcore.libs),
     components,
     buildRouter,
-    install(app) {
-        Object.keys(components).forEach(key => {
+    install(vue) {
+        Object.keys(this.components).forEach(key => {
             const component = components[key];
-            app.component(component.name, component);
+            vue.component(component.name, component);
         });
+        this.vue = vue;
     },
-    createApp(rootComponent, rootProps) {
-        let app = createApp(rootComponent, rootProps);
-        app.use(this);
-        return app;
+    createVueInstance(rootComponent, rootProps) {
+        let vue = createApp(rootComponent, rootProps);
+        vue.use(this);
+        return vue;
     },
     dialog(content, title, buttons, options, contentProps) {
         // 默认不实现，由UI框架扩展层实现

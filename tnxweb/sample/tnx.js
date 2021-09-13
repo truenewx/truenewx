@@ -1,4 +1,4 @@
-// app.js
+// tnx.js
 import tnxad from '../components/vue/ant-design/tnxad';
 
 export const tnx = tnxad;
@@ -30,4 +30,4 @@ app.rpc.toLogin = function(loginFormUrl, originalUrl) {
     return false;
 }
 
-export default app;
+export default tnx;
