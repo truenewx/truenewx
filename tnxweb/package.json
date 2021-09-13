@@ -1,6 +1,6 @@
 {
   "name": "@truenewx/tnxweb",
-  "version": "2.2.0",
+  "version": "2.2.2",
   "description": "互联网技术解决方案：Web扩展支持",
   "private": false,
   "publishConfig": {
@@ -8,7 +8,6 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "main": "components/index.js",
   "keywords": [
     "truenewx",
     "tnxweb",
