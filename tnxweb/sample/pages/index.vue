@@ -3,15 +3,15 @@
         <div class="text-center">
             <h1>{{ title }}</h1>
             <p>首页</p>
-            <p>
-                <a-button class="mx-1" @click="showAlert">Alert</a-button>
-                <a-button class="mx-1" @click="showSuccess">Success</a-button>
-                <a-button class="mx-1" @click="showError">Error</a-button>
-                <a-button class="mx-1" @click="showConfirm">Confirm</a-button>
-                <a-button class="mx-1" @click="showToast">Toast</a-button>
-                <a-button class="mx-1" @click="showLoading">Loading</a-button>
-                <a-button class="mx-1" @click="showOpen">Open</a-button>
-            </p>
+            <el-space wrap>
+                <el-button @click="showAlert">Alert</el-button>
+                <el-button @click="showSuccess">Success</el-button>
+                <el-button @click="showError">Error</el-button>
+                <el-button @click="showConfirm">Confirm</el-button>
+                <el-button @click="showToast">Toast</el-button>
+                <el-button @click="showLoading">Loading</el-button>
+                <el-button @click="showOpen">Open</el-button>
+            </el-space>
         </div>
     </div>
 </template>

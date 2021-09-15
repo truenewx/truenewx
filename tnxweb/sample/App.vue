@@ -5,15 +5,15 @@
 </template>
 
 <script>
-    import index from './pages/index.vue';
+import index from './pages/index.vue';
 
-    export default {
-        name: 'App',
-        components: {
-            'page-index': index,
-        },
-        data () {
-            return {}
-        }
+export default {
+    name: 'App',
+    components: {
+        'page-index': index,
+    },
+    data() {
+        return {}
     }
+}
 </script>

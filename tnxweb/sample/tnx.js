@@ -1,7 +1,7 @@
 // tnx.js
-import tnxad from '../components/vue/ant-design/tnxad';
+import tnxel from '../components/vue/element-plus/tnxel';
 
-export const tnx = tnxad;
+export const tnx = tnxel;
 export const util = tnx.util;
 export const app = tnx.app;
 
