@@ -1,0 +1,8 @@
+/**
+ * tnxel-layout.css
+ * 对Element Plus除颜色相关CSS外其它样式（主要为布局样式）的调整。
+ * 之所以拆分成颜色和布局两部分的原因是，工程可能使用定制颜色主题的样式库，本布局样式库应在工程定制颜色主题的样式库之后引入。
+ */
+.el-space--horizontal {
+    padding-left: 0.5rem;
+}
