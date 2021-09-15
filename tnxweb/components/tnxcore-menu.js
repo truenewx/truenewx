@@ -271,19 +271,24 @@ Menu.prototype.loadGrantedItems = function(scope, callback) {
         callback(this._grantedItems);
     } else {
         const _this = this;
-        window.tnx.app.rpc.get(this._url, function(authorities) {
-            if (!Array.isArray(authorities)) {
-                authorities = [authorities];
-            }
-            _this.authorities = authorities;
+        if (this._url) {
+            window.tnx.app.rpc.get(this._url, function(authorities) {
+                if (!Array.isArray(authorities)) {
+                    authorities = [authorities];
+                }
+                _this.authorities = authorities;
 
-            _this.scope = scope;
-            _this._grantedItems = [];
-            _this.items.forEach(item => {
-                applyGrantedItemToItems(_this.authorities, item, _this._grantedItems);
+                _this.scope = scope;
+                _this._grantedItems = [];
+                _this.items.forEach(item => {
+                    applyGrantedItemToItems(_this.authorities, item, _this._grantedItems);
+                });
+                callback(_this._grantedItems);
             });
-            callback(_this._grantedItems);
-        });
+        } else { // 未指定获权地址，则视为具有所有权限，用于没有或不关心服务端权限的场景
+            this._grantedItems = this.items;
+            callback(this._grantedItems);
+        }
     }
 }
 

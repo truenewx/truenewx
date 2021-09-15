@@ -20,5 +20,5 @@
 .border-bottom,
 .border-start,
 .border-end {
-    border-color: var(--el-border-color-base);
+    border-color: var(--el-border-color-base) !important;
 }
