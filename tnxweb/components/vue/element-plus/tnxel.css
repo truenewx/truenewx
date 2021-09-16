@@ -1,7 +1,6 @@
 /**
- * tnxel-color.css
- * 对Element Plus颜色相关CSS的调整。
- * 之所以拆分成颜色和布局两部分的原因是，工程可能使用定制颜色主题的样式库，本颜色样式库应在工程定制颜色主题的样式库之前引入。
+ * tnxel.css
+ * 对Element Plus样式的调整
  */
 .text-regular {
     color: var(--el-text-color-regular);
@@ -34,4 +33,8 @@
 
 .border-primary {
     border-color: var(--el-color-primary) !important;
+}
+
+.el-dropdown-menu__item i {
+    margin-right: 0.25rem;
 }
