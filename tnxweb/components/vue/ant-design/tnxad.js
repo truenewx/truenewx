@@ -12,9 +12,9 @@ const tnxad = Object.assign({}, tnxvue, {
     components,
 });
 
-tnxad.install = tnxad.util.function.around(tnxad.install, function(install, vue) {
-    vue.use(AntDesign);
-    install.call(window.tnx, vue);
+tnxad.install = tnxad.util.function.around(tnxad.install, function(install, vm) {
+    vm.use(AntDesign);
+    install.call(window.tnx, vm);
 });
 
 window.tnx = tnxad;

@@ -15,10 +15,23 @@
     color: var(--el-text-color-placeholder);
 }
 
+.text-primary {
+    color: var(--el-color-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--el-color-primary) !important;
+    color: #ffffff;
+}
+
 .border,
 .border-top,
 .border-bottom,
 .border-start,
 .border-end {
     border-color: var(--el-border-color-base) !important;
+}
+
+.border-primary {
+    border-color: var(--el-color-primary) !important;
 }

@@ -95,6 +95,6 @@ span.nowrap {
     color: transparent !important;
 }
 
-i + span {
+i + span:not([class]) {
     margin-left: 0.25rem;
 }

@@ -4,17 +4,21 @@
  */
 import ElementPlus from 'element-plus';
 import tnxvue from '../tnxvue.js';
+import Icon from './icon/Icon';
+import Avatar from './avatar/Avatar';
 
-const components = Object.assign({}, tnxvue.components, {});
+const components = Object.assign({}, tnxvue.components, {
+    Icon, Avatar,
+});
 
 const tnxel = Object.assign({}, tnxvue, {
     libs: Object.assign({}, tnxvue.libs, {ElementPlus}),
     components,
 });
 
-tnxel.install = tnxel.util.function.around(tnxel.install, function(install, vue) {
-    vue.use(ElementPlus);
-    install.call(window.tnx, vue);
+tnxel.install = tnxel.util.function.around(tnxel.install, function(install, vm) {
+    vm.use(ElementPlus);
+    install.call(window.tnx, vm);
 });
 
 window.tnx = tnxel;

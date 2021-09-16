@@ -60,17 +60,17 @@ const tnxvue = Object.assign({}, tnxcore, {
     libs: Object.assign({}, tnxcore.libs),
     components,
     buildRouter,
-    install(vue) {
-        Object.keys(this.components).forEach(key => {
-            const component = components[key];
-            vue.component(component.name, component);
-        });
-        this.vue = vue;
+    install(vm) {
+        for (let key of Object.keys(this.components)) {
+            const component = this.components[key];
+            vm.component(component.name, component);
+        }
+        this.vm = vm;
     },
     createVueInstance(rootComponent, rootProps) {
-        let vue = createApp(rootComponent, rootProps);
-        vue.use(this);
-        return vue;
+        let vm = createApp(rootComponent, rootProps);
+        vm.use(this);
+        return vm;
     },
     dialog(content, title, buttons, options, contentProps) {
         // 默认不实现，由UI框架扩展层实现
