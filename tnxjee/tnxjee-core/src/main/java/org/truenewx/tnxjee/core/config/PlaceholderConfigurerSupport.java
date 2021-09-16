@@ -47,6 +47,9 @@ public abstract class PlaceholderConfigurerSupport {
         return null;
     }
 
+    /**
+     * @return 当前应用的名称
+     */
     protected abstract String getAppName();
 
 }
