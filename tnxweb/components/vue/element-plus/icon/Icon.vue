@@ -5,11 +5,13 @@
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
         <Edit v-else-if="type === 'Edit'"/>
         <HomeFilled v-else-if="type === 'HomeFilled'"/>
+        <InfoFilled v-else-if="type === 'InfoFilled'"/>
         <OfficeBuilding v-else-if="type === 'OfficeBuilding'"/>
         <Plus v-else-if="type === 'Plus'"/>
         <Select v-else-if="type === 'Select'"/>
         <Setting v-else-if="type === 'Setting'"/>
         <UserFilled v-else-if="type === 'UserFilled'"/>
+        <View v-else-if="type === 'View'"/>
     </el-icon>
 </template>
 
@@ -17,18 +19,37 @@
 import {
     ArrowDown,
     ArrowRight,
+    CircleCloseFilled,
     Edit,
     HomeFilled,
+    InfoFilled,
     Loading,
     OfficeBuilding,
     Plus,
     Select,
     Setting,
-    UserFilled
+    SuccessFilled,
+    UserFilled,
+    View,
+    WarningFilled
 } from '@element-plus/icons';
 
 const components = {
-    ArrowDown, ArrowRight, Edit, HomeFilled, Loading, OfficeBuilding, Plus, Select, Setting, UserFilled
+    ArrowDown,
+    ArrowRight,
+    CircleCloseFilled,
+    Edit,
+    HomeFilled,
+    InfoFilled,
+    Loading,
+    OfficeBuilding,
+    Plus,
+    Select,
+    Setting,
+    SuccessFilled,
+    UserFilled,
+    View,
+    WarningFilled,
 };
 
 export default {

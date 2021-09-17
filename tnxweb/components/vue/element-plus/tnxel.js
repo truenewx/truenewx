@@ -6,9 +6,10 @@ import ElementPlus from 'element-plus';
 import tnxvue from '../tnxvue.js';
 import Icon from './icon/Icon';
 import Avatar from './avatar/Avatar';
+import Alert from './alert/Alert';
 
 const components = Object.assign({}, tnxvue.components, {
-    Icon, Avatar,
+    Icon, Avatar, Alert,
 });
 
 const tnxel = Object.assign({}, tnxvue, {

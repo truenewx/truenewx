@@ -2,16 +2,20 @@
  * tnxel.css
  * 对Element Plus样式的调整
  */
+.text-info {
+    color: var(--el-color-info) !important;
+}
+
 .text-regular {
-    color: var(--el-text-color-regular);
+    color: var(--el-text-color-regular) !important;
 }
 
 .text-secondary {
-    color: var(--el-text-color-secondary);
+    color: var(--el-text-color-secondary) !important;
 }
 
 .text-placeholder {
-    color: var(--el-text-color-placeholder);
+    color: var(--el-text-color-placeholder) !important;
 }
 
 .text-primary {
@@ -37,4 +41,8 @@
 
 .el-dropdown-menu__item i {
     margin-right: 0.25rem;
+}
+
+.el-alert {
+    margin-bottom: 1rem;
 }
