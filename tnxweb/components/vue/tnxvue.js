@@ -57,7 +57,9 @@ function getDefaultDialogButtons(type, callback, theme) {
 }
 
 const tnxvue = Object.assign({}, tnxcore, {
-    libs: Object.assign({}, tnxcore.libs),
+    libs: Object.assign({}, tnxcore.libs, {
+        Vue: {createApp}
+    }),
     components,
     buildRouter,
     install(vm) {
