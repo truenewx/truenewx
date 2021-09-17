@@ -273,23 +273,29 @@ Menu.prototype.loadGrantedItems = function(scope, callback) {
         const _this = this;
         if (this._url) {
             window.tnx.app.rpc.get(this._url, function(authorities) {
-                if (!Array.isArray(authorities)) {
-                    authorities = [authorities];
-                }
-                _this.authorities = authorities;
-
-                _this.scope = scope;
-                _this._grantedItems = [];
-                _this.items.forEach(item => {
-                    applyGrantedItemToItems(_this.authorities, item, _this._grantedItems);
-                });
-                callback(_this._grantedItems);
+                _this._applyAuthorities(authorities, scope, callback);
             });
         } else { // 未指定获权地址，则视为具有所有权限，用于没有或不关心服务端权限的场景
-            this._grantedItems = this.items;
-            callback(this._grantedItems);
+            this._applyAuthorities({
+                rank: '*',
+                permissions: ['*'],
+            }, scope, callback);
         }
     }
+}
+
+Menu.prototype._applyAuthorities = function(authorities, scope, callback) {
+    if (!Array.isArray(authorities)) {
+        authorities = [authorities];
+    }
+    this.authorities = authorities;
+    this.scope = scope;
+
+    this._grantedItems = [];
+    for (let item of this.items) {
+        applyGrantedItemToItems(this.authorities, item, this._grantedItems);
+    }
+    callback(this._grantedItems);
 }
 
 Menu.prototype.resolveItemPathParams = function(vm, item) {
