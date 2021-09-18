@@ -11,7 +11,7 @@
         :width="width"
         :top="top"
         :before-close="beforeClose"
-        @closed="onClosed">
+        @closed="onClosed" v-if="visible">
         <template #title>
             <div class="dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
                 v-if="title || options['show-close']"></div>

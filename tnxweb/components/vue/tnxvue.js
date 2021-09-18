@@ -4,7 +4,7 @@
  */
 import tnxcore from '../tnxcore.js';
 import validator from './tnxvue-validator';
-import buildRouter from './tnxvue-router';
+import createRouter from './tnxvue-router';
 import Text from './text';
 import Percent from './percent';
 import {createApp} from 'vue';
@@ -61,18 +61,31 @@ const tnxvue = Object.assign({}, tnxcore, {
         Vue: {createApp}
     }),
     components,
-    buildRouter,
+    router: {
+        instance: null,
+        create(VueRouter, menu, fnImportPage) {
+            return createRouter(VueRouter, menu, fnImportPage);
+        },
+        beforeLeave(router, from) {
+            window.tnx.app.page.stopCache(router, from.path);
+        }
+    },
+    createVueInstance(rootComponent, router, rootProps) {
+        let vm = createApp(rootComponent, rootProps);
+        vm.use(this);
+        if (router) {
+            vm.use(router);
+            window.tnx.router.instance = vm.config.globalProperties.$router;
+        } else if (window.tnx.router.instance) {
+            vm.config.globalProperties.$router = window.tnx.router.instance;
+        }
+        return vm;
+    },
     install(vm) {
         for (let key of Object.keys(this.components)) {
             const component = this.components[key];
             vm.component(component.name, component);
         }
-        this.vm = vm;
-    },
-    createVueInstance(rootComponent, rootProps) {
-        let vm = createApp(rootComponent, rootProps);
-        vm.use(this);
-        return vm;
     },
     dialog(content, title, buttons, options, contentProps) {
         // 默认不实现，由UI框架扩展层实现

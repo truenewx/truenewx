@@ -18,9 +18,12 @@ const components = Object.assign({}, tnxvue.components, {
     Icon, Avatar, Alert, Button, Dialog, Select, SubmitForm,
 });
 
+const dialogClass = 'tnxel-dialog';
+
 const tnxel = Object.assign({}, tnxvue, {
     libs: Object.assign({}, tnxvue.libs, {ElementPlus}),
     components,
+    _dialogs: [], // 对话框堆栈
     dialog(content, title, buttons, options, contentProps) {
         this._closeMessage();
 
@@ -34,19 +37,35 @@ const tnxel = Object.assign({}, tnxvue, {
         let componentDefinition = Object.assign({}, Dialog, componentOptions);
 
         const dialogId = 'dialog-' + (new Date().getTime());
-        $('body').append('<div id="' + dialogId + '"></div>');
+        $('body').append('<div class="' + dialogClass + '" id="' + dialogId + '"></div>');
         if (!(buttons instanceof Array)) {
             buttons = [];
         }
-        const dialog = window.tnx.createVueInstance(componentDefinition, {
+        const dialogVm = window.tnx.createVueInstance(componentDefinition, null, {
             content: content,
             title: title,
             contentProps: contentProps,
             buttons: buttons,
             theme: options.theme,
-        }).mount('#' + dialogId);
-        dialog.options = Object.assign(dialog.options || {}, options);
-        return dialog;
+        }).mount('.' + dialogClass + '#' + dialogId);
+        dialogVm.id = dialogId;
+        dialogVm.options = Object.assign(dialogVm.options || {}, options);
+        this._dialogs.push(dialogVm);
+        return dialogVm;
+    },
+    closeDialog(all) {
+        if (this._dialogs.length) {
+            let dialog = this._dialogs.pop();
+            while (dialog) {
+                dialog.close();
+                $('.' + dialogClass + '#' + dialog.id).remove();
+                if (all) {
+                    dialog = this._dialogs.pop();
+                } else {
+                    break;
+                }
+            }
+        }
     },
     _closeMessage() {
         ElMessage.closeAll();
@@ -205,6 +224,13 @@ const tnxel = Object.assign({}, tnxvue, {
 tnxel.install = tnxel.util.function.around(tnxel.install, function(install, vm) {
     vm.use(ElementPlus);
     install.call(window.tnx, vm);
+});
+
+tnxel.router.beforeLeave = tnxel.util.function.around(tnxel.router.beforeLeave, function(beforeLeave, router, from) {
+    // 页面跳转前关闭当前页面中可能存在的所有消息框和对话框
+    window.tnx._closeMessage();
+    window.tnx.closeDialog(true);
+    beforeLeave.call(window.tnx.router, router, from);
 });
 
 window.tnx = tnxel;

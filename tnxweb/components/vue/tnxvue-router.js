@@ -99,7 +99,9 @@ export default function(VueRouter, menu, fnImportPage) {
         }
     };
     router.beforeEach(function(to, from, next) {
-        window.tnx.app.page.stopCache(router, from.path);
+        if (typeof window.tnx.router.beforeLeave === 'function') {
+            window.tnx.router.beforeLeave(router, from);
+        }
 
         let allow = true;
         let beforeLeaveHandler = router.$beforeLeaveHandlers[from.path];
