@@ -236,3 +236,7 @@ span.form-item-tip {
 .is-success .el-form-item__error {
     display: none;
 }
+
+.el-button {
+    min-height: unset;
+}
