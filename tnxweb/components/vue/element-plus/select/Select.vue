@@ -40,8 +40,11 @@
         </el-radio-button>
     </el-radio-group>
     <el-dropdown trigger="click" :size="size" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
-        <el-button :type="theme">{{ currentText }}
-            <i class="el-icon-arrow-down el-icon--right"></i>
+        <el-button style="width: 100%" :type="theme">
+            <div class="d-flex justify-content-between">
+                <span>{{ currentText }}</span>
+                <tnxel-icon type="ArrowDown"/>
+            </div>
         </el-button>
         <template #dropdown v-if="items && items.length">
             <el-dropdown-menu>
@@ -77,11 +80,16 @@
 </template>
 
 <script>
+import Icon from '../icon/Icon';
+
 export const isMultiSelector = function(selector) {
     return selector === 'checkbox' || selector === 'tags';
 }
 export default {
     name: 'TnxelSelect',
+    components: {
+        'tnxel-icon': Icon,
+    },
     props: {
         id: [Number, String],
         modelValue: [String, Number, Boolean, Array],

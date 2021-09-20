@@ -240,3 +240,9 @@ span.form-item-tip {
 .el-button {
     min-height: unset;
 }
+
+.el-card__header .el-dropdown {
+    display: flex;
+    align-items: center;
+    color: var(--el-color-primary);
+}
