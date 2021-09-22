@@ -8,13 +8,15 @@
                 <slot v-if="$slots.default"></slot>
                 <template v-else-if="menuItem">{{ menuItem.caption }}</template>
             </template>
-            <el-dropdown-menu #dropdown>
-                <el-dropdown-item v-for="dropdownItem of dropdownItems" :key="dropdownItem.path"
-                    :icon="dropdownItem.icon" :disabled="dropdownItem.disabled" :title="dropdownItem.title"
-                    :command="dropdownItem">
-                    {{ dropdownItem.caption || (dropdownItem.menuItem ? dropdownItem.menuItem.caption : '') }}
-                </el-dropdown-item>
-            </el-dropdown-menu>
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <el-dropdown-item v-for="dropdownItem of dropdownItems" :key="dropdownItem.path"
+                        :icon="dropdownItem.icon" :disabled="dropdownItem.disabled" :title="dropdownItem.title"
+                        :command="dropdownItem">
+                        {{ dropdownItem.caption || (dropdownItem.menuItem ? dropdownItem.menuItem.caption : '') }}
+                    </el-dropdown-item>
+                </el-dropdown-menu>
+            </template>
         </el-dropdown>
         <el-button :type="type" :icon="icon" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
