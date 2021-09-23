@@ -8,8 +8,6 @@
         :close-on-press-escape="options['close-on-press-escape']"
         :show-close="options['show-close']"
         :center="options.center"
-        :width="width"
-        :top="top"
         :before-close="beforeClose"
         @closed="onClosed" v-if="visible">
         <template #title>
@@ -72,8 +70,10 @@ export default {
         },
     },
     mounted() {
+        let vm = this;
         this.$nextTick(function() {
-            const height = $('.el-dialog:last').height();
+            let $dialog = $('.el-dialog:last');
+            const height = $dialog.height();
             const docHeight = window.tnx.util.dom.getDocHeight();
             // 对话框高度占文档高度的比例
             const heightRatio = height / docHeight;
@@ -83,6 +83,10 @@ export default {
             let top = (baseTop - height / 2);
             top = Math.max(top, 5); // 至少顶部留5px空隙
             this.middleTop = top + 'px';
+            $dialog.css({
+                'margin-top': vm.top,
+                'width': vm.width,
+            });
 
             if (typeof this.options.onShown === 'function') {
                 this.options.onShown.call(this);

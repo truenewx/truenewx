@@ -60,7 +60,16 @@ Object.assign(String.prototype, {
             regex = new RegExp(regex, "gm");
         }
         return this.replace(regex, replcement);
-    }
+    },
+    allIndexOf(searchString, position) {
+        let indexes = [];
+        let index = this.indexOf(searchString, position);
+        while (index >= 0) {
+            indexes.push(index);
+            index = this.indexOf(searchString, index + searchString.length);
+        }
+        return indexes;
+    },
 });
 
 const DATE_PATTERNS = {
@@ -771,6 +780,12 @@ export const DomUtil = {
         } else {
             return maxZIndex + step;
         }
+    },
+    selectRange(element, start, length) {
+        let end = start + length;
+        element.setSelectionRange(start, end);
+        element.focus();
+        return end;
     },
 }
 

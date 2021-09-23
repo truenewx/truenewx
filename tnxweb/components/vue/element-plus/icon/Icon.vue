@@ -3,6 +3,10 @@
         <Loading v-if="type === 'Loading'"/>
         <ArrowDown v-else-if="type === 'ArrowDown'"/>
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
+        <Bottom v-else-if="type === 'Bottom'"/>
+        <CircleCloseFilled v-else-if="type === 'CircleCloseFilled'"/>
+        <Close v-else-if="type === 'Close'"/>
+        <CloseBold v-else-if="type === 'CloseBold'"/>
         <Edit v-else-if="type === 'Edit'"/>
         <HomeFilled v-else-if="type === 'HomeFilled'"/>
         <InfoFilled v-else-if="type === 'InfoFilled'"/>
@@ -11,6 +15,7 @@
         <QuestionFilled v-else-if="type === 'QuestionFilled'"/>
         <Select v-else-if="type === 'Select'"/>
         <Setting v-else-if="type === 'Setting'"/>
+        <Top v-else-if="type === 'Top'"/>
         <UserFilled v-else-if="type === 'UserFilled'"/>
         <View v-else-if="type === 'View'"/>
     </el-icon>
@@ -20,7 +25,10 @@
 import {
     ArrowDown,
     ArrowRight,
+    Bottom,
     CircleCloseFilled,
+    Close,
+    CloseBold,
     Edit,
     HomeFilled,
     InfoFilled,
@@ -31,6 +39,7 @@ import {
     Select,
     Setting,
     SuccessFilled,
+    Top,
     UserFilled,
     View,
     WarningFilled
@@ -39,7 +48,10 @@ import {
 const components = {
     ArrowDown,
     ArrowRight,
+    Bottom,
     CircleCloseFilled,
+    Close,
+    CloseBold,
     Edit,
     HomeFilled,
     InfoFilled,
@@ -50,6 +62,7 @@ const components = {
     Select,
     Setting,
     SuccessFilled,
+    Top,
     UserFilled,
     View,
     WarningFilled,
@@ -66,13 +79,14 @@ export default {
     computed: {
         className() {
             if (this.type && components[this.type]) {
+                let className = 'tnxel-icon-' + this.type;
                 if (this.type === 'Loading') {
-                    return 'is-loading';
+                    className += ' is-loading';
                 }
+                return className;
             } else {
                 return this.type;
             }
-            return undefined;
         }
     }
 }
