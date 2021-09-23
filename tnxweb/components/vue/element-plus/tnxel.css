@@ -14,6 +14,7 @@
     color: var(--el-text-color-secondary) !important;
 }
 
+.text-muted,
 .text-placeholder {
     color: var(--el-text-color-placeholder) !important;
 }
@@ -37,6 +38,10 @@
 
 .border-primary {
     border-color: var(--el-color-primary) !important;
+}
+
+.disabled {
+    color: var(--el-text-color-placeholder) !important;
 }
 
 .el-dropdown-menu__item i {
