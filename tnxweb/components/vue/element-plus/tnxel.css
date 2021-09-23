@@ -251,3 +251,7 @@ span.form-item-tip {
     align-items: center;
     color: var(--el-color-primary);
 }
+
+.el-button + .el-button {
+    margin-left: 0.5rem;
+}
