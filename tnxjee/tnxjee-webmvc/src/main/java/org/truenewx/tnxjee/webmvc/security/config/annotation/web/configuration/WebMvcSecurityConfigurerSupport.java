@@ -2,7 +2,11 @@ package org.truenewx.tnxjee.webmvc.security.config.annotation.web.configuration;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +30,6 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.web.cors.CorsRegistryProperties;
 import org.truenewx.tnxjee.web.security.WebSecurityProperties;
 import org.truenewx.tnxjee.web.util.SwaggerUtil;
 import org.truenewx.tnxjee.webmvc.api.meta.ApiMetaController;
@@ -52,8 +55,6 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     private RedirectStrategy redirectStrategy;
     @Autowired
     private WebSecurityProperties securityProperties;
-    @Autowired
-    private CorsRegistryProperties corsRegistryProperties;
 
     protected SecurityUrlProvider urlProvider = new SecurityUrlProvider() {
         // 所有方法都有默认实现，默认实例无需提供
@@ -177,12 +178,10 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
 
         RequestMatcher[] anonymousMatchers = getAnonymousRequestMatchers().toArray(new RequestMatcher[0]);
         // @formatter:off
-        http.authorizeRequests().requestMatchers(anonymousMatchers).permitAll().anyRequest().authenticated()
-                .and()
+        http.authorizeRequests().requestMatchers(anonymousMatchers).permitAll().anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
-                .accessDeniedHandler(accessDeniedHandler())
-                .and()
-                .logout().logoutUrl(this.urlProvider.getLogoutProcessUrl()).logoutSuccessHandler(logoutSuccessHandler())
+                .accessDeniedHandler(accessDeniedHandler()).and().logout()
+                .logoutUrl(this.urlProvider.getLogoutProcessUrl()).logoutSuccessHandler(logoutSuccessHandler())
                 .deleteCookies(getLogoutClearCookies()).permitAll();
         // @formatter:on
 
@@ -251,7 +250,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     }
 
     protected String[] getLogoutClearCookies() {
-        return new String[]{ "JSESSIONID", "SESSION" };
+        return new String[] { "JSESSIONID", "SESSION" };
     }
 
 }
