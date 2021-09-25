@@ -9,15 +9,15 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("tnxjee.web.security")
 public class WebSecurityProperties {
 
-    private boolean csrfDisabled;
+    private boolean csrfEnabled;
     private List<String> ignoringPatterns;
 
-    public boolean isCsrfDisabled() {
-        return this.csrfDisabled;
+    public boolean isCsrfEnabled() {
+        return this.csrfEnabled;
     }
 
-    public void setCsrfDisabled(boolean csrfDisabled) {
-        this.csrfDisabled = csrfDisabled;
+    public void setCsrfEnabled(boolean csrfEnabled) {
+        this.csrfEnabled = csrfEnabled;
     }
 
     public List<String> getIgnoringPatterns() {

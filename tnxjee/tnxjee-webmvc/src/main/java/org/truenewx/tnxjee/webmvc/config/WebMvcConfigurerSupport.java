@@ -35,6 +35,8 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
     private ApplicationContext applicationContext;
     @Autowired
     private SingleCorsConfigurationSource corsConfigurationSource;
+    @Autowired
+    private IgnoreNullConfigCorsProcessor ignoreNullConfigCorsProcessor;
 
     protected final ApplicationContext getApplicationContext() {
         return this.applicationContext;
@@ -68,29 +70,27 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        if (this.corsRegistryProperties.isAllowCredentials()) {
-            // 配置的应用URI均允许跨域访问
-            Set<String> allowedOriginals = new HashSet<>(this.commonProperties.getAllAppUris());
-            // 加入额外配置的跨域访问白名单
-            CollectionUtil.addAll(allowedOriginals, this.corsRegistryProperties.getAllowedOrigins());
+        // 配置的应用URI均允许跨域访问
+        Set<String> allowedOriginals = new HashSet<>(this.commonProperties.getAllAppUris());
+        // 加入额外配置的跨域访问白名单
+        CollectionUtil.addAll(allowedOriginals, this.corsRegistryProperties.getAllowedOrigins());
 
-            CorsRegistration registration = registry
-                    .addMapping(this.corsRegistryProperties.getPathPattern())
-                    .allowedOrigins(allowedOriginals.toArray(new String[0]))
-                    .allowedMethods(this.corsRegistryProperties.getAllowedMethods())
-                    .allowedHeaders(this.corsRegistryProperties.getAllowedHeaders())
-                    .allowCredentials(this.corsRegistryProperties.isAllowCredentials());
-            String[] exposedHeaders = this.corsRegistryProperties.getExposedHeaders();
-            Set<String> exposedHeaderSet = new HashSet<>();
-            addExposedHeaders(exposedHeaderSet);
-            exposedHeaders = ArrayUtils.addAll(exposedHeaders, exposedHeaderSet.toArray(new String[0]));
-            registration.exposedHeaders(exposedHeaders);
-            if (this.corsRegistryProperties.getMaxAge() != null) {
-                registration.maxAge(this.corsRegistryProperties.getMaxAge());
-            }
-            CorsConfiguration corsConfiguration = BeanUtil.getFieldValue(registration, CorsConfiguration.class);
-            this.corsConfigurationSource.setCorsConfiguration(corsConfiguration);
+        CorsRegistration registration = registry
+                .addMapping(this.corsRegistryProperties.getPathPattern())
+                .allowedOrigins(allowedOriginals.toArray(new String[0]))
+                .allowedMethods(this.corsRegistryProperties.getAllowedMethods())
+                .allowedHeaders(this.corsRegistryProperties.getAllowedHeaders())
+                .allowCredentials(true);
+        String[] exposedHeaders = this.corsRegistryProperties.getExposedHeaders();
+        Set<String> exposedHeaderSet = new HashSet<>();
+        addExposedHeaders(exposedHeaderSet);
+        exposedHeaders = ArrayUtils.addAll(exposedHeaders, exposedHeaderSet.toArray(new String[0]));
+        registration.exposedHeaders(exposedHeaders);
+        if (this.corsRegistryProperties.getMaxAge() != null) {
+            registration.maxAge(this.corsRegistryProperties.getMaxAge());
         }
+        CorsConfiguration corsConfiguration = BeanUtil.getFieldValue(registration, CorsConfiguration.class);
+        this.corsConfigurationSource.setCorsConfiguration(corsConfiguration);
     }
 
     protected void addExposedHeaders(Collection<String> exposedHeaders) {
@@ -102,7 +102,7 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
     @Bean("corsFilter")
     public CorsFilter corsFilter() {
         CorsFilter corsFilter = new CorsFilter(this.corsConfigurationSource);
-        corsFilter.setCorsProcessor(new IgnoreNullConfigCorsProcessor());
+        corsFilter.setCorsProcessor(this.ignoreNullConfigCorsProcessor);
         return corsFilter;
     }
 
