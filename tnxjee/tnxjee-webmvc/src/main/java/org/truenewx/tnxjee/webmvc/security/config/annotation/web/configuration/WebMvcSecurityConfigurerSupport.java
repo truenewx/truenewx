@@ -192,10 +192,9 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
         for (WebHttpSecurityConfigurer configurer : additionalConfigurers.values()) {
             configurer.configure(http);
         }
-
-        if (this.corsRegistryProperties.isAllowCredentials()) {
-            http.cors().and().csrf().disable(); // 开启cors则必须关闭csrf，以允许跨站点请求
-        } else if (this.securityProperties.isCsrfDisabled()) {
+        // 默认均开启cors，是否允许所有请求，由具体的cors配置决定
+        http.cors();
+        if (!this.securityProperties.isCsrfEnabled()) {
             http.csrf().disable();
         }
     }

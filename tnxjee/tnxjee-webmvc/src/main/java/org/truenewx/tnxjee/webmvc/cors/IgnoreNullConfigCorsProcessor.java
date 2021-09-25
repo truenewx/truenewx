@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.method.HandlerMethod;
@@ -16,6 +17,7 @@ import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
  *
  * @author jianglei
  */
+@Component
 public class IgnoreNullConfigCorsProcessor extends DefaultCorsProcessor {
 
     @Autowired

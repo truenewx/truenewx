@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.web.cors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjee.core.Strings;
@@ -10,15 +11,13 @@ public class CorsRegistryProperties {
 
     private String pathPattern = "/**";
 
-    private String[] allowedOrigins = {};
+    private String[] allowedOrigins = { Strings.ASTERISK };
 
     private String[] allowedMethods = { Strings.ASTERISK };
 
     private String[] allowedHeaders = { Strings.ASTERISK };
 
     private String[] exposedHeaders = {};
-
-    private boolean allowCredentials;
 
     private Long maxAge;
 
@@ -62,14 +61,6 @@ public class CorsRegistryProperties {
         this.exposedHeaders = exposedHeaders;
     }
 
-    public boolean isAllowCredentials() {
-        return this.allowCredentials;
-    }
-
-    public void setAllowCredentials(boolean allowCredentials) {
-        this.allowCredentials = allowCredentials;
-    }
-
     public Long getMaxAge() {
         return this.maxAge;
     }
@@ -77,4 +68,10 @@ public class CorsRegistryProperties {
     public void setMaxAge(Long maxAge) {
         this.maxAge = maxAge;
     }
+
+    public boolean isAllAllowed() {
+        return ArrayUtils.contains(this.allowedOrigins, Strings.ASTERISK) && ArrayUtils.contains(this.allowedMethods,
+                Strings.ASTERISK) && ArrayUtils.contains(this.allowedHeaders, Strings.ASTERISK);
+    }
+
 }
