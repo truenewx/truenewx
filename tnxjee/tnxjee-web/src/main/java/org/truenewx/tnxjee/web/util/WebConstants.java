@@ -38,9 +38,9 @@ public class WebConstants {
     public static final String HEADER_ORIGINAL_REQUEST = "Original-Request";
 
     /**
-     * 头信息名：内部JWT
+     * 头信息名：RPC JWT
      */
-    public static final String HEADER_INTERNAL_JWT = "Internal-Jwt";
+    public static final String HEADER_RPC_JWT = "Rpc-Jwt";
 
     /**
      * 默认的登录成功跳转目标参数

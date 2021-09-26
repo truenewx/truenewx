@@ -8,9 +8,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.config.InternalJwtConfiguration;
+import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
 import org.truenewx.tnxjee.model.spec.user.security.DefaultUserSpecificDetails;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
@@ -18,8 +19,8 @@ import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.feign.GrantAuthority;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.web.util.WebConstants;
+import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
-import org.truenewx.tnxjee.webmvc.util.RpcUtil;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
@@ -32,8 +33,10 @@ import feign.RequestTemplate;
 @Component
 public class FeignRequestInterceptor implements RequestInterceptor {
 
-    @Autowired(required = false)
-    private InternalJwtConfiguration internalJwtConfiguration;
+    @Value(AppConstants.EL_SPRING_APP_NAME)
+    private String appName;
+    @Autowired
+    private InternalJwtResolver jwtResolver;
 
     @Override
     public void apply(RequestTemplate template) {
@@ -52,23 +55,23 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                         headerValues.add(requestHeaders.nextElement());
                     }
                     template.header(headerName, headerValues);
-                    if (noJwt && WebConstants.HEADER_INTERNAL_JWT.equals(headerName)) {
+                    if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
                         noJwt = false;
                     }
                 }
             }
         }
         if (noJwt) { // 没有JWT则构建JWT传递
-            String token = generateJwt(template);
-            if (token == null) { // 确保存在JWT头信息，以便于判断是否内部RPC
-                token = Boolean.TRUE.toString();
+            String jwt = generateJwt(template);
+            if (jwt == null) { // 确保存在JWT头信息，以便于判断是否内部RPC
+                jwt = Boolean.TRUE.toString();
             }
-            template.header(WebConstants.HEADER_INTERNAL_JWT, token);
+            template.header(WebConstants.HEADER_RPC_JWT, jwt);
         }
     }
 
     private String generateJwt(RequestTemplate template) {
-        if (this.internalJwtConfiguration != null && this.internalJwtConfiguration.isValid()) {
+        if (this.jwtResolver.isGenerable(this.appName)) {
             UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
             Class<?> targetType = template.feignTarget().type();
             GrantAuthority grantAuthority = targetType.getAnnotation(GrantAuthority.class);
@@ -96,8 +99,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                         break;
                 }
             }
-            return RpcUtil.generateInternalJwt(userDetails, this.internalJwtConfiguration.getSecretKey(),
-                    this.internalJwtConfiguration.getExpiredIntervalSeconds());
+            return this.jwtResolver.generate(this.appName, userDetails);
         }
         return null;
     }
