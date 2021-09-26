@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
-import org.truenewx.tnxjee.webmvc.util.RpcUtil;
+import org.truenewx.tnxjee.webmvc.util.WebMvcUtil;
 
 /**
  * WEB未登录访问限制的进入点
@@ -52,7 +52,7 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        if (RpcUtil.isInternalRpc(request)) { // 内部RPC调用直接返回401错误
+        if (WebMvcUtil.isInternalRpc(request)) { // 内部RPC调用直接返回401错误
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

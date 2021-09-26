@@ -31,7 +31,7 @@ import org.truenewx.tnxjee.webmvc.http.annotation.ResultFilter;
 import org.truenewx.tnxjee.webmvc.http.annotation.ResultWithClassField;
 import org.truenewx.tnxjee.webmvc.jackson.AttachFieldBeanSerializerModifier;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
-import org.truenewx.tnxjee.webmvc.util.RpcUtil;
+import org.truenewx.tnxjee.webmvc.util.WebMvcUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +79,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             HandlerMethod handlerMethod = this.handlerMethodMapping.getHandlerMethod(request);
             if (handlerMethod != null) {
                 Method method = handlerMethod.getMethod();
-                boolean internal = RpcUtil.isInternalRpc(request);
+                boolean internal = WebMvcUtil.isInternalRpc(request);
                 ObjectMapper mapper = getWriter(internal, method);
                 String json = mapper.writeValueAsString(object);
                 Charset charset = Objects.requireNonNullElse(getDefaultCharset(), StandardCharsets.UTF_8);

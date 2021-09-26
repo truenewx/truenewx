@@ -2,11 +2,7 @@ package org.truenewx.tnxjee.webmvc.security.config.annotation.web.configuration;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +34,7 @@ import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
 import org.truenewx.tnxjee.webmvc.security.web.access.AccessDeniedBusinessExceptionHandler;
 import org.truenewx.tnxjee.webmvc.security.web.access.intercept.WebFilterInvocationSecurityMetadataSource;
-import org.truenewx.tnxjee.webmvc.security.web.authentication.InternalJwtAuthenticationFilter;
+import org.truenewx.tnxjee.webmvc.security.web.authentication.RpcJwtAuthenticationFilter;
 import org.truenewx.tnxjee.webmvc.security.web.authentication.WebAuthenticationEntryPoint;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 
@@ -173,7 +169,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
         for (SecurityConfigurerAdapter configurer : configurers) {
             http.apply(configurer);
         }
-        http.addFilterAfter(new InternalJwtAuthenticationFilter(getApplicationContext()),
+        http.addFilterAfter(new RpcJwtAuthenticationFilter(getApplicationContext()),
                 UsernamePasswordAuthenticationFilter.class);
 
         RequestMatcher[] anonymousMatchers = getAnonymousRequestMatchers().toArray(new RequestMatcher[0]);
@@ -250,7 +246,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     }
 
     protected String[] getLogoutClearCookies() {
-        return new String[] { "JSESSIONID", "SESSION" };
+        return new String[]{ "JSESSIONID", "SESSION" };
     }
 
 }
