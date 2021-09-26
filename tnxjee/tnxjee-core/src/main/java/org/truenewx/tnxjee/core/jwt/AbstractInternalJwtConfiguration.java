@@ -19,16 +19,16 @@ public abstract class AbstractInternalJwtConfiguration implements InternalJwtCon
 
     @Override
     public int getExpiredIntervalSeconds() {
-        return getRpcJwtExpiredTimeSeconds(this.profileSupplier.get());
+        return getExpiredIntervalSeconds(this.profileSupplier.get());
     }
 
     /**
-     * 获取RPC调用时JWT的过期时间秒数
+     * 获取JWT过期时间秒数
      *
      * @param profile 运行环境
-     * @return RPC调用时JWT的过期时间秒数
+     * @return JWT的过期时间秒数
      */
-    protected int getRpcJwtExpiredTimeSeconds(String profile) {
+    protected int getExpiredIntervalSeconds(String profile) {
         switch (profile) {
             case Profiles.LOCAL:
             case Profiles.DEV:
