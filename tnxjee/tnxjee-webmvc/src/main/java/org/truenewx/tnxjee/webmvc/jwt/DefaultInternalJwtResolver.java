@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.jwt.InternalJwtConfiguration;
@@ -23,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 /**
  * 默认内部JWT解决器实现
  */
-@Component
 public class DefaultInternalJwtResolver implements InternalJwtResolver, ContextInitializedBean {
 
     private static final String JWT_PREFIX = "jwt:";
