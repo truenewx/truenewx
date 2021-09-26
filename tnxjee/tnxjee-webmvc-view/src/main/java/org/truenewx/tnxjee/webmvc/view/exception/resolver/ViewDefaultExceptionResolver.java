@@ -31,7 +31,8 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
             Exception ex) {
         ModelAndView mav = super.doResolveException(request, response, handler, ex);
         if (mav == null) {
-            if (!ResolvableExceptionResolver.supports(ex)) {
+            // 非ajax请求且非可解决的异常，则跳转内部错误页
+            if (!WebUtil.isAjaxRequest(request) && !ResolvableExceptionResolver.supports(ex)) {
                 String path = this.pathProperties.getInternal();
                 if (this.webContextPathPredicate.test(path)) {
                     return new ModelAndView(path);
