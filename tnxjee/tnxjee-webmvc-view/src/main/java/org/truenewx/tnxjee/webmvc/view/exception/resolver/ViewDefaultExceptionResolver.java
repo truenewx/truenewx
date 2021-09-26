@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.resolver.ResolvableExceptionResolver;
 import org.truenewx.tnxjee.webmvc.function.WebContextPathPredicate;
 
@@ -43,9 +44,11 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
     @Override
     protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request,
             HttpServletResponse response, Object handler) throws IOException {
-        String path = this.pathProperties.getNotFound();
-        if (this.webContextPathPredicate.test(path)) {
-            return new ModelAndView(path);
+        if (!WebUtil.isAjaxRequest(request)) { // 非ajax请求才跳转错误页面，否则采用默认处理
+            String path = this.pathProperties.getNotFound();
+            if (this.webContextPathPredicate.test(path)) {
+                return new ModelAndView(path);
+            }
         }
         return super.handleNoHandlerFoundException(ex, request, response, handler);
     }
