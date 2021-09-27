@@ -41,13 +41,8 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
         try {
             MutablePropertySources propertySources = environment.getPropertySources();
             String rootLocation = getRootLocation(environment);
-            boolean added = false;
-            String profile = SpringUtil.getActiveProfile(environment);
-            if (profile == null) { // 无法取得profile时，先从固定的profile.properties文件中加载profile配置，使默认profile生效
-                String profileLocation = rootLocation + Strings.SLASH + "profile.properties";
-                Resource profileResource = this.resourcePatternResolver.getResource(profileLocation);
-                added = addPropertySource(propertySources, rootLocation, profileResource);
-            }
+            // 先从根目录中加载配置
+            boolean added = addPropertySource(environment, rootLocation);
             // 找出根目录下的所有子目录并按照优先级排序
             List<Resource> subDirs = getSortedSubDirs(rootLocation);
             // 从顶层至底层依次加载配置文件以确保上层配置优先
