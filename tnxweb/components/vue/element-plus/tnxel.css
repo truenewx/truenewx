@@ -28,6 +28,10 @@
     color: #ffffff;
 }
 
+.bg-primary .el-dropdown {
+    color: inherit;
+}
+
 .border,
 .border-top,
 .border-bottom,
@@ -317,4 +321,25 @@ el-header ul.tnxel-nav,
 .el-header ul.tnxel-nav li .el-badge .el-badge__content.is-fixed {
     top: 16px;
     right: 24px;
+}
+
+el-card {
+    display: none;
+}
+
+.el-card__header {
+    padding: 1rem;
+}
+
+.el-card__body {
+    padding: 1rem;
+}
+
+.el-card__body .card-body-text {
+    font-size: 14px;
+}
+
+.el-form .el-card__body,
+.pb-0 > .el-card__body {
+    padding: 1rem 1rem 0 1rem;
 }

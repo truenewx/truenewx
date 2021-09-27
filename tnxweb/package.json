@@ -29,6 +29,7 @@
     "bootstrap": "5.1.1",
     "vue": "3.2.11",
     "vue-router": "4.0.11",
+    "mitt": "3.0.0",
     "element-plus": "1.1.0-beta.13",
     "@element-plus/icons": "0.0.11",
     "ant-design-vue": "2.2.7"

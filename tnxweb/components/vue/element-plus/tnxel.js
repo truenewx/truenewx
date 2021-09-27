@@ -6,16 +6,62 @@ import ElementPlus, {ElLoading, ElMessage, ElMessageBox} from 'element-plus';
 import tnxvue from '../tnxvue.js';
 import $ from 'jquery';
 
-import Icon from './icon/Icon';
 import Avatar from './avatar/Avatar';
 import Alert from './alert/Alert';
 import Button from './button/Button';
+import Curd from './curd/Curd';
+import DatePicker from './date-picker/DatePicker';
+import DateRange from './date-range/DateRange';
+import DetailForm from './detail-form/DetailForm';
 import Dialog from './dialog/Dialog';
+import EnumSelect from './enum-select/EnumSelect';
+import FetchCascader from './fetch-cascader/FetchCascader';
+import FetchSelect from './fetch-select/FetchSelect';
+import FetchTags from './fetch-tags/FetchTags';
+import FssUpload from './fss-upload/FssUpload';
+import FssView from './fss-view/FssView';
+import Icon from './icon/Icon';
+import InputNumber from './input-number/InputNumber';
+import Paged from './paged/Paged';
+import PermissionTree from './permission-tree/PermissionTree';
+import QueryForm from './query-form/QueryForm';
+import QueryTable from './query-table/QueryTable';
+import RegionCascader from './region-cascader/RegionCascader';
 import Select from './select/Select';
+import StepsNav from './steps-nav/StepsNav';
 import SubmitForm from './submit-form/SubmitForm';
+import Tabs from './tabs/Tabs';
+import Transfer from './transfer/Transfer';
+import Upload from './upload/Upload';
 
 const components = Object.assign({}, tnxvue.components, {
-    Icon, Avatar, Alert, Button, Dialog, Select, SubmitForm,
+    Avatar,
+    Alert,
+    Button,
+    Curd,
+    DatePicker,
+    DateRange,
+    DetailForm,
+    Dialog,
+    EnumSelect,
+    FetchCascader,
+    FetchSelect,
+    FetchTags,
+    FssUpload,
+    FssView,
+    Icon,
+    InputNumber,
+    Paged,
+    PermissionTree,
+    QueryForm,
+    QueryTable,
+    RegionCascader,
+    Select,
+    StepsNav,
+    SubmitForm,
+    Tabs,
+    Transfer,
+    Upload,
 });
 
 const dialogClass = 'tnxel-dialog';

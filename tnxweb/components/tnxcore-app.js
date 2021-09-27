@@ -6,6 +6,7 @@ import rpc from './tnxcore-app-rpc';
 const app = {
     context: '',
     version: undefined,
+    global: {},
     rpc: rpc,
     page: {
         context: "/pages",

@@ -7,7 +7,8 @@ import validator from './tnxvue-validator';
 import createRouter from './tnxvue-router';
 import Text from './text';
 import Percent from './percent';
-import {createApp} from 'vue';
+import {computed, createApp, ref} from 'vue';
+import mitt from 'mitt';
 
 const components = {
     Div: {
@@ -58,7 +59,7 @@ function getDefaultDialogButtons(type, callback, theme) {
 
 const tnxvue = Object.assign({}, tnxcore, {
     libs: Object.assign({}, tnxcore.libs, {
-        Vue: {createApp}
+        Vue: {createApp, computed, ref}
     }),
     components,
     router: {
@@ -75,9 +76,15 @@ const tnxvue = Object.assign({}, tnxcore, {
         vm.use(this);
         if (router) {
             vm.use(router);
+            router.app = window.tnx.app;
             window.tnx.router.instance = vm.config.globalProperties.$router;
         } else if (window.tnx.router.instance) {
             vm.config.globalProperties.$router = window.tnx.router.instance;
+        }
+        vm.config.unwrapInjectedRef = true;
+        window.tnx.app.eventBus = mitt();
+        window.tnx.app.eventBus.once = function(name, handler) {
+            this.all.set(name, [handler]);
         }
         return vm;
     },
