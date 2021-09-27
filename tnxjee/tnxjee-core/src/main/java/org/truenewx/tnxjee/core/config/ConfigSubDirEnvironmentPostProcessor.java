@@ -20,18 +20,17 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.truenewx.tnxjee.Framework;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
-import org.truenewx.tnxjee.core.util.Layers;
 import org.truenewx.tnxjee.core.util.SpringUtil;
 
 /**
- * 基于分层机制的环境配置提交处理器，于Spring容器启动前加载基于分层机制的自定义配置属性
+ * 基于配置子目录的环境配置后置处理器，于Spring容器启动前加载基于分层机制的自定义配置属性
  *
  * @author jianglei
  */
-public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     private static final String DEFAULT_ROOT_LOCATION = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config";
-    private static final String SOURCE_NAME_PREFIX = Framework.NAME + "LayerConfig: ";
+    private static final String SOURCE_NAME_PREFIX = Framework.NAME + "Config: ";
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private YamlPropertySourceLoader yamlLoader = new YamlPropertySourceLoader();
@@ -49,13 +48,16 @@ public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProces
                 Resource profileResource = this.resourcePatternResolver.getResource(profileLocation);
                 added = addPropertySource(propertySources, rootLocation, profileResource);
             }
+            // 找出根目录下的所有子目录并按照优先级排序
+            List<Resource> subDirs = getSortedSubDirs(rootLocation);
             // 从顶层至底层依次加载配置文件以确保上层配置优先
-            for (String basename : Layers.ALL_DESC) {
-                added = addPropertySource(environment, rootLocation, basename) || added;
+            for (Resource subDir : subDirs) {
+                String dirLocation = rootLocation + Strings.SLASH + subDir.getFilename();
+                added = addPropertySource(environment, dirLocation) || added;
             }
 
             if (added) {
-                System.out.println("====== Layer-based Property Sources ======");
+                System.out.println("====== Config Sub Dir Property Sources ======");
                 for (PropertySource<?> propertySource : propertySources) {
                     if (propertySource.getName().startsWith(SOURCE_NAME_PREFIX)) {
                         System.out.println(propertySource.getName());
@@ -71,23 +73,56 @@ public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProces
         return environment.getProperty("spring.config.location", DEFAULT_ROOT_LOCATION);
     }
 
-    private boolean addPropertySource(ConfigurableEnvironment environment, String rootLocation, String basename)
-            throws IOException {
+    protected List<Resource> getSortedSubDirs(String rootLocation) throws IOException {
         List<Resource> list = new ArrayList<>();
-        String location = rootLocation + Strings.SLASH + basename;
+        Resource[] subDirs = this.resourcePatternResolver.getResources(rootLocation + "/*");
+        for (Resource subDir : subDirs) {
+            if (subDir.getFile().isDirectory()) {
+                list.add(subDir);
+            }
+        }
+        list.sort((r1, r2) -> {
+            String dirName1 = r1.getFilename();
+            String dirName2 = r2.getFilename();
+            int ordinal1 = getDirOrdinal(dirName1);
+            int ordinal2 = getDirOrdinal(dirName2);
+            int result = Integer.compare(ordinal1, ordinal2);
+            if (result == 0) {
+                // 子目录序号相同，则比较子目录名称，由于core,model,repo,service,web的层级名称符合自然排序，所以此处只需简单比较名称即可
+                result = dirName1.compareTo(dirName2);
+            }
+            return result;
+        });
+        return list;
+    }
+
+    private int getDirOrdinal(String dirName) {
+        // tnxjee 优先于 tnxjeex 优先于 应用
+        if (dirName.startsWith(Framework.NAME + Strings.MINUS)) {
+            return 0;
+        }
+        if (dirName.startsWith(Framework.NAME + "x" + Strings.MINUS)) {
+            return 1;
+        }
+        return 2;
+    }
+
+    private boolean addPropertySource(ConfigurableEnvironment environment, String dirLocation) throws IOException {
+        List<Resource> list = new ArrayList<>();
+        String location = dirLocation + Strings.SLASH + "application"; // 配置文件基本名称固定为application，以便于IDE工具编辑
         String profile = SpringUtil.getActiveProfile(environment);
         if (StringUtils.isNotBlank(profile)) {
-            // [root]/[basename]-[profile].*
+            // [dir]/application-[profile].*
             addResources(list, location + Strings.MINUS + profile + Strings.DOT + Strings.ASTERISK);
         }
-        // [root]/[basename].*
+        // [dir]/[basename].*
         addResources(list, location + Strings.DOT + Strings.ASTERISK);
         list.sort((res1, res2) -> {
             String filename1 = res1.getFilename();
             String filename2 = res2.getFilename();
             String extension1 = FilenameUtils.getExtension(filename1);
             String extension2 = FilenameUtils.getExtension(filename2);
-            int result = Integer.compare(getOrdinal(extension1), getOrdinal(extension2));
+            int result = Integer.compare(getExtensionOrdinal(extension1), getExtensionOrdinal(extension2));
             if (result == 0) { // 扩展名序号相同，则简单比较文件名即可，带profile的自然靠前
                 return filename1.compareTo(filename2);
             }
@@ -96,7 +131,7 @@ public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProces
         boolean added = false;
         MutablePropertySources propertySources = environment.getPropertySources();
         for (Resource resource : list) {
-            added = addPropertySource(propertySources, rootLocation, resource) || added;
+            added = addPropertySource(propertySources, dirLocation, resource) || added;
         }
         return added;
     }
@@ -105,19 +140,19 @@ public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProces
         Resource[] resources = this.resourcePatternResolver.getResources(locationPattern);
         for (Resource resource : resources) {
             String extension = FilenameUtils.getExtension(resource.getFilename());
-            if (getOrdinal(extension) >= 0) {
+            if (getExtensionOrdinal(extension) >= 0) {
                 validList.add(resource);
             }
         }
     }
 
-    private boolean addPropertySource(MutablePropertySources propertySources, String rootLocation,
-            Resource resource) throws IOException {
+    private boolean addPropertySource(MutablePropertySources propertySources, String dirLocation, Resource resource)
+            throws IOException {
         if (resource.exists()) {
             String filename = resource.getFilename();
             PropertySourceLoader sourceLoader = getSourceLoader(filename);
             if (sourceLoader != null) {
-                String sourceName = SOURCE_NAME_PREFIX + Strings.LEFT_SQUARE_BRACKET + rootLocation + Strings.SLASH
+                String sourceName = SOURCE_NAME_PREFIX + Strings.LEFT_SQUARE_BRACKET + dirLocation + Strings.SLASH
                         + filename + Strings.RIGHT_SQUARE_BRACKET;
                 if (!propertySources.contains(sourceName)) {
                     PropertySource<?> propertySource = CollectionUtil
@@ -134,15 +169,15 @@ public class LayerBasedEnvironmentPostProcessor implements EnvironmentPostProces
 
     private PropertySourceLoader getSourceLoader(String filename) {
         String extension = FilenameUtils.getExtension(filename);
-        if (getOrdinal(extension) > 0) {
+        if (getExtensionOrdinal(extension) > 0) {
             return this.yamlLoader;
-        } else if (getOrdinal(extension) == 0) {
+        } else if (getExtensionOrdinal(extension) == 0) {
             return this.propertiesLoader;
         }
         return null;
     }
 
-    private int getOrdinal(String extension) {
+    private int getExtensionOrdinal(String extension) {
         if (extension != null) {
             switch (extension) {
                 case "properties":
