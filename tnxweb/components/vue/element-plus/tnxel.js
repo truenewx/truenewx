@@ -279,6 +279,131 @@ tnxel.router.beforeLeave = tnxel.util.function.around(tnxel.router.beforeLeave, 
     beforeLeave.call(window.tnx.router, router, from);
 });
 
+tnxel.date = {
+    formatDateTime: function(row, column, cellValue) {
+        if (cellValue) {
+            return new Date(cellValue).formatDateTime();
+        }
+        return undefined;
+    },
+    formatDate: function(row, column, cellValue) {
+        if (cellValue) {
+            return new Date(cellValue).formatDate();
+        }
+        return undefined;
+    },
+    formatTime: function(row, column, cellValue) {
+        if (typeof cellValue === 'number') {
+            cellValue = new Date(cellValue);
+        }
+        if (cellValue instanceof Date) {
+            cellValue = cellValue.formatTime();
+        }
+        if (typeof cellValue === 'string') {
+            return cellValue;
+        }
+        return undefined;
+    },
+    formatTimeMinute: function(row, column, cellValue) {
+        if (typeof cellValue === 'number') {
+            cellValue = new Date(cellValue);
+        }
+        if (cellValue instanceof Date) {
+            cellValue = cellValue.formatTimeMinute();
+        }
+        if (typeof cellValue === 'string') {
+            let array = cellValue.split(':');
+            if (array.length > 1) {
+                return array[0] + ':' + array[1];
+            }
+        }
+        return undefined;
+    },
+    formatDateMinute: function(row, column, cellValue) {
+        if (cellValue) {
+            return new Date(cellValue).formatDateMinute();
+        }
+        return undefined;
+    },
+    formatDateMonth: function(row, column, cellValue) {
+        if (cellValue) {
+            return new Date(cellValue).formatDateMonth();
+        }
+        return undefined;
+    },
+    formatPermanentableDate: function(row, column, cellValue) {
+        if (Array.isArray(cellValue)) {
+            cellValue = cellValue[column];
+        }
+        return tnxvue.util.date.formatPermanentableDate(cellValue);
+    }
+};
+
+tnxel.number = {
+    formatPercent: function(row, column, cellValue) {
+        if (typeof cellValue !== 'number') {
+            cellValue = parseFloat(cellValue);
+        }
+        if (!isNaN(cellValue)) {
+            return cellValue.toPercent();
+        }
+        return undefined;
+    }
+}
+
+tnxel.boolean = {
+    items: {
+        getText(type, value) {
+            let items = this[type];
+            if (Array.isArray(items)) {
+                for (let item of items) {
+                    if (item.value === value) {
+                        return item.text;
+                    }
+                }
+            }
+            return undefined;
+        },
+        has: [{
+            value: true,
+            text: '有',
+        }, {
+            value: false,
+            text: '无',
+        }]
+    },
+    format: function(row, column, cellValue) {
+        if (typeof cellValue === 'boolean') {
+            cellValue = cellValue.toText();
+        }
+        return cellValue;
+    },
+    formatHas: function(row, column, cellValue) {
+        if (typeof cellValue === 'boolean') {
+            cellValue = tnxel.boolean.items.getText('has', cellValue);
+        }
+        return cellValue;
+    }
+}
+
+const rpc = tnxel.app.rpc;
+rpc.handleErrors = tnxel.util.function.around(rpc.handleErrors, function(handleErrors, errors, options) {
+    if (options && options.form) {
+        let forms;
+        if (Array.isArray(options.form)) {
+            forms = options.form;
+        } else {
+            forms = [options.form];
+        }
+        forms.forEach(form => {
+            if (typeof form.disable === 'function') {
+                form.disable(false);
+            }
+        });
+    }
+    return handleErrors.call(rpc, errors, options);
+});
+
 window.tnx = tnxel;
 
 export default tnxel;

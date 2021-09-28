@@ -51,10 +51,16 @@ export default {
             return 'is-' + this.effect;
         },
         iconType() {
-            if (this.alertType === 'error') {
-                return 'CircleCloseFilled';
+            switch (this.alertType) {
+                case 'error':
+                    return 'CircleCloseFilled';
+                case 'warning':
+                    return 'WarningFilled';
+                case 'success':
+                    return 'CircleCheckFilled';
+                default:
+                    return 'InfoFilled';
             }
-            return this.alertType.firstToUpperCase() + 'Filled';
         },
         iconStyle() {
             let style = {};

@@ -343,3 +343,16 @@ el-card {
 .pb-0 > .el-card__body {
     padding: 1rem 1rem 0 1rem;
 }
+
+.el-alert {
+    --el-alert-padding: 0.75rem 1rem;
+    --el-alert-title-font-size: 14px;
+}
+
+.el-alert .el-alert__icon {
+    margin-right: 0.5rem;
+}
+
+.el-alert .el-alert__content {
+    padding: 0;
+}
