@@ -6,6 +6,22 @@
     color: var(--el-color-info) !important;
 }
 
+.bg-info {
+    background-color: var(--el-color-info-light) !important;
+}
+
+.text-white {
+    color: white !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.border-white {
+    border-color: white !important;
+}
+
 .text-regular {
     color: var(--el-text-color-regular) !important;
 }
@@ -13,6 +29,18 @@
 .text-muted,
 .text-secondary {
     color: var(--el-text-color-secondary) !important;
+}
+
+.bg-muted {
+    background-color: var(--el-border-color-lighter) !important;
+}
+
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end {
+    border-color: var(--el-border-color-base) !important;
 }
 
 .text-placeholder {
@@ -32,20 +60,113 @@
     color: inherit;
 }
 
-.bg-muted {
-    background-color: var(--el-border-color-lighter) !important;
-}
-
-.border,
-.border-top,
-.border-bottom,
-.border-start,
-.border-end {
-    border-color: var(--el-border-color-base) !important;
-}
-
 .border-primary {
     border-color: var(--el-color-primary) !important;
+}
+
+.text-success,
+.theme-success .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--el-color-success) !important;
+}
+
+.bg-success {
+    background-color: var(--el-color-success) !important;
+    color: white;
+}
+
+.bg-success-light {
+    background-color: var(--el-color-success-lighter) !important;
+}
+
+.border-success,
+.theme-success .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-success .el-input__inner:focus {
+    border-color: var(--el-color-success) !important;
+}
+
+.theme-success .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-success .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: var(--el-color-success) !important;
+    border-color: var(--el-color-success) !important;
+}
+
+.theme-success .el-button--default:hover,
+.theme-success .el-button--default:active,
+.theme-success .el-button--default:focus {
+    color: var(--el-color-success);
+    background: var(--el-color-success-lighter);
+    border-color: var(--el-color-success-light);
+}
+
+.text-warning,
+.theme-warning .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--el-color-warning) !important;
+}
+
+.bg-warning {
+    background-color: var(--el-color-warning) !important;
+    color: white;
+}
+
+.bg-warning-light {
+    background-color: var(--el-color-warning-lighter) !important;
+}
+
+.border-warning,
+.theme-warning .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-warning .el-input__inner:focus {
+    border-color: var(--el-color-warning) !important;
+}
+
+.theme-warning .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-warning .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: var(--el-color-warning) !important;
+    border-color: var(--el-color-warning) !important;
+}
+
+.theme-warning .el-button--default:hover,
+.theme-warning .el-button--default:active,
+.theme-warning .el-button--default:focus {
+    color: var(--el-color-warning);
+    background: var(--el-color-warning-lighter);
+    border-color: var(--el-color-warning-light);
+}
+
+.text-danger,
+.theme-danger .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--el-color-danger) !important;
+}
+
+.bg-danger {
+    background-color: var(--el-color-danger) !important;
+    color: white;
+}
+
+.bg-danger-light {
+    background-color: var(--el-color-danger-lighter) !important;
+}
+
+.border-danger,
+.theme-danger .el-checkbox__input.is-focus .el-checkbox__inner,
+.theme-danger .el-input__inner:focus,
+.is-error .el-input__inner,
+.theme-success .is-error .el-input__inner:focus,
+.theme-warning .is-error .el-input__inner:focus {
+    border-color: var(--el-color-danger) !important;
+}
+
+.theme-danger .el-checkbox__input.is-checked .el-checkbox__inner,
+.theme-danger .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background-color: var(--el-color-danger) !important;
+    border-color: var(--el-color-danger) !important;
+}
+
+.theme-danger .el-button--default:hover,
+.theme-danger .el-button--default:active,
+.theme-danger .el-button--default:focus {
+    color: var(--el-color-danger);
+    background: var(--el-color-danger-lighter);
+    border-color: var(--el-color-danger-light);
 }
 
 .disabled {
@@ -398,4 +519,91 @@ el-card {
     width: fit-content;
     min-width: 30px;
     max-width: 300px;
+}
+
+/**
+ * 页签中的图标显示在文本后
+ */
+.el-tabs__item .el-badge__content.is-fixed {
+    position: unset;
+    transform: translateY(6px) translateX(8px);
+}
+
+.el-table__row .is-center .cell .w-fit-content {
+    width: auto !important;
+}
+
+.tnxel-tag-select .el-input {
+    margin-bottom: 5px;
+    width: 210px;
+}
+
+.tnxel-tag-group .el-tag {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.tnxel-tag-group .el-tag:not(:last-child) {
+    margin-right: 10px;
+}
+
+.tnxel-tag-select .el-pagination {
+    margin-top: 5px;
+    line-height: 28px;
+}
+
+.tnxel-tag-select .el-pagination .el-pager {
+    line-height: 28px;
+}
+
+.el-pagination .el-pagination__sizes .el-input__suffix {
+    display: none;
+}
+
+.el-pagination .el-pagination__sizes .el-select .el-input {
+    width: 66px;
+    margin: 0;
+}
+
+.el-pagination .el-pagination__sizes .el-select .el-input .el-input__inner {
+    border: none;
+    cursor: default;
+    padding: 0;
+}
+
+.el-sub-menu .el-menu-item {
+    min-width: unset;
+}
+
+.el-drawer__header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dcdfe6;
+    margin-bottom: 0.5rem;
+}
+
+.el-drawer__body {
+    padding: 1rem;
+}
+
+.el-empty__description {
+    margin-top: 1rem;
+}
+
+.el-popover__reference-wrapper {
+    cursor: pointer;
+}
+
+.el-button.w-100 + .el-button {
+    margin-left: 0;
+}
+
+.tnxel-tabs:not(.el-tabs--border-card):not(.el-tabs--card) .el-tabs__item {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.tnxel-tabs-pane-label {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
 }
