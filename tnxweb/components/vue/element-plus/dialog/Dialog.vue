@@ -11,13 +11,13 @@
         :before-close="beforeClose"
         @closed="onClosed" v-if="visible">
         <template #title>
-            <div class="dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
+            <div class="tnxel-dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
                 v-if="title || options['show-close']"></div>
         </template>
-        <div :class="mergeClass()" v-if="contentValue" v-html="contentValue"></div>
+        <div :class="mergeClass()" v-html="contentValue" v-if="contentValue"></div>
         <tnxel-dialog-content :class="mergeClass()" ref="content" v-bind="contentProps" v-else></tnxel-dialog-content>
         <template #footer>
-            <div class="dialog-footer border-top" :class="mergeClass()" v-if="buttons && buttons.length">
+            <div class="tnxel-dialog-footer" :class="mergeClass()" v-if="buttons && buttons.length">
                 <el-button v-for="(button, index) in buttons" :type="button.type" :key="index"
                     @click="btnClick(index)">{{ button.caption || button.text }}
                 </el-button>
@@ -31,7 +31,16 @@ import $ from 'jquery';
 
 export default {
     name: 'TnxelDialog',
-    props: ['title', 'content', 'contentProps', 'buttons', 'theme'],
+    components: {
+        'tnxel-dialog-content': null,
+    },
+    props: {
+        title: String,
+        content: String,
+        contentProps: Object,
+        buttons: Array,
+        theme: String,
+    },
     data() {
         return {
             visible: true,
@@ -93,9 +102,6 @@ export default {
             }
         });
     },
-    components: {
-        'tnxel-dialog-content': null,
-    },
     methods: {
         mergeClass(classObject) {
             classObject = classObject || {};
@@ -146,15 +152,15 @@ export default {
 }
 
 .el-dialog__header .el-dialog__headerbtn {
-    margin-top: -5px;
+    margin-top: -0.5rem;
 }
 
-.dialog-title {
-    font-size: 16px; /* 与关闭按钮大小一致 */
-    padding: 1rem;
+.tnxel-dialog-title {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
 }
 
-.dialog-title > :last-child,
+.tnxel-dialog-title > :last-child,
 .el-dialog__body > div > :last-child {
     margin-bottom: 0;
 }
@@ -165,16 +171,15 @@ export default {
 }
 
 .el-dialog__footer {
-    padding: 0;
+    padding: 0 1rem 1rem 1rem;
 }
 
-.dialog-footer {
-    padding: 1rem;
+.tnxel-dialog-footer {
     display: flex;
     flex-direction: row-reverse;
 }
 
-.dialog-footer .el-button {
+.el-dialog__footer .el-button {
     margin-left: 10px;
 }
 </style>

@@ -10,11 +10,11 @@
     color: var(--el-text-color-regular) !important;
 }
 
+.text-muted,
 .text-secondary {
     color: var(--el-text-color-secondary) !important;
 }
 
-.text-muted,
 .text-placeholder {
     color: var(--el-text-color-placeholder) !important;
 }
@@ -25,11 +25,15 @@
 
 .bg-primary {
     background-color: var(--el-color-primary) !important;
-    color: #ffffff;
+    color: white;
 }
 
 .bg-primary .el-dropdown {
     color: inherit;
+}
+
+.bg-muted {
+    background-color: var(--el-border-color-lighter) !important;
 }
 
 .border,
@@ -355,4 +359,43 @@ el-card {
 
 .el-alert .el-alert__content {
     padding: 0;
+}
+
+.el-message-box__header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--el-border-color-base);
+}
+
+.el-message-box {
+    padding-bottom: 0;
+}
+
+.el-message-box__title {
+    font-size: 1rem;
+}
+
+.el-message-box__headerbtn {
+    margin-top: -3px;
+}
+
+.el-message-box__content {
+    padding: 1rem;
+}
+
+.el-message-box__btns {
+    padding: 0 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.el-message-box__btns button:nth-child(2) {
+    margin-left: 0;
+    margin-right: 0.5rem;
+}
+
+.el-message.tnxel-toast {
+    padding: 1rem;
+    width: fit-content;
+    min-width: 30px;
+    max-width: 300px;
 }

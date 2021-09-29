@@ -3,6 +3,7 @@
  * 基于ElementPlus的扩展支持
  */
 import ElementPlus, {ElLoading, ElMessage, ElMessageBox} from 'element-plus';
+import ElementPlus_zh_CN from 'element-plus/es/locale/lang/zh-cn';
 import tnxvue from '../tnxvue.js';
 import $ from 'jquery';
 
@@ -142,6 +143,7 @@ const tnxel = Object.assign({}, tnxvue, {
             dangerouslyUseHTMLString: true,
         }, options, {
             type: 'warning',
+            confirmButtonText: '确定',
         });
         this._closeMessage();
         ElMessageBox.alert(message, title, options).then(callback);
@@ -152,6 +154,7 @@ const tnxel = Object.assign({}, tnxvue, {
             dangerouslyUseHTMLString: true,
         }, options, {
             type: 'success',
+            confirmButtonText: '确定',
         });
         this._closeMessage();
         ElMessageBox.alert(message, '成功', options).then(callback);
@@ -162,6 +165,7 @@ const tnxel = Object.assign({}, tnxvue, {
             dangerouslyUseHTMLString: true,
         }, options, {
             type: 'error',
+            confirmButtonText: '确定',
         });
         this._closeMessage();
         ElMessageBox.alert(message, '错误', options).then(callback);
@@ -177,7 +181,7 @@ const tnxel = Object.assign({}, tnxvue, {
             dangerouslyUseHTMLString: true,
         }, options, {
             type: 'info',
-            iconClass: 'el-icon-question',
+            confirmButtonText: '确定',
         });
         this._closeMessage();
         const promise = ElMessageBox.confirm(message, title, options);
@@ -205,6 +209,7 @@ const tnxel = Object.assign({}, tnxvue, {
             showClose: false,
             message: message,
             duration: timeout || 1500,
+            customClass: 'tnxel-toast',
             onClose: callback,
         });
         this._closeMessage();
@@ -268,7 +273,9 @@ const tnxel = Object.assign({}, tnxvue, {
 });
 
 tnxel.install = tnxel.util.function.around(tnxel.install, function(install, vm) {
-    vm.use(ElementPlus);
+    vm.use(ElementPlus, {
+        locale: ElementPlus_zh_CN,
+    });
     install.call(window.tnx, vm);
 });
 
