@@ -12,6 +12,9 @@
                 <el-button @click="showLoading">Loading</el-button>
                 <el-button @click="showOpen">Open</el-button>
             </el-space>
+            <div class="mt-5">
+                <tnxel-fss-upload type="UserHeadImage" v-model="storageUrl"/>
+            </div>
         </div>
     </div>
 </template>
@@ -21,19 +24,17 @@ import {app, tnx} from '../tnx.js';
 import info from './info.vue';
 
 export default {
+    components: {
+        'tnxel-fss-upload': tnx.components.FssUpload,
+    },
     data() {
         return {
             title: process.env.VUE_APP_TITLE,
-            uploadBaseUrl: app.rpc.apps.fss,
+            storageUrl: null,
         };
     },
     created() {
-        // if (!this.uploadBaseUrl) {
-        //     const vm = this;
-        //     app.rpc.loadConfig(function(context) {
-        //         vm.uploadBaseUrl = context.apps.fss;
-        //     });
-        // }
+        app.rpc.loadConfig(process.env.VUE_APP_API_BASE_URL);
     },
     methods: {
         showAlert() {

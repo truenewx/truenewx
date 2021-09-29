@@ -1,5 +1,5 @@
 <template>
-    <el-upload ref="upload" name="file"
+    <el-upload ref="upload" name="file" class="tnxel-upload-container"
         :id="id"
         :hidden="hiddenContainer"
         :action="action"
@@ -13,7 +13,9 @@
         :headers="uploadHeaders"
         :multiple="uploadLimit ? uploadLimit.number > 1 : false"
         :accept="uploadAccept">
-        <i class="el-icon-plus"></i>
+        <template #default>
+            <tnxel-icon type="Plus"/>
+        </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
@@ -26,7 +28,7 @@
                 <span class="el-upload-list__item-uploading" v-if="file.uploading">
                     <i class="el-icon-loading"></i>
                 </span>
-                <span class="el-upload-list__item-actions">
+                <div class="el-upload-list__item-actions">
                     <span class="el-upload-list__item-preview" @click="previewFile(file)"
                         v-if="uploadLimit && uploadLimit.imageable">
                         <i class="el-icon-zoom-in"></i>
@@ -34,7 +36,7 @@
                     <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
                         <i class="el-icon-delete"></i>
                     </span>
-                </span>
+                </div>
             </div>
         </template>
         <template #tip>
@@ -45,9 +47,13 @@
 
 <script>
 import $ from 'jquery';
+import Icon from '../icon/Icon';
 
 export default {
     name: 'TnxelUpload',
+    components: {
+        'tnxel-icon': Icon,
+    },
     props: {
         appName: String, // 上传目标应用名称
         action: {
@@ -131,9 +137,6 @@ export default {
         uploadFiles() {
             return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
         },
-        uploadable() {
-            return this.uploadLimit && this.fileList.length < this.uploadLimit.number;
-        },
     },
     watch: {
         uploadLimit() {
@@ -169,20 +172,19 @@ export default {
                 width: width,
                 height: height,
             });
-
-            $('.el-icon-plus', $upload).css({
+            $('.tnxel-icon-Plus', $upload).css({
                 fontSize: plusSize + 'px'
             });
+
             this.hiddenContainer = false;
 
             if (this.fileList && this.fileList.length) {
-                let _this = this;
+                let vm = this;
                 this.$nextTick(function() {
-                    for (let file of _this.fileList) {
-                        _this._resizeFilePanel(file, _this.fileList);
+                    for (let file of vm.fileList) {
+                        vm._resizeFilePanel(file, vm.fileList);
                     }
                 });
-
             }
         },
         getFileId: function(file) {
@@ -248,6 +250,11 @@ export default {
             const rpc = this.tnx.app.rpc;
             return new Promise(function(resolve, reject) {
                 if (vm.validate(file)) {
+                    let $upload = $('#' + vm.id + ' .el-upload');
+                    if (vm.uploadFiles.length >= vm.uploadLimit.number) {
+                        $upload.css('visibility', 'hidden');
+                    }
+
                     let fssApp = vm.tnx.fss.getAppName();
                     // fss单独部署，且上传目标即为fss服务，则需确保用户在fss服务中已登录
                     if (fssApp && vm.action.startsWith(vm.tnx.fss.getBaseUrl())) {
@@ -257,6 +264,7 @@ export default {
                             app: fssApp,
                             toLogin: function(loginFormUrl, originalUrl, originalMethod) {
                                 // 此时已可知在CAS服务器上未登录，即未登录任一服务
+                                $upload.css('visibility', 'unset');
                                 reject(file);
                                 // 从当前应用登录表单地址
                                 rpc.get('/authentication/login-url', function(loginUrl) {
@@ -287,13 +295,16 @@ export default {
             const $upload = $('.el-upload', $container);
             if (fileList.length >= this.uploadLimit.number) {
                 // 隐藏添加框
-                $upload.hide();
+                $upload.css({
+                    display: 'none',
+                    visibility: 'unset',
+                });
             }
             const fileId = this.getFileId(file);
             const $listItem = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container).parent();
             let uploadStyle = $upload.attr('style');
             if (uploadStyle) {
-                uploadStyle = uploadStyle.replace(/display:\s*none;/, ''); // 去掉隐藏样式
+                uploadStyle = uploadStyle.replace(/display:\s*none;/, '').replace(/visibility:\s*unset;/, ''); // 去掉隐藏样式
                 $listItem.attr('style', uploadStyle);
             }
             if (typeof this.width === 'string' && this.width.endsWith('%')) {
@@ -375,3 +386,65 @@ export default {
     }
 }
 </script>
+
+<style>
+.tnxel-upload-container .el-upload {
+    border-radius: .25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item {
+    transition: none;
+    border-radius: .25rem;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item.is-ready {
+    display: none;
+}
+
+.tnxel-upload-container .el-upload-list__panel {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-thumbnail {
+    object-fit: contain;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-actions {
+    font-size: 1rem;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-uploading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #fff;
+    opacity: 0.5;
+    background-color: #000000;
+}
+
+.el-form-item__content .tnxel-upload-container .el-upload__tip {
+    line-height: 1;
+    margin-top: 0;
+}
+</style>
