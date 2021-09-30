@@ -112,8 +112,9 @@ export default {
             this.$emit('update:modelValue', this.model);
         },
         getModel() {
+            let model = this.modelValue;
             if (this.permanentable) {
-                let model = this.modelValue || {};
+                model = model || {};
                 // 可永久的日期不是对象，则封装为对象
                 if (typeof model !== 'object') {
                     model = {
@@ -126,14 +127,14 @@ export default {
                     model.value = this.defaultDateValue;
                 }
             } else {
-                if (modelValue instanceof Date) {
-                    return modelValue.format(this.format);
+                if (model instanceof Date) {
+                    return model.format(this.format);
                 }
-                if (typeof modelValue === 'number') {
-                    return new Date(modelValue).format(this.format);
+                if (typeof model === 'number') {
+                    return new Date(model).format(this.format);
                 }
             }
-            return modelValue;
+            return model;
         }
     }
 }

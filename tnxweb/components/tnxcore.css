@@ -50,19 +50,19 @@ a.plain:focus {
 }
 
 .fs-p80 {
-    font-size: 80%;
+    font-size: 80% !important;
 }
 
 .fs-p90 {
-    font-size: 90%;
+    font-size: 90% !important;
 }
 
 .fs-p110 {
-    font-size: 110%;
+    font-size: 110% !important;
 }
 
 .fs-p120 {
-    font-size: 120%;
+    font-size: 120% !important;
 }
 
 .strong {

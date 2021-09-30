@@ -4,12 +4,14 @@
  */
 const fss = {
     getAppName() {
-        return window.tnx.app.rpc.apps.fss ? 'fss' : undefined;
+        return window.tnx.app.rpc.appClients.fss ? 'fss' : undefined;
     },
     getBaseUrl() {
         let appName = this.getAppName();
         let rpc = window.tnx.app.rpc;
-        return rpc.apps[appName] || rpc.getBaseUrl() + '/fss';
+        let client = appName ? rpc.appClients[appName] : undefined;
+        let baseUrl = client ? client.baseUrl : undefined;
+        return baseUrl || rpc.getDefaultBaseUrl() + '/fss';
     },
     loadUploadLimit(type, callback) {
         window.tnx.app.rpc.get(this.getBaseUrl() + '/upload-limit/' + type, callback, {

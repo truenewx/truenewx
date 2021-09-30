@@ -1,6 +1,5 @@
 package org.truenewx.tnxjee.web.cors;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjee.core.Strings;
@@ -11,7 +10,7 @@ public class CorsRegistryProperties {
 
     private String pathPattern = "/**";
 
-    private String[] allowedOrigins = { Strings.ASTERISK };
+    private String[] allowedOrigins = {}; // 不能配置允许所有来源站点的*，必须一个个站点加入，否则无效
 
     private String[] allowedMethods = { Strings.ASTERISK };
 
@@ -67,11 +66,6 @@ public class CorsRegistryProperties {
 
     public void setMaxAge(Long maxAge) {
         this.maxAge = maxAge;
-    }
-
-    public boolean isAllAllowed() {
-        return ArrayUtils.contains(this.allowedOrigins, Strings.ASTERISK) && ArrayUtils.contains(this.allowedMethods,
-                Strings.ASTERISK) && ArrayUtils.contains(this.allowedHeaders, Strings.ASTERISK);
     }
 
 }

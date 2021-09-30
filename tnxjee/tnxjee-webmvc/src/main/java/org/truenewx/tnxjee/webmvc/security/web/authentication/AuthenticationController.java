@@ -56,7 +56,7 @@ public class AuthenticationController {
     }
 
     /**
-     * 校验是否已登录，已登录访问不做任何处理，匿名访问则由框架抛出错误
+     * 校验登录用户访问权限，匿名用户由框架抛出异常
      */
     @GetMapping("/validate")
     @ConfigAuthority

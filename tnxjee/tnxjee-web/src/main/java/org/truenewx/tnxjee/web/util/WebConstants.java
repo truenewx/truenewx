@@ -14,6 +14,11 @@ public class WebConstants {
     public static final String HEADER_USER_AGENT = "User-Agent";
 
     /**
+     * 头信息名：Cookie
+     */
+    public static final String HEADER_COOKIE = "Set-Cookie";
+
+    /**
      * 头信息名：AJAX请求
      */
     public static final String HEADER_AJAX_REQUEST = "X-Requested-With";

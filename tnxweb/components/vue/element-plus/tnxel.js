@@ -182,6 +182,7 @@ const tnxel = Object.assign({}, tnxvue, {
         }, options, {
             type: 'info',
             confirmButtonText: '确定',
+            cancelButtonText: '取消',
         });
         this._closeMessage();
         const promise = ElMessageBox.confirm(message, title, options);

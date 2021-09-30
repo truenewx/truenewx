@@ -44,7 +44,7 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
         FilterRegistrationBean<ForbidAccessFilter> frb = new FilterRegistrationBean<>();
         frb.setFilter(new ForbidAccessFilter());
         frb.addUrlPatterns("*.jsp");
-        frb.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        frb.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return frb;
     }
 

@@ -1,17 +1,33 @@
 // tnxcore-app-rpc.js
-import {util} from "./tnxcore-util";
-import axios from "axios";
+import {util} from './tnxcore-util';
+import Axios from 'axios';
+
+Axios.defaults.baseURL = '';
+Axios.defaults.withCredentials = true; // 允许携带Cookie
+const ajaxHeader = {'X-Requested-With': 'XMLHttpRequest'};
+Object.assign(Axios.defaults.headers.common, ajaxHeader); // 标记为AJAX请求
+
+function createClient(baseUrl) {
+    return {
+        baseUrl: baseUrl,
+        request: Axios.create({
+            baseURL: baseUrl,
+            withCredentials: true,
+            headers: ajaxHeader,
+        }),
+    };
+}
 
 export default {
+    defaultClient: {
+        baseUrl: Axios.defaults.baseURL,
+        request: Axios,
+    },
+    appClients: {},
     loginSuccessRedirectParameter: '_next',
     logoutProcessUrl: '/logout',
-    baseApp: undefined,
-    apps: {},
-    setBaseUrl(baseUrl) {
-        axios.defaults.baseURL = baseUrl || '';
-    },
-    getBaseUrl() {
-        return axios.defaults.baseURL;
+    getDefaultBaseUrl() {
+        return this.defaultClient.baseUrl;
     },
     /**
      * 从后端服务器加载配置
@@ -23,9 +39,12 @@ export default {
             callback = baseUrl;
             baseUrl = undefined;
         }
-        this.setBaseUrl(baseUrl);
+        if (baseUrl !== this.getDefaultBaseUrl()) {
+            Axios.defaults.baseURL = baseUrl;
+            this.defaultClient = createClient(baseUrl);
+        }
 
-        const _this = this;
+        let _this = this;
         this.get('/api/meta/context', function(context) {
             _this.setConfig(context);
             if (typeof callback === 'function') {
@@ -34,21 +53,24 @@ export default {
         });
     },
     setConfig(config) {
-        this.baseApp = config.baseApp;
-        if (config.apps) { // 相关应用的上下文根路径
-            this.apps = config.apps;
-        }
-        if (this.baseApp && this.apps) {
-            axios.defaults.baseURL = this.apps[this.baseApp];
-        }
+        Object.assign(Axios.defaults.headers.common, config.headers);
         if (config.loginSuccessRedirectParameter) {
             this.loginSuccessRedirectParameter = config.loginSuccessRedirectParameter;
         }
-        // 声明为AJAX请求
-        Object.assign(axios.defaults.headers.common, config.headers, {
-            'X-Requested-With': 'XMLHttpRequest'
-        });
-        axios.defaults.withCredentials = true;
+        if (config.apps) {
+            let appNames = Object.keys(config.apps);
+            for (let appName of appNames) {
+                let appBaseUrl = config.apps[appName];
+                if (appName === config.baseApp) {
+                    if (appBaseUrl !== this.getDefaultBaseUrl()) {
+                        this.defaultClient = createClient(appBaseUrl);
+                    }
+                    this.appClients[appName] = this.defaultClient;
+                } else {
+                    this.appClients[appName] = createClient(appBaseUrl);
+                }
+            }
+        }
     },
     get(url, params, callback, options) {
         if (typeof params === 'function' || (callback && typeof callback === 'object')) {
@@ -86,12 +108,6 @@ export default {
         this.request(url, options);
     },
     request(url, options) {
-        if (options.app && url.startsWith('/')) {
-            const appBaseUrl = this.apps[options.app];
-            if (appBaseUrl) {
-                url = appBaseUrl + url;
-            }
-        }
         const config = {
             referer: url,
             method: options.method,
@@ -120,8 +136,25 @@ export default {
         this._request(url, config, options);
     },
     _request(url, config, options) {
-        const _this = this;
-        axios(url, config).then(function(response) {
+        let client = options.app ? this.appClients[options.app] : this.defaultClient;
+        if (!url.startsWith('/')) { // 绝对地址需找到对应的应用客户端，并转换为相对地址
+            let appNames = Object.keys(this.appClients);
+            for (let appName of appNames) {
+                let appClient = this.appClients[appName];
+                if (url.startsWith(appClient.baseUrl)) {
+                    url = url.substr(appClient.baseUrl.length);
+                    client = appClient;
+                    break;
+                }
+            }
+        }
+        if (!url.startsWith('/')) { // 无法转换为相对地址的一律使用全局客户端
+            client = {
+                request: Axios
+            }
+        }
+        let _this = this;
+        client.request(url, config).then(function(response) {
             if (_this._redirectRequest(response, config, options)) { // 执行了重定向跳转，则不作后续处理
                 return;
             }

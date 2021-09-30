@@ -517,8 +517,15 @@ el-card {
 .el-message.tnxel-toast {
     padding: 1rem;
     width: fit-content;
-    min-width: 30px;
+    min-width: 60px;
     max-width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.el-message.tnxel-toast .el-message__icon {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
 }
 
 /**
@@ -606,4 +613,8 @@ el-card {
 .tnxel-tabs-pane-label {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
+}
+
+.el-tabs--border-card {
+    box-shadow: none;
 }

@@ -5,8 +5,6 @@ export const tnx = tnxel;
 export const util = tnx.util;
 export const app = tnx.app;
 
-app.rpc.setBaseUrl(process.env.VUE_APP_RPC_BASE_URL);
-
 app.rpc.toLogin = function(loginFormUrl, originalUrl) {
     if (loginFormUrl) {
         let alertable = originalUrl !== undefined;

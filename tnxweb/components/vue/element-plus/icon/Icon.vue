@@ -19,6 +19,7 @@
         <Top v-else-if="type === 'Top'"/>
         <UserFilled v-else-if="type === 'UserFilled'"/>
         <View v-else-if="type === 'View'"/>
+        <WarningFilled v-else-if="type === 'WarningFilled'"/>
     </el-icon>
 </template>
 
