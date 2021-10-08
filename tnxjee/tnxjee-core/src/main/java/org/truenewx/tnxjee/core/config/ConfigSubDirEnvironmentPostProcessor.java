@@ -31,6 +31,7 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
 
     private static final String DEFAULT_ROOT_LOCATION = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config";
     private static final String SOURCE_NAME_PREFIX = Framework.NAME + "Config: ";
+    private static final String BASENAME = "application"; // 配置文件基本名称固定为application，以便于IDE工具编辑
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private YamlPropertySourceLoader yamlLoader = new YamlPropertySourceLoader();
@@ -44,10 +45,10 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
             // 先从根目录中加载配置
             boolean added = addPropertySource(environment, rootLocation);
             // 找出根目录下的所有子目录并按照优先级排序
-            List<Resource> subDirs = getSortedSubDirs(rootLocation);
+            List<String> dirNames = getSortedDirNames(rootLocation);
             // 从顶层至底层依次加载配置文件以确保上层配置优先
-            for (Resource subDir : subDirs) {
-                String dirLocation = rootLocation + Strings.SLASH + subDir.getFilename();
+            for (String dirName : dirNames) {
+                String dirLocation = rootLocation + Strings.SLASH + dirName;
                 added = addPropertySource(environment, dirLocation) || added;
             }
 
@@ -68,17 +69,20 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
         return environment.getProperty("spring.config.location", DEFAULT_ROOT_LOCATION);
     }
 
-    protected List<Resource> getSortedSubDirs(String rootLocation) throws IOException {
-        List<Resource> list = new ArrayList<>();
-        Resource[] subDirs = this.resourcePatternResolver.getResources(rootLocation + "/*");
-        for (Resource subDir : subDirs) {
-            if (subDir.getFile().isDirectory()) {
-                list.add(subDir);
+    protected List<String> getSortedDirNames(String rootLocation) throws IOException {
+        List<String> list = new ArrayList<>();
+        // 模式/*无法找出位于jar包中的目录，故通过模式/*/application*先找出配置文件，再取得所处目录
+        Resource[] resources = this.resourcePatternResolver.getResources(
+                rootLocation + "/*/" + BASENAME + Strings.ASTERISK);
+        for (Resource resource : resources) {
+            String url = resource.getURL().toString();
+            url = url.substring(0, url.lastIndexOf(Strings.SLASH));
+            String dirName = url.substring(url.lastIndexOf(Strings.SLASH) + 1);
+            if (!list.contains(dirName)) {
+                list.add(dirName);
             }
         }
-        list.sort((r1, r2) -> {
-            String dirName1 = r1.getFilename();
-            String dirName2 = r2.getFilename();
+        list.sort((dirName1, dirName2) -> {
             int ordinal1 = getDirOrdinal(dirName1);
             int ordinal2 = getDirOrdinal(dirName2);
             int result = Integer.compare(ordinal1, ordinal2);
@@ -104,7 +108,7 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
 
     private boolean addPropertySource(ConfigurableEnvironment environment, String dirLocation) throws IOException {
         List<Resource> list = new ArrayList<>();
-        String location = dirLocation + Strings.SLASH + "application"; // 配置文件基本名称固定为application，以便于IDE工具编辑
+        String location = dirLocation + Strings.SLASH + BASENAME;
         String profile = SpringUtil.getActiveProfile(environment);
         if (StringUtils.isNotBlank(profile)) {
             // [dir]/application-[profile].*
