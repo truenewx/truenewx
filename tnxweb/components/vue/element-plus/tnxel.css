@@ -555,6 +555,15 @@ el-card {
     margin-right: 10px;
 }
 
+.tnxel-table_tags.el-table__cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.tnxel-table_tags.el-table__cell .el-tag {
+    margin: 2px 4px 2px 0;
+}
+
 .tnxel-tag-select .el-pagination {
     margin-top: 5px;
     line-height: 28px;
