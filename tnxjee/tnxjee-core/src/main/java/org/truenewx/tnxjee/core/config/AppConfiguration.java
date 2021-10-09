@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.core.config;
 
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 
@@ -17,6 +19,7 @@ public class AppConfiguration {
     private String loginPath = "/login/cas";
     private String logoutPath = "/logout";
     private String loginedPath = Strings.EMPTY;
+    private Map<String, String> subs;
 
     public String getCaption() {
         return this.caption;
@@ -87,6 +90,14 @@ public class AppConfiguration {
      */
     public void setLoginedPath(String loginedPath) {
         this.loginedPath = loginedPath;
+    }
+
+    public Map<String, String> getSubs() {
+        return this.subs;
+    }
+
+    public void setSubs(Map<String, String> subs) {
+        this.subs = subs;
     }
 
     /**

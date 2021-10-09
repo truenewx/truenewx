@@ -255,13 +255,13 @@ export default {
                         $upload.css('visibility', 'hidden');
                     }
 
-                    let fssApp = vm.tnx.fss.getAppName();
-                    // fss单独部署，且上传目标即为fss服务，则需确保用户在fss服务中已登录
-                    if (fssApp && vm.action.startsWith(vm.tnx.fss.getBaseUrl())) {
+                    let fssConfig = vm.tnx.fss.getClientConfig();
+                    // fss作为应用部署，且上传目标即为fss应用，则需确保用户在fss应用中已登录
+                    if (fssConfig.appName && vm.action.startsWith(fssConfig.baseUrl + fssConfig.contextUrl)) {
                         rpc.ensureLogined(function() {
                             resolve(file);
                         }, {
-                            app: fssApp,
+                            app: fssConfig.appName,
                             toLogin: function(loginFormUrl, originalUrl, originalMethod) {
                                 // 此时已可知在CAS服务器上未登录，即未登录任一服务
                                 $upload.css('visibility', 'unset');

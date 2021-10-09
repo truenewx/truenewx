@@ -382,7 +382,11 @@ span.form-item-tip {
 }
 
 .el-button + .el-button {
-    margin-left: 0.5rem;
+    margin-left: 0;
+}
+
+.el-button + .el-button:not(:last-child) {
+    margin-right: 0.5rem;
 }
 
 /*

@@ -21,6 +21,7 @@ import org.truenewx.tnxjee.core.enums.EnumType;
 import org.truenewx.tnxjee.core.spec.EnumGrouped;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.model.Model;
+import org.truenewx.tnxjee.webmvc.api.meta.model.ApiApp;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiContext;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiModelPropertyMeta;
@@ -56,14 +57,15 @@ public class ApiMetaController {
         context.setLoginSuccessRedirectParameter(this.apiMetaProperties.getLoginSuccessRedirectParameter());
         Set<String> appNames = CollectionUtil.toSet(this.apiMetaProperties.getAppNames());
         if (CollectionUtils.isEmpty(appNames)) {
-            context.getApps().putAll(this.commonProperties.getAppContextUriMapping());
+            appNames = new HashSet<>(this.commonProperties.getApps().keySet());
         } else {
             appNames.add(this.baseApp); // 至少包含当前应用
-            for (String appName : appNames) {
-                AppConfiguration app = this.commonProperties.getApp(appName);
-                if (app != null) {
-                    context.getApps().put(appName, app.getContextUri(false));
-                }
+        }
+        for (String appName : appNames) {
+            AppConfiguration appConfiguration = this.commonProperties.getApp(appName);
+            if (appConfiguration != null) {
+                ApiApp apiApp = new ApiApp(appConfiguration.getContextUri(false), appConfiguration.getSubs());
+                context.getApps().put(appName, apiApp);
             }
         }
         return context;

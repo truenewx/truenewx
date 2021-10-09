@@ -7,11 +7,11 @@ Axios.defaults.withCredentials = true; // 允许携带Cookie
 const ajaxHeader = {'X-Requested-With': 'XMLHttpRequest'};
 Object.assign(Axios.defaults.headers.common, ajaxHeader); // 标记为AJAX请求
 
-function createClient(baseUrl) {
+function createClient(app) {
     return {
-        baseUrl: baseUrl,
+        baseUrl: app.baseUrl,
         request: Axios.create({
-            baseURL: baseUrl,
+            baseURL: app.baseUrl,
             withCredentials: true,
             headers: ajaxHeader,
         }),
@@ -41,7 +41,7 @@ export default {
         }
         if (baseUrl !== this.getDefaultBaseUrl()) {
             Axios.defaults.baseURL = baseUrl;
-            this.defaultClient = createClient(baseUrl);
+            this.defaultClient = createClient({baseUrl});
         }
 
         let _this = this;
@@ -60,14 +60,24 @@ export default {
         if (config.apps) {
             let appNames = Object.keys(config.apps);
             for (let appName of appNames) {
-                let appBaseUrl = config.apps[appName];
+                let app = config.apps[appName];
                 if (appName === config.baseApp) {
-                    if (appBaseUrl !== this.getDefaultBaseUrl()) {
-                        this.defaultClient = createClient(appBaseUrl);
+                    if (app.baseUrl !== this.getDefaultBaseUrl()) {
+                        this.defaultClient = createClient(app);
                     }
                     this.appClients[appName] = this.defaultClient;
                 } else {
-                    this.appClients[appName] = createClient(appBaseUrl);
+                    this.appClients[appName] = createClient(app);
+                }
+                if (app.subs) {
+                    let refClient = this.appClients[appName];
+                    let subAppNames = Object.keys(app.subs);
+                    for (let subAppName of subAppNames) {
+                        this.appClients[subAppName] = {
+                            ref: refClient,
+                            contextUrl: app.subs[subAppName],
+                        }
+                    }
                 }
             }
         }
@@ -120,7 +130,8 @@ export default {
                 if (value === undefined || value === null) {
                     delete config.params[key];
                 } else {
-                    config.params[key] = value + ''; // 参数值都转换为字符串，以避免参数传递错误
+                    value = encodeURIComponent(value + '');
+                    config.params[key] = value; // 参数值都转换为字符串，以避免参数传递错误
                 }
             });
             config.paramsSerializer = function(params) {
@@ -147,11 +158,18 @@ export default {
                     break;
                 }
             }
-        }
-        if (!url.startsWith('/')) { // 无法转换为相对地址的一律使用全局客户端
-            client = {
-                request: Axios
+            if (!url.startsWith('/')) { // 无法转换为相对地址的一律使用全局客户端
+                client = {
+                    request: Axios
+                }
             }
+        }
+        if (client.ref) {
+            // 登录凭证验证请求直接向引用的所属应用发送，其它请求才需要添加上下文路径前缀
+            if (!url.startsWith(this.authenticationContextUrl + '/')) {
+                url = client.contextUrl + url;
+            }
+            client = client.ref;
         }
         let _this = this;
         client.request(url, config).then(function(response) {
@@ -194,7 +212,7 @@ export default {
                             loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
                         }
                         // 原始地址是授权验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
-                        if (originalUrl && (originalUrl.startsWith(_this._authenticationUrlPrefix + '/')
+                        if (originalUrl && (originalUrl.startsWith(_this.authenticationContextUrl + '/')
                             || originalUrl === _this.logoutProcessUrl)) {
                             originalUrl = undefined;
                             originalMethod = undefined;
@@ -304,9 +322,12 @@ export default {
         }
         return message.trim();
     },
-    _authenticationUrlPrefix: '/authentication',
+    /**
+     * 登录凭证验证地址上下文前缀
+     */
+    authenticationContextUrl: '/authentication',
     isLogined(callback, options) {
-        this.get(this._authenticationUrlPrefix + '/authorized', callback, options);
+        this.get(this.authenticationContextUrl + '/authorized', callback, options);
     },
     /**
      * 确保已登录
@@ -314,7 +335,7 @@ export default {
      * @param options 请求选项集
      */
     ensureLogined(callback, options) {
-        this.get(this._authenticationUrlPrefix + '/validate', callback, options);
+        this.get(this.authenticationContextUrl + '/validate', callback, options);
     },
     /**
      * 确保已具有指定授权
@@ -323,7 +344,7 @@ export default {
      * @param options 请求选项集
      */
     ensureGranted(authority, callback, options) {
-        this.get(this._authenticationUrlPrefix + '/validate', authority, callback, options);
+        this.get(this.authenticationContextUrl + '/validate', authority, callback, options);
     },
     _metas: {},
     getMeta(urlOrType, callback, app) {

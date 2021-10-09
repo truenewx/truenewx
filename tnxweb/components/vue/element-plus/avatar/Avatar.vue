@@ -73,27 +73,33 @@ export default {
         load() {
             if (this.url && this.url.startsWith('fss://')) {
                 let rpc = window.tnx.app.rpc;
+                let fssConfig = window.tnx.fss.getClientConfig();
                 let vm = this;
-                rpc.ensureLogined(function() {
-                    let fssBaseUrl = window.tnx.fss.getBaseUrl();
-                    if (vm.preview) {
-                        rpc.get(fssBaseUrl + '/meta', {
-                            storageUrl: vm.url
-                        }, function(meta) {
-                            vm.src = meta.thumbnailReadUrl;
-                            vm.previewSrcList = [meta.readUrl];
-                        });
-                    } else {
-                        rpc.get(fssBaseUrl + '/read-url', {
-                            storageUrl: vm.url,
-                            thumbnail: true,
-                        }, function(readUrl) {
-                            vm.src = readUrl;
-                        });
-                    }
-                }, {
-                    app: window.tnx.fss.getAppName()
-                });
+                if (vm.preview) {
+                    rpc.get(fssConfig.contextUrl + '/meta', {
+                        storageUrl: vm.url
+                    }, function(meta) {
+                        vm.src = meta.thumbnailReadUrl;
+                        vm.previewSrcList = [meta.readUrl];
+                    }, {
+                        app: fssConfig.appName,
+                        error(errors) {
+                            console.error(errors[0].message);
+                        }
+                    });
+                } else {
+                    rpc.get(fssConfig.contextUrl + '/read-url', {
+                        storageUrl: vm.url,
+                        thumbnail: true,
+                    }, function(readUrl) {
+                        vm.src = readUrl;
+                    }, {
+                        app: fssConfig.appName,
+                        error(errors) {
+                            console.error(errors[0].message);
+                        }
+                    });
+                }
             } else {
                 this.src = this.url;
             }

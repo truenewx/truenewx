@@ -79,11 +79,12 @@ export default {
             return false;
         },
         _init: function() {
+            let fssConfig = vm.tnx.fss.getClientConfig();
             const vm = this;
             vm.tnx.app.rpc.ensureLogined(function() {
                 if (vm.modelValue) {
                     let storageUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
-                    vm.tnx.app.rpc.get(vm.tnx.fss.getBaseUrl() + '/metas', {
+                    vm.tnx.app.rpc.get(fssConfig.contextUrl + '/metas', {
                         storageUrls: storageUrls
                     }, function(metas) {
                         let fileList = [];
@@ -101,6 +102,8 @@ export default {
                         vm.$nextTick(function() {
                             vm._loadUploadLimit();
                         });
+                    }, {
+                        app: fssConfig.appName
                     });
                 } else {
                     vm.$nextTick(function() {
@@ -108,7 +111,7 @@ export default {
                     });
                 }
             }, {
-                app: vm.tnx.fss.getAppName(),
+                app: fssConfig.appName,
                 toLogin: function(loginFormUrl, originalUrl, originalMethod) {
                     return true;
                 }

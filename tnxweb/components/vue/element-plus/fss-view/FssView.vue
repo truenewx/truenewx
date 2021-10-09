@@ -1,6 +1,7 @@
 <template>
+    <span class="text-muted" v-if="denied">没有权限查看该图片</span>
     <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain"
-        :style="{width: imageWidth, height: imageHeight}" v-if="meta.imageable">
+        :style="{width: imageWidth, height: imageHeight}" v-else-if="meta.imageable">
         <template #error>
             <div class="text-muted h-100 flex-center">
                 <i class="el-icon-picture-outline"/>
@@ -26,6 +27,7 @@ export default {
     data() {
         return {
             meta: {},
+            denied: false,
         }
     },
     computed: {
@@ -56,17 +58,20 @@ export default {
     },
     methods: {
         load() {
-            if (this.url && !this.url.startsWith('http://') && !this.url.startsWith('https://')) {
+            if (this.url && this.url.startsWith('fss://')) {
                 let rpc = window.tnx.app.rpc;
+                let fssConfig = window.tnx.fss.getClientConfig();
                 let vm = this;
-                rpc.ensureLogined(function() {
-                    rpc.get(window.tnx.fss.getBaseUrl() + '/meta', {
-                        storageUrl: vm.url
-                    }, function(meta) {
-                        vm.meta = meta;
-                    });
+                rpc.get(fssConfig.contextUrl + '/meta', {
+                    storageUrl: vm.url,
+                }, function(meta) {
+                    vm.meta = meta;
                 }, {
-                    app: window.tnx.fss.getAppName()
+                    app: fssConfig.appName,
+                    error(errors) {
+                        vm.denied = true;
+                        console.error(errors[0].message);
+                    }
                 });
             }
         }
