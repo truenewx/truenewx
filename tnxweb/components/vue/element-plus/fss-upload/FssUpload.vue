@@ -79,8 +79,8 @@ export default {
             return false;
         },
         _init: function() {
-            let fssConfig = vm.tnx.fss.getClientConfig();
             const vm = this;
+            let fssConfig = vm.tnx.fss.getClientConfig();
             vm.tnx.app.rpc.ensureLogined(function() {
                 if (vm.modelValue) {
                     let storageUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
