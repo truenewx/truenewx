@@ -102,9 +102,10 @@ public class JpaRepoGeneratorImpl extends ClassGeneratorSupport implements JpaRe
             String rightKeyPropertyName = keyPropertyName + Strings.DOT + keyFieldBinate.getRight().getName();
             params.put("rightKeyPropertyName", rightKeyPropertyName);
             generate(module, entityClass, params, this.relationImplTemplateLocation, "Impl");
-        } else { // TODO 既不是单体也不是关系的普通实体
-
         }
+        // 既不是单体也不是关系的普通实体，由于JPA要求指定Key类型，但框架的Entity没有限定Key类型，故无法自动生成
+        // Entity不能限定Key类型的原因在于，子接口Relation的Key拆分成了左右两个Key，无法单一指定Key类型，这一点与JPA不相同
+        // 好在普通Entity实体数量很少，Repo也很容易手写
     }
 
     private String generate(String module, Class<? extends Entity> entityClass, Map<String, Object> params,
