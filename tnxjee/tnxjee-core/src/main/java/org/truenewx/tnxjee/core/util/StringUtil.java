@@ -1266,4 +1266,79 @@ public class StringUtil {
         return null;
     }
 
+    /**
+     * 将指定分隔符围绕指定数据的每一个元素拼接成字符串，其效果为join后前后再加分隔符
+     *
+     * @param separator 分隔符
+     * @param array     数组
+     * @return 拼接成的字符串
+     */
+    public static String surround(String separator, Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        if (array.length == 0) {
+            return Strings.EMPTY;
+        }
+        return separator + StringUtils.join(array, separator) + separator;
+    }
+
+    /**
+     * 将指定分隔符围绕指定数据的每一个元素拼接成字符串，其效果为join后前后再加分隔符
+     *
+     * @param separator 分隔符
+     * @param array     数组
+     * @return 拼接成的字符串
+     */
+    public static String surround(String separator, long[] array) {
+        if (array == null) {
+            return null;
+        }
+        if (array.length == 0) {
+            return Strings.EMPTY;
+        }
+        return separator + StringUtils.join(array, separator) + separator;
+    }
+
+    /**
+     * 将指定分隔符围绕指定数据的每一个元素拼接成字符串，其效果为join后前后再加分隔符
+     *
+     * @param separator 分隔符
+     * @param array     数组
+     * @return 拼接成的字符串
+     */
+    public static String surround(String separator, int[] array) {
+        if (array == null) {
+            return null;
+        }
+        if (array.length == 0) {
+            return Strings.EMPTY;
+        }
+        return separator + StringUtils.join(array, separator) + separator;
+    }
+
+    /**
+     * surround()方法的反向方法，将指定字符串中的指定分隔符抽取掉，剩下部分拆分为字符串数组返回
+     *
+     * @param s         字符串
+     * @param separator 分隔符
+     * @return 拆分成的字符串数组
+     */
+    public static String[] separate(String s, String separator) {
+        if (s == null) {
+            return null;
+        }
+        s = s.trim();
+        if (s.startsWith(separator)) {
+            s = s.substring(separator.length());
+        }
+        if (s.endsWith(separator)) {
+            s = s.substring(0, s.length() - separator.length());
+        }
+        if (StringUtils.isBlank(s)) {
+            return new String[0];
+        }
+        return s.split(separator);
+    }
+
 }

@@ -139,7 +139,7 @@ public class ArrayUtil {
         return integerArray;
     }
 
-    public static Long[] toLongArray(long[] longArray) {
+    public static Long[] toLongObjectArray(long[] longArray) {
         if (longArray == null) {
             return null;
         }
@@ -149,6 +149,18 @@ public class ArrayUtil {
             result[i] = longArray[i];
         }
         return result;
+    }
+
+    public static long[] toLongValueArray(String[] stringArray) {
+        if (stringArray == null) {
+            return null;
+        }
+        int length = stringArray.length;
+        long[] longArray = new long[length];
+        for (int i = 0; i < length; i++) {
+            longArray[i] = MathUtil.parseLong(stringArray[i]);
+        }
+        return longArray;
     }
 
     public static Set<Integer> toSet(int[] array) {
