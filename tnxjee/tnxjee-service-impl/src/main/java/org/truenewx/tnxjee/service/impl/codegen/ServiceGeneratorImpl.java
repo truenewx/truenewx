@@ -34,6 +34,9 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
     private String commandRelationTemplateLocation = "META-INF/template/command-relation-service.ftl";
     private String relationImplTemplateLocation = "META-INF/template/relation-service-impl.ftl";
 
+    private String entityTemplateLocation = "META-INF/template/entity-service.ftl";
+    private String entityImplTemplateLocation = "META-INF/template/entity-service-impl.ftl";
+
     public ServiceGeneratorImpl(String modelBasePackage, String targetBasePackage) {
         super(modelBasePackage, targetBasePackage);
     }
@@ -83,8 +86,11 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
             String serviceInterfaceSimpleName = generate(module, entityClass, params, location, Strings.EMPTY);
             params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
             generate(module, entityClass, params, this.relationImplTemplateLocation, "Impl");
-        } else { // TODO 既不是单体也不是关系的普通实体
-
+        } else { // 既不是单体也不是关系的普通实体
+            String serviceInterfaceSimpleName = generate(module, entityClass, params, this.entityTemplateLocation,
+                    Strings.EMPTY);
+            params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
+            generate(module, entityClass, params, this.entityImplTemplateLocation, "Impl");
         }
     }
 
@@ -113,9 +119,14 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
         params.put("entityClassName", entityClass.getName());
         params.put("serviceClassSimpleName", serviceClassSimpleName);
         params.put("entityClassSimpleName", entityClassSimpleName);
-        String repoPackageName = packageName.replaceFirst("\\.service\\.", ".repo.");
         String repoClassSimpleName = entityClassSimpleName + "Repo";
         params.put("repoClassSimpleName", repoClassSimpleName);
+        String repoPackageName;
+        if (module == null) {
+            repoPackageName = packageName.replaceFirst("\\.service", ".repo");
+        } else {
+            repoPackageName = packageName.replaceFirst("\\.service\\.", ".repo.");
+        }
         String repoClassName = repoPackageName + Strings.DOT + repoClassSimpleName;
         params.put("repoClassName", repoClassName);
         generate(serviceClassName, location, params);
