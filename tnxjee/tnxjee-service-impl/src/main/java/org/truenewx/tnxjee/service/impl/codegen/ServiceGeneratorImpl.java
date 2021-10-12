@@ -6,8 +6,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.codegen.ClassGeneratorSupport;
 import org.truenewx.tnxjee.model.entity.Entity;
 import org.truenewx.tnxjee.model.entity.relation.Relation;
@@ -36,6 +39,9 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
 
     private String entityTemplateLocation = "META-INF/template/entity-service.ftl";
     private String entityImplTemplateLocation = "META-INF/template/entity-service-impl.ftl";
+
+    @Autowired
+    private ApplicationContext context;
 
     public ServiceGeneratorImpl(String modelBasePackage, String targetBasePackage) {
         super(modelBasePackage, targetBasePackage);
@@ -69,13 +75,17 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
                 putClassName(params, ownerClass, "owner");
                 String location = simple ? this.simpleOwnedUnityTemplateLocation : this.commandOwnedUnityTemplateLocation;
                 String serviceInterfaceSimpleName = generate(module, entityClass, params, location, Strings.EMPTY);
-                params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
-                generate(module, entityClass, params, this.ownedUnityImplTemplateLocation, "Impl");
+                if (serviceInterfaceSimpleName != null) {
+                    params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
+                    generate(module, entityClass, params, this.ownedUnityImplTemplateLocation, "Impl");
+                }
             } else {
                 String location = simple ? this.simpleUnityTemplateLocation : this.commandUnityTemplateLocation;
                 String serviceInterfaceSimpleName = generate(module, entityClass, params, location, Strings.EMPTY);
-                params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
-                generate(module, entityClass, params, this.unityImplTemplateLocation, "Impl");
+                if (serviceInterfaceSimpleName != null) {
+                    params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
+                    generate(module, entityClass, params, this.unityImplTemplateLocation, "Impl");
+                }
             }
         } else if (Relation.class.isAssignableFrom(entityClass)) { // 关系实体
             Class<?> leftKeyClass = ClassUtil.getActualGenericType(entityClass, Relation.class, 0);
@@ -84,13 +94,17 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
             putClassName(params, rightKeyClass, "rightKey");
             String location = simple ? this.simpleRelationTemplateLocation : this.commandRelationTemplateLocation;
             String serviceInterfaceSimpleName = generate(module, entityClass, params, location, Strings.EMPTY);
-            params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
-            generate(module, entityClass, params, this.relationImplTemplateLocation, "Impl");
+            if (serviceInterfaceSimpleName != null) {
+                params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
+                generate(module, entityClass, params, this.relationImplTemplateLocation, "Impl");
+            }
         } else { // 既不是单体也不是关系的普通实体
             String serviceInterfaceSimpleName = generate(module, entityClass, params, this.entityTemplateLocation,
                     Strings.EMPTY);
-            params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
-            generate(module, entityClass, params, this.entityImplTemplateLocation, "Impl");
+            if (serviceInterfaceSimpleName != null) {
+                params.put("serviceInterfaceSimpleName", serviceInterfaceSimpleName);
+                generate(module, entityClass, params, this.entityImplTemplateLocation, "Impl");
+            }
         }
     }
 
@@ -128,9 +142,17 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
             repoPackageName = packageName.replaceFirst("\\.service\\.", ".repo.");
         }
         String repoClassName = repoPackageName + Strings.DOT + repoClassSimpleName;
-        params.put("repoClassName", repoClassName);
-        generate(serviceClassName, location, params);
-        return serviceClassSimpleName;
+        try {
+            this.context.getClassLoader().loadClass(repoClassName);
+
+            params.put("repoClassName", repoClassName);
+            generate(serviceClassName, location, params);
+            return serviceClassSimpleName;
+        } catch (ClassNotFoundException e) {
+            // 找不到对应的Repo类，则无法生成Service类
+            LogUtil.warn(getClass(), "{} is ignored because {} was not found", serviceClassName, repoClassName);
+            return null;
+        }
     }
 
 }

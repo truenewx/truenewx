@@ -25,6 +25,15 @@ public abstract class JpaCodeGenConfigSupport {
         return getClass().getPackageName();
     }
 
+    /**
+     * 获取不生成Repo的实体类型清单
+     *
+     * @return 不生成Repo的实体类型清单
+     */
+    protected Class<?>[] getIgnoredEntityClassesForRepo() {
+        return null;
+    }
+
     @Bean
     public JpaEnumConverterGenerator enumConverterGenerator() {
         return new JpaEnumConverterGeneratorImpl(getModelBasePackage(), getRepoBasePackage());
@@ -37,7 +46,7 @@ public abstract class JpaCodeGenConfigSupport {
 
     @Bean
     public JpaRepoGenerator repoGenerator() {
-        return new JpaRepoGeneratorImpl(getModelBasePackage(), getRepoBasePackage());
+        return new JpaRepoGeneratorImpl(getModelBasePackage(), getRepoBasePackage(), getIgnoredEntityClassesForRepo());
     }
 
 }

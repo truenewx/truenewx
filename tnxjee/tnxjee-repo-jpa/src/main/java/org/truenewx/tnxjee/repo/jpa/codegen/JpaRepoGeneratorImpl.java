@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
@@ -34,17 +35,22 @@ public class JpaRepoGeneratorImpl extends ClassGeneratorSupport implements JpaRe
     private String relationExtTemplateLocation = "META-INF/template/relation-repox.ftl";
     private String relationImplTemplateLocation = "META-INF/template/relation-repo-impl.ftl";
 
-    public JpaRepoGeneratorImpl(String modelBasePackage, String targetBasePackage) {
+    private Class<?>[] ignoredEntityClasses;
+
+    public JpaRepoGeneratorImpl(String modelBasePackage, String targetBasePackage, Class<?>[] ignoredEntityClasses) {
         super(modelBasePackage, targetBasePackage);
+        this.ignoredEntityClasses = ignoredEntityClasses;
     }
 
     @Override
     public void generate(String... modules) throws Exception {
         generate(this.modelBasePackage, (module, entityClass) -> {
-            try {
-                generate(module, entityClass, true); // 默认均生成实现类，多余的可手工删除
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            if (this.ignoredEntityClasses == null || !ArrayUtils.contains(this.ignoredEntityClasses, entityClass)) {
+                try {
+                    generate(module, entityClass, true); // 默认均生成实现类，多余的可手工删除
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }, modules);
     }
