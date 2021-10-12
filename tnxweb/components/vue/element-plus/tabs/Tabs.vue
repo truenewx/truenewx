@@ -61,14 +61,16 @@ export default {
     },
     mounted() {
         let cache = this.getCache();
-        if (cache && this.$route.meta.isHistory()) {
-            let model = cache[this.id];
-            if (model) {
-                let vm = this;
-                this.$nextTick(function() {
-                    vm.model = model;
-                });
-            }
+        if (cache) {
+            let vm = this;
+            setTimeout(function() {
+                if (vm.$route.meta.isHistory()) {
+                    let model = cache[vm.id];
+                    if (model) {
+                        vm.model = model;
+                    }
+                }
+            });
         }
     },
     methods: {

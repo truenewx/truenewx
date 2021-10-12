@@ -10,7 +10,7 @@ function addRoute(routes, superiorPath, item, fnImportPage) {
             meta: {
                 superiorPath: superiorPath,
                 cache: {}, // 路由级缓存
-                isHistory() {
+                isHistory() { // 通过setTimeout()方式调用才能确保获得正确结果
                     return this.historyFrom !== undefined;
                 }
             },
@@ -75,17 +75,21 @@ export default function(VueRouter, menu, fnImportPage) {
     const routes = [];
     applyItemsToRoutes(undefined, items, routes, fnImportPage);
 
+    const routerHistory = VueRouter.createHistory();
     const router = VueRouter.createRouter({
-        history: VueRouter.createHistory(),
+        history: routerHistory,
         routes,
     });
+    router.history = routerHistory;
 
-    // 监听浏览器的返回事件
+    // 浏览器的返回事件触发位于VueRouter的钩子执行和页面渲染之后，这意味着$route.meta.historyFrom必须在页面渲染完之后才具有正确的值
     if (window.history && window.history.pushState) {
         window.history.pushState(null, null, document.URL);
         window.addEventListener('popstate', function() {
-            // 此函数先于VueRouter的所有钩子执行
-            router._historied = true;
+            let $route = getCurrentRoute(router);
+            if ($route) {
+                $route.meta.historyFrom = router.history.state.forward;
+            }
         }, false);
     }
 
@@ -115,38 +119,25 @@ export default function(VueRouter, menu, fnImportPage) {
         }
     });
     router.afterEach(function(to, from) {
-        let $route = getCurrentRoute(router);
-        if (router._historied) {
-            delete router._historied;
-            if ($route) {
-                $route.meta.historyFrom = from.path;
-            }
-        } else if ($route) {
-            delete $route.meta.historyFrom;
-        }
         // 前后路径相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
         if (to.path === from.path && to.fullPath !== from.fullPath) {
             window.location.reload();
-        } else {
-            router.prev = from;
         }
     });
     router.back = FunctionUtil.around(router.back, function(back, path) {
+        let prevPath = router.history.state.back;
         let $route = getCurrentRoute(router);
         // 如果上一页路径为指定路径，或匹配上级菜单路径，则执行原始的返回
-        if (router.prev) {
-            if (router.prev.path === path || matchesPath(path || router.prev.path, $route.meta.superiorPath)) {
-                back.call(router);
-                return;
-            }
+        if (prevPath === path || matchesPath(path || prevPath, $route.meta.superiorPath)) {
+            back.call(router);
+            return;
         }
-        // 如果没有上一页路径，或者上一页路径为根目录，则替换到上级菜单页面
-        if (!router.prev || router.prev.path === '/') {
+        // 如果没有上一页路径，则替换到上级菜单页面
+        if (!prevPath) {
             path = path || $route.meta.superiorPath;
         }
         path = instantiatePath(path, $route.params);
         if (path) {
-            router._historied = true; // 标记路由器正在执行历史动作
             router.replace(path);
             return;
         }

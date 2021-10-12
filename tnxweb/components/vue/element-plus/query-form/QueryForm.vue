@@ -64,23 +64,26 @@ export default {
         }
     },
     mounted() {
-        let queryable = this.init;
-        if (this.$route.meta.isHistory()) {
-            queryable = true; // 历史性访问均需要执行查询
-            let params = this.$route.meta.cache[this.cacheKey];
-            if (params) {
-                let keys = Object.keys(this.params);
-                for (let key of keys) {
-                    let value = params[key];
-                    if (value !== undefined) {
-                        this.params[key] = value;
+        let vm = this;
+        setTimeout(function() {
+            let queryable = vm.init;
+            if (vm.$route.meta.isHistory()) {
+                queryable = true; // 历史性访问均需要执行查询
+                let params = vm.$route.meta.cache[vm.cacheKey];
+                if (params) {
+                    let keys = Object.keys(vm.params);
+                    for (let key of keys) {
+                        let value = params[key];
+                        if (value !== undefined) {
+                            vm.params[key] = value;
+                        }
                     }
                 }
             }
-        }
-        if (queryable) {
-            this.toQuery();
-        }
+            if (queryable) {
+                vm.toQuery();
+            }
+        });
     },
     methods: {
         cacheParams() {
