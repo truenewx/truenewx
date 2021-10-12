@@ -122,18 +122,21 @@ export default function(VueRouter, menu, fnImportPage) {
         // 前后路径相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
         if (to.path === from.path && to.fullPath !== from.fullPath) {
             window.location.reload();
+        } else {
+            router.prev = from;
         }
     });
     router.back = FunctionUtil.around(router.back, function(back, path) {
-        let prevPath = router.history.state.back;
         let $route = getCurrentRoute(router);
         // 如果上一页路径为指定路径，或匹配上级菜单路径，则执行原始的返回
-        if (prevPath === path || matchesPath(path || prevPath, $route.meta.superiorPath)) {
-            back.call(router);
-            return;
+        if (router.prev) {
+            if (router.prev.path === path || matchesPath(path || router.prev.path, $route.meta.superiorPath)) {
+                back.call(router);
+                return;
+            }
         }
         // 如果没有上一页路径，则替换到上级菜单页面
-        if (!prevPath) {
+        if (!router.prev || !router.history.state.back) {
             path = path || $route.meta.superiorPath;
         }
         path = instantiatePath(path, $route.params);
