@@ -9,7 +9,9 @@ export default {
     props: {
         modelValue: {
             type: Array,
-            required: true,
+            default() {
+                return [];
+            }
         },
         url: {
             type: String,
