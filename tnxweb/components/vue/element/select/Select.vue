@@ -43,22 +43,26 @@
         <el-button :type="theme">{{ currentText }}
             <i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
-        <el-dropdown-menu #dropdown v-if="items && items.length">
-            <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
-                <i :class="item[iconName]" v-if="item[iconName]"></i>
-                <span>{{ item[textName] }}</span>
-            </el-dropdown-item>
-        </el-dropdown-menu>
+        <template #dropdown>
+            <el-dropdown-menu v-if="items && items.length">
+                <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
+                    <i :class="item[iconName]" v-if="item[iconName]"></i>
+                    <span>{{ item[textName] }}</span>
+                </el-dropdown-item>
+            </el-dropdown-menu>
+        </template>
     </el-dropdown>
     <el-dropdown :type="theme" :size="size" trigger="click" split-button @command="onDropdownCommand"
         v-else-if="selector === 'split-dropdown'">
         <span>{{ currentText }}</span>
-        <el-dropdown-menu #dropdown v-if="items && items.length">
-            <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
-                <i :class="item[iconName]" v-if="item[iconName]"></i>
-                <span>{{ item[textName] }}</span>
-            </el-dropdown-item>
-        </el-dropdown-menu>
+        <template #dropdown>
+            <el-dropdown-menu v-if="items && items.length">
+                <el-dropdown-item v-for="item of items" :key="item[valueName]" :command="item[valueName]">
+                    <i :class="item[iconName]" v-if="item[iconName]"></i>
+                    <span>{{ item[textName] }}</span>
+                </el-dropdown-item>
+            </el-dropdown-menu>
+        </template>
     </el-dropdown>
     <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :theme="theme" :size="size"
         :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
