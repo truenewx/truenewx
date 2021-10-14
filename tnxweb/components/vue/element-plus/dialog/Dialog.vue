@@ -171,10 +171,11 @@ export default {
 }
 
 .el-dialog__footer {
-    padding: 0 1rem 1rem 1rem;
+    padding: 0;
 }
 
 .tnxel-dialog-footer {
+    padding: 0 1rem 1rem 1rem;
     display: flex;
     flex-direction: row-reverse;
 }
