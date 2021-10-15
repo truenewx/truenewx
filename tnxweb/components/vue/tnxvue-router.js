@@ -135,8 +135,8 @@ export default function(VueRouter, menu, fnImportPage) {
                 return;
             }
         }
-        // 如果没有上一页路径，则替换到上级菜单页面
-        if (!router.prev || !router.history.state.back) {
+        // 如果没有上一页路径，则替换到上级菜单页面。如果记录的上一页路径与history中的返回路径不一致，说明页面进行了刷新，无法进行简单返回
+        if (!router.prev || !router.history.state.back || router.prev.path !== router.history.state.back) {
             path = path || $route.meta.superiorPath;
         }
         path = instantiatePath(path, $route.params);
