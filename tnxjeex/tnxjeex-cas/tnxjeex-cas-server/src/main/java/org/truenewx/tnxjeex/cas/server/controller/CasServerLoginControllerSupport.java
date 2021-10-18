@@ -1,6 +1,8 @@
 package org.truenewx.tnxjeex.cas.server.controller;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,6 +82,7 @@ public abstract class CasServerLoginControllerSupport {
                 String targetUrl = this.serviceManager.getLoginProcessUrl(request, service, scope);
                 String redirectUrl = request.getParameter(redirectParameter);
                 if (StringUtils.isNotBlank(redirectUrl)) {
+                    redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
                     targetUrl = NetUtil.mergeParam(targetUrl, redirectParameter, redirectUrl);
                 }
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);

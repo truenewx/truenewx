@@ -1,20 +1,22 @@
 package org.truenewx.tnxjee.webmvc.security.web;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjee.web.cors.CorsRegistryProperties;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.web.util.WebUtil;
 
@@ -24,21 +26,30 @@ import org.truenewx.tnxjee.web.util.WebUtil;
 @Component
 public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
 
-    private List<String> allowedHostList = new ArrayList<>();
+    private Set<String> allowedHostList = new HashSet<>();
+
+    @Autowired(required = false)
+    public void setCommonProperties(CommonProperties commonProperties) {
+        this.allowedHostList.addAll(commonProperties.getAllAppUris());
+    }
+
+    @Autowired(required = false)
+    public void setCorsRegistryProperties(CorsRegistryProperties corsRegistryProperties) {
+        addAllowedHost(corsRegistryProperties.getAllowedOrigins());
+    }
 
     public void addAllowedHost(String... allowedHost) {
         CollectionUtil.addAll(this.allowedHostList, allowedHost);
     }
 
     @Override
-    public void sendRedirect(HttpServletRequest request, HttpServletResponse response,
-            String url) throws IOException {
+    public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
         String contextPath = request.getContextPath();
         if (Strings.SLASH.equals(contextPath)) {
             contextPath = Strings.EMPTY;
         }
         String redirectUrl = calculateRedirectUrl(contextPath, url);
-        if (!isValidRedirectUrl(request, response, redirectUrl)) {
+        if (!isValidRedirectUrl(request, redirectUrl)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "illegal redirect target url: " + redirectUrl);
             return;
         }
@@ -66,8 +77,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
         }
     }
 
-    protected boolean isValidRedirectUrl(HttpServletRequest request, HttpServletResponse response,
-            String redirectUrl) throws IOException {
+    private boolean isValidRedirectUrl(HttpServletRequest request, String redirectUrl) {
         // 空地址无效
         if (StringUtils.isBlank(redirectUrl)) {
             return false;
@@ -94,7 +104,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
             return true;
         }
         // 匹配允许名单可以重定向
-        return StringUtil.wildcardMatchOneOf(redirectHost, this.allowedHostList);
+        return this.allowedHostList.contains(redirectHost);
     }
 
     protected String buildRedirectBody(String redirectUrl) {

@@ -1,18 +1,23 @@
 package org.truenewx.tnxjee.webmvc.security.web.authentication;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.web.util.WebUtil;
+import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
 import org.truenewx.tnxjee.webmvc.util.WebMvcUtil;
 
@@ -25,6 +30,8 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
     private RedirectStrategy redirectStrategy;
     @Autowired(required = false)
     private SecurityUrlProvider securityUrlProvider;
+    @Autowired
+    private ApiMetaProperties apiMetaProperties;
     private boolean ajaxGetToForm;
 
     public WebAuthenticationEntryPoint(String loginFormUrl) {
@@ -35,7 +42,15 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) {
         if (this.securityUrlProvider != null) {
-            return this.securityUrlProvider.getLoginFormUrl(request);
+            String loginFormUrl = this.securityUrlProvider.getLoginFormUrl(request);
+            String queryString = request.getQueryString();
+            if (StringUtils.isNotBlank(queryString)) {
+                String nextUrl = request.getRequestURI() + Strings.QUESTION + queryString;
+                String redirectParameter = this.apiMetaProperties.getLoginSuccessRedirectParameter();
+                loginFormUrl += Strings.AND + redirectParameter + Strings.EQUAL
+                        + URLEncoder.encode(nextUrl, StandardCharsets.UTF_8);
+            }
+            return loginFormUrl;
         }
         return super.determineUrlToUseForThisRequest(request, response, exception);
     }
