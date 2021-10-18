@@ -25,7 +25,7 @@ import org.truenewx.tnxjee.webmvc.cors.IgnoreNullConfigCorsProcessor;
 import org.truenewx.tnxjee.webmvc.cors.SingleCorsConfigurationSource;
 import org.truenewx.tnxjee.webmvc.jwt.DefaultInternalJwtResolver;
 import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
-import org.truenewx.tnxjee.webmvc.servlet.filter.SameSiteCookieFilter;
+import org.truenewx.tnxjee.webmvc.servlet.filter.SessionIdSameSiteFilter;
 
 /**
  * WEB MVC配置器支持，可选的控制层配置均在此配置支持体系中
@@ -113,9 +113,9 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean<SameSiteCookieFilter> sameSiteCookieFilter() {
-        FilterRegistrationBean<SameSiteCookieFilter> frb = new FilterRegistrationBean<>();
-        frb.setFilter(new SameSiteCookieFilter());
+    public FilterRegistrationBean<SessionIdSameSiteFilter> sameSiteCookieFilter() {
+        FilterRegistrationBean<SessionIdSameSiteFilter> frb = new FilterRegistrationBean<>();
+        frb.setFilter(new SessionIdSameSiteFilter());
         frb.addUrlPatterns("/*");
         frb.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return frb;
