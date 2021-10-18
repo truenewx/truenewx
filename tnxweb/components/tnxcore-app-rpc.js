@@ -29,6 +29,10 @@ export default {
     getDefaultBaseUrl() {
         return this.defaultClient.baseUrl;
     },
+    getBaseUrl(appName) {
+        let appClient = this.appClients[appName];
+        return appClient ? appClient.baseUrl : undefined;
+    },
     /**
      * 从后端服务器加载配置
      * @param baseUrl 获取配置的后端服务器基础路径
@@ -147,7 +151,7 @@ export default {
         this._request(url, config, options);
     },
     _request(url, config, options) {
-        let client = options.app ? this.appClients[options.app] : this.defaultClient;
+        let client = options.app ? this.appClients[options.app] : null;
         if (!url.startsWith('/')) { // 绝对地址需找到对应的应用客户端，并转换为相对地址
             let appNames = Object.keys(this.appClients);
             for (let appName of appNames) {
@@ -164,6 +168,7 @@ export default {
                 }
             }
         }
+        client = client || this.defaultClient;
         if (client.ref) {
             // 登录凭证验证请求直接向引用的所属应用发送，其它请求才需要添加上下文路径前缀
             if (!url.startsWith(this.authenticationContextUrl + '/')) {
