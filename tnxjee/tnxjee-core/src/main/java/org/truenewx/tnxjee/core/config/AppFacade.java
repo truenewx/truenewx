@@ -7,6 +7,7 @@ public class AppFacade {
 
     private String name;
     private String caption;
+    private String business;
     private String contextUri;
     private String loginedUri;
 
@@ -24,6 +25,14 @@ public class AppFacade {
 
     public void setCaption(String caption) {
         this.caption = caption;
+    }
+
+    public String getBusiness() {
+        return this.business;
+    }
+
+    public void setBusiness(String business) {
+        this.business = business;
     }
 
     public String getContextUri() {

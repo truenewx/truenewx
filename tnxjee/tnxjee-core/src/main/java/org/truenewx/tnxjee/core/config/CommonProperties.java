@@ -124,6 +124,7 @@ public class CommonProperties implements InitializingBean {
         AppFacade basic = new AppFacade();
         basic.setName(name);
         basic.setCaption(appConfig.getCaption());
+        basic.setBusiness(appConfig.getBusiness());
         if (relativeContextUri) {
             basic.setContextUri(appConfig.getContextPath());
         } else {

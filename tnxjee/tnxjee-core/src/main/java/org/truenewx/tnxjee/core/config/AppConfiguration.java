@@ -13,6 +13,7 @@ import org.truenewx.tnxjee.core.Strings;
 public class AppConfiguration {
 
     private String caption;
+    private String business;
     private String gatewayUri;
     private String directUri;
     private String contextPath = Strings.EMPTY;
@@ -27,6 +28,14 @@ public class AppConfiguration {
 
     public void setCaption(String caption) {
         this.caption = caption;
+    }
+
+    public String getBusiness() {
+        return this.business;
+    }
+
+    public void setBusiness(String business) {
+        this.business = business;
     }
 
     public String getGatewayUri() {
