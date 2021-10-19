@@ -35,7 +35,7 @@ public abstract class CasServerLoginControllerSupport {
     @Autowired
     private ResolvableExceptionAuthenticationFailureHandler authenticationFailureHandler;
     @Autowired
-    private CasServiceManager serviceManager;
+    protected CasServiceManager serviceManager;
     @Autowired
     private CasTicketManager ticketManager;
     @Autowired
