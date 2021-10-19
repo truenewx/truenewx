@@ -142,6 +142,18 @@ tnxvue.app.isProduction = function() {
     return true;
 };
 
+tnxvue.app.toDevUrl = function(url, portIndex, target) {
+    if (!this.isProduction()) {
+        let localhost = 'http://localhost:';
+        if (url.startsWith(localhost)) {
+            portIndex = portIndex || 2;
+            target = target || '0';
+            url = url.substr(0, localhost.length + portIndex - 1) + target + url.substr(localhost.length + portIndex);
+        }
+    }
+    return url;
+}
+
 // 元数据到async-validator组件规则的转换处理
 tnxvue.app.validator = validator;
 tnxvue.app.rpc.getMeta = tnxvue.util.function.around(tnxvue.app.rpc.getMeta, function(getMeta, url, callback, app) {
