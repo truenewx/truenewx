@@ -30,7 +30,7 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * 指定用户在业务授权类型下写文件
      *
      * @param type         业务类型
-     * @param scope        业务模型标识
+     * @param scope        业务范围
      * @param userIdentity 用户标识
      * @param fileSize     文件大小
      * @param filename     文件名
@@ -79,5 +79,11 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      */
     void read(I userIdentity, String path, OutputStream out) throws IOException;
 
+    /**
+     * 删除指定文件
+     *
+     * @param userIdentity 用户标识
+     * @param storageUrl   文件存储路径
+     */
     void delete(I userIdentity, String storageUrl);
 }

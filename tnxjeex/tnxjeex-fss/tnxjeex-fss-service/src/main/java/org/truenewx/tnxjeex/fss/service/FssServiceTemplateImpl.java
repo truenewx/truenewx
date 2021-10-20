@@ -79,8 +79,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
         // 获取文件名
-        filename = filename.substring(0, filename.length() - extension.length());
-        String storageFilename = strategy.getFilename(scope, userIdentity, filename);
+        String storageFilename = strategy.getFilename(scope, userIdentity);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
             in = new BufferedInputStream(in);

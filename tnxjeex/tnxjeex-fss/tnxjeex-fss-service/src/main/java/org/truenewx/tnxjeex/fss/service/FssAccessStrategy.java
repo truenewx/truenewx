@@ -49,12 +49,11 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     /**
      * 获取指定资源的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
      *
-     * @param scope            业务范围
-     * @param userIdentity     用户标识。登录用户才能写资源，所以此处一定不为null
-     * @param originalFilename 原始文件名，不含扩展名
+     * @param scope        业务范围
+     * @param userIdentity 用户标识。登录用户才能写资源，所以此处一定不为null
      * @return 指定资源的最后一级文件名
      */
-    default String getFilename(String scope, I userIdentity, String originalFilename) {
+    default String getFilename(String scope, I userIdentity) {
         return null;
     }
 
