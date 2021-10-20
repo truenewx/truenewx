@@ -38,13 +38,25 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     String getContextPath();
 
     /**
-     * 获取指定资源的相对于上下文根的存储目录，不包含最后一级的文件名，文件名由框架自动加在路径中
+     * 获取指定资源的相对于上下文根的存储目录，不包含最后一级的文件名
      *
      * @param scope        业务范围
      * @param userIdentity 用户标识。登录用户才能写资源，所以此处一定不为null
      * @return 相对于上下文根的存储目录，返回null表示没有写权限
      */
     String getRelativeDir(String scope, I userIdentity);
+
+    /**
+     * 获取指定资源的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
+     *
+     * @param scope            业务范围
+     * @param userIdentity     用户标识。登录用户才能写资源，所以此处一定不为null
+     * @param originalFilename 原始文件名，不含扩展名
+     * @return 指定资源的最后一级文件名
+     */
+    default String getFilename(String scope, I userIdentity, String originalFilename) {
+        return null;
+    }
 
     /**
      * @return 是否公开匿名可读

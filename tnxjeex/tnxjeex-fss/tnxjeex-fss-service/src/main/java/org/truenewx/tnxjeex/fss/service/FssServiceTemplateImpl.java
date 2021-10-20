@@ -78,16 +78,22 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (relativeDir == null) {
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
-        // 用BufferedInputStream装载以确保输入流可以标记和重置位置
-        in = new BufferedInputStream(in);
-        in.mark(Integer.MAX_VALUE);
-        String md5Code = EncryptUtil.encryptByMd5(in);
-        in.reset();
-        String storageFilename = md5Code + extension; // 存储文件名
+        // 获取文件名
+        filename = filename.substring(0, filename.length() - extension.length());
+        String storageFilename = strategy.getFilename(scope, userIdentity, filename);
+        if (StringUtils.isBlank(storageFilename)) {
+            // 用BufferedInputStream装载以确保输入流可以标记和重置位置
+            in = new BufferedInputStream(in);
+            in.mark(Integer.MAX_VALUE);
+            storageFilename = EncryptUtil.encryptByMd5(in);
+            in.reset();
+        }
+        storageFilename += extension.toLowerCase();
+        // 构建存储路径
         FssStoragePath fsp = new FssStoragePath(type, NetUtil.standardizeUrl(relativeDir), storageFilename);
         String contextPath = NetUtil.standardizeUrl(strategy.getContextPath());
         String storagePath = contextPath + fsp.getRelativePath();
-
+        // 写文件
         FssProvider provider = strategy.getProvider();
         FssAccessor accessor = this.accessors.get(provider);
         accessor.write(in, storagePath, filename);
