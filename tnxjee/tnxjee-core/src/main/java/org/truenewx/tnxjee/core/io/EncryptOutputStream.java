@@ -7,16 +7,16 @@ import java.nio.charset.StandardCharsets;
 import org.truenewx.tnxjee.core.util.MathUtil;
 
 /**
- * 带有附加信息的输出流，配套使用 {@link AttachInputStream} 读取附加信息
+ * 加密输出流，配套使用 {@link EncryptInputStream} 读取附加信息
  *
  * @author jianglei
  */
-public class AttachOutputStream extends OutputStream {
+public class EncryptOutputStream extends OutputStream {
 
     private OutputStream out;
     private Byte salt;
 
-    public AttachOutputStream(OutputStream out, String attachment, Byte salt) throws IOException {
+    public EncryptOutputStream(OutputStream out, String attachment, Byte salt) throws IOException {
         this.out = out;
         byte[] bytes = attachment == null ? new byte[0] : attachment.getBytes(StandardCharsets.UTF_8);
         int length = bytes.length;

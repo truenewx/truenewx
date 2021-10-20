@@ -7,17 +7,17 @@ import java.nio.charset.StandardCharsets;
 import org.truenewx.tnxjee.core.util.MathUtil;
 
 /**
- * 带有附加信息的输入流，配合读取 {@link AttachOutputStream} 写入的附加信息
+ * 加密输入流，配合读取 {@link EncryptOutputStream} 写入的附加信息
  *
  * @author jianglei
  */
-public class AttachInputStream extends InputStream {
+public class EncryptInputStream extends InputStream {
 
     private InputStream in;
     private boolean readAttachment;
     private Byte salt;
 
-    public AttachInputStream(InputStream in, Byte salt) {
+    public EncryptInputStream(InputStream in, Byte salt) {
         this.in = in;
         this.salt = salt;
     }
