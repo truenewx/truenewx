@@ -86,6 +86,13 @@ public class FileUploadLimit {
         return this;
     }
 
+    /**
+     * 校验文件大小和扩展名
+     *
+     * @param fileSize 文件大小
+     * @param filename 文件名
+     * @return 包含.的扩展名
+     */
     public String validate(long fileSize, String filename) {
         if (fileSize > this.capacity) {
             throw new BusinessException(UploadExceptionCodes.CAPACITY_EXCEEDS_LIMIT,
