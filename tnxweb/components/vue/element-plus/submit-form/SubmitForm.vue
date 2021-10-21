@@ -14,6 +14,7 @@
 
 <script>
 import $ from 'jquery';
+import AsyncValidator from 'async-validator';
 
 export default {
     name: 'TnxelSubmitForm',
@@ -106,6 +107,7 @@ export default {
             this.disabled = disabled !== false;
         },
         focusError() {
+            // TODO 使用el-form组件的scrollToField()方法实现滚动到错误字段
             let $form = $('#' + this.id);
             let $item = $('.el-form-item.is-error:first', $form);
             if ($item.length) {
@@ -173,6 +175,32 @@ export default {
         },
         getFieldNames() {
             return this.fieldNames;
+        },
+        /**
+         * 执行所有的校验规则，以自定义方式处理错误
+         * @param callback 校验后的回调函数，首个参数为错误消息字符串数组，没有错误时为null
+         */
+        validateRules(callback, fieldLabels) {
+            let validator = new AsyncValidator(this.validationRules);
+            validator.validate(this.model, function(errors) {
+                let messages = [];
+                if (errors) {
+                    for (let error of errors) {
+                        let fieldLabel = undefined;
+                        if (typeof fieldLabels === 'function') {
+                            fieldLabel = fieldLabels(error.field);
+                        } else if (typeof fieldLabels === 'object') {
+                            fieldLabel = fieldLabels[error.field];
+                        }
+                        fieldLabel = fieldLabel || error.field;
+                        messages.push(fieldLabel + error.message);
+                    }
+                }
+                if (messages.length === 0) {
+                    messages = null;
+                }
+                callback(messages);
+            });
         }
     }
 }
