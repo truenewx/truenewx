@@ -115,14 +115,18 @@ export default {
         },
         validate(callback, errorFocus) {
             let _this = this;
-            return this.$refs.form.validate(function(valid, invalidFields) {
-                if (!valid && _this.errorFocus && errorFocus !== false) {
+            this.$refs.form.validate().then(function() {
+                if (typeof callback === 'function') {
+                    callback(true);
+                }
+            }).catch(function() {
+                if (_this.errorFocus && errorFocus !== false) {
                     _this.$nextTick(function() {
                         _this.focusError.call(_this);
                     });
                 }
                 if (typeof callback === 'function') {
-                    callback(valid);
+                    callback(false);
                 }
             });
         },
