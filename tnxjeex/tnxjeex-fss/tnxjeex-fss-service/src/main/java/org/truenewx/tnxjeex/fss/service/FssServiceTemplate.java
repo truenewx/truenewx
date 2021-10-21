@@ -1,8 +1,10 @@
 package org.truenewx.tnxjeex.fss.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.Service;
@@ -78,6 +80,21 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @throws IOException 如果读的过程中出现错误
      */
     void read(I userIdentity, String path, OutputStream out) throws IOException;
+
+    /**
+     * 读取指定指定路径的文件内容为字符串，字符编码：UTF-8
+     *
+     * @param userIdentity 用户标识
+     * @param path         文件路径
+     * @return 字符串内容
+     * @throws IOException 如果读的过程中出现错误
+     */
+    default String read(I userIdentity, String path) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        read(userIdentity, path, out);
+        out.close();
+        return out.toString(StandardCharsets.UTF_8);
+    }
 
     /**
      * 删除指定文件
