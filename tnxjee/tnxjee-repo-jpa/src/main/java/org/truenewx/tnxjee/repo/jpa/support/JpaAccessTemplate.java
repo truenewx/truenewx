@@ -1,10 +1,6 @@
 package org.truenewx.tnxjee.repo.jpa.support;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
@@ -155,6 +151,22 @@ public class JpaAccessTemplate implements DataAccessTemplate {
 
     public <T> T first(CharSequence ql) {
         return first(ql, (Map<String, ?>) null);
+    }
+
+    public boolean exists(CharSequence ql, String paramName, Object paramValue) {
+        return first(ql, paramName, paramValue) != null;
+    }
+
+    public boolean exists(CharSequence ql, Map<String, ?> params) {
+        return first(ql, params) != null;
+    }
+
+    public boolean exists(CharSequence ql, List<?> params) {
+        return first(ql, params) != null;
+    }
+
+    public boolean exists(CharSequence ql) {
+        return first(ql) != null;
     }
 
     public long count(CharSequence ql, String paramName, Object paramValue) {
