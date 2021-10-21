@@ -5,11 +5,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * 标签限定规则
+ * Html标签限定规则
  *
  * @author jianglei
  */
-public class TagLimitRule extends ValidationRule {
+public class HtmlTagLimitRule extends ValidationRule {
 
     private Set<String> allowed = new LinkedHashSet<>();
     private Set<String> forbidden = new LinkedHashSet<>();

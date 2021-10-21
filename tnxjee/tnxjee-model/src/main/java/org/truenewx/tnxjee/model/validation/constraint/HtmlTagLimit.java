@@ -5,20 +5,20 @@ import java.lang.annotation.*;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import org.truenewx.tnxjee.model.validation.constraint.validator.TagLimitValidator;
+import org.truenewx.tnxjee.model.validation.constraint.validator.HtmlTagLimitValidator;
 
 /**
- * 标签限定
+ * Html标签限定
  *
  * @author jianglei
  */
 @Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = TagLimitValidator.class)
-public @interface TagLimit {
+@Constraint(validatedBy = HtmlTagLimitValidator.class)
+public @interface HtmlTagLimit {
 
-    String DEFAULT_MESSAGE = "{org.truenewx.tnxjee.model.validation.constraint.TagLimit.message}";
+    String DEFAULT_MESSAGE = "{org.truenewx.tnxjee.model.validation.constraint.HtmlTagLimit.message}";
 
     /**
      * 允许的标签名称清单

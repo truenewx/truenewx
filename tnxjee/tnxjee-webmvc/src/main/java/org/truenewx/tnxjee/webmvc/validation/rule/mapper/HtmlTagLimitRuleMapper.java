@@ -8,19 +8,18 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.model.validation.rule.TagLimitRule;
+import org.truenewx.tnxjee.model.validation.rule.HtmlTagLimitRule;
 
 /**
- * 标签限定规则映射生成器
+ * Html标签限定规则映射生成器
  *
  * @author jianglei
- * @since JDK 1.8
  */
 @Component
-public class TagLimitRuleMapper implements ValidationRuleMapper<TagLimitRule> {
+public class HtmlTagLimitRuleMapper implements ValidationRuleMapper<HtmlTagLimitRule> {
 
     @Override
-    public Map<String, Object> toMap(TagLimitRule rule, Locale locale) {
+    public Map<String, Object> toMap(HtmlTagLimitRule rule, Locale locale) {
         Map<String, Object> result = new HashMap<>();
         Set<String> allowed = rule.getAllowed();
         Set<String> forbidden = rule.getForbidden();
