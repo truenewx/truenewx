@@ -131,6 +131,16 @@ public class Strings {
     public static final String INFINITY = "∞";
 
     /**
+     * 小于
+     */
+    public static final String LESS_THAN = "<";
+
+    /**
+     * 大于
+     */
+    public static final String GREATER_THAN = ">";
+
+    /**
      * 字符编码：UTF-8
      */
     public static final String ENCODING_UTF8 = "UTF-8";
