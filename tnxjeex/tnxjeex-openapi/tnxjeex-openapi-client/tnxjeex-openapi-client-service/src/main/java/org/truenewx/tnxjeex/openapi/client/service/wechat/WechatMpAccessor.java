@@ -4,11 +4,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
+import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjeex.openapi.client.model.wechat.WechatAppType;
 import org.truenewx.tnxjeex.openapi.client.model.wechat.WechatUser;
 
@@ -102,6 +104,58 @@ public abstract class WechatMpAccessor extends WechatPublicAppAccessSupport {
             scene.deleteCharAt(0); // 去掉首位的分号
         }
         return scene.toString();
+    }
+
+    /**
+     * 校验指定文本内容的合法性
+     *
+     * @param openId               用户OpenId（用户需在近两小时访问过当前公众号/小程序）
+     * @param text                 文本内容
+     * @param fieldCaptionSupplier 字段名称供应者
+     * @ 如果非法
+     */
+    public void validateTextLegality(String openId, String text, Supplier<String> fieldCaptionSupplier) {
+        if (StringUtils.isNotBlank(text)) {
+            String url = "/wxa/msg_sec_check?access_token=" + getAccessToken();
+            Map<String, Object> params = new HashMap<>();
+            if (StringUtils.isNotBlank(openId)) { // 提供了用户openId，则使用v2版本的接口
+                params.put("version", 2);
+                params.put("openid", openId);
+                params.put("scene", 3);
+            }
+            params.put("content", text);
+            Map<String, Object> result = post(url, params);
+            validateLegalityResult(result, fieldCaptionSupplier);
+        }
+    }
+
+    private void validateLegalityResult(Map<String, Object> result, Supplier<String> fieldCaptionSupplier) {
+        if (result != null) {
+            Integer errcode = (Integer) result.get("errcode");
+            if (errcode != null && errcode.intValue() == 87014) {
+                String fieldCaption = null;
+                if (fieldCaptionSupplier != null) {
+                    fieldCaption = fieldCaptionSupplier.get();
+                }
+                if (StringUtils.isBlank(fieldCaption)) {
+                    fieldCaption = Strings.EMPTY;
+                }
+                throw new BusinessException("error.openapi.client.illegal_content", fieldCaption);
+            }
+        }
+    }
+
+    /**
+     * 校验指定图片的合法性
+     *
+     * @param in                   图片输入流
+     * @param fieldCaptionSupplier 字段名称供应者
+     * @ 如果非法
+     */
+    public void validateImageLegality(InputStream in, String mimeType, Supplier<String> fieldCaptionSupplier) {
+        String url = "/wxa/img_sec_check?access_token=" + getAccessToken();
+        Map<String, Object> result = postFormData(url, in, mimeType);
+        validateLegalityResult(result, fieldCaptionSupplier);
     }
 
 }

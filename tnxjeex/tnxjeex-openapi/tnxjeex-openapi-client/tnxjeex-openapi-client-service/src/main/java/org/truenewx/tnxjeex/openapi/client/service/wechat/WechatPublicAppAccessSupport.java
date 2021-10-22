@@ -1,10 +1,8 @@
 package org.truenewx.tnxjeex.openapi.client.service.wechat;
 
-import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.Security;
 import java.util.*;
-import java.util.function.Supplier;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
-import org.truenewx.tnxjee.service.exception.BusinessException;
 
 /**
  * 微信公众平台（mp.weixin.qq.com）应用访问支持
@@ -126,55 +123,6 @@ public abstract class WechatPublicAppAccessSupport extends WechatAppAccessSuppor
         String s = "jsapi_ticket=" + getJsApiTicket() + "&noncestr=" + noncestr + "&timestamp="
                 + timestamp + "&url=" + url;
         return EncryptUtil.encryptBySha1(s);
-    }
-
-    /**
-     * 校验指定文本内容的合法性
-     *
-     * @param text                 文本内容
-     * @param fieldCaptionSupplier 字段名称供应者
-     * @throws BusinessException 如果非法
-     */
-    public void validateTextLegality(String text, Supplier<String> fieldCaptionSupplier)
-            throws BusinessException {
-        if (StringUtils.isNotBlank(text)) {
-            String url = "/wxa/msg_sec_check?access_token=" + getAccessToken();
-            Map<String, Object> params = new HashMap<>();
-            params.put("content", text);
-            Map<String, Object> result = post(url, params);
-            validateLegalityResult(result, fieldCaptionSupplier);
-        }
-    }
-
-    private void validateLegalityResult(Map<String, Object> result,
-            Supplier<String> fieldCaptionSupplier) throws BusinessException {
-        if (result != null) {
-            Integer errcode = (Integer) result.get("errcode");
-            if (errcode != null && errcode.intValue() == 87014) {
-                String fieldCaption = null;
-                if (fieldCaptionSupplier != null) {
-                    fieldCaption = fieldCaptionSupplier.get();
-                }
-                if (StringUtils.isBlank(fieldCaption)) {
-                    fieldCaption = Strings.EMPTY;
-                }
-                throw new BusinessException("error.openapi.client.illegal_content", fieldCaption);
-            }
-        }
-    }
-
-    /**
-     * 校验指定图片的合法性
-     *
-     * @param in                   图片输入流
-     * @param fieldCaptionSupplier 字段名称供应者
-     * @throws BusinessException 如果非法
-     */
-    public void validateImageLegality(InputStream in, String mimeType,
-            Supplier<String> fieldCaptionSupplier) throws BusinessException {
-        String url = "/wxa/img_sec_check?access_token=" + getAccessToken();
-        Map<String, Object> result = postFormData(url, in, mimeType);
-        validateLegalityResult(result, fieldCaptionSupplier);
     }
 
 }
