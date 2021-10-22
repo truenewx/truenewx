@@ -23,8 +23,8 @@ public class MarkRule extends ValidationRule {
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.annotationTypes.isEmpty();
+    public boolean isValid() {
+        return this.annotationTypes.size() > 0;
     }
 
 }

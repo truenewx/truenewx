@@ -35,7 +35,7 @@ public class HtmlTagLimitValidator implements ConstraintValidator<HtmlTagLimit, 
         if (StringUtils.isNotBlank(s) && s.contains(Strings.LESS_THAN) && s.contains(Strings.GREATER_THAN)) {
             s = s.trim();
             if (this.allowed.length == 0 && this.forbidden.length == 0) { // 限制所有标签
-                return !StringUtil.regexMatch(s, ".*<(?i)[a-z]+.*>.*");
+                return !StringUtil.regexMatch(s, "<[a-z]+[ ]*[/]?[ ]*>");
             }
             if (this.allowed.length > 0) { // 仅允许的标签，禁止其它标签
                 // 正则表达式写不出，只得用笨办法

@@ -45,8 +45,8 @@ public class RegexRule extends ValidationRule {
     }
 
     @Override
-    public boolean isEmpty() {
-        return StringUtils.isBlank(this.expression) && StringUtils.isBlank(this.message);
+    public boolean isValid() {
+        return StringUtils.isNotBlank(this.expression);
     }
 
 }

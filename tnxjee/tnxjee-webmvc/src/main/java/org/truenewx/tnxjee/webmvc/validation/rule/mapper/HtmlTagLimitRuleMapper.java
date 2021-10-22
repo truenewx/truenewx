@@ -24,13 +24,13 @@ public class HtmlTagLimitRuleMapper implements ValidationRuleMapper<HtmlTagLimit
         Set<String> allowed = rule.getAllowed();
         Set<String> forbidden = rule.getForbidden();
         if (allowed.isEmpty() && forbidden.isEmpty()) { // 不允许所有标签
-            result.put("rejectTags", Boolean.TRUE);
+            result.put("rejectHtmlTags", Boolean.TRUE);
         } else {
             if (allowed.size() > 0) { // 存在仅允许的标签
-                result.put("allowedTags", StringUtils.join(allowed, Strings.COMMA));
+                result.put("allowedHtmlTags", StringUtils.join(allowed, Strings.COMMA));
             }
             if (forbidden.size() > 0) { // 存在禁止的标签
-                result.put("forbiddenTags", StringUtils.join(forbidden, Strings.COMMA));
+                result.put("forbiddenHtmlTags", StringUtils.join(forbidden, Strings.COMMA));
             }
         }
         return result;

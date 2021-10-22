@@ -35,8 +35,8 @@ public class HtmlTagLimitRule extends ValidationRule {
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.allowed.isEmpty() && this.forbidden.isEmpty();
+    public boolean isValid() {
+        return true;
     }
 
 }

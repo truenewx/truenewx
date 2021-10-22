@@ -6,7 +6,7 @@ package org.truenewx.tnxjee.model.validation.rule;
  * @param <T> 值类型
  * @author jianglei
  */
-public abstract class RangeRule<T> extends ValidationRule {
+public abstract class RangeRule<T extends Comparable<T>> extends ValidationRule {
 
     private T min;
     private T max;
@@ -51,7 +51,7 @@ public abstract class RangeRule<T> extends ValidationRule {
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.min == null && this.max == null;
+    public boolean isValid() {
+        return this.min != null && this.max != null && this.min.compareTo(this.max) <= 0;
     }
 }

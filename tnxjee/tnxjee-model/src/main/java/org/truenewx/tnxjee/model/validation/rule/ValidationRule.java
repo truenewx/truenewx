@@ -19,10 +19,10 @@ public abstract class ValidationRule {
     }
 
     /**
-     * 判断当前规则是否为空
+     * 判断当前规则是否有效，无效规则将不会映射至前端
      *
-     * @return 当前规则是否为空
+     * @return 当前规则是否有效
      */
-    public abstract boolean isEmpty();
+    public abstract boolean isValid();
 
 }

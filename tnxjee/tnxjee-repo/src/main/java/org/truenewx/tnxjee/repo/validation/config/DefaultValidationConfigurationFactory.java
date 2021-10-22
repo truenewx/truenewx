@@ -171,7 +171,7 @@ public class DefaultValidationConfigurationFactory implements ValidationConfigur
                 ValidationRule rule = configuration.getRule(propertyName, ruleClass);
                 if (rule == null) {
                     rule = builder.create(annotation);
-                    if (rule != null && !rule.isEmpty()) {
+                    if (rule != null && rule.isValid()) {
                         configuration.addRule(propertyName, rule);
                     }
                 } else {

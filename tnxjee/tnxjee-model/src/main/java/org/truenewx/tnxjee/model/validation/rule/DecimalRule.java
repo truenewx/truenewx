@@ -47,8 +47,8 @@ public class DecimalRule extends RangeRule<BigDecimal> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return super.isEmpty() && this.precision == 0 && this.scale == 0;
+    public boolean isValid() {
+        return super.isValid() && this.precision > 0;
     }
 
 }

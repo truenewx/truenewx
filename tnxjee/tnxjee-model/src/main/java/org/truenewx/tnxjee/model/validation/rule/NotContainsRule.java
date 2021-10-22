@@ -56,8 +56,8 @@ public class NotContainsRule extends ValidationRule {
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.values.isEmpty() && !this.notContainsAngleBracket && !this.notContainsHtmlChars;
+    public boolean isValid() {
+        return this.values.size() > 0 || this.notContainsAngleBracket || this.notContainsHtmlChars;
     }
 
 }
