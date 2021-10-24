@@ -628,3 +628,11 @@ el-card {
 .el-tabs--border-card {
     box-shadow: none;
 }
+
+.el-checkbox {
+    margin-right: 1.5rem;
+}
+
+.el-checkbox__label {
+    padding-left: 0.5rem;
+}

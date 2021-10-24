@@ -1,5 +1,5 @@
 <template>
-    <el-form :id="id" :inline="true" :model="params" :class="theme ? ('theme-' + theme) : null">
+    <el-form :id="id" :inline="inline" :model="params" :class="theme ? ('theme-' + theme) : null">
         <slot></slot>
         <el-form-item v-if="queryText || clearText">
             <el-button :type="theme || 'primary'" icon="el-icon-search" @click="toQuery" :plain="plain"
@@ -20,26 +20,32 @@ export default {
         id: String,
         modelValue: {
             type: Object,
-            required: true,
+            default() {
+                return {};
+            },
         },
         theme: String,
         query: Function,
         queryText: {
             type: String,
-            default: () => '查询'
+            default: () => '查询',
         },
         clearText: {
             type: String,
-            default: () => '清空'
+            default: () => '清空',
         },
         clear: Function,
         plain: {
             type: Boolean,
-            default: () => true
+            default: () => true,
         },
         init: { // 是否初始化执行查询
             type: Boolean,
-            default: () => false
+            default: () => false,
+        },
+        inline: {
+            type: Boolean,
+            default: () => true,
         }
     },
     emits: ['update:modelValue'],

@@ -14,6 +14,7 @@
         <OfficeBuilding v-else-if="type === 'OfficeBuilding'"/>
         <Plus v-else-if="type === 'Plus'"/>
         <QuestionFilled v-else-if="type === 'QuestionFilled'"/>
+        <Search v-else-if="type === 'Search'"/>
         <Select v-else-if="type === 'Select'"/>
         <Setting v-else-if="type === 'Setting'"/>
         <Top v-else-if="type === 'Top'"/>
@@ -39,6 +40,7 @@ import {
     OfficeBuilding,
     Plus,
     QuestionFilled,
+    Search,
     Select,
     Setting,
     SuccessFilled,
@@ -63,6 +65,7 @@ const components = {
     OfficeBuilding,
     Plus,
     QuestionFilled,
+    Search,
     Select,
     Setting,
     SuccessFilled,

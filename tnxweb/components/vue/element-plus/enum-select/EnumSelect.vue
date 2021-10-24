@@ -25,7 +25,7 @@ export default {
     },
     props: {
         id: [Number, String],
-        modelValue: String,
+        modelValue: [String, Number, Boolean, Array],
         selector: String,
         type: {
             type: String,
