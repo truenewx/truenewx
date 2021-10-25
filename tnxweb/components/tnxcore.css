@@ -105,3 +105,13 @@ div[contenteditable][placeholder]:empty:before {
     position: relative;
     color: #C0C4CC;
 }
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -9,6 +9,7 @@
         <Close v-else-if="type === 'Close'"/>
         <CloseBold v-else-if="type === 'CloseBold'"/>
         <Edit v-else-if="type === 'Edit'"/>
+        <Folder v-else-if="type === 'Folder'"/>
         <HomeFilled v-else-if="type === 'HomeFilled'"/>
         <InfoFilled v-else-if="type === 'InfoFilled'"/>
         <OfficeBuilding v-else-if="type === 'OfficeBuilding'"/>
@@ -34,6 +35,7 @@ import {
     Close,
     CloseBold,
     Edit,
+    Folder,
     HomeFilled,
     InfoFilled,
     Loading,
@@ -59,6 +61,7 @@ const components = {
     Close,
     CloseBold,
     Edit,
+    Folder,
     HomeFilled,
     InfoFilled,
     Loading,
@@ -91,6 +94,8 @@ export default {
                     className += ' is-loading';
                 }
                 return className;
+            } else if (this.type === 'loading') {
+                return 'tnxel-icon-' + this.type + ' el-icon-loading';
             } else {
                 return this.type;
             }

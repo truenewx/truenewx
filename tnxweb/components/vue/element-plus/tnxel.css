@@ -603,6 +603,10 @@ el-card {
     padding: 1rem;
 }
 
+.el-empty {
+    --el-empty-padding: 0 0 2rem 0;
+}
+
 .el-empty__description {
     margin-top: 1rem;
 }
