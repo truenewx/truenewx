@@ -5,6 +5,7 @@
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
         <Bottom v-else-if="type === 'Bottom'"/>
         <CircleCheckFilled v-else-if="type === 'CircleCheckFilled'"/>
+        <CircleClose v-else-if="type === 'CircleClose'"/>
         <CircleCloseFilled v-else-if="type === 'CircleCloseFilled'"/>
         <Close v-else-if="type === 'Close'"/>
         <CloseBold v-else-if="type === 'CloseBold'"/>
@@ -31,6 +32,7 @@ import {
     ArrowRight,
     Bottom,
     CircleCheckFilled,
+    CircleClose,
     CircleCloseFilled,
     Close,
     CloseBold,
@@ -57,6 +59,7 @@ const components = {
     ArrowRight,
     Bottom,
     CircleCheckFilled,
+    CircleClose,
     CircleCloseFilled,
     Close,
     CloseBold,
@@ -85,6 +88,10 @@ export default {
         type: String,
         color: {},
         size: Number,
+        center: {
+            type: Boolean,
+            default: true,
+        }
     },
     computed: {
         className() {
@@ -92,6 +99,9 @@ export default {
                 let className = 'tnxel-icon-' + this.type;
                 if (this.type === 'Loading') {
                     className += ' is-loading';
+                }
+                if (this.center) {
+                    className += ' flex-center';
                 }
                 return className;
             } else if (this.type === 'loading') {

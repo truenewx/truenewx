@@ -604,11 +604,11 @@ el-card {
 }
 
 .el-empty {
-    --el-empty-padding: 0 0 2rem 0;
+    --el-empty-padding: 1rem 0;
 }
 
 .el-empty__description {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 }
 
 .el-popover__reference-wrapper {
@@ -639,4 +639,12 @@ el-card {
 
 .el-checkbox__label {
     padding-left: 0.5rem;
+}
+
+.el-divider__text {
+    padding: 0 0.5rem;
+}
+
+.el-divider__text.is-left {
+    left: 1rem;
 }
