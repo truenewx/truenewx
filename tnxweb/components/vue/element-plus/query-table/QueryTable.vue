@@ -4,7 +4,7 @@
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
-        <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged"/>
+        <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged && showPaged"/>
     </div>
 </template>
 
@@ -18,10 +18,8 @@ export default {
     name: 'TnxelQueryTable',
     props: {
         app: String,
-        url: {
-            type: String,
-            required: true,
-        },
+        url: String,
+        data: Object, // QueryResult
         modelValue: Object,
         size: String,
         border: {
@@ -29,6 +27,10 @@ export default {
             default: true,
         },
         stripe: {
+            type: Boolean,
+            default: true,
+        },
+        showPaged: {
             type: Boolean,
             default: true,
         },
@@ -41,9 +43,9 @@ export default {
     data() {
         return {
             params: this.getParams(this.modelValue),
-            records: null,
+            records: this.data ? this.data.records : null,
             querying: false,
-            paged: null,
+            paged: this.data ? this.data.paged : null,
         }
     },
     computed: {
