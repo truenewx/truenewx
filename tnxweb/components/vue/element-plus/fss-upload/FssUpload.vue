@@ -17,7 +17,7 @@ export default {
             type: String,
             required: true,
         },
-        scope: String,
+        scope: [Number, String],
         readOnly: {
             type: Boolean,
             default: () => false,

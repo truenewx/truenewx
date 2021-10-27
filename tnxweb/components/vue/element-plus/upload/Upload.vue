@@ -14,10 +14,10 @@
         :multiple="uploadLimit ? uploadLimit.number > 1 : false"
         :accept="uploadAccept">
         <template #default>
-            <tnxel-icon type="Plus"/>
+            <tnxel-icon type="Plus" :size="plusSize"/>
         </template>
         <template #file="{file}">
-            <div class="el-upload-list__panel" :data-file-id="getFileId(file)">
+            <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
                 <div v-else>
                     <i class="el-icon-document"></i> {{ file.name }}
@@ -137,6 +137,34 @@ export default {
         uploadFiles() {
             return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
         },
+        uploadSize() {
+            let width = this.width;
+            let height = this.height;
+            let uploadSize = undefined;
+            if (this.uploadLimit.sizes && this.uploadLimit.sizes.length) {
+                uploadSize = this.uploadLimit.sizes[0];
+            }
+            if (uploadSize) {
+                width = width || uploadSize.width;
+                height = height || uploadSize.height;
+            }
+            width = width || 128;
+            height = height || (this.uploadLimit.imageable ? 128 : 40);
+            return {width, height};
+        },
+        itemPanelStyle() {
+            let style = this.uploadSize;
+            style.width = window.tnx.util.string.getPixelString(style.width);
+            style.height = window.tnx.util.string.getPixelString(style.height);
+            return style;
+        },
+        plusSize() {
+            let width = this.uploadSize.width;
+            let height = this.uploadSize.height;
+            let plusSize = Math.floor(Math.min(width, height) / 3);
+            plusSize = Math.max(16, Math.min(plusSize, 32));
+            return plusSize;
+        },
     },
     watch: {
         uploadLimit() {
@@ -150,30 +178,14 @@ export default {
         render() {
             const $container = $('#' + this.id);
             // 初始化显示尺寸
-            let width = this.width;
-            let height = this.height;
-            let uploadSize = undefined;
-            if (this.uploadLimit.sizes && this.uploadLimit.sizes.length) {
-                uploadSize = this.uploadLimit.sizes[0];
-            }
-            if (uploadSize) {
-                width = width || uploadSize.width;
-                height = height || uploadSize.height;
-            }
-            width = width || 128;
-            height = height || (this.uploadLimit.imageable ? 128 : 40);
-            let plusSize = Math.floor(Math.min(width, height) / 3);
-            plusSize = Math.max(16, Math.min(plusSize, 32));
-
-            width = window.tnx.util.string.getPixelString(width);
-            height = window.tnx.util.string.getPixelString(height);
+            let width = this.uploadSize.width;
+            let height = this.uploadSize.height;
+            width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
+            height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
             const $upload = $('.el-upload', $container);
             $upload.css({
                 width: width,
                 height: height,
-            });
-            $('.tnxel-icon-Plus', $upload).css({
-                fontSize: plusSize + 'px'
             });
 
             this.hiddenContainer = false;
@@ -300,17 +312,12 @@ export default {
                     visibility: 'unset',
                 });
             }
-            const fileId = this.getFileId(file);
-            const $listItem = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container).parent();
-            let uploadStyle = $upload.attr('style');
-            if (uploadStyle) {
-                uploadStyle = uploadStyle.replace(/display:\s*none;/, '').replace(/visibility:\s*unset;/, ''); // 去掉隐藏样式
-                $listItem.attr('style', uploadStyle);
-            }
+
+            const $listItemContainer = $(".el-upload-list", $container);
             if (typeof this.width === 'string' && this.width.endsWith('%')) {
-                $listItem.parent().css({width: '100%'});
+                $listItemContainer.css({width: '100%'});
             }
-            $listItem.parent().css({'min-height': $upload.outerHeight(true)});
+            $listItemContainer.css({'min-height': $upload.outerHeight(true)});
         },
         _onSuccess: function(uploadedFile, file, fileList) {
             file.uploading = false;
@@ -405,6 +412,9 @@ export default {
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item {
     transition: none;
     border-radius: .25rem;
+    width: unset;
+    height: unset;
+    line-height: 0;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item.is-ready {
@@ -412,8 +422,6 @@ export default {
 }
 
 .tnxel-upload-container .el-upload-list__panel {
-    width: 100%;
-    height: 100%;
     display: inline-flex;
     align-items: center;
     justify-content: center;

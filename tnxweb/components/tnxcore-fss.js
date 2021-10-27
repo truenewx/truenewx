@@ -37,7 +37,7 @@ const fss = {
     getUploadUrl(type, scope) {
         let config = this.getClientConfig();
         let url = config.baseUrl + config.contextUrl + '/upload/' + type;
-        if (scope) {
+        if (scope !== undefined && scope !== null) {
             url += '/' + scope;
         }
         return url;
