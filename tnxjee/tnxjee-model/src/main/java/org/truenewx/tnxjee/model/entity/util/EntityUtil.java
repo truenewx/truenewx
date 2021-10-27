@@ -139,7 +139,7 @@ public class EntityUtil {
     }
 
     /**
-     * 将指定对象转换为类JSON格式，与JSON的差别在于以,作为首尾，而不是{}
+     * 将指定对象转换为类JSON格式，与JSON的差别在于以,作为首尾，而不是{}或[]
      *
      * @param bean              对象
      * @param ignoredProperties 忽略的属性名称集
@@ -147,8 +147,11 @@ public class EntityUtil {
      */
     public static String toJsonLike(Object bean, String... ignoredProperties) {
         String json = JsonUtil.toJson(bean, ignoredProperties);
-        if (json != null && json.startsWith(Strings.LEFT_BRACE) && json.endsWith(Strings.RIGHT_BRACE)) {
-            return Strings.COMMA + json.substring(1, json.length() - 1) + Strings.COMMA;
+        if (json != null) {
+            if ((json.startsWith(Strings.LEFT_BRACE) && json.endsWith(Strings.RIGHT_BRACE))
+                    || (json.startsWith(Strings.LEFT_SQUARE_BRACKET) && json.endsWith(Strings.RIGHT_SQUARE_BRACKET))) {
+                return Strings.COMMA + json.substring(1, json.length() - 1) + Strings.COMMA;
+            }
         }
         return json;
     }
@@ -156,7 +159,7 @@ public class EntityUtil {
     /**
      * 解析类JSON格式字符串为映射集
      *
-     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}
+     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}或[]
      * @return 映射集
      */
     public static Map<String, Object> parseJsonLike(String json) {
@@ -169,14 +172,19 @@ public class EntityUtil {
     /**
      * 解析类JSON格式字符串为指定类型的对象
      *
-     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}
+     * @param json 类JSON字符串，与JSON的差别在于以,作为首尾，而不是{}或[]
      * @param type 结果对象类型
      * @param <T>  结果对象类型
      * @return 结果对象
      */
     public static <T> T parseJsonLike(String json, Class<T> type) {
         if (json != null && json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
-            json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
+            if (type.isArray() || Collection.class.isAssignableFrom(type)) {
+                json = Strings.LEFT_SQUARE_BRACKET + json.substring(1,
+                        json.length() - 1) + Strings.RIGHT_SQUARE_BRACKET;
+            } else {
+                json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
+            }
         }
         return JsonUtil.json2Bean(json, type);
     }
