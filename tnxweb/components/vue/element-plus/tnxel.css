@@ -327,7 +327,7 @@
  * 垂直表单的字段错误
  */
 .el-form-item__error {
-    padding-top: 0.5rem;
+    padding-top: 2px;
 }
 
 /*
