@@ -90,7 +90,7 @@ export default {
         size: Number,
         center: {
             type: Boolean,
-            default: true,
+            default: false,
         }
     },
     computed: {
