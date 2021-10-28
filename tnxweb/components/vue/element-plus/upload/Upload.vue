@@ -153,10 +153,10 @@ export default {
             return {width, height};
         },
         itemPanelStyle() {
-            let style = this.uploadSize;
-            style.width = window.tnx.util.string.getPixelString(style.width);
-            style.height = window.tnx.util.string.getPixelString(style.height);
-            return style;
+            return {
+                width: window.tnx.util.string.getPixelString(this.uploadSize.width),
+                height: window.tnx.util.string.getPixelString(this.uploadSize.height),
+            };
         },
         plusSize() {
             let width = this.uploadSize.width;
@@ -171,33 +171,36 @@ export default {
             this.render();
         },
         fileList() {
-            this.render();
+            if (this.uploadLimit && this.uploadLimit.number !== undefined) {
+                this.render();
+            }
         }
     },
     methods: {
         render() {
-            const $container = $('#' + this.id);
-            // 初始化显示尺寸
-            let width = this.uploadSize.width;
-            let height = this.uploadSize.height;
-            width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
-            height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
-            const $upload = $('.el-upload', $container);
-            $upload.css({
-                width: width,
-                height: height,
-            });
+            let vm = this;
+            // 需在vue渲染之后才可正常操作dom元素
+            this.$nextTick(function() {
+                const $container = $('#' + vm.id);
+                // 初始化显示尺寸
+                let width = vm.uploadSize.width;
+                let height = vm.uploadSize.height;
+                width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
+                height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
+                const $upload = $('.el-upload', $container);
+                $upload.css({
+                    width: width,
+                    height: height,
+                });
 
-            this.hiddenContainer = false;
+                vm.hiddenContainer = false;
 
-            if (this.fileList && this.fileList.length) {
-                let vm = this;
-                this.$nextTick(function() {
+                if (vm.fileList && vm.fileList.length) {
                     for (let file of vm.fileList) {
                         vm._resizeFilePanel(file, vm.fileList);
                     }
-                });
-            }
+                }
+            });
         },
         getFileId: function(file) {
             if (!file.id) {
