@@ -311,7 +311,7 @@
 }
 
 .el-form-item__content .el-radio-group,
-.el-form-item__content .el-checkbox-group {
+.el-form-item__content .el-checkbox-group:not(.el-transfer-panel__list) {
     min-height: 40px;
     display: flex;
     align-items: center;
@@ -319,7 +319,7 @@
 }
 
 .el-form-item__content .el-radio-group .el-radio,
-.el-form-item__content .el-checkbox-group .el-checkbox {
+.el-form-item__content .el-checkbox-group:not(.el-transfer-panel__list) .el-checkbox {
     line-height: 40px;
 }
 
