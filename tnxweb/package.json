@@ -67,7 +67,8 @@
         }
       ],
       "no-undef": "warn",
-      "no-useless-escape": "warn"
+      "no-useless-escape": "warn",
+      "vue/no-v-model-argument": "off"
     }
   },
   "browserslist": [
