@@ -205,6 +205,7 @@
 
 .el-form--label-top .el-form-item__label {
     padding-bottom: 0;
+    margin-bottom: 0.25rem;
     line-height: 2rem;
 }
 
@@ -285,7 +286,7 @@
     flex-wrap: nowrap;
 }
 
-.mx-auto .el-form--label-top .el-form-item__content {
+.el-form--label-top .el-form-item__content {
     flex-wrap: wrap;
 }
 
@@ -350,6 +351,7 @@
     font-size: 0.75rem;
     line-height: 1;
     color: var(--el-text-color-secondary);
+    font-weight: normal;
 }
 
 div.form-item-tip {
@@ -371,7 +373,12 @@ span.form-item-tip {
     margin-bottom: 1rem;
 }
 
-.is-error .form-item-tip,
+.is-error .form-item-tip {
+    visibility: hidden;
+    height: 0;
+    margin-top: 6px; /* 与.el-form-item__error的上间距2px组合成8px的总间距 */
+}
+
 .is-success .el-form-item__error {
     display: none;
 }
