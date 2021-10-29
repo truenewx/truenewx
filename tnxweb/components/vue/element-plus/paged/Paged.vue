@@ -1,9 +1,11 @@
 <template>
-    <div class="d-flex"
+    <div class="tnxel-pagination-container"
         :class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}">
-        <el-pagination layout="total, sizes, prev, pager, next" :background="background" @current-change="change"
-            :page-size="value.pageSize || 0" :page-sizes="[value.pageSize || 0]" popper-class="d-none"
-            :current-page="value.pageNo" :total="value.total || 0" v-if="value"/>
+        <slot :paged="value" :change="change" :background="background">
+            <el-pagination layout="total, sizes, prev, pager, next" :background="background" @current-change="change"
+                v-model:page-size="model.pageSize" :page-sizes="[model.pageSize || 0]" popper-class="d-none"
+                v-model:current-page="model.pageNo" :total="model.total || 0" v-if="model"/>
+        </slot>
     </div>
 </template>
 
@@ -11,10 +13,7 @@
 export default {
     name: 'TnxelPaged',
     props: {
-        value: {
-            type: Object,
-            required: true,
-        },
+        value: Object,
         change: {
             type: Function
         },
@@ -24,5 +23,41 @@ export default {
         },
         align: String,
     },
+    data() {
+        return {
+            model: this.value,
+        }
+    },
+    watch: {
+        value() {
+            this.model = this.value;
+        }
+    }
 }
 </script>
+
+<style>
+.tnxel-pagination-container {
+    display: flex;
+    padding: 0.25rem 0.5rem;
+}
+
+.tnxel-pagination-container .el-pagination {
+    padding: 0;
+}
+
+.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-input__suffix {
+    display: none;
+}
+
+.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-select .el-input {
+    width: 66px;
+    margin: 0;
+}
+
+.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-select .el-input .el-input__inner {
+    border: none;
+    cursor: default;
+    padding: 0;
+}
+</style>

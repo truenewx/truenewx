@@ -585,21 +585,6 @@ el-card {
     line-height: 28px;
 }
 
-.el-pagination .el-pagination__sizes .el-input__suffix {
-    display: none;
-}
-
-.el-pagination .el-pagination__sizes .el-select .el-input {
-    width: 66px;
-    margin: 0;
-}
-
-.el-pagination .el-pagination__sizes .el-select .el-input .el-input__inner {
-    border: none;
-    cursor: default;
-    padding: 0;
-}
-
 .el-sub-menu .el-menu-item {
     min-width: unset;
 }
@@ -642,6 +627,14 @@ el-card {
 
 .el-tabs--border-card {
     box-shadow: none;
+}
+
+.el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+    color: var(--el-text-color-primary);
+}
+
+.el-tabs--border-card > .el-tabs__content {
+    padding: 1rem;
 }
 
 .el-checkbox {

@@ -4,7 +4,9 @@
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
-        <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged && showPaged"/>
+        <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="paged">
+            <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="showPaged"/>
+        </slot>
     </div>
 </template>
 
