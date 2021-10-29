@@ -42,9 +42,9 @@ public interface StateTransitAction<U extends Unity<K>, K extends Serializable, 
      *
      * @param userIdentity 用户标识
      * @param unity        单体
-     * @return 是否具有权限
+     * @return 是否具有数据操作权限
      */
-    boolean check(I userIdentity, U unity);
+    boolean isGranted(I userIdentity, U unity);
 
     /**
      * 指定用户对指定单体，在指定上下文情况时，执行动作

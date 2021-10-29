@@ -83,7 +83,7 @@ public abstract class AbstractStateMachine<U extends Unity<K>, K extends Seriali
         if (action == null) {
             throw new StateIntransitableException(state, transition);
         }
-        if (!action.check(userIdentity, unity)) {
+        if (!action.isGranted(userIdentity, unity)) {
             throw new NoDataOperateAuthorityException();
         }
         Object condition = getCondition(userIdentity, unity, context);
