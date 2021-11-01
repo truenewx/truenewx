@@ -417,7 +417,7 @@ export const StringUtil = {
 export const DateUtil = {
     patterns: DATE_PATTERNS,
     format(date, pattern) {
-        if (typeof date === 'number') {
+        if (typeof date === 'number' || typeof date === 'string') {
             date = new Date(date);
         }
         if (date instanceof Date) {
