@@ -121,3 +121,8 @@ div[contenteditable][placeholder]:empty:before {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

@@ -32,7 +32,7 @@
 }
 
 .bg-muted {
-    background-color: var(--el-border-color-lighter) !important;
+    background-color: var(--el-color-info-lighter) !important;
 }
 
 .border,
@@ -651,4 +651,8 @@ el-card {
 
 .el-divider__text.is-left {
     left: 1rem;
+}
+
+.el-icon {
+    font-size: unset;
 }

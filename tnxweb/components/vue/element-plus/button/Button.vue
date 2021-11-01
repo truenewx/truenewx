@@ -18,9 +18,10 @@
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
-        <el-button :type="type" :icon="icon" :disabled="disabled" :title="title" @click="clickButton" :size="size"
+        <el-button :type="type" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
             <template v-if="!hiddenCaption">
+                <tnxel-icon :type="icon"/>
                 <slot v-if="$slots.default"></slot>
                 <template v-else-if="menuItem">{{ menuItem.caption }}</template>
             </template>
@@ -29,8 +30,13 @@
 </template>
 
 <script>
+import Icon from '../icon/Icon';
+
 export default {
     name: 'TnxelButton',
+    components: {
+        'tnxel-icon': Icon,
+    },
     props: {
         menu: Object,
         path: String,
