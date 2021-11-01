@@ -1,5 +1,5 @@
 <template>
-    <el-icon :class="className" :size="size" :color="color">
+    <el-icon :class="className" :color="color" :style="style">
         <Loading v-if="type === 'Loading'"/>
         <ArrowDown v-else-if="type === 'ArrowDown'"/>
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
@@ -88,6 +88,8 @@ export default {
         type: String,
         color: {},
         size: Number,
+        width: [Number, String],
+        height: [Number, String],
         center: {
             type: Boolean,
             default: false,
@@ -109,6 +111,25 @@ export default {
             } else {
                 return this.type;
             }
+        },
+        style() {
+            let style = {};
+            if (this.size) {
+                style['font-size'] = this.size + 'px';
+            }
+            if (this.width) {
+                style.width = this.width;
+                if (typeof this.width === 'number') {
+                    style.width += 'px';
+                }
+            }
+            if (this.height) {
+                style.height = this.height;
+                if (typeof this.height === 'number') {
+                    style.height += 'px';
+                }
+            }
+            return style;
         }
     }
 }
