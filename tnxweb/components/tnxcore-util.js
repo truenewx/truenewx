@@ -787,6 +787,9 @@ export const DomUtil = {
         element.focus();
         return end;
     },
+    scrollToTop() {
+        window.document.body.scrollIntoView();
+    },
 }
 
 export const util = {
