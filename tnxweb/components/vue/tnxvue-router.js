@@ -5,18 +5,19 @@ import {FunctionUtil} from '../tnxcore-util';
 
 function addRoute(routes, superiorPath, item, fnImportPage) {
     if (item && item.path) {
+        let page = item.page || item.path.replace(/\/:[a-zA-Z0-9_]+/g, '');
         routes.push({
             path: item.path,
             meta: {
                 superiorPath: superiorPath,
+                page: page,
                 cache: {}, // 路由级缓存
                 isHistory() { // 通过setTimeout()方式调用才能确保获得正确结果
                     return this.historyFrom !== undefined;
                 }
             },
             component() {
-                let path = item.page || item.path.replace(/\/:[a-zA-Z0-9_]+/g, '');
-                return fnImportPage(path);
+                return fnImportPage(page);
             },
         });
     }
