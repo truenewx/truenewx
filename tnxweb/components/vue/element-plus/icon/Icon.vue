@@ -10,6 +10,8 @@
         <CircleCloseFilled v-else-if="type === 'CircleCloseFilled'"/>
         <Close v-else-if="type === 'Close'"/>
         <CloseBold v-else-if="type === 'CloseBold'"/>
+        <CopyDocument v-else-if="type === 'CopyDocument'"/>
+        <DocumentCopy v-else-if="type === 'DocumentCopy'"/>
         <Edit v-else-if="type === 'Edit'"/>
         <Folder v-else-if="type === 'Folder'"/>
         <HomeFilled v-else-if="type === 'HomeFilled'"/>
@@ -38,6 +40,8 @@ import {
     CircleCloseFilled,
     Close,
     CloseBold,
+    CopyDocument,
+    DocumentCopy,
     Edit,
     Folder,
     HomeFilled,
@@ -66,6 +70,8 @@ const components = {
     CircleCloseFilled,
     Close,
     CloseBold,
+    CopyDocument,
+    DocumentCopy,
     Edit,
     Folder,
     HomeFilled,
