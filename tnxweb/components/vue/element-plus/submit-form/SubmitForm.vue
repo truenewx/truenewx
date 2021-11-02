@@ -1,7 +1,8 @@
 <template>
-    <el-form :id="id" :label-position="vertical ? 'top' : 'right'" label-width="auto" ref="form" :model="model"
-        :rules="validationRules" :validate-on-rule-change="false" :inline-message="!vertical"
-        :disabled="disabled" :class="theme ? ('theme-' + theme) : null" status-icon>
+    <el-form ref="form" :id="id" label-width="auto" :label-position="vertical ? 'top' : 'right'"
+        :model="model" :rules="validationRules" :validate-on-rule-change="false"
+        :inline="inline" :inline-message="!vertical" :disabled="disabled"
+        :class="theme ? ('theme-' + theme) : null" status-icon>
         <slot></slot>
         <el-form-item class="w-100" :label-width="labelWidth" v-if="submit !== undefined && submit !== null">
             <el-button :type="theme || 'primary'" @click="toSubmit" v-if="submit !== false">
@@ -48,6 +49,10 @@ export default {
             default: '取消'
         },
         vertical: {
+            type: Boolean,
+            default: false
+        },
+        inline: {
             type: Boolean,
             default: false
         },
