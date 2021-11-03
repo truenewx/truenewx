@@ -29,6 +29,7 @@ import QueryForm from './query-form/QueryForm';
 import QueryTable from './query-table/QueryTable';
 import RegionCascader from './region-cascader/RegionCascader';
 import Select from './select/Select';
+import Slider from './slider/Slider';
 import StepsNav from './steps-nav/StepsNav';
 import SubmitForm from './submit-form/SubmitForm';
 import Tabs from './tabs/Tabs';
@@ -58,6 +59,7 @@ const components = Object.assign({}, tnxvue.components, {
     QueryTable,
     RegionCascader,
     Select,
+    Slider,
     StepsNav,
     SubmitForm,
     Tabs,
