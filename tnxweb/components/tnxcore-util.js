@@ -790,6 +790,10 @@ export const DomUtil = {
     scrollToTop() {
         window.document.body.scrollIntoView();
     },
+    scrollToBottom() {
+        let top = window.document.body.scrollHeight;
+        window.scroll({top: top, left: 0, behavior: 'smooth'});
+    },
 }
 
 export const util = {
