@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
+import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjeex.cas.client.userdetails.SimpleCasAssertionUserDetailsService;
 import org.truenewx.tnxjeex.cas.client.validation.CasJsonServiceTicketValidator;
@@ -15,11 +16,18 @@ import org.truenewx.tnxjeex.cas.client.web.servlet.CasClientLoginHandlerMapping;
 public class CasClientConfig {
 
     static {
-        SecurityUtil.DETAIL_FUNCTION = authentication -> {
+        SecurityUtil.GET_DETAIL_FUNCTION = authentication -> {
             if (authentication instanceof CasAuthenticationToken) {
                 return ((CasAuthenticationToken) authentication).getUserDetails();
             }
             return authentication.getDetails();
+        };
+        SecurityUtil.SET_DETAIL_CONSUMER = (token, userDetails) -> {
+            if (token instanceof CasAuthenticationToken) {
+                BeanUtil.setFieldValue(token, "userDetails", userDetails);
+            } else {
+                token.setDetails(userDetails);
+            }
         };
     }
 

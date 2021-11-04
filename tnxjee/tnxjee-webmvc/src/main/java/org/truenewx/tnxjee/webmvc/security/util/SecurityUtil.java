@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -21,9 +22,18 @@ import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
  */
 public class SecurityUtil {
 
-    public static Function<Authentication, Object> DETAIL_FUNCTION = Authentication::getDetails;
+    public static Function<Authentication, Object> GET_DETAIL_FUNCTION = Authentication::getDetails;
+    public static BiConsumer<AbstractAuthenticationToken, Object> SET_DETAIL_CONSUMER = AbstractAuthenticationToken::setDetails;
 
     private SecurityUtil() {
+    }
+
+    public static void setAuthorizedUserDetails(UserSpecificDetails<?> userDetails) {
+        Authentication authentication = getAuthentication();
+        if (authentication instanceof AbstractAuthenticationToken) {
+            AbstractAuthenticationToken token = (AbstractAuthenticationToken) authentication;
+            SET_DETAIL_CONSUMER.accept(token, userDetails);
+        }
     }
 
     /**
@@ -44,7 +54,7 @@ public class SecurityUtil {
     private static Object getAuthenticationDetails() {
         Authentication authentication = getAuthentication();
         if (authentication != null) {
-            return DETAIL_FUNCTION.apply(authentication);
+            return GET_DETAIL_FUNCTION.apply(authentication);
         }
         return null;
     }
