@@ -98,4 +98,12 @@ public class AliyunFssAccessor implements FssAccessor {
         }
     }
 
+    @Override
+    public void copy(String sourcePath, String targetPath) {
+        sourcePath = AliyunOssUtil.standardizePath(sourcePath);
+        targetPath = AliyunOssUtil.standardizePath(targetPath);
+        String bucketName = getBucketName();
+        this.account.getOssClient().copyObject(bucketName, sourcePath, bucketName, targetPath);
+    }
+
 }

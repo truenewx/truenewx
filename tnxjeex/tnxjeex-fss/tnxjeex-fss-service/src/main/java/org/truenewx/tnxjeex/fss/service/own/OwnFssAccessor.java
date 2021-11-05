@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
@@ -136,4 +137,12 @@ public class OwnFssAccessor implements FssAccessor {
             file.delete();
         }
     }
+
+    @Override
+    public void copy(String sourcePath, String targetPath) {
+        File sourceFile = getStorageFile(sourcePath);
+        File targetFile = getStorageFile(targetPath);
+        IOUtil.copyFile(sourceFile, targetFile);
+    }
+
 }

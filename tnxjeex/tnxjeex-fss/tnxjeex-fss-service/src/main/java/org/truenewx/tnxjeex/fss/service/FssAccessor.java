@@ -36,4 +36,6 @@ public interface FssAccessor {
     boolean read(String path, OutputStream out) throws IOException;
 
     void delete(String path);
+
+    void copy(String sourcePath, String targetPath);
 }

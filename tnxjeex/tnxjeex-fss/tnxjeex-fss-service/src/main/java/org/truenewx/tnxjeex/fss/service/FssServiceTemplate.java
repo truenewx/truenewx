@@ -66,20 +66,20 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * 获取指定文件的最后修改时间
      *
      * @param userIdentity 用户标识
-     * @param path         文件路径
+     * @param storageUrl   文件路径
      * @return 最后修改时间毫秒数，指定资源不存在时返回null
      */
-    Long getLastModifiedTime(I userIdentity, String path);
+    Long getLastModifiedTime(I userIdentity, String storageUrl);
 
     /**
      * 指定用户读取指定路径的文件内容到指定输出流中
      *
      * @param userIdentity 用户标识
-     * @param path         文件路径
+     * @param storageUrl   文件路径
      * @param out          输出流
      * @throws IOException 如果读的过程中出现错误
      */
-    void read(I userIdentity, String path, OutputStream out) throws IOException;
+    void read(I userIdentity, String storageUrl, OutputStream out) throws IOException;
 
     /**
      * 读取指定指定路径的文件内容为字符串，字符编码：UTF-8
@@ -100,7 +100,17 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * 删除指定文件
      *
      * @param userIdentity 用户标识
-     * @param storageUrl   文件存储路径
+     * @param storageUrl   文件存储地址
      */
     void delete(I userIdentity, String storageUrl);
+
+    /**
+     * 复制指定文件为新的业务范围所表示的文件，仅在存储文件名由业务范围决定时有效
+     *
+     * @param userIdentity 用户标识
+     * @param storageUrl   原文件存储地址
+     * @param newScope     新的业务范围
+     * @return 新文件的存储地址
+     */
+    String copy(I userIdentity, String storageUrl, String newScope);
 }
