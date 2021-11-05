@@ -30,7 +30,10 @@ export default {
             type: Boolean,
             default: () => true
         },
-        iconSize: [Number, String],
+        iconSize: {
+            type: [Number, String],
+            default: 14,
+        },
         titleSize: [Number, String],
         contentClass: String,
     },
