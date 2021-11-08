@@ -1,5 +1,5 @@
 <template>
-    <el-transfer v-model="selected" :data="selectable" :titles="titles"
+    <el-transfer class="tnxel-transfer" v-model="selected" :data="selectable" :titles="titles"
         :filterable="filterable" :filter-method="filter" :filter-placeholder="placeholder"/>
 </template>
 
@@ -95,3 +95,19 @@ export default {
     }
 }
 </script>
+
+<style>
+.tnxel-transfer {
+    display: flex;
+}
+
+.tnxel-transfer .el-transfer__buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tnxel-transfer .el-transfer__buttons .el-button + .el-button {
+    margin-left: 0;
+}
+</style>
