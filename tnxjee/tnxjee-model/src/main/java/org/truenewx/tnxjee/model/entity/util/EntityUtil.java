@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.model.entity.util;
 import java.io.Serializable;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.model.entity.unity.Unity;
@@ -163,7 +164,10 @@ public class EntityUtil {
      * @return 映射集
      */
     public static Map<String, Object> parseJsonLike(String json) {
-        if (json != null && json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        if (json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
             json = Strings.LEFT_BRACE + json.substring(1, json.length() - 1) + Strings.RIGHT_BRACE;
         }
         return JsonUtil.json2Map(json);
@@ -178,7 +182,10 @@ public class EntityUtil {
      * @return 结果对象
      */
     public static <T> T parseJsonLike(String json, Class<T> type) {
-        if (json != null && json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        if (json.startsWith(Strings.COMMA) && json.endsWith(Strings.COMMA)) {
             if (type.isArray() || Collection.class.isAssignableFrom(type)) {
                 json = Strings.LEFT_SQUARE_BRACKET + json.substring(1,
                         json.length() - 1) + Strings.RIGHT_SQUARE_BRACKET;
