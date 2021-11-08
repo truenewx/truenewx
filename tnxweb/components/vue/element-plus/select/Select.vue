@@ -94,10 +94,7 @@ export default {
         id: [Number, String],
         modelValue: [String, Number, Boolean, Array],
         selector: String,
-        items: {
-            type: Array,
-            required: true,
-        },
+        items: Array,
         valueName: {
             type: String,
             default: 'value',
