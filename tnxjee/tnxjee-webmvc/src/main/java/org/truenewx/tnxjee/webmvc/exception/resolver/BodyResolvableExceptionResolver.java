@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.truenewx.tnxjee.service.exception.*;
+import org.truenewx.tnxjee.web.context.SpringWebContext;
+import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 
 /**
@@ -23,7 +25,8 @@ public class BodyResolvableExceptionResolver extends ResolvableExceptionResolver
 
     @Override
     protected boolean supports(HandlerMethod handlerMethod) {
-        return SpringWebMvcUtil.isResponseBody(handlerMethod);
+        HttpServletRequest request = SpringWebContext.getRequest();
+        return (request != null && WebUtil.isAjaxRequest(request)) || SpringWebMvcUtil.isResponseBody(handlerMethod);
     }
 
     @Override
