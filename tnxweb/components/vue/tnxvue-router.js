@@ -120,11 +120,10 @@ export default function(VueRouter, menu, fnImportPage) {
         }
     });
     router.afterEach(function(to, from) {
-        // 前后路径相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
-        if (to.path === from.path && to.fullPath !== from.fullPath) {
+        router.prev = from;
+        // 前后页面相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
+        if (to.meta.page === from.meta.page && to.fullPath !== from.fullPath) {
             window.location.reload();
-        } else {
-            router.prev = from;
         }
     });
     router.back = FunctionUtil.around(router.back, function(back, path) {
