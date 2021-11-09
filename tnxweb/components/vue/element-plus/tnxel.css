@@ -656,3 +656,7 @@ el-card {
 .el-icon {
     font-size: unset;
 }
+
+.el-input-group__append, .el-input-group__prepend {
+    padding: 0 1rem;
+}
