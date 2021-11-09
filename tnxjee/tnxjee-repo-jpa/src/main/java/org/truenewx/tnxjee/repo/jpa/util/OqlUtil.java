@@ -251,4 +251,11 @@ public class OqlUtil {
             ql.append(QlConstants.JUNCTION_AND).append(condition);
         }
     }
+
+    public static void appendAndCondition(StringBuffer ql, String condition) {
+        if (StringUtils.isNotBlank(condition)) {
+            ql.append(QlConstants.JUNCTION_AND).append(condition);
+        }
+    }
+
 }
