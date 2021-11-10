@@ -176,6 +176,8 @@ export default {
                                     }
                                 });
                                 return false;
+                            } else {
+                                vm._onUpdated(index, model, close);
                             }
                         }
                     }
