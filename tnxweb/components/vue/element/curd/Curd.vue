@@ -116,10 +116,10 @@ export default {
                                     vm._onAdded(model, close);
                                 }
                             });
+                            return false;
                         } else {
                             vm._onAdded(model, close);
                         }
-                        return false;
                     }
                 }
             });
