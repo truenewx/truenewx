@@ -118,6 +118,8 @@ export default {
                                 }
                             });
                             return false;
+                        } else {
+                            vm._onAdded(model, close);
                         }
                     }
                 }
@@ -175,6 +177,8 @@ export default {
                                     }
                                 });
                                 return false;
+                            } else {
+                                vm._onUpdated(index, model, close);
                             }
                         }
                     }
