@@ -377,18 +377,18 @@ export const StringUtil = {
     },
     idCard(idCardNo) {
         let birthday;
-        let male;
+        let gender;
         if (idCardNo.length === 15) { // 15位身份证号码
             birthday = '19' + idCardNo.substr(6, 6);
-            male = idCardNo.substr(14, 1);
+            gender = idCardNo.substr(14, 1);
         } else {
             birthday = idCardNo.substr(6, 8);
-            male = idCardNo.substr(16, 1);
+            gender = idCardNo.substr(16, 1);
         }
         birthday = birthday.substr(0, 4) + '-' + birthday.substr(4, 2) + '-' + birthday.substr(6, 2);
         return {
             birthday: birthday,
-            male: male === '1',
+            male: parseInt(gender) % 2 === 1, // 奇：男，偶：女
             serialNo: idCardNo
         };
     },
