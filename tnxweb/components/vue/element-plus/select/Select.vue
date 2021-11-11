@@ -11,14 +11,16 @@
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
+            <el-button type="text" class="btn-empty" :class="emptyClass" v-if="emptyText" @click="clear">
+                {{ emptyText }}
+            </el-button>
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
                 :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" @click="select(item[valueName])">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
             </el-tag>
             <template v-if="items.length === 0">
-                <slot name="empty" v-if="$slots.empty"></slot>
-                <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+                <slot name="empty"></slot>
             </template>
         </template>
         <i class="el-icon-loading" v-else/>
@@ -201,7 +203,8 @@ export default {
                     model = [];
                 }
                 return model;
-            } else if (items && items.length) {
+            }
+            if (items && items.length) {
                 let item = this.getItem(this.modelValue);
                 if (item) {
                     return item[this.valueName];
@@ -214,7 +217,7 @@ export default {
                     }
                 }
             }
-            return null;
+            return model;
         },
         filter(keyword) {
             for (let item of this.items) {
@@ -266,6 +269,36 @@ export default {
                 this.model = value;
             }
         },
+        clear() {
+            if (this.isMulti()) {
+                this.model = [];
+            } else {
+                this.model = null;
+            }
+        },
     }
 }
 </script>
+
+<style>
+.tnxel-tag-group .btn-empty {
+    padding: 0;
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+}
+
+.tnxel-tag-group .btn-empty .el-button__text--expand {
+    letter-spacing: unset;
+    margin-right: unset;
+}
+
+.tnxel-tag-group .el-tag {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.tnxel-tag-group .el-tag:not(:last-child) {
+    margin-right: 10px;
+}
+</style>

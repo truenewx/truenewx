@@ -557,16 +557,6 @@ el-card {
     width: 210px;
 }
 
-.tnxel-tag-group .el-tag {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    cursor: pointer;
-}
-
-.tnxel-tag-group .el-tag:not(:last-child) {
-    margin-right: 10px;
-}
-
 .tnxel-table_tags.el-table__cell {
     padding-top: 10px;
     padding-bottom: 10px;
