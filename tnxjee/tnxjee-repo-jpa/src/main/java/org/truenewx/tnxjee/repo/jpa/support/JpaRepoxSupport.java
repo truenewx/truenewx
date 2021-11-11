@@ -57,34 +57,45 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         getAccessTemplate().refresh(entity);
     }
 
-    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, QueryIgnoring ignoring,
+    protected <E> QueryResult<E> query(CharSequence recordQl, CharSequence totalQl, Map<String, Object> params,
             int pageSize, int pageNo, List<FieldOrder> orders) {
         Long total = null;
-        if (pageSize > 0 && ignoring != QueryIgnoring.TOTAL) { // 需分页查询且不忽略总数时，才获取总数
-            String countQl = ql.toString();
-            countQl = "select count(*) " + countQl.substring(countQl.indexOf("from "));
-            total = getAccessTemplate().count(countQl, params);
+        if (pageSize > 0 && totalQl != null) {
+            total = getAccessTemplate().count(totalQl, params);
         }
 
         List<E> records;
         // 已知总数为0或无需查询记录清单，则不查询记录清单
-        if ((total != null && total == 0) || ignoring == QueryIgnoring.RECORD) {
+        if ((total != null && total == 0) || recordQl == null) {
             records = new ArrayList<>();
         } else {
             String orderString = OqlUtil.buildOrderString(orders);
             if (StringUtils.isNotBlank(orderString)) {
-                if (ql instanceof StringBuffer) {
-                    ((StringBuffer) ql).append(orderString);
+                if (recordQl instanceof StringBuffer) {
+                    ((StringBuffer) recordQl).append(orderString);
                 } else {
-                    ql = ql.toString() + orderString;
+                    recordQl = recordQl + orderString;
                 }
             }
-            records = getAccessTemplate().list(ql, params, pageSize, pageNo);
+            records = getAccessTemplate().list(recordQl, params, pageSize, pageNo);
             if (pageSize <= 0) { // 非分页查询，总数为结果记录条数
                 total = (long) records.size();
             }
         }
         return QueryResult.of(records, pageSize, pageNo, total, orders);
+    }
+
+    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, QueryIgnoring ignoring,
+            int pageSize, int pageNo, List<FieldOrder> orders) {
+        String totalQl = null;
+        if (pageSize > 0 && ignoring != QueryIgnoring.TOTAL) {
+            totalQl = ql.toString();
+            totalQl = "select count(*) " + totalQl.substring(totalQl.indexOf("from "));
+        }
+        if (ignoring == QueryIgnoring.RECORD) {
+            ql = null;
+        }
+        return query(ql, totalQl, params, pageSize, pageNo, orders);
     }
 
     protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, Paging paging) {
@@ -103,7 +114,7 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return getAccessTemplate().getTableName(getEntityName());
     }
 
-    private final PersistentClass getPersistentClass() {
+    private PersistentClass getPersistentClass() {
         return getAccessTemplate().getPersistentClass(getEntityName());
     }
 

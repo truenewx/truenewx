@@ -101,4 +101,26 @@ public class Pagination implements Serializable {
         return this.orders == null || this.orders.isEmpty();
     }
 
+    public void changeOrderFieldName(String oldFieldName, String newFieldName) {
+        if (this.orders != null) {
+            for (FieldOrder order : this.orders) {
+                if (order.getName().equals(oldFieldName)) {
+                    order.setName(newFieldName);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void prependOrderFieldNamePrefix(String prefix) {
+        if (this.orders != null) {
+            for (FieldOrder order : this.orders) {
+                String name = order.getName();
+                if (!name.startsWith(prefix)) {
+                    order.setName(prefix + name);
+                }
+            }
+        }
+    }
+
 }
