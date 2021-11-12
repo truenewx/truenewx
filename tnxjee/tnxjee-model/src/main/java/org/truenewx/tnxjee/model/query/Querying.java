@@ -10,6 +10,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.model.annotation.RequestParamIgnore;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 /**
  * 分页查询条件。通过创建子类附带更多的查询条件
@@ -57,7 +58,7 @@ public class Querying extends Pagination implements QueryModel, Paging {
     public void setOrderBy(String orderBy) {
         setOrders(null);
         if (StringUtils.isNotBlank(orderBy)) {
-            String[] orders = orderBy.split(Strings.COMMA);
+            String[] orders = UriEncoder.decode(orderBy).split(Strings.COMMA);
             for (String order : orders) {
                 FieldOrder fieldOrder = FieldOrder.of(order);
                 if (fieldOrder != null) {
