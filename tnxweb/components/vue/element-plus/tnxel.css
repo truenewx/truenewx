@@ -298,6 +298,7 @@
     margin: 0.75rem 0 0 0;
 }
 
+.new-error-line .el-form-item__content,
 .el-form-item__content + .new-error-line {
     flex-wrap: wrap;
 }
@@ -361,6 +362,7 @@ div.form-item-tip {
 
 div.form-item-tip + .el-form-item__error {
     position: relative;
+    top: 0;
 }
 
 span.form-item-tip {
@@ -376,6 +378,10 @@ span.form-item-tip {
 .is-error .form-item-tip {
     visibility: hidden;
     height: 0;
+    margin-top: 4px; /* 与.el-form-item__error的上下各间距2px组合成8px的总间距以控制总行高 */
+}
+
+.el-form--label-top .is-error .form-item-tip {
     margin-top: 6px; /* 与.el-form-item__error的上间距2px组合成8px的总间距 */
 }
 
