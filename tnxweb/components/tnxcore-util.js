@@ -641,20 +641,22 @@ export const NetUtil = {
         if (typeof object === 'object') {
             Object.keys(object).forEach(key => {
                 let value = object[key];
-                switch (typeof value) {
-                    case 'function':
-                        value = value();
-                        break;
-                    case 'object':
-                        if (typeof value.toString === 'function') {
-                            value = value.toString();
-                        } else {
-                            value = null;
-                        }
-                        break;
-                }
                 if (value) {
-                    s += '&' + key + '=' + value;
+                    switch (typeof value) {
+                        case 'function':
+                            value = value();
+                            break;
+                        case 'object':
+                            if (typeof value.toString === 'function') {
+                                value = value.toString();
+                            } else {
+                                value = null;
+                            }
+                            break;
+                    }
+                    if (value) {
+                        s += '&' + key + '=' + value;
+                    }
                 }
             });
             if (s.length) { // 去掉头部多余的&
