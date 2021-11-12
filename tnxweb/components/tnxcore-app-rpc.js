@@ -129,15 +129,6 @@ export default {
             data: options.body,
         };
         if (config.params) {
-            Object.keys(config.params).forEach(key => {
-                let value = config.params[key];
-                if (value === undefined || value === null) {
-                    delete config.params[key];
-                } else {
-                    value = encodeURIComponent(value + '');
-                    config.params[key] = value; // 参数值都转换为字符串，以避免参数传递错误
-                }
-            });
             config.paramsSerializer = function(params) {
                 return util.net.toParameterString(params);
             };

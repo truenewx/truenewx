@@ -586,6 +586,7 @@ export const NetUtil = {
         let index = href.indexOf('?');
         if (index >= 0) {
             let parameterString = href.substr(index + 1);
+            parameterString = decodeURIComponent(parameterString);
             index = parameterString.indexOf('#');
             if (index >= 0) {
                 parameterString = parameterString.substr(0, index);
@@ -605,7 +606,9 @@ export const NetUtil = {
                     let paramName = parameter.substr(0, index);
                     let paramValue = parameter.substr(index + 1);
                     if (params[paramName]) {
-                        params[paramName] = [params[paramName]];
+                        if (!Array.isArray(params[paramName])) {
+                            params[paramName] = [params[paramName]];
+                        }
                         params[paramName].push(paramValue);
                     } else {
                         params[paramName] = paramValue;
@@ -618,15 +621,21 @@ export const NetUtil = {
     getParamValue(name) {
         let parameterString = this.getParameterString();
         if (parameterString) {
+            let value = [];
             let array = parameterString.split('&');
             for (let parameter of array) {
                 let index = parameter.indexOf('=');
                 if (index > 0) {
                     let paramName = parameter.substr(0, index);
                     if (paramName === name) {
-                        return parameter.substr(index + 1);
+                        value.push(parameter.substr(index + 1));
                     }
                 }
+            }
+            if (value.length === 1) {
+                return value[0];
+            } else if (value.length > 1) {
+                return value;
             }
         }
         return undefined;
@@ -642,20 +651,30 @@ export const NetUtil = {
             Object.keys(object).forEach(key => {
                 let value = object[key];
                 if (value) {
-                    switch (typeof value) {
-                        case 'function':
-                            value = value();
-                            break;
-                        case 'object':
-                            if (typeof value.toString === 'function') {
-                                value = value.toString();
-                            } else {
-                                value = null;
-                            }
-                            break;
+                    let toKeyValueString = function(key, value) {
+                        switch (typeof value) {
+                            case 'function':
+                                value = value();
+                                break;
+                            case 'object':
+                                if (typeof value.toString === 'function') {
+                                    value = value.toString();
+                                } else {
+                                    value = null;
+                                }
+                                break;
+                        }
+                        if (value) {
+                            return '&' + key + '=' + encodeURIComponent(value);
+                        }
+                        return '';
                     }
-                    if (value) {
-                        s += '&' + key + '=' + value;
+                    if (Array.isArray(value)) {
+                        for (let v of value) {
+                            s += toKeyValueString(key, v);
+                        }
+                    } else {
+                        s += toKeyValueString(key, value);
                     }
                 }
             });
