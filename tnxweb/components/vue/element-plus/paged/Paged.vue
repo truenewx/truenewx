@@ -39,7 +39,7 @@ export default {
 <style>
 .tnxel-pagination-container {
     display: flex;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0;
 }
 
 .tnxel-pagination-container .el-pagination {
