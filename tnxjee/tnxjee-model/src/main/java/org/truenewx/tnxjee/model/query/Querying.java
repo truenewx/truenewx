@@ -1,16 +1,17 @@
 package org.truenewx.tnxjee.model.query;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.BeanUtil;
+import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.model.annotation.RequestParamIgnore;
-import org.yaml.snakeyaml.util.UriEncoder;
 
 /**
  * 分页查询条件。通过创建子类附带更多的查询条件
@@ -58,7 +59,7 @@ public class Querying extends Pagination implements QueryModel, Paging {
     public void setOrderBy(String orderBy) {
         setOrders(null);
         if (StringUtils.isNotBlank(orderBy)) {
-            String[] orders = UriEncoder.decode(orderBy).split(Strings.COMMA);
+            String[] orders = decode(orderBy).split(Strings.COMMA);
             for (String order : orders) {
                 FieldOrder fieldOrder = FieldOrder.of(order);
                 if (fieldOrder != null) {
@@ -66,6 +67,10 @@ public class Querying extends Pagination implements QueryModel, Paging {
                 }
             }
         }
+    }
+
+    private String decode(String s) {
+        return URLDecoder.decode(s, StandardCharsets.UTF_8);
     }
 
     public String getOrderBy() {
@@ -96,6 +101,58 @@ public class Querying extends Pagination implements QueryModel, Paging {
             }
         }
         return orderBy.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void decodeParamValue(String... ignoredParamNames) {
+        ClassUtil.loopDynamicFields(getClass(), field -> {
+            if (!ArrayUtils.contains(ignoredParamNames, field.getName())) {
+                Class<?> fieldType = field.getType();
+                if (fieldType == String.class) {
+                    String value = (String) BeanUtil.getFieldValue(this, field);
+                    if (StringUtils.isNotBlank(value)) {
+                        String decodedValue = decode(value);
+                        if (!value.equals(decodedValue)) {
+                            BeanUtil.setFieldValue(this, field, decodedValue);
+                        }
+                    }
+                } else if (fieldType.isArray() && fieldType.getComponentType() == String.class) {
+                    String[] array = (String[]) BeanUtil.getFieldValue(this, field);
+                    if (array != null) {
+                        for (int i = 0; i < array.length; i++) {
+                            String value = array[i];
+                            array[i] = decode(value);
+                        }
+                    }
+                } else if (Collection.class.isAssignableFrom(fieldType)) {
+                    Collection<Object> collection = (Collection<Object>) BeanUtil.getFieldValue(this, field);
+                    if (collection instanceof List) {
+                        List<Object> list = (List<Object>) collection;
+                        for (int i = 0; i < list.size(); i++) {
+                            Object obj = list.get(i);
+                            if (obj instanceof String) {
+                                list.set(i, decode((String) obj));
+                            }
+                        }
+                    } else {
+                        List<Object> decodedList = new ArrayList<>();
+                        Iterator<Object> iterator = collection.iterator();
+                        while (iterator.hasNext()) {
+                            Object obj = iterator.next();
+                            if (obj instanceof String) {
+                                String decodedValue = decode((String) obj);
+                                if (!obj.equals(decodedValue)) {
+                                    iterator.remove();
+                                    decodedList.add(decodedValue);
+                                }
+                            }
+                        }
+                        collection.addAll(decodedList);
+                    }
+                }
+            }
+            return true;
+        });
     }
 
 }
