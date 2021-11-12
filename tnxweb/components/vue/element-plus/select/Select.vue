@@ -11,7 +11,7 @@
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
-            <el-button type="text" class="btn-empty" :class="emptyClass" v-if="emptyText" @click="clear">
+            <el-button type="text" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
             </el-button>
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
@@ -19,6 +19,22 @@
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
             </el-tag>
+            <template v-if="items.length === 0">
+                <slot name="empty"></slot>
+            </template>
+        </template>
+        <i class="el-icon-loading" v-else/>
+    </div>
+    <div class="tnxel-text-button-group d-flex flex-wrap" v-else-if="selector === 'text' || selector === 'texts'">
+        <template v-if="items">
+            <el-button type="text" :class="emptyClass" v-if="emptyText" @click="clear">
+                {{ emptyText }}
+            </el-button>
+            <el-button v-for="item in items" :key="item[valueName]" :type="isSelected(item[valueName]) ? '' : 'text'"
+                :size="size" plain @click="select(item[valueName], $event)">
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
+            </el-button>
             <template v-if="items.length === 0">
                 <slot name="empty"></slot>
             </template>
@@ -85,7 +101,7 @@
 import Icon from '../icon/Icon';
 
 export const isMultiSelector = function(selector) {
-    return selector === 'checkbox' || selector === 'tags';
+    return selector === 'checkbox' || selector === 'tags' || selector === 'texts';
 }
 export default {
     name: 'TnxelSelect',
@@ -131,6 +147,7 @@ export default {
         theme: String,
         size: String,
     },
+    emits: ['update:modelValue'],
     data() {
         let model = this.getModel(this.items);
         if (model !== this.modelValue) {
@@ -153,7 +170,11 @@ export default {
     watch: {
         model(value) {
             this.$emit('update:modelValue', value);
-            this.triggerChange(value);
+            let vm = this;
+            // 确保变更事件在值变更应用后再触发
+            this.$nextTick(function() {
+                vm.triggerChange(value);
+            })
         },
         modelValue(value) {
             this.model = this.getModel(this.items);
@@ -249,7 +270,7 @@ export default {
                 return this.model === value;
             }
         },
-        select(value) {
+        select(value, event) {
             if (this.tagClick) {
                 let item = this.getItem(value);
                 if (item) {
@@ -261,12 +282,17 @@ export default {
             if (this.isMulti()) {
                 let index = this.model.indexOf(value);
                 if (index >= 0) {
-                    this.model.splice(index, 1);
+                    this.model = this.model.filter(function(e, i) {
+                        return i !== index;
+                    });
                 } else {
-                    this.model.push(value);
+                    this.model = this.model.concat([value]);
                 }
             } else {
                 this.model = value;
+            }
+            if (event) {
+                event.currentTarget.blur();
             }
         },
         clear() {
@@ -281,17 +307,6 @@ export default {
 </script>
 
 <style>
-.tnxel-tag-group .btn-empty {
-    padding: 0;
-    margin-left: 0.75rem;
-    margin-right: 0.75rem;
-}
-
-.tnxel-tag-group .btn-empty .el-button__text--expand {
-    letter-spacing: unset;
-    margin-right: unset;
-}
-
 .tnxel-tag-group .el-tag {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -300,5 +315,32 @@ export default {
 
 .tnxel-tag-group .el-tag:not(:last-child) {
     margin-right: 10px;
+}
+
+.tnxel-tag-group .el-button,
+.tnxel-text-button-group .el-button {
+    padding: 0.5rem 0.75rem;
+}
+
+.tnxel-tag-group .el-button__text--expand,
+.tnxel-text-button-group .el-button__text--expand {
+    letter-spacing: unset;
+    margin-right: unset;
+}
+
+.tnxel-tag-group .el-button--text,
+.tnxel-text-button-group .el-button--text {
+    color: unset;
+}
+
+.tnxel-tag-group .el-button--text:hover,
+.tnxel-text-button-group .el-button--text:hover {
+    color: var(--el-color-primary);
+    border-color: transparent;
+}
+
+.tnxel-text-button-group .el-button--default {
+    border-color: var(--el-color-primary);
+    color: var(--el-color-primary);
 }
 </style>
