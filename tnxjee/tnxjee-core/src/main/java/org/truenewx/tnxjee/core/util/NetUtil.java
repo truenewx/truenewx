@@ -3,8 +3,6 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +14,10 @@ import org.truenewx.tnxjee.core.Strings;
  * @author jianglei
  */
 public class NetUtil {
+
+    public static final String LOCAL_HOST_NAME = "localhost";
+    public static final String LOCAL_IP_V4 = "127.0.0.1";
+    public static final String LOCAL_IP_V6 = "0:0:0:0:0:0:0:1";
 
     private NetUtil() {
     }
@@ -30,19 +32,19 @@ public class NetUtil {
         if (StringUtil.isIp(host)) {
             return host;
         }
-        String s = "";
+        StringBuilder s = new StringBuilder();
         try {
             InetAddress address = InetAddress.getByName(host);
             for (byte b : address.getAddress()) {
-                s += (b & 0xff) + ".";
+                s.append(b & 0xff).append(Strings.DOT);
             }
             if (s.length() > 0) {
-                s = s.substring(0, s.length() - 1);
+                s = new StringBuilder(s.substring(0, s.length() - 1));
             }
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e);
         }
-        return s;
+        return s.toString();
     }
 
     /**
@@ -58,7 +60,7 @@ public class NetUtil {
                 Enumeration<InetAddress> ias = ni.getInetAddresses();
                 while (ias.hasMoreElements()) {
                     String ip = ias.nextElement().getHostAddress();
-                    if (NetUtil.isIntranetIp(ip) && !"127.0.0.1".equals(ip)) {
+                    if (NetUtil.isIntranetIp(ip) && !LOCAL_IP_V4.equals(ip)) {
                         return ip;
                     }
                 }
@@ -66,28 +68,7 @@ public class NetUtil {
         } catch (SocketException e) {
             LogUtil.error(NetUtil.class, e);
         }
-        return "127.0.0.1";
-    }
-
-    /**
-     * 获取本机的公网ip，耗时约为700ms
-     *
-     * @return 本机的公网ip
-     */
-    public static String getLocalPublicIp() {
-        String content = null;
-        try {
-            URL url = new URL("http://ip.chinaz.com");
-            content = IOUtils.toString(url, Strings.ENCODING_UTF8);
-            Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
-            Matcher matcher = pattern.matcher(content);
-            if (matcher.find()) {
-                return matcher.group(1);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return LOCAL_IP_V4;
     }
 
     /**
@@ -102,7 +83,7 @@ public class NetUtil {
             if (address instanceof Inet4Address) {
                 return (Inet4Address) address;
             }
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException ignored) {
         }
         return null;
     }
@@ -144,7 +125,7 @@ public class NetUtil {
      * @return 指定主机地址是否本机地址
      */
     public static boolean isLocalHost(String host) {
-        return "localhost".equals(host) || "127.0.0.1".equals(host) || "0:0:0:0:0:0:0:1".equals(host);
+        return LOCAL_HOST_NAME.equals(host) || LOCAL_IP_V4.equals(host) || LOCAL_IP_V6.equals(host);
     }
 
     /**
@@ -402,11 +383,13 @@ public class NetUtil {
                 } catch (IOException e) {
                     LogUtil.error(NetUtil.class, e);
                 }
-                in = null;
             }
             if (out != null) {
-                out.close();
-                out = null;
+                try {
+                    out.close();
+                } catch (Exception e) {
+                    LogUtil.error(NetUtil.class, e);
+                }
             }
         }
         return response;
@@ -535,12 +518,23 @@ public class NetUtil {
             topDomainLevel = 2;
         }
         if (domains.length > topDomainLevel) {
-            String domain = domains[0];
+            StringBuilder domain = new StringBuilder(domains[0]);
             for (int i = 1; i < domains.length - topDomainLevel; i++) {
-                domain += "." + domains[i];
+                domain.append(Strings.DOT).append(domains[i]);
             }
-            return domain;
+            return domain.toString();
         }
         return null;
     }
+
+    public static boolean isHttpUrl(String url, boolean acceptHttps) {
+        if (url.startsWith("http://")) {
+            return true;
+        }
+        if (acceptHttps && url.startsWith("https://")) {
+            return true;
+        }
+        return false;
+    }
+
 }

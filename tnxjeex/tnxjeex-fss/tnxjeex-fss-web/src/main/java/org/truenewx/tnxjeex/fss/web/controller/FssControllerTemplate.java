@@ -187,22 +187,26 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     public String transfer(FssTransferCommand command) {
         String type = command.getType();
         String url = command.getUrl();
-        if (StringUtils.isNotBlank(type) && url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
-            try {
-                String filename = getFilename(url, command.getExtension());
-                String fileId = StringUtil.uuid32();
-                File file = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
-                NetUtil.download(url, null, file);
-                FssUploadedFileMeta meta = write(type, command.getScope(), fileId, file.length(), filename,
-                        new FileInputStream(file), true);
-                // 在独立线程中删除临时文件，以免影响正常流程
-                this.executor.execute(file::delete);
-                return meta.getStorageUrl();
-            } catch (IOException e) {
-                LogUtil.error(getClass(), e);
+        if (StringUtils.isNotBlank(type) && url != null && NetUtil.isHttpUrl(url, true)) {
+            String contextUrl = WebUtil.getProtocolAndHost(SpringWebContext.getRequest()) + getDownloadUrlPrefix();
+            // 不是本地读取地址，也不是对外的读取地址，才可以转换
+            if (!url.startsWith(contextUrl + Strings.SLASH) && !this.service.isReadUrl(type, url)) {
+                try {
+                    String filename = getFilename(url, command.getExtension());
+                    String fileId = StringUtil.uuid32();
+                    File file = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
+                    NetUtil.download(url, null, file);
+                    FssUploadedFileMeta meta = write(type, command.getScope(), fileId, file.length(), filename,
+                            new FileInputStream(file), true);
+                    // 在独立线程中删除临时文件，以免影响正常流程
+                    this.executor.execute(file::delete);
+                    return meta.getStorageUrl();
+                } catch (IOException e) {
+                    LogUtil.error(getClass(), e);
+                }
             }
         }
-        return command.getUrl(); // url变量可能已被改变，此处需返回原始URL
+        return url;
     }
 
     private String getFilename(String url, String extension) {

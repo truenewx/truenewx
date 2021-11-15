@@ -68,7 +68,8 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
         return permission == ObjectPermission.PublicRead || permission == ObjectPermission.PublicReadWrite;
     }
 
-    protected String getContextUrl() {
+    @Override
+    public String getContextUrl() {
         return this.contextUrl;
     }
 

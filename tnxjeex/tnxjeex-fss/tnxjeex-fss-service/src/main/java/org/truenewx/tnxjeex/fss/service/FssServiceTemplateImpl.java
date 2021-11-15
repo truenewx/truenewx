@@ -166,6 +166,26 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         return path;
     }
 
+    @Override
+    public boolean isReadUrl(String type, String url) {
+        if (NetUtil.isHttpUrl(url, true)) {
+            FssAccessStrategy<I> strategy = getStrategy(type);
+            FssProvider provider = strategy.getProvider();
+            if (provider == FssProvider.OWN) {
+                FssStoragePath fsp = FssStoragePath.of(url);
+                return fsp != null && type.equals(fsp.getType());
+            } else {
+                FssAuthorizer authorizer = this.authorizers.get(provider);
+                if (authorizer != null) {
+                    String contextUrl = authorizer.getContextUrl();
+                    String contextPath = NetUtil.standardizeUrl(strategy.getContextPath());
+                    return url.startsWith(contextUrl + contextPath + Strings.SLASH);
+                }
+            }
+        }
+        return false;
+    }
+
     private FssAccessStrategy<I> validateUserRead(I userIdentity, FssStoragePath fsp) {
         if (fsp.isValid()) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());

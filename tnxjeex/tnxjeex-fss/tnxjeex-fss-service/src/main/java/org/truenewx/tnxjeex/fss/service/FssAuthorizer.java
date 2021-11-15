@@ -19,9 +19,15 @@ public interface FssAuthorizer {
 
     /**
      * 授权指定资源为公开可读
-     * @param path   资源路径
+     *
+     * @param path 资源路径
      */
     void authorizePublicRead(String path);
+
+    /**
+     * @return 读取URL的通用上下文地址，包含协议、域名（或IP）、可能的端口
+     */
+    String getContextUrl();
 
     /**
      * 获取指定资源读取URL
