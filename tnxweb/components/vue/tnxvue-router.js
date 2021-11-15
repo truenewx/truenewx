@@ -1,7 +1,7 @@
 /**
  * 基于Vue的路由器构建函数
  */
-import {FunctionUtil} from '../tnxcore-util';
+import {FunctionUtil, NetUtil} from '../tnxcore-util';
 
 function addRoute(routes, superiorPath, item, fnImportPage) {
     if (item && item.path) {
@@ -84,15 +84,15 @@ export default function(VueRouter, menu, fnImportPage) {
     router.history = routerHistory;
 
     // 浏览器的返回事件触发位于VueRouter的钩子执行和页面渲染之后，这意味着$route.meta.historyFrom必须在页面渲染完之后才具有正确的值
-    if (window.history && window.history.pushState) {
-        window.history.pushState(null, null, document.URL);
-        window.addEventListener('popstate', function() {
-            let $route = getCurrentRoute(router);
-            if ($route) {
-                $route.meta.historyFrom = router.history.state.forward;
-            }
-        }, false);
-    }
+    // if (window.history && window.history.pushState) {
+    //     window.history.pushState(null, null, document.URL);
+    // }
+    window.addEventListener('popstate', function() {
+        let $route = getCurrentRoute(router);
+        if ($route) {
+            $route.meta.historyFrom = router.history.state.forward;
+        }
+    }, false);
 
     // 注册离开页面前事件处理支持
     router.$beforeLeaveHandlers = {};
@@ -103,6 +103,7 @@ export default function(VueRouter, menu, fnImportPage) {
             router.$beforeLeaveHandlers[path] = handler;
         }
     };
+
     router.beforeEach(function(to, from, next) {
         if (typeof window.tnx.router.beforeLeave === 'function') {
             window.tnx.router.beforeLeave(router, from);
@@ -119,6 +120,7 @@ export default function(VueRouter, menu, fnImportPage) {
             next();
         }
     });
+
     router.afterEach(function(to, from) {
         router.prev = from;
         // 前后页面相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
@@ -126,6 +128,7 @@ export default function(VueRouter, menu, fnImportPage) {
             window.location.reload();
         }
     });
+
     router.back = FunctionUtil.around(router.back, function(back, path) {
         let $route = getCurrentRoute(router);
         // 如果上一页路径为指定路径，或匹配上级菜单路径，则执行原始的返回
@@ -147,5 +150,22 @@ export default function(VueRouter, menu, fnImportPage) {
         // 直接返回上一页作为兜底
         back.call(router);
     });
+
+    router.pushState = function(path) {
+        let success = NetUtil.pushState('#' + path);
+        if (!success) {
+            this.push(path);
+        }
+        return success;
+    }
+
+    router.replaceState = function(path) {
+        let success = NetUtil.replaceState('#' + path);
+        if (!success) {
+            this.replace(path);
+        }
+        return success;
+    }
+
     return router;
 }

@@ -761,7 +761,27 @@ export const NetUtil = {
     isWechat() {
         let userAgent = navigator.userAgent.toLowerCase();
         return userAgent.contains('micromessenger');
-    }
+    },
+    pushState(url) {
+        if (window.history.pushState) {
+            if (url.startsWith('/')) {
+                url = window.location.origin + url;
+            }
+            window.history.pushState({}, '', url);
+            return true;
+        }
+        return false;
+    },
+    replaceState(url) {
+        if (window.history.replaceState) {
+            if (url.startsWith('/')) {
+                url = window.location.origin + url;
+            }
+            window.history.replaceState({}, '', url);
+            return true;
+        }
+        return false;
+    },
 }
 
 export const DomUtil = {
