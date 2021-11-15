@@ -265,7 +265,25 @@ export const ObjectUtil = {
                 delete obj[key];
             }
         }
-    }
+    },
+    isEmpty(value) {
+        if (value === null || value === undefined) {
+            return true;
+        }
+        if (value instanceof String || Array.isArray(value)) {
+            return value.length === 0;
+        }
+        return false;
+    },
+    isNotEmpty(value) {
+        if (value === null || value === undefined) {
+            return false;
+        }
+        if (value instanceof String || Array.isArray(value)) {
+            return value.length > 0;
+        }
+        return true;
+    },
 }
 
 export const FunctionUtil = {

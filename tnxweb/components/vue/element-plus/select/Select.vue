@@ -168,13 +168,17 @@ export default {
         },
     },
     watch: {
-        model(value) {
-            this.$emit('update:modelValue', value);
-            let vm = this;
-            // 确保变更事件在值变更应用后再触发
-            this.$nextTick(function() {
-                vm.triggerChange(value);
-            })
+        model(newValue, oldValue) {
+            this.$emit('update:modelValue', newValue);
+            // 新旧值不同时为空才触发变更事件
+            const util = window.tnx.util;
+            if (util.object.isNotEmpty(newValue) || util.object.isNotEmpty(oldValue)) {
+                let vm = this;
+                // 确保变更事件在值变更应用后再触发
+                this.$nextTick(function() {
+                    vm.triggerChange(newValue);
+                });
+            }
         },
         modelValue(value) {
             this.model = this.getModel(this.items);
