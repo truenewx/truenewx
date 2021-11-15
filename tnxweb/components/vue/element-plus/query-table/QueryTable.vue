@@ -5,7 +5,7 @@
             <slot></slot>
         </el-table>
         <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="paged">
-            <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="showPaged"/>
+            <tnxel-paged :value="paged" :change="onPagedChange" :align="pagedAlign" v-if="showPaged"/>
         </slot>
     </div>
 </template>
@@ -40,6 +40,8 @@ export default {
         success: Function,
         rowClassName: String,
         formatter: Function,
+        order: Function,
+        pagedChange: Function,
     },
     emits: ['update:modelValue'],
     data() {
@@ -87,10 +89,16 @@ export default {
         getParams(modelValue) {
             return Object.assign({}, modelValue); // 避免改动传入的参数对象
         },
+        onPagedChange(pageNo) {
+            if (this.pagedChange && this.pagedChange(pageNo) === false) {
+                return;
+            }
+            this.query(pageNo);
+        },
         query(params) {
             if (typeof params === 'number') { // 参数为页码
                 this.params.pageNo = params;
-                if (this.modelValue) { // 指定了value属性，在页码变更时需要触发更新事件
+                if (this.modelValue) { // 指定了modelValue属性，在页码变更时需要触发更新事件
                     this.$emit('update:modelValue', this.params);
                 }
             } else if (typeof params === 'object') {
@@ -128,7 +136,14 @@ export default {
             } else {
                 delete this.params.orderBy;
             }
-            this.query(1);
+            this.params.pageNo = 1;
+            if (this.modelValue) {
+                this.$emit('update:modelValue', this.params);
+            }
+            if (this.order && this.order(this.params.orderBy) === false) {
+                return;
+            }
+            this.query();
         }
     }
 }
