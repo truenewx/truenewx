@@ -126,28 +126,30 @@ public class Querying extends Pagination implements QueryModel, Paging {
                     }
                 } else if (Collection.class.isAssignableFrom(fieldType)) {
                     Collection<Object> collection = (Collection<Object>) BeanUtil.getFieldValue(this, field);
-                    if (collection instanceof List) {
-                        List<Object> list = (List<Object>) collection;
-                        for (int i = 0; i < list.size(); i++) {
-                            Object obj = list.get(i);
-                            if (obj instanceof String) {
-                                list.set(i, decode((String) obj));
-                            }
-                        }
-                    } else {
-                        List<Object> decodedList = new ArrayList<>();
-                        Iterator<Object> iterator = collection.iterator();
-                        while (iterator.hasNext()) {
-                            Object obj = iterator.next();
-                            if (obj instanceof String) {
-                                String decodedValue = decode((String) obj);
-                                if (!obj.equals(decodedValue)) {
-                                    iterator.remove();
-                                    decodedList.add(decodedValue);
+                    if (collection != null) {
+                        if (collection instanceof List) {
+                            List<Object> list = (List<Object>) collection;
+                            for (int i = 0; i < list.size(); i++) {
+                                Object obj = list.get(i);
+                                if (obj instanceof String) {
+                                    list.set(i, decode((String) obj));
                                 }
                             }
+                        } else {
+                            List<Object> decodedList = new ArrayList<>();
+                            Iterator<Object> iterator = collection.iterator();
+                            while (iterator.hasNext()) {
+                                Object obj = iterator.next();
+                                if (obj instanceof String) {
+                                    String decodedValue = decode((String) obj);
+                                    if (!obj.equals(decodedValue)) {
+                                        iterator.remove();
+                                        decodedList.add(decodedValue);
+                                    }
+                                }
+                            }
+                            collection.addAll(decodedList);
                         }
-                        collection.addAll(decodedList);
                     }
                 }
             }
