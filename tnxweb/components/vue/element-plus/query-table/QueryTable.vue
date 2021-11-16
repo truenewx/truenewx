@@ -1,7 +1,18 @@
 <template>
-    <div class="tnxel-query-table">
-        <el-table :data="records" :empty-text="emptyRecordText" :size="size" :border="border" :stripe="stripe"
-            @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
+    <div class="tnxel-query-table" :class="{selectable: selectable}">
+        <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
+            :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSort"
+            :row-class-name="rowClassName" @row-click="selectRow">
+            <el-table-column header-align="center" align="center" width="50px" v-if="selectable">
+                <template #header>
+                    <el-checkbox v-if="selectable === 'all'"/>
+                    <span v-else>选择</span>
+                </template>
+                <template #default="scope">
+                    <el-checkbox v-model="pageSelectedIndexes[scope.$index]" @change="selectPageToAll"
+                        v-if="selectable === 'multi' || selectable === 'all'"/>
+                </template>
+            </el-table-column>
             <slot></slot>
         </el-table>
         <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="paged">
@@ -42,14 +53,29 @@ export default {
         formatter: Function,
         order: Function,
         pagedChange: Function,
+        selectable: { // 是否可选择
+            type: [Boolean, String], // false-不可选择；true/'single'-可单选；'multi'-可多选但不可全选；'all'-可多选且可全选
+            default() {
+                return false;
+            }
+        },
+        selectName: { // 比较已选对象与表格数据中行对象是否相等的字段名称，这要求数据对象必须具有唯一标识字段
+            type: String,
+            default() {
+                return 'id';
+            }
+        },
+        selected: [Object, Array], // 已选择的行对象
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'update:selected'],
     data() {
         return {
             params: this.getParams(this.modelValue),
             records: this.data ? this.data.records : null,
             querying: false,
             paged: this.data ? this.data.paged : null,
+            pageSelectedIndexes: [], // 当前页已选择记录的索引
+            allSelectedRecords: this.selected || [], // 所有已选择的记录
         }
     },
     computed: {
@@ -83,7 +109,7 @@ export default {
     watch: {
         value(value) {
             this.params = this.getParams(value);
-        }
+        },
     },
     methods: {
         getParams(modelValue) {
@@ -117,6 +143,7 @@ export default {
                     vm.records = vm.format(result.records);
                     vm.paged = result.paged;
                 }
+                vm.selectAllToPage();
                 if (vm.success) {
                     vm.success(vm.records, vm.paged);
                 }
@@ -144,7 +171,55 @@ export default {
                 return;
             }
             this.query();
-        }
+        },
+        selectRow(row) {
+            let vm = this;
+            let index = window.tnx.util.array.indexOf(this.records, function(element) {
+                return row[vm.selectName] === element[vm.selectName];
+            });
+            if (index >= 0) {
+                this.pageSelectedIndexes[index] = !this.pageSelectedIndexes[index];
+                this.selectPageToAll();
+            }
+        },
+        selectPageToAll() {
+            let vm = this;
+            for (let index = 0; index < this.pageSelectedIndexes.length; index++) {
+                let selectedInPage = this.pageSelectedIndexes[index];
+                let record = this.records[index];
+                let fnEquals = function(element) {
+                    return record[vm.selectName] === element[vm.selectName];
+                };
+                let selectedInAll = this.allSelectedRecords.contains(fnEquals);
+                if (selectedInPage && !selectedInAll) { // 当前页已选但全局未选，则加入全局已选清单
+                    this.allSelectedRecords.push(record);
+                } else if (!selectedInPage && selectedInAll) { // 当前页未选但全局已选，则从全局已选中移除
+                    this.allSelectedRecords.remove(fnEquals);
+                }
+            }
+            this.$emit('update:selected', this.allSelectedRecords);
+        },
+        selectAllToPage() {
+            let vm = this;
+            if (!Array.isArray(this.allSelectedRecords)) {
+                this.allSelectedRecords = [this.allSelectedRecords];
+            }
+            this.pageSelectedIndexes = [];
+            for (let selectedRecord of this.allSelectedRecords) {
+                for (let i = 0; i < this.records.length; i++) {
+                    let record = this.records[i];
+                    if (record[vm.selectName] === selectedRecord[vm.selectName]) {
+                        this.pageSelectedIndexes[i] = true;
+                    }
+                }
+            }
+        },
     }
 }
 </script>
+
+<style>
+.tnxel-query-table.selectable .el-table__row {
+    cursor: pointer;
+}
+</style>

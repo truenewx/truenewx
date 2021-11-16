@@ -585,6 +585,20 @@ export const DateUtil = {
     }
 }
 
+export const ArrayUtil = {
+    indexOf(array, element) {
+        if (typeof element === 'function') {
+            for (let i = 0; i < array.length; i++) {
+                if (element(array[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        return array.indexOf(element);
+    },
+}
+
 export const NetUtil = {
     /**
      * 从指定头信息集中获取指定头信息值
@@ -900,6 +914,7 @@ export const util = {
     math: MathUtil,
     string: StringUtil,
     date: DateUtil,
+    array: ArrayUtil,
     net: NetUtil,
     dom: DomUtil,
 };
