@@ -868,21 +868,21 @@ export const DomUtil = {
         }
     },
     /**
-     * 替代文档全局键盘事件处理
+     * 替代元素键盘事件处理
      * @param handler 事件处理函数
      * @param options 事件参数，必须至少包含key，可以包含：ctrlKey、altKey、shiftKey
      */
-    replaceDocumentKeyEvent(handler, options) {
+    replaceKeyEvent(element, handler, options) {
         let _this = this;
         // 屏蔽键盘按下事件
-        document.onkeydown = function(event) {
+        element.onkeydown = function(event) {
             if (_this.matchesKeyEvent(event, options)) {
                 event.preventDefault();
                 event.returnValue = false;
             }
         };
         // 替换键盘松开事件
-        document.onkeyup = function(event) {
+        element.onkeyup = function(event) {
             if (_this.matchesKeyEvent(event, options)) {
                 event.preventDefault();
                 event.returnValue = false;
