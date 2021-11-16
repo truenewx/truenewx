@@ -98,9 +98,17 @@ const tnxvue = Object.assign({}, tnxcore, {
         // 默认不实现，由UI框架扩展层实现
         throw new Error('Unsupported function');
     },
+    drawer(content, title, buttons, options, contentProps) {
+        // 默认不实现，由UI框架扩展层实现
+        throw new Error('Unsupported function');
+    },
     open(component, props, options) {
-        if (component.methods.dialog) {
+        if (component.methods.drawer) {
+            options = Object.assign({}, component.methods.drawer(props), options);
+            options.mode = 'drawer';
+        } else if (component.methods.dialog) {
             options = Object.assign({}, component.methods.dialog(props), options);
+            options.mode = 'dialog';
         } else {
             options = options || {};
         }
@@ -117,9 +125,14 @@ const tnxvue = Object.assign({}, tnxcore, {
                 }
             }
         }
+        let mode = options.mode;
         delete options.title;
         delete options.type;
         delete options.click;
+        delete options.mode;
+        if (mode === 'drawer') {
+            return this.drawer(component, title, buttons, options, props);
+        }
         return this.dialog(component, title, buttons, options, props);
     }
 });

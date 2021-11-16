@@ -15,6 +15,7 @@ import DatePicker from './date-picker/DatePicker';
 import DateRange from './date-range/DateRange';
 import DetailForm from './detail-form/DetailForm';
 import Dialog from './dialog/Dialog';
+import Drawer from './drawer/Drawer';
 import EnumSelect from './enum-select/EnumSelect';
 import FetchCascader from './fetch-cascader/FetchCascader';
 import FetchSelect from './fetch-select/FetchSelect';
@@ -45,6 +46,7 @@ const components = Object.assign({}, tnxvue.components, {
     DateRange,
     DetailForm,
     Dialog,
+    Drawer,
     EnumSelect,
     FetchCascader,
     FetchSelect,
@@ -115,6 +117,35 @@ const tnxel = Object.assign({}, tnxvue, {
                 }
             }
         }
+    },
+    drawer(content, title, buttons, options, contentProps) {
+        this._closeMessage();
+
+        let componentOptions = {};
+        if (this.util.isComponent(content)) {
+            componentOptions.components = {
+                'tnxel-drawer-content': content
+            };
+            content = null;
+        }
+        let componentDefinition = Object.assign({}, Drawer, componentOptions);
+
+        const drawerClass = 'tnxel-drawer';
+        const drawerId = 'drawer-' + (new Date().getTime());
+        $('body').append('<div class="' + drawerClass + '" id="' + drawerId + '"></div>');
+        if (!(buttons instanceof Array)) {
+            buttons = [];
+        }
+        const drawerVm = window.tnx.createVueInstance(componentDefinition, null, {
+            content: content,
+            title: title,
+            contentProps: contentProps,
+            buttons: buttons,
+            theme: options.theme,
+        }).mount('.' + drawerClass + '#' + drawerId);
+        drawerVm.id = drawerId;
+        drawerVm.options = Object.assign(drawerVm.options || {}, options);
+        return drawerVm;
     },
     _closeMessage() {
         ElMessage.closeAll();
