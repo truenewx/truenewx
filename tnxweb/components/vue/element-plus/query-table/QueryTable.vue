@@ -2,7 +2,7 @@
     <div class="tnxel-query-table" :class="{selectable: selectable}">
         <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
             :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSort"
-            :row-class-name="rowClassName" @row-click="selectRow">
+            :row-class-name="rowClassName" @cell-click="selectRow">
             <el-table-column header-align="center" align="center" width="50px" v-if="selectable">
                 <template #header>
                     <el-checkbox v-if="selectable === 'all'"/>
@@ -172,14 +172,16 @@ export default {
             }
             this.query();
         },
-        selectRow(row) {
-            let vm = this;
-            let index = window.tnx.util.array.indexOf(this.records, function(element) {
-                return row[vm.selectName] === element[vm.selectName];
-            });
-            if (index >= 0) {
-                this.pageSelectedIndexes[index] = !this.pageSelectedIndexes[index];
-                this.selectPageToAll();
+        selectRow(row, column, cell) {
+            if (this.selectable && this.records && column.getColumnIndex() > 0 && !cell.innerHTML.contains('</a>')) {
+                let vm = this;
+                let index = window.tnx.util.array.indexOf(this.records, function(element) {
+                    return row[vm.selectName] === element[vm.selectName];
+                });
+                if (index >= 0) {
+                    this.pageSelectedIndexes[index] = !this.pageSelectedIndexes[index];
+                    this.selectPageToAll();
+                }
             }
         },
         selectPageToAll() {
