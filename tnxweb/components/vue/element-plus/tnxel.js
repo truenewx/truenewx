@@ -103,7 +103,7 @@ const tnxel = Object.assign({}, tnxvue, {
         }).mount(containerSelector);
         dialogVm.id = dialogId;
         dialogVm.options = Object.assign(dialogVm.options || {}, options);
-        dialogVm.onClosed = this.util.function.around(dialogVm, function(onClosed) {
+        dialogVm.onClosed = this.util.function.around(dialogVm.onClosed, function(onClosed) {
             let $container = $(containerSelector);
             $container.next('.el-overlay').remove();
             $container.remove();
@@ -153,7 +153,7 @@ const tnxel = Object.assign({}, tnxvue, {
         }).mount(containerSelector);
         drawerVm.id = drawerId;
         drawerVm.options = Object.assign(drawerVm.options || {}, options);
-        drawerVm.onClosed = this.util.function.around(drawerVm, function(onClosed) {
+        drawerVm.onClosed = this.util.function.around(drawerVm.onClosed, function(onClosed) {
             let $container = $(containerSelector);
             $container.next('.el-overlay').remove();
             $container.remove();
