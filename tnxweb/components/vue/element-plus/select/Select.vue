@@ -324,6 +324,8 @@ export default {
 .tnxel-tag-group .el-button,
 .tnxel-text-button-group .el-button {
     padding: 0.5rem 0.75rem;
+    margin-left: 0;
+    margin-right: 0.5rem;
 }
 
 .tnxel-tag-group .el-button__text--expand,
