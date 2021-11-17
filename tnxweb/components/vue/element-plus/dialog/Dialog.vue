@@ -9,7 +9,7 @@
         :show-close="options['show-close']"
         :center="options.center"
         :before-close="beforeClose"
-        @closed="onClosed" v-if="visible">
+        @closed="onClosed">
         <template #title>
             <div class="tnxel-dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
                 v-if="title || options['show-close']"></div>
@@ -97,6 +97,12 @@ export default {
                 'width': vm.width,
             });
 
+            if (vm.$refs.content && !vm.$refs.content.close) {
+                vm.$refs.content.close = function() {
+                    vm.close();
+                }
+            }
+
             if (typeof vm.options.onShown === 'function') {
                 vm.options.onShown.call(this);
             }
@@ -131,13 +137,9 @@ export default {
                     return;
                 }
             }
-            // 避免组件内容在关闭时被再次加载，并出现闪现现象
-            const height = $('.el-dialog__wrapper:last .el-dialog__body').height();
-            this.contentValue = '<div style="height: ' + height + 'px"></div>';
             done();
         },
         onClosed() {
-            $('.el-dialog__wrapper:last').remove();
             if (typeof this.options.onClosed === 'function') {
                 this.options.onClosed.call(this.$refs.content);
             }

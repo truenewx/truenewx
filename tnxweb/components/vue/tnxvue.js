@@ -103,15 +103,21 @@ const tnxvue = Object.assign({}, tnxcore, {
         throw new Error('Unsupported function');
     },
     open(component, props, options) {
-        if (component.methods.drawer) {
-            options = Object.assign({}, component.methods.drawer(props), options);
-            options.mode = 'drawer';
-        } else if (component.methods.dialog) {
-            options = Object.assign({}, component.methods.dialog(props), options);
-            options.mode = 'dialog';
-        } else {
-            options = options || {};
+        options = options || {};
+
+        // 目标组件中同时提供的dialog和drawer方法，则以options.mode为准，默认为dialog
+        let mode = options.mode;
+        if (component.methods.dialog && !component.methods.drawer) {
+            mode = 'dialog';
+        } else if (!component.methods.dialog && component.methods.drawer) {
+            mode = 'drawer';
         }
+        if (mode === 'drawer') {
+            options = Object.assign({}, component.methods.drawer(props), options);
+        } else {
+            options = Object.assign({}, component.methods.dialog(props), options);
+        }
+
         const title = component.title || options.title;
         const buttons = options.buttons || getDefaultDialogButtons(options.type, options.click, options.theme);
         if (options.buttonText) {
@@ -125,11 +131,10 @@ const tnxvue = Object.assign({}, tnxcore, {
                 }
             }
         }
-        let mode = options.mode;
+        delete options.mode;
         delete options.title;
         delete options.type;
         delete options.click;
-        delete options.mode;
         if (mode === 'drawer') {
             return this.drawer(component, title, buttons, options, props);
         }

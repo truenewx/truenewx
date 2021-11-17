@@ -70,6 +70,7 @@ const components = Object.assign({}, tnxvue.components, {
 });
 
 const dialogClass = 'tnxel-dialog';
+const drawerClass = 'tnxel-drawer';
 
 const tnxel = Object.assign({}, tnxvue, {
     libs: Object.assign({}, tnxvue.libs, {ElementPlus}),
@@ -92,15 +93,22 @@ const tnxel = Object.assign({}, tnxvue, {
         if (!(buttons instanceof Array)) {
             buttons = [];
         }
+        const containerSelector = '.' + dialogClass + '#' + dialogId;
         const dialogVm = window.tnx.createVueInstance(componentDefinition, null, {
             content: content,
             title: title,
             contentProps: contentProps,
             buttons: buttons,
             theme: options.theme,
-        }).mount('.' + dialogClass + '#' + dialogId);
+        }).mount(containerSelector);
         dialogVm.id = dialogId;
         dialogVm.options = Object.assign(dialogVm.options || {}, options);
+        dialogVm.onClosed = this.util.function.around(dialogVm, function(onClosed) {
+            let $container = $(containerSelector);
+            $container.next('.el-overlay').remove();
+            $container.remove();
+            onClosed.call(dialogVm);
+        });
         this._dialogs.push(dialogVm);
         return dialogVm;
     },
@@ -109,7 +117,6 @@ const tnxel = Object.assign({}, tnxvue, {
             let dialog = this._dialogs.pop();
             while (dialog) {
                 dialog.close();
-                $('.' + dialogClass + '#' + dialog.id).remove();
                 if (all) {
                     dialog = this._dialogs.pop();
                 } else {
@@ -118,6 +125,7 @@ const tnxel = Object.assign({}, tnxvue, {
             }
         }
     },
+    _drawers: [], // 抽屉堆栈
     drawer(content, title, buttons, options, contentProps) {
         this._closeMessage();
 
@@ -130,22 +138,42 @@ const tnxel = Object.assign({}, tnxvue, {
         }
         let componentDefinition = Object.assign({}, Drawer, componentOptions);
 
-        const drawerClass = 'tnxel-drawer';
         const drawerId = 'drawer-' + (new Date().getTime());
         $('body').append('<div class="' + drawerClass + '" id="' + drawerId + '"></div>');
         if (!(buttons instanceof Array)) {
             buttons = [];
         }
+        const containerSelector = '.' + drawerClass + '#' + drawerId;
         const drawerVm = window.tnx.createVueInstance(componentDefinition, null, {
             content: content,
             title: title,
             contentProps: contentProps,
             buttons: buttons,
             theme: options.theme,
-        }).mount('.' + drawerClass + '#' + drawerId);
+        }).mount(containerSelector);
         drawerVm.id = drawerId;
         drawerVm.options = Object.assign(drawerVm.options || {}, options);
+        drawerVm.onClosed = this.util.function.around(drawerVm, function(onClosed) {
+            let $container = $(containerSelector);
+            $container.next('.el-overlay').remove();
+            $container.remove();
+            onClosed.call(drawerVm);
+        });
+        this._drawers.push(drawerVm);
         return drawerVm;
+    },
+    closeDrawer(all) {
+        if (this._drawers.length) {
+            let drawer = this._drawers.pop();
+            while (drawer) {
+                drawer.close();
+                if (all) {
+                    drawer = this._drawers.pop();
+                } else {
+                    break;
+                }
+            }
+        }
     },
     _closeMessage() {
         ElMessage.closeAll();

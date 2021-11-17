@@ -62,6 +62,11 @@ export default {
     mounted() {
         let vm = this;
         this.$nextTick(function() {
+            if (vm.$refs.content && !vm.$refs.content.close) {
+                vm.$refs.content.close = function() {
+                    vm.close();
+                }
+            }
             if (typeof vm.options.onShown === 'function') {
                 vm.options.onShown.call(this);
             }
@@ -98,12 +103,14 @@ export default {
                     return;
                 }
             }
-            // 避免组件内容在关闭时被再次加载，并出现闪现现象
-            this.contentValue = '';
             done();
         },
         onClosed() {
-            $('.el-drawer__wrapper:last').remove();
+            if (this.id) {
+                let $drawer = $('.tnxel-drawer#' + this.id);
+                $drawer.next('.el-overlay').remove();
+                $drawer.remove();
+            }
             if (typeof this.options.onClosed === 'function') {
                 this.options.onClosed.call(this.$refs.content);
             }
