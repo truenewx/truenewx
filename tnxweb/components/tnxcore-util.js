@@ -192,6 +192,9 @@ Object.assign(Array.prototype, {
         }
         return index;
     },
+    clone() {
+        return this.slice(0, this.length);
+    },
 });
 
 Object.assign(Boolean.prototype, {
