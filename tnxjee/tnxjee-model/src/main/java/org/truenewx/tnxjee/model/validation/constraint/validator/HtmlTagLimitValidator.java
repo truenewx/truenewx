@@ -18,7 +18,6 @@ import org.truenewx.tnxjee.model.validation.constraint.HtmlTagLimit;
 public class HtmlTagLimitValidator implements ConstraintValidator<HtmlTagLimit, CharSequence> {
 
     private String[] allowed;
-
     private String[] forbidden;
 
     @Override
@@ -34,40 +33,67 @@ public class HtmlTagLimitValidator implements ConstraintValidator<HtmlTagLimit, 
         String s = value == null ? null : value.toString();
         if (StringUtils.isNotBlank(s) && s.contains(Strings.LESS_THAN) && s.contains(Strings.GREATER_THAN)) {
             s = s.trim();
-            if (this.allowed.length == 0 && this.forbidden.length == 0) { // 限制所有标签
+            if (ArrayUtils.isEmpty(this.allowed) && ArrayUtils.isEmpty(this.forbidden)) { // 限制所有标签
                 return !StringUtil.regexMatch(s, "<[a-z]+[ ]*[/]?[ ]*>");
             }
-            if (this.allowed.length > 0) { // 仅允许的标签，禁止其它标签
-                // 正则表达式写不出，只得用笨办法
-                int leftIndex = s.indexOf(Strings.LESS_THAN);
-                int rightIndex = leftIndex >= 0 ? s.indexOf(Strings.GREATER_THAN, leftIndex) : -1;
-                while (leftIndex >= 0 && rightIndex >= 0) {
-                    String sub = s.substring(leftIndex + 1, rightIndex); // <>中间的部分
-                    int spaceIndex = sub.indexOf(Strings.SPACE);
-                    String tag = spaceIndex >= 0 ? sub.substring(0, spaceIndex) : sub;
-                    if (tag.startsWith(Strings.SLASH)) { // 标签结束处
-                        tag = tag.substring(Strings.SLASH.length());
-                    }
-                    if (!ArrayUtils.contains(this.allowed, tag.toLowerCase())) {
-                        return false; // 存在不允许的标签，则直接返回false
-                    }
-                    leftIndex = s.indexOf(Strings.LESS_THAN, rightIndex);
-                    rightIndex = leftIndex >= 0 ? s.indexOf(Strings.GREATER_THAN, leftIndex) : -1;
-                }
+            // 允许的标签清单不为空，才限制允许标签外的其它标签
+            if (ArrayUtils.isNotEmpty(this.allowed) && containsOtherTag(s, this.allowed)) {
+                return false; // 存在不允许的标签，则直接返回false
             }
-            if (this.forbidden.length > 0) { // 禁止的标签
-                // 无漏洞的正则表达式难以理解，还是以字符串操作进行判断
-                s = s.toLowerCase();
-                for (String tag : this.forbidden) {
-                    if (s.contains(Strings.LESS_THAN + tag + Strings.GREATER_THAN) || s.contains(
-                            Strings.LESS_THAN + tag + Strings.SPACE)) {
-                        return false;
-                    }
-                }
-                return true;
+            if (containsForbiddenTag(s, this.forbidden)) {
+                return false; // 存在禁止的标签，则直接返回false
             }
         }
         return true;
+    }
+
+    /**
+     * 判断指定字符串是否包含允许使用的标签清单之外的其它标签
+     *
+     * @param s           字符串
+     * @param allowedTags 允许使用的标签清单
+     * @return 指定字符串是否包含允许使用的标签清单之外的其它标签
+     */
+    public static boolean containsOtherTag(String s, String[] allowedTags) {
+        // 正则表达式写不出，只得用笨办法
+        int leftIndex = s.indexOf(Strings.LESS_THAN);
+        int rightIndex = leftIndex >= 0 ? s.indexOf(Strings.GREATER_THAN, leftIndex) : -1;
+        while (leftIndex >= 0 && rightIndex >= 0) {
+            String sub = s.substring(leftIndex + 1, rightIndex); // <>中间的部分
+            int spaceIndex = sub.indexOf(Strings.SPACE);
+            String tag = spaceIndex >= 0 ? sub.substring(0, spaceIndex) : sub;
+            if (tag.startsWith(Strings.SLASH)) { // 标签结束处
+                tag = tag.substring(Strings.SLASH.length());
+            }
+            // 存在标签但不在允许的标签清单（即使为空）中，则返回true
+            if (!ArrayUtils.contains(allowedTags, tag.toLowerCase())) {
+                return true;
+            }
+            leftIndex = s.indexOf(Strings.LESS_THAN, rightIndex);
+            rightIndex = leftIndex >= 0 ? s.indexOf(Strings.GREATER_THAN, leftIndex) : -1;
+        }
+        return false;
+    }
+
+    /**
+     * 判断指定字符串是否包含禁止使用的标签
+     *
+     * @param s             字符串
+     * @param forbiddenTags 禁止使用的标签清单
+     * @return 指定字符串是否包含禁止使用的标签
+     */
+    public static boolean containsForbiddenTag(String s, String[] forbiddenTags) {
+        if (ArrayUtils.isNotEmpty(forbiddenTags)) { // 禁止的标签
+            // 无漏洞的正则表达式难以理解，还是以字符串操作进行判断
+            s = s.toLowerCase();
+            for (String tag : forbiddenTags) {
+                if (s.contains(Strings.LESS_THAN + tag + Strings.GREATER_THAN) || s.contains(
+                        Strings.LESS_THAN + tag + Strings.SPACE)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
