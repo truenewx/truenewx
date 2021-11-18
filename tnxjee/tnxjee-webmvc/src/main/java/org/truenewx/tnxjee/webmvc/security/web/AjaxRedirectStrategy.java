@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.webmvc.security.web;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -14,7 +15,6 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.CommonProperties;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.web.cors.CorsRegistryProperties;
 import org.truenewx.tnxjee.web.util.WebConstants;
@@ -39,7 +39,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
     }
 
     public void addAllowedHost(String... allowedHost) {
-        CollectionUtil.addAll(this.allowedHostList, allowedHost);
+        Collections.addAll(this.allowedHostList, allowedHost);
     }
 
     @Override

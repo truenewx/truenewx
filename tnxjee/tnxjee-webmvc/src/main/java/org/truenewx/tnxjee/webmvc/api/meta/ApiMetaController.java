@@ -19,7 +19,7 @@ import org.truenewx.tnxjee.core.enums.EnumDictResolver;
 import org.truenewx.tnxjee.core.enums.EnumItem;
 import org.truenewx.tnxjee.core.enums.EnumType;
 import org.truenewx.tnxjee.core.spec.EnumGrouped;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
+import org.truenewx.tnxjee.core.util.ArrayUtil;
 import org.truenewx.tnxjee.model.Model;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiApp;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiContext;
@@ -55,7 +55,7 @@ public class ApiMetaController {
         ApiContext context = new ApiContext();
         context.setBaseApp(this.baseApp);
         context.setLoginSuccessRedirectParameter(this.apiMetaProperties.getLoginSuccessRedirectParameter());
-        Set<String> appNames = CollectionUtil.toSet(this.apiMetaProperties.getAppNames());
+        Set<String> appNames = ArrayUtil.toSet(this.apiMetaProperties.getAppNames());
         if (CollectionUtils.isEmpty(appNames)) {
             appNames = new HashSet<>(this.commonProperties.getApps().keySet());
         } else {

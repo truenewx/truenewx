@@ -1,9 +1,8 @@
 package org.truenewx.tnxjee.model.validation.rule;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.truenewx.tnxjee.core.util.CollectionUtil;
 
 /**
  * 不能包含字符串规则
@@ -36,7 +35,7 @@ public class NotContainsRule extends ValidationRule {
      * @param values 不能包含的字符串集
      */
     public void addValues(String... values) {
-        CollectionUtil.addAll(this.values, values);
+        Collections.addAll(this.values, values);
     }
 
     public boolean isNotContainsAngleBracket() {

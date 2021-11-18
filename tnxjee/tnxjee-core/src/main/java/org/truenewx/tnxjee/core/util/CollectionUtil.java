@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import org.springframework.lang.Nullable;
+
 /**
  * 集合工具类
  *
@@ -112,7 +114,7 @@ public class CollectionUtil {
             return ((Map<?, ?>) iterable).size();
         } else {
             int size = 0;
-            for (Iterator<?> iterator = iterable.iterator(); iterator.hasNext(); ) {
+            for (Object obj : iterable) {
                 size++;
             }
             return size;
@@ -179,21 +181,14 @@ public class CollectionUtil {
      * @param collection 集合
      * @param array      数组
      */
-    public static <T> void addAll(Collection<T> collection, T[] array) {
+    public static <T> void addAll(Collection<T> collection, @Nullable T[] array) {
         if (array != null) {
-            for (T e : array) {
-                collection.add(e);
-            }
+            Collections.addAll(collection, array);
         }
     }
 
     /**
      * 将Key为String的map转为Key为Integer的map
-     *
-     * @param map
-     * @param minKey
-     * @return
-     * @author jianglei
      */
     public static Map<Integer, String> toIntegerKeyMap(Map<String, String> map, int minKey) {
         Map<Integer, String> newMap = new HashMap<>();
@@ -275,23 +270,9 @@ public class CollectionUtil {
             return (List<T>) iterable;
         } else {
             List<T> list = new ArrayList<>();
-            iterable.forEach(entity -> {
-                list.add(entity);
-            });
+            iterable.forEach(list::add);
             return list;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Set<T> toSet(T... array) {
-        if (array == null) {
-            return null;
-        }
-        Set<T> set = new HashSet<>();
-        for (T obj : array) {
-            set.add(obj);
-        }
-        return set;
     }
 
     public static <K, V> Map<K, V> clone(Map<K, V> map) {
@@ -428,26 +409,6 @@ public class CollectionUtil {
             result.put(entry.getKey(), entry.getValue());
         });
         return result;
-    }
-
-    /**
-     * 移除指定数组中的null值，去重后，进行排序
-     *
-     * @param array 数组
-     * @param <E>   可排序的元素类型
-     * @return 处理后得到的集合
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <E extends Comparable> List<E> sortValidly(E[] array) {
-        Set<E> set = new HashSet<>();
-        for (E obj : array) {
-            if (obj != null) {
-                set.add(obj);
-            }
-        }
-        List<E> list = new ArrayList<>(set);
-        Collections.sort(list);
-        return list;
     }
 
     public static <E> int indexOf(List<E> list, Predicate<E> predicate) {

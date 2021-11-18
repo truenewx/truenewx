@@ -1,10 +1,10 @@
 package org.truenewx.tnxjee.model.validation.constraint.validator;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.model.validation.constraint.NotContains;
 import org.truenewx.tnxjee.model.validation.constraint.NotContainsHtmlChars;
 import org.truenewx.tnxjee.model.validation.constraint.NotContainsSpecialChars;
@@ -25,14 +25,12 @@ public class NotContainsSpecialCharsValidator
             values.add(Strings.COMMA);
         }
         if (!annotation.html()) {
-            CollectionUtil.addAll(values,
-                    NotContainsHtmlChars.class.getAnnotation(NotContains.class).value());
+            Collections.addAll(values, NotContainsHtmlChars.class.getAnnotation(NotContains.class).value());
         }
         if (!annotation.sql()) {
-            CollectionUtil.addAll(values,
-                    NotContainsSqlChars.class.getAnnotation(NotContains.class).value());
+            Collections.addAll(values, NotContainsSqlChars.class.getAnnotation(NotContains.class).value());
         }
-        setValues(values.toArray(new String[values.size()]));
+        setValues(values.toArray(new String[0]));
     }
 
 }

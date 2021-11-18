@@ -6,7 +6,6 @@ import java.util.*;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
 import org.truenewx.tnxjee.core.enums.annotation.EnumItemKey;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.SpringUtil;
 import org.truenewx.tnxjee.model.annotation.ComponentType;
@@ -41,7 +40,7 @@ public class AttachFieldBeanSerializerModifier extends BeanSerializerModifier {
         if (ignoredPropertyNames.length > 0) {
             Collection<String> names = this.ignoredPropertyNamesMapping
                     .computeIfAbsent(beanClass, k -> new HashSet<>());
-            CollectionUtil.addAll(names, ignoredPropertyNames);
+            Collections.addAll(names, ignoredPropertyNames);
         }
     }
 

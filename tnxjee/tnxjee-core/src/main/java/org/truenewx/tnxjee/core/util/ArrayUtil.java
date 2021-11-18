@@ -163,6 +163,27 @@ public class ArrayUtil {
         return longArray;
     }
 
+    /**
+     * 将指定变参数组转换为List，与{@link Arrays#asList(Object...)}的区别是：本方法返回的List还可以进一步改动
+     *
+     * @param array 变参数组
+     * @param <T>   元素类型
+     * @return List
+     */
+    @SafeVarargs
+    public static <T> List<T> asList(T... array) {
+        List<T> list = new ArrayList<>();
+        Collections.addAll(list, array);
+        return list;
+    }
+
+    @SafeVarargs
+    public static <T> Set<T> asSet(T... array) {
+        Set<T> set = new HashSet<>();
+        Collections.addAll(set, array);
+        return set;
+    }
+
     public static Set<Integer> toSet(int[] array) {
         if (array == null) {
             return null;
@@ -189,9 +210,7 @@ public class ArrayUtil {
         if (array == null) {
             return null;
         }
-        Set<T> set = new HashSet<>();
-        Collections.addAll(set, array);
-        return set;
+        return asSet(array);
     }
 
     public static List<Integer> toList(int[] array) {
@@ -220,9 +239,7 @@ public class ArrayUtil {
         if (array == null) {
             return null;
         }
-        List<T> list = new ArrayList<>();
-        Collections.addAll(list, array);
-        return list;
+        return asList(array);
     }
 
     public static void toLowerCase(String[] array) {
@@ -285,6 +302,26 @@ public class ArrayUtil {
             }
         }
         return array;
+    }
+
+    /**
+     * 移除指定数组中的null值，去重后，进行排序
+     *
+     * @param array 数组
+     * @param <T>   可排序的元素类型
+     * @return 处理后得到的集合
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T extends Comparable> List<T> sortValidly(T[] array) {
+        Set<T> set = new HashSet<>();
+        for (T obj : array) {
+            if (obj != null) {
+                set.add(obj);
+            }
+        }
+        List<T> list = new ArrayList<>(set);
+        Collections.sort(list);
+        return list;
     }
 
 }
