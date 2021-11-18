@@ -1,6 +1,7 @@
 <template>
     <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
-        <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
+        <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]"
+            :data-value="item[valueName]">
             <i :class="item[iconName]" v-if="item[iconName]"></i>
             <span>{{ item[textName] }}</span>
         </el-checkbox>
@@ -15,7 +16,8 @@
                 {{ emptyText }}
             </el-button>
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
-                :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" @click="select(item[valueName])">
+                :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" :data-value="item[valueName]"
+                @click="select(item[valueName])">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
             </el-tag>
@@ -31,7 +33,7 @@
                 {{ emptyText }}
             </el-button>
             <el-button v-for="item in items" :key="item[valueName]" :type="isSelected(item[valueName]) ? '' : 'text'"
-                :size="size" plain @click="select(item[valueName], $event)">
+                :size="size" :data-value="item[valueName]" plain @click="select(item[valueName], $event)">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
             </el-button>
@@ -44,15 +46,16 @@
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio>
-        <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]">
+        <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]" :data-value="item[valueName]">
             <i :class="item[iconName]" v-if="item[iconName]"></i>
             <span>{{ item[textName] }}</span>
         </el-radio>
     </el-radio-group>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio-button'">
-        <el-radio-button :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio-button>
-        <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]">
+        <el-radio-button :class="emptyClass" :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
+        <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]"
+            :data-value="item[valueName]">
             <i :class="item[iconName]" v-if="item[iconName]"></i>
             <span>{{ item[textName] }}</span>
         </el-radio-button>
@@ -66,7 +69,8 @@
         </el-button>
         <template #dropdown v-if="items && items.length">
             <el-dropdown-menu>
-                <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
+                <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]"
+                    :data-value="item[valueName]">
                     <i :class="item[iconName]" v-if="item[iconName]"></i>
                     <span>{{ item[textName] }}</span>
                 </el-dropdown-item>
@@ -78,7 +82,8 @@
         <span>{{ currentText }}</span>
         <template #dropdown v-if="items && items.length">
             <el-dropdown-menu>
-                <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]">
+                <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]"
+                    :data-value="item[valueName]">
                     <i :class="item[iconName]" v-if="item[iconName]"></i>
                     <span>{{ item[textName] }}</span>
                 </el-dropdown-item>
@@ -90,7 +95,7 @@
         <el-option class="text-muted" :value="emptyValue" :label="emptyText" :class="emptyClass" v-if="empty"/>
         <template v-for="item in items">
             <el-option :key="item[valueName]" :value="item[valueName]" :label="item[textName]"
-                v-if="!hiddenValues.contains(item[valueName])">
+                :data-value="item[valueName]" v-if="!hiddenValues.contains(item[valueName])">
                 <slot name="option" :item="item"></slot>
             </el-option>
         </template>
