@@ -656,3 +656,11 @@ el-card {
 .el-input-group__append, .el-input-group__prepend {
     padding: 0 1rem;
 }
+
+.el-input__inner {
+    padding: 0 0.75rem;
+}
+
+.el-textarea__inner {
+    padding: 0.5rem 0.75rem;
+}
