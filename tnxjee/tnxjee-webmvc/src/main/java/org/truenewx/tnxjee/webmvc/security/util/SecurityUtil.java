@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -28,7 +29,7 @@ public class SecurityUtil {
     private SecurityUtil() {
     }
 
-    public static void setAuthorizedUserDetails(UserSpecificDetails<?> userDetails) {
+    private static void setAuthorizedUserDetails(UserSpecificDetails<?> userDetails) {
         Authentication authentication = getAuthentication();
         if (authentication instanceof AbstractAuthenticationToken) {
             AbstractAuthenticationToken token = (AbstractAuthenticationToken) authentication;
@@ -57,6 +58,26 @@ public class SecurityUtil {
             return GET_DETAIL_FUNCTION.apply(authentication);
         }
         return null;
+    }
+
+    /**
+     * 确保用户细节已授权使用，以便完成与授权用户细节环境上下文有关的处理动作，如果当前未正式授权则构建临时授权，且在使用后废弃临时授权
+     *
+     * @param userDetails 用户细节
+     * @param consumer    处理动作
+     * @param <D>         用户细节类型
+     */
+    public static <D extends UserSpecificDetails<?>> void ensureAuthorizedUserDetails(D userDetails,
+            Consumer<D> consumer) {
+        boolean clearUserDetails = false;
+        if (getAuthorizedUserDetails() == null) {
+            setAuthorizedUserDetails(userDetails);
+            clearUserDetails = true;
+        }
+        consumer.accept(userDetails);
+        if (clearUserDetails) {
+            SecurityUtil.setAuthorizedUserDetails(null);
+        }
     }
 
     public static Authentication getAuthentication() {
