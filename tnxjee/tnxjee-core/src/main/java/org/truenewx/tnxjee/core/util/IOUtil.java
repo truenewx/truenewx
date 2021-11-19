@@ -1,6 +1,17 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +37,7 @@ public class IOUtil {
     /**
      * 文件路径分隔符
      */
-    public static final String FILE_SEPARATOR = System.getProperties()
-            .getProperty("file.separator");
+    public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 
     private IOUtil() {
     }
@@ -67,8 +77,7 @@ public class IOUtil {
      * @return 结果字符串
      * @throws IOException 如果读取过程中出现错误
      */
-    public static String readUnblocklyToString(InputStream in, String charsetName)
-            throws IOException {
+    public static String readUnblocklyToString(InputStream in, String charsetName) throws IOException {
         return readUnblocklyToString(new BufferedReader(new InputStreamReader(in, charsetName)));
     }
 
@@ -192,8 +201,8 @@ public class IOUtil {
         basename = basename.replace('\\', '/');
         // 把basename中classpath:替换为classpath*:后进行查找
         StringBuilder searchBasename = new StringBuilder(
-                basename.replace(ResourceUtils.CLASSPATH_URL_PREFIX,
-                        ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)).append(Strings.ASTERISK);
+                basename.replace(ResourceUtils.CLASSPATH_URL_PREFIX, ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX))
+                        .append(Strings.ASTERISK);
         if (!extension.startsWith(Strings.DOT)) {
             searchBasename.append(Strings.DOT);
         }
@@ -206,8 +215,7 @@ public class IOUtil {
             for (Resource resource : resources) {
                 String fileName = resource.getFilename();
                 String[] fileNameArray = fileName.split(Strings.UNDERLINE);
-                if (StringUtils.indexOfIgnoreCase(fileName,
-                        locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
+                if (StringUtils.indexOfIgnoreCase(fileName, locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
                     result = resource;
                     break;
                 } else if (StringUtils.indexOfIgnoreCase(fileName, locale.getLanguage(), 0) >= 0) {
@@ -232,8 +240,7 @@ public class IOUtil {
      * @param extension 文件扩展名，句点包含与否均可
      * @return 找到的文件，如果没找到则返回null
      */
-    public static File findI18nFileByDir(String baseDir, String basename, String extension,
-            Locale locale) {
+    public static File findI18nFileByDir(String baseDir, String basename, String extension, Locale locale) {
         StringBuilder searchFileName = new StringBuilder(basename).append(Strings.ASTERISK);
         if (!extension.startsWith(Strings.DOT)) {
             searchFileName.append(Strings.DOT);
@@ -247,12 +254,11 @@ public class IOUtil {
             for (File file : resultList) {
                 String resultFileName = file.getName();
                 String[] fileNameArray = resultFileName.split(Strings.UNDERLINE);
-                if (StringUtils.indexOfIgnoreCase(resultFileName,
-                        locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
+                if (StringUtils.indexOfIgnoreCase(resultFileName, locale.getLanguage() + "_" + locale.getCountry(),
+                        0) >= 0) {
                     returnFile = file;
                     break;
-                } else if (StringUtils.indexOfIgnoreCase(resultFileName, locale.getLanguage(),
-                        0) >= 0) {
+                } else if (StringUtils.indexOfIgnoreCase(resultFileName, locale.getLanguage(), 0) >= 0) {
                     returnFile = file;
                 } else if (returnFile == null && fileNameArray.length == 1) {
                     returnFile = file;
@@ -309,8 +315,7 @@ public class IOUtil {
             if (ch == '*') {
                 // 通配符星号*表示可以匹配任意多个字符
                 while (strIndex < strLength) {
-                    if (wildcardMatch(pattern.substring(patternIndex + 1),
-                            str.substring(strIndex))) {
+                    if (wildcardMatch(pattern.substring(patternIndex + 1), str.substring(strIndex))) {
                         return true;
                     }
                     strIndex++;
@@ -340,13 +345,14 @@ public class IOUtil {
 
     public static boolean copyFile(File source, File target) {
         if (source.exists()) {
-            FileChannel in = null;
-            FileChannel out = null;
+            FileInputStream in = null;
+            FileOutputStream out = null;
             try {
                 createFile(target);
-                in = new FileInputStream(source).getChannel();
-                out = new FileOutputStream(target).getChannel();
-                out.transferFrom(in, 0, in.size());
+                in = new FileInputStream(source);
+                FileChannel inChannel = in.getChannel();
+                out = new FileOutputStream(target);
+                out.getChannel().transferFrom(inChannel, 0, inChannel.size());
                 return true;
             } catch (IOException e) {
                 LogUtil.error(IOUtil.class, e);
