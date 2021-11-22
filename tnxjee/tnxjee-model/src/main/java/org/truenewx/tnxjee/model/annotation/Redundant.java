@@ -10,7 +10,7 @@ import org.truenewx.tnxjee.core.Strings;
  * @author jianglei
  */
 @Documented
-@Target(ElementType.FIELD)
+@Target({ ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Redundant {
