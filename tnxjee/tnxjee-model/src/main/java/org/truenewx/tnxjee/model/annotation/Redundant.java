@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 import org.truenewx.tnxjee.core.Strings;
 
 /**
- * 标注属性冗余
+ * 标注冗余
  *
  * @author jianglei
  */
