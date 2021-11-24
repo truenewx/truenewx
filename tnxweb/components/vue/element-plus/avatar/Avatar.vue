@@ -115,4 +115,8 @@ export default {
     align-items: center;
     justify-content: center;
 }
+
+.el-avatar img {
+    background-color: white;
+}
 </style>
