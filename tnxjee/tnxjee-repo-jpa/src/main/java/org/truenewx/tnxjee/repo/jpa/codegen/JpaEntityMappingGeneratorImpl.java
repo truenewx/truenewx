@@ -39,13 +39,10 @@ import org.truenewx.tnxjee.model.entity.Entity;
 import org.truenewx.tnxjee.model.entity.relation.RelationKey;
 import org.truenewx.tnxjee.model.spec.enums.Ethnicity;
 import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
-import org.truenewx.tnxjee.repo.jpa.converter.IntArrayAttributeConverter;
-import org.truenewx.tnxjee.repo.jpa.converter.LongArrayAttributeConverter;
-import org.truenewx.tnxjee.repo.jpa.converter.MapToJsonAttributeConverter;
-import org.truenewx.tnxjee.repo.jpa.converter.StringArrayAttributeConverter;
+import org.truenewx.tnxjee.repo.jpa.converter.*;
 import org.truenewx.tnxjee.repo.jpa.converter.spec.DefaultUserIdentityAttributeConverter;
 import org.truenewx.tnxjee.repo.jpa.converter.spec.EthnicityConverter;
-import org.truenewx.tnxjee.repo.jpa.converter.spec.HttpRequestMethodAttributeConverter;
+import org.truenewx.tnxjee.repo.jpa.converter.spec.HttpRequestMethodConverter;
 
 /**
  * JPA实体映射文件生成器实现
@@ -154,7 +151,12 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
                                     field.getName());
                             JpaEntityColumn column = getColumn(metaData, tableName, field, null);
                             addColumnElement(basicElement, column, true);
-                            addConvertElement(basicElement, basicConverter.getRight());
+                            String converter = basicConverter.getRight();
+                            // 字段类型为Instant时，数据类型为bigint的，才生成属性转换器配置
+                            if (fieldType == Instant.class && !column.getDefinition().startsWith("bigint")) {
+                                converter = null;
+                            }
+                            addConvertElement(basicElement, converter);
                         } else { // 引用字段暂存，在所有简单字段类型生成后，再最后生成关联关系配置，以符合映射文件xml约束
                             refFields.add(field);
                         }
@@ -316,11 +318,14 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
     }
 
     private String getConverter(Class<?> fieldType) throws Exception {
+        if (fieldType == Instant.class) {
+            return InstantMillisAttributeConverter.class.getName();
+        }
         if (fieldType == Ethnicity.class) {
             return EthnicityConverter.class.getName();
         }
         if (fieldType == HttpRequestMethod.class) {
-            return HttpRequestMethodAttributeConverter.class.getName();
+            return HttpRequestMethodConverter.class.getName();
         }
         if (fieldType == DefaultUserIdentity.class) {
             return DefaultUserIdentityAttributeConverter.class.getName();

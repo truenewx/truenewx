@@ -10,7 +10,8 @@ import org.truenewx.tnxjee.core.util.tuple.NumberRange;
  *
  * @param <T> 数值类型
  */
-public abstract class NumberRangeConverter<T extends Number> implements AttributeConverter<NumberRange<T>, String> {
+public abstract class NumberRangeAttributeConverter<T extends Number>
+        implements AttributeConverter<NumberRange<T>, String> {
 
     @Override
     public String convertToDatabaseColumn(NumberRange<T> attribute) {

@@ -5,5 +5,5 @@ import java.math.BigDecimal;
 /**
  * BigDecimal范围属性转换器
  */
-public class BigDecimalRangeConverter extends NumberRangeConverter<BigDecimal> {
+public class BigDecimalRangeAttributeConverter extends NumberRangeAttributeConverter<BigDecimal> {
 }
