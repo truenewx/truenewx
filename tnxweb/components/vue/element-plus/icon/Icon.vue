@@ -105,10 +105,6 @@ export default {
         size: Number,
         width: [Number, String],
         height: [Number, String],
-        center: {
-            type: Boolean,
-            default: false,
-        }
     },
     computed: {
         className() {
@@ -116,9 +112,6 @@ export default {
                 let className = 'tnxel-icon-' + this.type;
                 if (this.type === 'Loading') {
                     className += ' is-loading';
-                }
-                if (this.center) {
-                    className += ' flex-center';
                 }
                 return className;
             } else if (this.type === 'loading') {

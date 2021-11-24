@@ -44,21 +44,23 @@ export default {
     },
     computed: {
         style() {
+            let style = {
+                'min-width': this.size + 'px',
+                'min-height': this.size + 'px',
+            };
             if (this.preview && this.src) {
-                return {
+                Object.assign(style, {
                     width: this.size + 'px',
                     height: this.size + 'px',
                     'font-size': (this.size / 2) + 'px',
-                };
+                });
             } else {
-                let style = {
-                    'font-size': (this.size / 2) + 'px',
-                };
+                style['font-size'] = (this.size / 2) + 'px';
                 if (this.src) {
                     style['background-color'] = 'transparent';
                 }
-                return style;
             }
+            return style;
         }
     },
     watch: {

@@ -664,3 +664,10 @@ el-card {
 .el-textarea__inner {
     padding: 0.5rem 0.75rem;
 }
+
+/*
+ * 修正Bootstrap造成的影响
+ */
+i svg {
+    vertical-align: unset;
+}
