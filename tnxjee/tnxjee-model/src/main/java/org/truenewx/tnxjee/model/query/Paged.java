@@ -52,20 +52,16 @@ public class Paged extends Pagination {
         return this.total != null && this.total >= 0;
     }
 
-    public int getPageCount() {
-        if (isPageable()) {
-            if (isCountable()) {
-                int pageSize = getPageSize();
-                int pageCount = (int) (this.total / pageSize);
-                if (this.total % pageSize != 0) {
-                    pageCount++;
-                }
-                return pageCount;
-            } else if (!this.morePage) { // 无总数但没有更多页时，当前页码即为总页数
-                return getPageNo();
+    public Integer getPageCount() {
+        if (isPageable() && isCountable()) {
+            int pageSize = getPageSize();
+            int pageCount = (int) (this.total / pageSize);
+            if (this.total % pageSize != 0) {
+                pageCount++;
             }
+            return pageCount;
         }
-        return 0;
+        return null;
     }
 
     public int getPreviousPage() {
@@ -73,10 +69,13 @@ public class Paged extends Pagination {
         return pageNo <= 1 ? 1 : (pageNo - 1);
     }
 
-    public int getNextPage() {
+    public Integer getNextPage() {
+        Integer pageCount = getPageCount();
+        if (pageCount == null) {
+            return null;
+        }
         int pageNo = getPageNo();
-        int pageCount = getPageCount();
-        return (this.total >= 0 && pageNo >= pageCount) ? pageCount : (pageNo + 1);
+        return pageNo >= pageCount ? pageCount : (pageNo + 1);
     }
 
 }
