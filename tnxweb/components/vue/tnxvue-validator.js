@@ -4,6 +4,7 @@
  * async-validator组件详见：https://github.com/yiminghe/async-validator
  */
 import validator from '../tnxcore-validator';
+import AsyncValidator from 'async-validator';
 
 const regExps = {
     number: /^-?([1-9]\d{0,2}((,?\d{3})*|\d*)(\.\d*)?|0?\.\d*|0)$/,
@@ -324,5 +325,8 @@ export default {
     validateRegExp,
     getRule,
     getRules,
-    getErrorMessage: validator.getErrorMessage
+    getErrorMessage: validator.getErrorMessage,
+    validate: function(rules, source, callback) {
+        return new AsyncValidator(rules).validate(source, callback);
+    },
 }
