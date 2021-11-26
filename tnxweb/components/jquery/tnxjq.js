@@ -26,6 +26,7 @@ $.fn.scrollVisible = function(handler, offset) {
         }
     }
     window.addEventListener('scroll', fn);
+    $(document).ready(fn);
 }
 
 const tnxjq = $.extend({}, tnxcore, {
