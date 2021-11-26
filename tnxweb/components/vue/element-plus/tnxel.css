@@ -18,10 +18,6 @@
     background-color: white !important;
 }
 
-.border-white {
-    border-color: white !important;
-}
-
 .text-regular {
     color: var(--el-text-color-regular) !important;
 }
