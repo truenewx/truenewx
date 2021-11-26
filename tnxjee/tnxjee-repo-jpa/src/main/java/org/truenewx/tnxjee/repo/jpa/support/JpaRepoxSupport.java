@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.model.entity.Entity;
-import org.truenewx.tnxjee.model.query.FieldOrder;
-import org.truenewx.tnxjee.model.query.Paging;
-import org.truenewx.tnxjee.model.query.QueryIgnoring;
-import org.truenewx.tnxjee.model.query.QueryResult;
+import org.truenewx.tnxjee.model.query.*;
 import org.truenewx.tnxjee.repo.jpa.JpaRepox;
 import org.truenewx.tnxjee.repo.jpa.util.OqlUtil;
 import org.truenewx.tnxjee.repo.support.RepoxSupport;
@@ -77,6 +74,17 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
                     recordQl = recordQl + orderString;
                 }
             }
+            
+            // 分页查询但未指定取数语句，未取总数，则多查询一条记录，以判断是否还有更多数据
+            if (pageSize > 0 && totalQl == null) {
+                records = getAccessTemplate().listWithOneMore(recordQl, params, pageSize, pageNo);
+                boolean morePage = records.size() > pageSize;
+                if (morePage) {
+                    records.remove(records.size() - 1);
+                }
+                return new QueryResult<>(records, new Paged(pageSize, pageNo, morePage));
+            }
+
             records = getAccessTemplate().list(recordQl, params, pageSize, pageNo);
             if (pageSize <= 0) { // 非分页查询，总数为结果记录条数
                 total = (long) records.size();
@@ -85,8 +93,8 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return QueryResult.of(records, pageSize, pageNo, total, orders);
     }
 
-    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, QueryIgnoring ignoring,
-            int pageSize, int pageNo, List<FieldOrder> orders) {
+    protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, int pageSize, int pageNo,
+            List<FieldOrder> orders, QueryIgnoring ignoring) {
         String totalQl = null;
         if (pageSize > 0 && ignoring != QueryIgnoring.TOTAL) {
             totalQl = ql.toString();
@@ -100,14 +108,14 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
 
     protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, Paging paging) {
         if (paging == null) {
-            return query(ql, params, null, 0, 1, null);
+            return query(ql, params, 0, 1, null, null);
         }
-        return query(ql, params, paging.getIgnoring(), paging.getPageSize(), paging.getPageNo(), paging.getOrders());
+        return query(ql, params, paging.getPageSize(), paging.getPageNo(), paging.getOrders(), paging.getIgnoring());
     }
 
     protected <E> QueryResult<E> query(CharSequence ql, Map<String, Object> params, int pageSize, int pageNo,
             FieldOrder... orders) {
-        return query(ql, params, null, pageSize, pageNo, Arrays.asList(orders));
+        return query(ql, params, pageSize, pageNo, Arrays.asList(orders), null);
     }
 
     protected final String getTableName() {
