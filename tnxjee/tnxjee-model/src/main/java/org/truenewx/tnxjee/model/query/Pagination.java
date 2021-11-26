@@ -123,4 +123,15 @@ public class Pagination implements Serializable {
         }
     }
 
+    public Boolean getOrderDesc(String filedName) {
+        if (this.orders != null) {
+            for (FieldOrder order : this.orders) {
+                if (order.getName().equals(filedName)) {
+                    return order.isDesc();
+                }
+            }
+        }
+        return null;
+    }
+
 }
