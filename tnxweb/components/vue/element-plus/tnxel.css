@@ -181,6 +181,10 @@
     margin-bottom: 1rem;
 }
 
+.el-alert.w-100 .el-alert__content {
+    width: 100%;
+}
+
 .el-form-item {
     margin-bottom: 1rem;
 }

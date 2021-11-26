@@ -45,6 +45,10 @@ a.plain:focus {
     width: fit-content !important;
 }
 
+.h-fit-content {
+    height: fit-content !important;
+}
+
 .fs-1r,
 .fs-base {
     font-size: 1rem !important;
@@ -88,7 +92,7 @@ ul {
     line-height: 1rem;
 }
 
-span.nowrap {
+.nowrap {
     white-space: nowrap;
 }
 
