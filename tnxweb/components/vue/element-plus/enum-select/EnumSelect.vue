@@ -112,6 +112,13 @@ export default {
                 }
             }
         },
+        getText(value) {
+            // 暂不支持分组枚举类型
+            if (this.$refs.select) {
+                return this.$refs.select.getText(value);
+            }
+            return undefined;
+        },
     }
 }
 </script>

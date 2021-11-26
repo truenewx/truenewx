@@ -213,6 +213,12 @@ export default {
             }
         },
         getItem(value) {
+            if (this.empty && value === this.emptyValue) {
+                let item = {};
+                item[this.valueName] = this.emptyValue;
+                item[this.textName] = this.emptyText;
+                return item;
+            }
             if (value !== undefined && value !== null && this.items) {
                 for (let item of this.items) {
                     if ((item[this.valueName] + '') === (value + '')) {
@@ -221,6 +227,10 @@ export default {
                 }
             }
             return undefined;
+        },
+        getText(value) {
+            let item = this.getItem(value);
+            return item ? item[this.textName] : undefined;
         },
         getModel(items) {
             let model = this.modelValue || this.defaultValue;
