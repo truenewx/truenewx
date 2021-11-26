@@ -152,7 +152,3 @@ pre {
 .border-transparent {
     border-color: transparent !important;
 }
-
-.fixed-top {
-    z-index: 10000;
-}
