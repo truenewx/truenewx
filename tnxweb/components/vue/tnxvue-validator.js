@@ -125,12 +125,31 @@ function getRule(validationName, validationValue, fieldMeta) {
             if (validationValue === true) {
                 rule = {
                     validator(r, fieldValue, callback, source, options) {
-                        if (validationValue && fieldValue) {
+                        if (fieldValue) {
                             let limitedValues = ['<', '>', '\'', '"', '\\'];
                             for (let i = 0; i < limitedValues.length; i++) {
                                 if (fieldValue.indexOf(limitedValues[i]) >= 0) {
                                     let s = limitedValues.join(' ');
                                     let message = validator.getErrorMessage('notContains', fieldCaption, s);
+                                    return callback(new Error(message));
+                                }
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
+        case 'notContains':
+            if (validationValue) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (fieldValue) {
+                            let limitedValues = validationValue.split(' ');
+                            for (let i = 0; i < limitedValues.length; i++) {
+                                if (fieldValue.indexOf(limitedValues[i]) >= 0) {
+                                    let message = validator.getErrorMessage('notContains', fieldCaption,
+                                        validationValue);
                                     return callback(new Error(message));
                                 }
                             }
