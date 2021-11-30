@@ -27,6 +27,10 @@
     color: var(--el-text-color-secondary) !important;
 }
 
+.text-normal {
+    color: var(--el-text-color-primary) !important;
+}
+
 .bg-muted {
     background-color: var(--el-color-info-lighter) !important;
 }
