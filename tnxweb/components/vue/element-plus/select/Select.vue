@@ -339,8 +339,7 @@ export default {
 .tnxel-tag-group .el-button,
 .tnxel-text-button-group .el-button {
     padding: 0.5rem 0.75rem;
-    margin-left: 0;
-    margin-right: 0.5rem;
+    margin: 2px 0.5rem 2px 0;
 }
 
 .tnxel-tag-group .el-button__text--expand,
@@ -363,5 +362,10 @@ export default {
 .tnxel-text-button-group .el-button--default {
     border-color: var(--el-color-primary);
     color: var(--el-color-primary);
+}
+
+.el-form-item__content > .tnxel-text-button-group {
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 </style>
