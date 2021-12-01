@@ -21,10 +21,10 @@
         <el-button :type="type" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
             <tnxel-icon :type="icon" v-if="icon"/>
-            <template v-if="!hiddenCaption">
+            <span v-if="!hiddenCaption">
                 <slot v-if="$slots.default"></slot>
                 <template v-else-if="menuItem">{{ menuItem.caption }}</template>
-            </template>
+            </span>
         </el-button>
     </el-tooltip>
 </template>
