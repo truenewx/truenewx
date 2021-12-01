@@ -5,7 +5,8 @@
             :row-class-name="rowClassName" @cell-click="selectRow">
             <el-table-column header-align="center" align="center" width="50px" v-if="selectable">
                 <template #header>
-                    <el-checkbox v-if="selectable === 'all'"/>
+                    <el-checkbox :model-value="pageAllSelected" :indeterminate="allSelectedIndeterminate"
+                        @change="selectAll" v-if="selectable === 'all'"/>
                     <span v-else>选择</span>
                 </template>
                 <template #default="scope">
@@ -122,6 +123,28 @@ export default {
             }
             return undefined;
         },
+        pageAllSelected() {
+            let selected = null;
+            for (let i = 0; i < this.records.length; i++) {
+                if (selected == null) {
+                    selected = this.pageSelectedIndexes[i];
+                } else if (selected !== this.pageSelectedIndexes[i]) {
+                    return null;
+                }
+            }
+            return selected;
+        },
+        allSelectedIndeterminate() {
+            if (this.records?.length) {
+                let firstSelected = this.pageSelectedIndexes[0];
+                for (let i = 1; i < this.records.length; i++) {
+                    if (this.pageSelectedIndexes[i] !== firstSelected) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     },
     watch: {
         modelValue(value) {
@@ -198,6 +221,13 @@ export default {
                 if (index >= 0) {
                     this.pageSelectedIndexes[index] = !this.pageSelectedIndexes[index];
                     this.selectPageToAll();
+                }
+            }
+        },
+        selectAll(selected) {
+            if (this.records?.length) {
+                for (let i = 0; i < this.records.length; i++) {
+                    this.pageSelectedIndexes[i] = selected;
                 }
             }
         },
