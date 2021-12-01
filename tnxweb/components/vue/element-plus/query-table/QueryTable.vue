@@ -3,7 +3,7 @@
         <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
             :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSort"
             :row-class-name="rowClassName" @cell-click="selectRow">
-            <el-table-column header-align="center" align="center" width="50px" v-if="selectable">
+            <el-table-column class="select-column" header-align="center" align="center" width="50px" v-if="selectable">
                 <template #header>
                     <el-checkbox :model-value="pageAllSelected" :indeterminate="allSelectedIndeterminate"
                         @change="selectAll" v-if="selectable === 'all'"/>
@@ -124,15 +124,18 @@ export default {
             return undefined;
         },
         pageAllSelected() {
-            let selected = null;
-            for (let i = 0; i < this.records.length; i++) {
-                if (selected == null) {
-                    selected = this.pageSelectedIndexes[i];
-                } else if (selected !== this.pageSelectedIndexes[i]) {
-                    return null;
+            if (this.records?.length) {
+                let selected = null;
+                for (let i = 0; i < this.records.length; i++) {
+                    if (selected == null) {
+                        selected = this.pageSelectedIndexes[i];
+                    } else if (selected !== this.pageSelectedIndexes[i]) {
+                        return null;
+                    }
                 }
+                return selected;
             }
-            return selected;
+            return false;
         },
         allSelectedIndeterminate() {
             if (this.records?.length) {
@@ -149,6 +152,9 @@ export default {
     watch: {
         modelValue(value) {
             this.params = this.getParams(value);
+        },
+        allSelectedRecords() {
+            this.$emit('update:selected', this.allSelectedRecords);
         },
     },
     methods: {
@@ -170,6 +176,9 @@ export default {
             } else if (typeof params === 'object') {
                 this.params = this.getParams(params);
                 this.params.pageNo = this.params.pageNo || 1;
+                // 带查询条件参数对象的为全新查询，清空已选清单
+                this.pageSelectedIndexes = [];
+                this.allSelectedRecords = [];
             }
 
             this.records = null;
@@ -246,7 +255,6 @@ export default {
                     this.allSelectedRecords.remove(fnEquals);
                 }
             }
-            this.$emit('update:selected', this.allSelectedRecords);
         },
         selectAllToPage() {
             if (this.selectable) {
@@ -273,4 +281,15 @@ export default {
 .tnxel-query-table.selectable .el-table__row {
     cursor: pointer;
 }
+
+.tnxel-query-table.selectable .el-checkbox {
+    height: auto;
+}
+
+.tnxel-query-table.selectable .el-table__cell:first-child .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 </style>
