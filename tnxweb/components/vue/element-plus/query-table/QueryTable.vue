@@ -89,25 +89,42 @@ export default {
             }
         },
         defaultSort() {
-            if (this.paged && this.paged.orders && this.paged.orders.length) {
-                let fieldOrder = this.paged.orders[0];
-                return {
-                    prop: fieldOrder.name,
-                    order: fieldOrder.desc ? 'descending' : 'ascending',
-                };
+            let sortableColumnNames = [];
+            if (this.$slots.default) {
+                let columns = this.$slots.default();
+                for (let column of columns) {
+                    if (column.props.prop && column.props.sortable === 'custom') {
+                        sortableColumnNames.push(column.props.prop);
+                    }
+                }
             }
-            if (this.params && this.params.orderBy) {
-                let array = this.params.orderBy.split(' ');
-                return {
-                    prop: array[0],
-                    order: (array[1] || 'asc').toLowerCase() === 'desc' ? 'descending' : 'ascending',
+            if (sortableColumnNames.length) {
+                if (this.paged && this.paged.orders && this.paged.orders.length) {
+                    let fieldOrder = this.paged.orders[0];
+                    let fieldName = fieldOrder.name;
+                    if (sortableColumnNames.contains(fieldName)) {
+                        return {
+                            prop: fieldName,
+                            order: fieldOrder.desc ? 'descending' : 'ascending',
+                        };
+                    }
+                }
+                if (this.params && this.params.orderBy) {
+                    let array = this.params.orderBy.split(' ');
+                    let fieldName = array[0];
+                    if (sortableColumnNames.contains(fieldName)) {
+                        return {
+                            prop: fieldName,
+                            order: (array[1] || 'asc').toLowerCase() === 'desc' ? 'descending' : 'ascending',
+                        }
+                    }
                 }
             }
             return undefined;
         },
     },
     watch: {
-        value(value) {
+        modelValue(value) {
             this.params = this.getParams(value);
         },
     },
@@ -202,16 +219,18 @@ export default {
             this.$emit('update:selected', this.allSelectedRecords);
         },
         selectAllToPage() {
-            let vm = this;
-            if (!Array.isArray(this.allSelectedRecords)) {
-                this.allSelectedRecords = [this.allSelectedRecords];
-            }
-            this.pageSelectedIndexes = [];
-            for (let selectedRecord of this.allSelectedRecords) {
-                for (let i = 0; i < this.records.length; i++) {
-                    let record = this.records[i];
-                    if (record[vm.selectName] === selectedRecord[vm.selectName]) {
-                        this.pageSelectedIndexes[i] = true;
+            if (this.selectable) {
+                let vm = this;
+                if (!Array.isArray(this.allSelectedRecords)) {
+                    this.allSelectedRecords = [this.allSelectedRecords];
+                }
+                this.pageSelectedIndexes = [];
+                for (let selectedRecord of this.allSelectedRecords) {
+                    for (let i = 0; i < this.records.length; i++) {
+                        let record = this.records[i];
+                        if (record[vm.selectName] === selectedRecord[vm.selectName]) {
+                            this.pageSelectedIndexes[i] = true;
+                        }
                     }
                 }
             }
