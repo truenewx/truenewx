@@ -238,6 +238,7 @@ export default {
                 for (let i = 0; i < this.records.length; i++) {
                     this.pageSelectedIndexes[i] = selected;
                 }
+                this.selectPageToAll();
             }
         },
         selectPageToAll() {
@@ -255,6 +256,7 @@ export default {
                     this.allSelectedRecords.remove(fnEquals);
                 }
             }
+            this.$emit('update:selected', this.allSelectedRecords);
         },
         selectAllToPage() {
             if (this.selectable) {
