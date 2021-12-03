@@ -3,11 +3,13 @@ package org.truenewx.tnxjee.repo.jpa.converter;
 import java.time.Instant;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
  * Instant-毫秒数的属性转换器
  */
-public class InstantMillisAttributeConverter implements AttributeConverter<Instant, Long> {
+@Converter
+public class InstantMillisSecondNumberAttributeConverter implements AttributeConverter<Instant, Long> {
 
     @Override
     public Long convertToDatabaseColumn(Instant attribute) {

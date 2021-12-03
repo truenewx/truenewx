@@ -319,7 +319,7 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
 
     private String getConverter(Class<?> fieldType) throws Exception {
         if (fieldType == Instant.class) {
-            return InstantMillisAttributeConverter.class.getName();
+            return InstantZonedMillisSecondStringAttributeConverter.class.getName();
         }
         if (fieldType == Ethnicity.class) {
             return EthnicityConverter.class.getName();
