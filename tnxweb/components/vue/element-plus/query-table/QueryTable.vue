@@ -140,6 +140,9 @@ export default {
         allSelectedIndeterminate() {
             if (this.records?.length) {
                 let firstSelected = this.pageSelectedIndexes[0];
+                if (this.records.length === 1) {
+                    return firstSelected;
+                }
                 for (let i = 1; i < this.records.length; i++) {
                     if (this.pageSelectedIndexes[i] !== firstSelected) {
                         return true;
