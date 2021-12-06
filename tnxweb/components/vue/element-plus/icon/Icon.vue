@@ -19,11 +19,15 @@
         <InfoFilled v-else-if="type === 'InfoFilled'"/>
         <OfficeBuilding v-else-if="type === 'OfficeBuilding'"/>
         <Plus v-else-if="type === 'Plus'"/>
+        <Pointer v-else-if="type === 'Pointer'"/>
         <QuestionFilled v-else-if="type === 'QuestionFilled'"/>
+        <Rank v-else-if="type === 'Rank'"/>
         <Right v-else-if="type === 'Right'"/>
         <Search v-else-if="type === 'Search'"/>
         <Select v-else-if="type === 'Select'"/>
         <Setting v-else-if="type === 'Setting'"/>
+        <Sort v-else-if="type === 'Sort'"/>
+        <SuccessFilled v-else-if="type === 'SuccessFilled'"/>
         <Top v-else-if="type === 'Top'"/>
         <UserFilled v-else-if="type === 'UserFilled'"/>
         <View v-else-if="type === 'View'"/>
@@ -52,11 +56,14 @@ import {
     Loading,
     OfficeBuilding,
     Plus,
+    Pointer,
     QuestionFilled,
+    Rank,
     Right,
     Search,
     Select,
     Setting,
+    Sort,
     SuccessFilled,
     Top,
     UserFilled,
@@ -84,11 +91,14 @@ const components = {
     Loading,
     OfficeBuilding,
     Plus,
+    Pointer,
     QuestionFilled,
+    Rank,
     Right,
     Search,
     Select,
     Setting,
+    Sort,
     SuccessFilled,
     Top,
     UserFilled,
