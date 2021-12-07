@@ -1,7 +1,7 @@
 <template>
     <div class="tnxel-query-table">
         <el-table :data="records" :empty-text="emptyRecordText" :size="size" :border="border" :stripe="stripe"
-            @sort-change="sort" :default-sort="defaultSort" :key="defaultSort" :row-class-name="rowClassName">
+            @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString" :row-class-name="rowClassName">
             <slot></slot>
         </el-table>
         <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged"/>
@@ -56,19 +56,42 @@ export default {
             }
         },
         defaultSort() {
-            if (this.paged && this.paged.orders && this.paged.orders.length) {
-                let fieldOrder = this.paged.orders[0];
-                return {
-                    prop: fieldOrder.name,
-                    order: fieldOrder.desc ? 'descending' : 'ascending',
-                };
-            }
-            if (this.params && this.params.orderBy) {
-                let array = this.params.orderBy.split(' ');
-                return {
-                    prop: array[0],
-                    order: (array[1] || 'asc').toLowerCase() === 'desc' ? 'descending' : 'ascending',
+            let sortableColumnNames = [];
+            if (this.$slots.default?.length) {
+                for (let column of this.$slots.default) {
+                    let props = column.componentOptions.propsData;
+                    if (props.prop && props.sortable === 'custom') {
+                        sortableColumnNames.push(props.prop);
+                    }
                 }
+            }
+            if (sortableColumnNames.length) {
+                if (this.paged && this.paged.orders && this.paged.orders.length) {
+                    let fieldOrder = this.paged.orders[0];
+                    let fieldName = fieldOrder.name;
+                    if (sortableColumnNames.contains(fieldName)) {
+                        return {
+                            prop: fieldName,
+                            order: fieldOrder.desc ? 'descending' : 'ascending',
+                        };
+                    }
+                }
+                if (this.params && this.params.orderBy) {
+                    let array = this.params.orderBy.split(' ');
+                    let fieldName = array[0];
+                    if (sortableColumnNames.contains(fieldName)) {
+                        return {
+                            prop: fieldName,
+                            order: (array[1] || 'asc').toLowerCase() === 'desc' ? 'descending' : 'ascending',
+                        }
+                    }
+                }
+            }
+            return undefined;
+        },
+        defaultSortString() {
+            if (this.defaultSort) {
+                return this.defaultSort.prop + ' ' + this.defaultSort.order;
             }
             return undefined;
         },
