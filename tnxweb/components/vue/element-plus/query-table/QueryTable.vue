@@ -1,7 +1,7 @@
 <template>
     <div class="tnxel-query-table" :class="{selectable: selectable}">
         <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
-            :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSort"
+            :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
             :row-class-name="rowClassName" @cell-click="selectRow">
             <el-table-column class="select-column" header-align="center" align="center" width="50px" v-if="selectable">
                 <template #header>
@@ -120,6 +120,12 @@ export default {
                         }
                     }
                 }
+            }
+            return undefined;
+        },
+        defaultSortString() {
+            if (this.defaultSort) {
+                return this.defaultSort.prop + ' ' + this.defaultSort.order;
             }
             return undefined;
         },

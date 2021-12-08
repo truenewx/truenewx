@@ -21,9 +21,8 @@
         <el-button :type="type" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
             <tnxel-icon :type="icon" v-if="icon"/>
-            <span v-if="!hiddenCaption">
-                <slot v-if="$slots.default"></slot>
-                <template v-else-if="menuItem">{{ menuItem.caption }}</template>
+            <span v-if="!hiddenCaption && ($slots.default || menuItem)">
+                <slot>{{ menuItem ? menuItem.caption : '' }}</slot>
             </span>
         </el-button>
     </el-tooltip>

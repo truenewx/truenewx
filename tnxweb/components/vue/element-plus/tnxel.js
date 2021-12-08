@@ -10,12 +10,14 @@ import $ from 'jquery';
 import Avatar from './avatar/Avatar';
 import Alert from './alert/Alert';
 import Button from './button/Button';
+import CheckIcon from './check-icon/CheckIcon';
 import Curd from './curd/Curd';
 import DatePicker from './date-picker/DatePicker';
 import DateRange from './date-range/DateRange';
 import DetailForm from './detail-form/DetailForm';
 import Dialog from './dialog/Dialog';
 import Drawer from './drawer/Drawer';
+import DropdownItem from './dropdown-item/DropdownItem';
 import EnumSelect from './enum-select/EnumSelect';
 import FetchCascader from './fetch-cascader/FetchCascader';
 import FetchSelect from './fetch-select/FetchSelect';
@@ -41,12 +43,14 @@ const components = Object.assign({}, tnxvue.components, {
     Avatar,
     Alert,
     Button,
+    CheckIcon,
     Curd,
     DatePicker,
     DateRange,
     DetailForm,
     Dialog,
     Drawer,
+    DropdownItem,
     EnumSelect,
     FetchCascader,
     FetchSelect,
