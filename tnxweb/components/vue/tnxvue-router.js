@@ -6,7 +6,7 @@ import {FunctionUtil, NetUtil} from '../tnxcore-util';
 function addRoute(routes, superiorPath, item, fnImportPage) {
     if (item && item.path) {
         let page = item.page || item.path.replace(/\/:[a-zA-Z0-9_]+/g, '');
-        routes.push({
+        let route = {
             path: item.path,
             meta: {
                 superiorPath: superiorPath,
@@ -19,7 +19,15 @@ function addRoute(routes, superiorPath, item, fnImportPage) {
             component() {
                 return fnImportPage(page);
             },
-        });
+        };
+        // 如果直接定义route的redirect/alias字段，则item的redirect/alias为undefined时，route仍然有redirect/alias字段，只是其值为undefined，这将导致VueRouter报错
+        if (item.redirect) {
+            route.redirect = item.redirect;
+        }
+        if (item.alias) {
+            route.alias = item.alias;
+        }
+        routes.push(route);
     }
 }
 
@@ -123,8 +131,8 @@ export default function(VueRouter, menu, fnImportPage) {
 
     router.afterEach(function(to, from) {
         router.prev = from;
-        // 前后页面相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
-        if (to.meta.page === from.meta.page && to.fullPath !== from.fullPath) {
+        // 前后hash相同，但全路径不同（意味着参数不同），则需要刷新页面，否则页面不会刷新
+        if (to.href === from.href && to.fullPath !== from.fullPath) {
             window.location.reload();
         }
     });
