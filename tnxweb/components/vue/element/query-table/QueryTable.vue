@@ -59,9 +59,11 @@ export default {
             let sortableColumnNames = [];
             if (this.$slots.default?.length) {
                 for (let column of this.$slots.default) {
-                    let props = column.componentOptions.propsData;
-                    if (props.prop && props.sortable === 'custom') {
-                        sortableColumnNames.push(props.prop);
+                    if (column.componentOptions) {
+                        let props = column.componentOptions.propsData;
+                        if (props.prop && props.sortable === 'custom') {
+                            sortableColumnNames.push(props.prop);
+                        }
                     }
                 }
             }
