@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
@@ -190,6 +193,28 @@ public class MathUtil {
             return result;
         }
         return new Long[0];
+    }
+
+    /**
+     * 以指定分隔符拆分指定字符串，并解析为长整数集合
+     *
+     * @param s         字符串
+     * @param separator 分隔符
+     * @return 长整数数组
+     */
+    public static List<Long> parseLongList(String s, String separator) {
+        if (StringUtils.isNotBlank(s)) {
+            List<Long> result = new ArrayList<>();
+            String[] array = s.split(separator);
+            for (String e : array) {
+                Long value = parseLongObject(e);
+                if (value != null) {
+                    result.add(value);
+                }
+            }
+            return result;
+        }
+        return Collections.emptyList();
     }
 
     /**
