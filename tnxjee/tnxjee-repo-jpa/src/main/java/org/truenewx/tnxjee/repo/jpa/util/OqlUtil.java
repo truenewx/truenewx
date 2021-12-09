@@ -64,8 +64,8 @@ public class OqlUtil {
             if (comparison == null) { // 默认为等于比较符
                 comparison = Comparison.EQUAL;
             }
-            // 等于和不等于在参数个数大于5后使用IN/NOT IN代替
-            if ((comparison == Comparison.EQUAL || comparison == Comparison.NOT_EQUAL) && fieldParamValues.size() > 5) {
+            // 等于和不等于在参数个数大于3后使用IN/NOT IN代替
+            if ((comparison == Comparison.EQUAL || comparison == Comparison.NOT_EQUAL) && fieldParamValues.size() > 3) {
                 condition.append(fieldName);
                 if (comparison == Comparison.EQUAL) {
                     condition.append(Comparison.IN.toQlString());
