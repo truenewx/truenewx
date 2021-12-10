@@ -3,10 +3,10 @@ package org.truenewx.tnxjee.core.beans;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
-import org.truenewx.tnxjee.core.util.concurrent.ExecutorUtil;
 
 /**
  * 在容器初始化完成后延时执行操作的bean
@@ -20,11 +20,8 @@ public abstract class DelayContextInitializedBean implements ContextInitializedB
      */
     public static final long DEFAULT_MIN_DELAY_MILLIS = 3000;
 
-    private ScheduledExecutorService executor = ExecutorUtil.buildScheduledExecutor(getCorePoolSize());
-
-    protected int getCorePoolSize() {
-        return 4;
-    }
+    @Autowired
+    private ScheduledExecutorService executor;
 
     @Override
     public void afterInitialized(ApplicationContext context) throws Exception {
