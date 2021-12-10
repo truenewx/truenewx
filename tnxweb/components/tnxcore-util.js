@@ -144,7 +144,7 @@ Object.assign(Date.prototype, {
 });
 
 Object.assign(Array.prototype, {
-    contains(element) {
+    contains(element) { // 不覆盖原生的includes()方法，以免其它框架调用出错
         if (typeof element === 'function') {
             for (let e of this) {
                 if (element(e)) {

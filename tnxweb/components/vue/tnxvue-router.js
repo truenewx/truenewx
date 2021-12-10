@@ -40,17 +40,6 @@ function applyItemsToRoutes(superiorPath, items, routes, fnImportPage) {
     }
 }
 
-function matchesPath(path, pattern) {
-    if (path === pattern) {
-        return true;
-    }
-    if (pattern && pattern.contains('/:')) {
-        pattern = pattern.replace(/\/:[a-zA-Z0-9_]+/g, '/\\w+');
-        return new RegExp(pattern).test(path);
-    }
-    return false;
-}
-
 function instantiatePath(path, params) {
     if (path && path.contains('/:')) {
         if (params) {
@@ -138,24 +127,17 @@ export default function(VueRouter, menu, fnImportPage) {
     });
 
     router.back = FunctionUtil.around(router.back, function(back, path) {
-        let $route = getCurrentRoute(router);
-        // 如果上一页路径为指定路径，或匹配上级菜单路径，则执行原始的返回
-        if (router.prev) {
-            if (router.prev.path === path || matchesPath(path || router.prev.path, $route.meta.superiorPath)) {
-                back.call(router);
+        if (!router.prev?.href) { // 没有href，说明当前页面为刷新后进入的第一个页面，无法简单返回
+            let $route = getCurrentRoute(router);
+            if (!path) { // 未指定默认返回路径，则返回上一级页面
+                path = $route.meta.superiorPath;
+            }
+            path = instantiatePath(path, $route.params);
+            if (path) {
+                router.replace(path);
                 return;
             }
         }
-        // 如果没有上一页路径，则替换到上级菜单页面。如果记录的上一页路径与history中的返回路径不一致，说明页面进行了刷新，无法进行简单返回
-        if (!router.prev || !router.history.state.back || router.prev.path !== router.history.state.back) {
-            path = path || $route.meta.superiorPath;
-        }
-        path = instantiatePath(path, $route.params);
-        if (path) {
-            router.replace(path);
-            return;
-        }
-        // 直接返回上一页作为兜底
         back.call(router);
     });
 
