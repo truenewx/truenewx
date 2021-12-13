@@ -146,17 +146,23 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .permission-tree {
     overflow-y: auto;
 }
 
-.permission-node {
+.permission-tree .permission-node {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.permission-node span:last-child {
-    float: right;
+.permission-tree .permission-node > :last-child {
+    margin-left: 6px;
     margin-right: 6px;
+    white-space: normal;
+    line-height: 1;
+    text-align: right;
 }
 </style>
