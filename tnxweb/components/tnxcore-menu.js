@@ -106,21 +106,32 @@ function matches(item, path) {
         path = path.substr(index);
     }
     if (item.path) {
-        let pattern = item.path.replace(/\/:[a-zA-Z0-9_]+/g, '/[a-zA-Z0-9_\\*]+');
-        if (pattern === item.path) { // 无路径参数
-            if (item.path === path) {
-                return true;
+        return matchesPath(item.path, path);
+    } else if (typeof item.permission === 'string') { // 如果没有指定路径但指定了许可名
+        if (item.permittedPath) { // 如果指定了许可路径，则先尝试匹配许可路径和指定路径
+            if (!Array.isArray(item.permittedPath)) {
+                item.permittedPath = [item.permittedPath];
             }
-        } else { // 有路径参数
-            if (new RegExp(pattern, 'g').test(path)) {
-                return true;
+            for (let permittedPath of item.permittedPath) {
+                if (matchesPath(permittedPath, path)) {
+                    return true;
+                }
             }
         }
-    } else if (typeof item.permission === 'string') { // 如果没有指定路径但指定了许可名，则将匹配路径按照默认规则转换为许可名尝试匹配
+        // 此时还未匹配，则将指定路径按照默认规则转换为许可名尝试匹配
         let permission = getDefaultPermission(path);
         return item.permission === permission;
     }
     return false;
+}
+
+function matchesPath(pathPattern, actualPath) {
+    let pattern = pathPattern.replace(/\/:[a-zA-Z0-9_]+/g, '/[a-zA-Z0-9_\\*]+');
+    if (pattern === pathPattern) { // 无路径参数
+        return pathPattern === actualPath;
+    } else { // 有路径参数
+        return new RegExp(pattern, 'g').test(actualPath);
+    }
 }
 
 function buildLevel(items, parentLevel) {
