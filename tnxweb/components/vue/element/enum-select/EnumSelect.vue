@@ -25,7 +25,7 @@ export default {
     },
     props: {
         id: [Number, String],
-        value: String,
+        value: [String, Number, Boolean],
         selector: String,
         type: {
             type: String,
