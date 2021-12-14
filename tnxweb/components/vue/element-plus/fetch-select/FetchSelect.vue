@@ -11,7 +11,7 @@
 export default {
     name: 'TnxelFetchSelect',
     props: {
-        modelValue: String,
+        modelValue: [String, Number],
         url: String,
         params: { // 构建远程检索请求参数集的函数
             type: Function,
@@ -105,7 +105,7 @@ export default {
         getItem(value) {
             if (value !== undefined && value !== null && this.items) {
                 for (let item of this.items) {
-                    if (item[this.valueName] === value + '') { // 确保一致的字符串值比较
+                    if ((item[this.valueName] + '') === (value + '')) { // 确保一致的字符串值比较
                         return item;
                     }
                 }
