@@ -1,7 +1,8 @@
 <template>
     <div class="tnxel-query-table">
         <el-table :data="records" :empty-text="emptyRecordText" :size="size" :border="border" :stripe="stripe"
-            @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString" :row-class-name="rowClassName">
+            @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString" :row-class-name="rowClassName"
+            @selection-change="selectionChange">
             <slot></slot>
         </el-table>
         <tnxel-paged :value="paged" :change="query" :align="pagedAlign" v-if="paged"/>
@@ -149,7 +150,10 @@ export default {
                 delete this.params.orderBy;
             }
             this.query(1);
-        }
+        },
+        selectionChange(selection) {
+            this.$emit('selection-change', selection);
+        },
     }
 }
 </script>
