@@ -3,8 +3,8 @@
         <el-button :type="btnType" :icon="btnIcon" @click="toAdd" v-if="addable">{{ addText }}</el-button>
         <el-table :data="list" border stripe v-if="showEmpty || (list && list.length)">
             <slot></slot>
-            <el-table-column label="操作" header-align="center" align="center" width="100px"
-                v-if="updatable || removable">
+            <el-table-column label="操作" header-align="center" align="center"
+                :width="util.string.getPixelString(actionWidth)" v-if="updatable || removable">
                 <template #default="scope">
                     <slot name="actionPrepend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
                     <el-button type="text" @click="toUpdate(scope.$index)" v-if="updatable">
@@ -76,9 +76,16 @@ export default {
                 return null;
             }
         },
+        actionWidth: {
+            type: [String, Number],
+            default() {
+                return '100px';
+            }
+        }
     },
     data() {
         return {
+            util: window.tnx.util,
             list: this.value,
         }
     },
