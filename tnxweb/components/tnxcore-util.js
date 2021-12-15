@@ -685,22 +685,22 @@ export const NetUtil = {
         if (typeof object === 'object') {
             Object.keys(object).forEach(key => {
                 let value = object[key];
-                if (value) {
-                    let toKeyValueString = function(key, value) {
-                        switch (typeof value) {
+                if (value !== undefined && value !== null) {
+                    let toKeyValueString = function(k, v) {
+                        switch (typeof v) {
                             case 'function':
-                                value = value();
+                                v = v();
                                 break;
                             case 'object':
-                                if (typeof value.toString === 'function') {
-                                    value = value.toString();
+                                if (typeof v.toString === 'function') {
+                                    v = v.toString();
                                 } else {
-                                    value = null;
+                                    v = null;
                                 }
                                 break;
                         }
-                        if (value) {
-                            return '&' + key + '=' + encodeURIComponent(value);
+                        if (v !== undefined && v !== null) {
+                            return '&' + k + '=' + encodeURIComponent(v);
                         }
                         return '';
                     }
