@@ -45,7 +45,7 @@ function getDefaultPermission(path) {
         path += '/';
     }
     // 移除可能包含的路径变量
-    let permission = path.replace(/\/:[^\/]+\//g, '/');
+    let permission = path.replace(/\/:[^\/]+\//g, '/').replace(/\*/g, '');
     // 去掉许可头尾的/
     if (permission.startsWith('/')) {
         permission = permission.substr(1);
@@ -105,9 +105,10 @@ function matches(item, path) {
     if (index >= 0) {
         path = path.substr(index);
     }
-    if (item.path) {
-        return matchesPath(item.path, path);
-    } else if (typeof item.permission === 'string') { // 如果没有指定路径但指定了许可名
+    if (item.path && matchesPath(item.path, path)) {
+        return true;
+    }
+    if (typeof item.permission === 'string') { // 如果没有指定路径但指定了许可名
         if (item.permittedPath) { // 如果指定了许可路径，则先尝试匹配许可路径和指定路径
             if (!Array.isArray(item.permittedPath)) {
                 item.permittedPath = [item.permittedPath];
