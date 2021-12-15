@@ -26,6 +26,10 @@ public class PermanentableDate implements Comparable<PermanentableDate> {
         this.value = value;
     }
 
+    public PermanentableDate(String value) {
+        this(TemporalUtil.parseDate(value));
+    }
+
     public static PermanentableDate ofPermanent() {
         return new PermanentableDate(PERMANENT_DATE);
     }
