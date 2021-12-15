@@ -47,12 +47,12 @@ export default {
     watch: {
         modelValue(newValue, oldValue) {
             if (oldValue !== newValue && !this.equals(this.fileList, newValue)) {
-                this._init();
+                this._initialize();
             }
         }
     },
     mounted() {
-        this._init();
+        this._initialize();
     },
     methods: {
         equals: function(fileList, storageUrls) {
@@ -78,7 +78,7 @@ export default {
             }
             return false;
         },
-        _init: function() {
+        _initialize: function() {
             const vm = this;
             let fssConfig = vm.tnx.fss.getClientConfig();
             vm.tnx.app.rpc.ensureLogined(function() {
