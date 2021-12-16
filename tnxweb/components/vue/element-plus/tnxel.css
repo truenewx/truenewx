@@ -177,6 +177,16 @@
     margin-right: 0.25rem;
 }
 
+/* 分隔线前后间距保持一致 */
+.el-dropdown-menu__item--divided {
+    margin-top: 0;
+}
+
+/* 修正分隔线下的菜单项错位问题 */
+.el-dropdown-menu__item--divided:before {
+    content: unset;
+}
+
 .el-alert {
     margin-bottom: 1rem;
 }
