@@ -265,10 +265,16 @@ Menu.prototype.getBreadcrumbItems = function(path) {
 };
 
 Menu.prototype.isGranted = function(path) {
-    const _this = this;
-    return findItem(path, this.items, (item, sub) => {
-        return isGranted(_this.authorities, sub || item);
-    });
+    let breadcrumbItems = this.getBreadcrumbItems(path);
+    if (breadcrumbItems.length) {
+        for (let i = breadcrumbItems.length - 1; i >= 0; i--) {
+            let item = breadcrumbItems[i];
+            if (item.rank || item.permission) {
+                return isGranted(this.authorities, item);
+            }
+        }
+    }
+    return false;
 };
 
 Menu.prototype.loadGrantedItems = function(scope, callback) {
