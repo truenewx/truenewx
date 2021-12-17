@@ -195,6 +195,14 @@ Object.assign(Array.prototype, {
     clone() {
         return this.slice(0, this.length);
     },
+    get(fn) {
+        for (let e of this) {
+            if (fn(e)) {
+                return e;
+            }
+        }
+        return undefined;
+    },
 });
 
 Object.assign(Boolean.prototype, {
