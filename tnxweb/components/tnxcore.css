@@ -96,6 +96,14 @@ ul {
     white-space: nowrap;
 }
 
+.unselectable {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
 [role="button"],
 .cursor-pointer {
     cursor: pointer;
