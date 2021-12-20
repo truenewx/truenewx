@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
+import java.util.Date;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,7 @@ public class ExcelCell {
     }
 
     public String getStringCellValue() {
+        // 先以十进制数字方式读取，以适应纯数字单元格但希望以字符串形式读取的情况，常见如手机号码
         BigDecimal decimal = readDecimalValue();
         if (decimal != null) {
             return MathUtil.toShortestString(decimal);
@@ -149,17 +151,24 @@ public class ExcelCell {
     }
 
     public LocalDate getLocalMonthCellValue() {
-        String text = getStringCellValue();
-        if (StringUtils.isNotBlank(text)) {
-            LocalDate month = TemporalUtil.parseDate(text + "-01");
-            if (month == null) {
-                month = TemporalUtil.parse(LocalDate.class, text + "-1", "yyyy-M-d");
+        if (this.origin.getCellType() == CellType.NUMERIC) {
+            Date date = this.origin.getDateCellValue();
+            if (date != null) {
+                return TemporalUtil.toLocalDate(date.toInstant());
             }
-            if (month == null) {
-                throw new ExcelCellFormatException(this.origin.getAddress(),
-                        ExcelCellFormatException.EXPECTED_TYPE_MONTH, text);
+        } else {
+            String text = getStringCellValue();
+            if (StringUtils.isNotBlank(text)) {
+                LocalDate month = TemporalUtil.parseDate(text + "-01");
+                if (month == null) {
+                    month = TemporalUtil.parse(LocalDate.class, text + "-1", "yyyy-M-d");
+                }
+                if (month == null) {
+                    throw new ExcelCellFormatException(this.origin.getAddress(),
+                            ExcelCellFormatException.EXPECTED_TYPE_MONTH, text);
+                }
+                return month;
             }
-            return month;
         }
         return null;
     }
