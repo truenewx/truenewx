@@ -145,12 +145,13 @@ export default {
         },
         allSelectedIndeterminate() {
             if (this.records?.length) {
-                let firstSelected = this.pageSelectedIndexes[0];
+                let firstSelected = this.pageSelectedIndexes[0] || false;
                 if (this.records.length === 1) {
                     return firstSelected;
                 }
                 for (let i = 1; i < this.records.length; i++) {
-                    if (this.pageSelectedIndexes[i] !== firstSelected) {
+                    let selected = this.pageSelectedIndexes[i] || false;
+                    if (selected !== firstSelected) {
                         return true;
                     }
                 }
