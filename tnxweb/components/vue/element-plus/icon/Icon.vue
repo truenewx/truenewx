@@ -141,15 +141,17 @@ export default {
             if (this.size) {
                 style['font-size'] = this.size + 'px';
             }
-            if (this.width) {
-                style.width = this.width;
-                if (typeof this.width === 'number') {
+            let width = this.width || this.size;
+            if (width) {
+                style.width = width;
+                if (typeof style.width === 'number') {
                     style.width += 'px';
                 }
             }
-            if (this.height) {
-                style.height = this.height;
-                if (typeof this.height === 'number') {
+            let height = this.height || this.size;
+            if (height) {
+                style.height = height;
+                if (typeof style.height === 'number') {
                     style.height += 'px';
                 }
             }
