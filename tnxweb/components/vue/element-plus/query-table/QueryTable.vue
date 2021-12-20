@@ -285,6 +285,10 @@ export default {
                 }
             }
         },
+        clearSelection() {
+            this.pageSelectedIndexes = [];
+            this.allSelectedRecords = [];
+        },
     }
 }
 </script>
