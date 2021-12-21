@@ -203,7 +203,8 @@
     margin-bottom: 0;
 }
 
-.el-form-item__label {
+.el-form-item__label,
+.el-form-item__label .el-checkbox__label {
     font-weight: 600;
 }
 
@@ -653,6 +654,18 @@ el-card {
 
 .el-checkbox__label {
     padding-left: 0.5rem;
+}
+
+.el-card__header .el-checkbox {
+    height: auto;
+}
+
+.el-card__header .el-checkbox__input {
+    margin-top: 2px;
+}
+
+.el-card__header .el-checkbox__label {
+    font-size: var(--bs-body-font-size);
 }
 
 .el-divider__text {
