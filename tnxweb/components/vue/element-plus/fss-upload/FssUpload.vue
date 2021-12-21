@@ -1,6 +1,6 @@
 <template>
-    <tnxel-upload ref="upload" :action="action" :upload-limit="uploadLimit" :file-list="fileList" :read-only="readOnly"
-        :width="width" :height="height" :on-success="onSuccess" :on-removed="onRemove"/>
+    <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
+        :read-only="readOnly" :width="width" :height="height" :on-success="onSuccess" :on-removed="onRemove"/>
 </template>
 
 <script>
@@ -35,7 +35,7 @@ export default {
         return {
             tnx: tnx,
             action: tnx.fss.getUploadUrl(this.type, this.scope),
-            uploadLimit: {},
+            uploadOptions: {},
             fileList: [],
         };
     },
@@ -100,14 +100,14 @@ export default {
                         });
                         vm.fileList = fileList;
                         vm.$nextTick(function() {
-                            vm._loadUploadLimit();
+                            vm._loadUploadOptions();
                         });
                     }, {
                         app: fssConfig.appName
                     });
                 } else {
                     vm.$nextTick(function() {
-                        vm._loadUploadLimit();
+                        vm._loadUploadOptions();
                     });
                 }
             }, {
@@ -117,12 +117,12 @@ export default {
                 }
             });
         },
-        _loadUploadLimit: function() {
+        _loadUploadOptions: function() {
             // 上传限制为空才执行加载，避免多次重复加载
-            if (Object.keys(this.uploadLimit).length === 0) {
+            if (Object.keys(this.uploadOptions).length === 0) {
                 let vm = this;
-                vm.tnx.fss.loadUploadLimit(this.type, function(uploadLimit) {
-                    vm.uploadLimit = uploadLimit;
+                vm.tnx.fss.loadUploadOptions(this.type, function(uploadOptions) {
+                    vm.uploadOptions = uploadOptions;
                 });
             }
         },
@@ -158,7 +158,7 @@ export default {
                     return;
                 }
             }
-            if (this.uploadLimit.number === 1) {
+            if (this.uploadOptions.number === 1) {
                 storageUrls = storageUrls[0];
             }
             this.$emit('update:modelValue', storageUrls);
@@ -172,7 +172,7 @@ export default {
          * @returns 文件存储路径或其数组，有上传未完成时返回false
          */
         validateUploaded: function(reject) {
-            if (this.uploadLimit.number > 1) {
+            if (this.uploadOptions.number > 1) {
                 const storageUrls = [];
                 for (let file of this.uploadFiles) {
                     if (file.storageUrl) {

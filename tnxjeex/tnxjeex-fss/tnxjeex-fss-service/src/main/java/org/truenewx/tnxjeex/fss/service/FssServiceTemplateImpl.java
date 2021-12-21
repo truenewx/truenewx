@@ -59,12 +59,18 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         return getStrategy(type).getUploadLimit(userIdentity);
     }
 
+
     private FssAccessStrategy<I> getStrategy(String type) {
         FssAccessStrategy<I> strategy = this.strategies.get(type);
         if (strategy == null) {
             throw new BusinessException(FssExceptionCodes.NO_ACCESS_STRATEGY_FOR_TYPE, type);
         }
         return strategy;
+    }
+
+    @Override
+    public boolean isPublicReadable(String type) {
+        return getStrategy(type).isPublicReadable();
     }
 
     @Override

@@ -40,6 +40,7 @@ import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
+import org.truenewx.tnxjeex.fss.web.model.FileUploadOptions;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
 
 import com.aliyun.oss.internal.Mimetypes;
@@ -71,8 +72,24 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @GetMapping("/upload-limit/{type}")
     @ResponseBody
     @ConfigAnonymous // 匿名用户即可读取上传限制
+    @Deprecated
     public FileUploadLimit getUploadLimit(@PathVariable("type") String type) {
         return this.service.getUploadLimit(type, getUserIdentity());
+    }
+
+    /**
+     * 获取指定用户上传指定业务类型的文件上传配置
+     *
+     * @param type 业务类型
+     * @return 指定用户上传指定业务类型的文件上传配置
+     */
+    @GetMapping("/upload-options/{type}")
+    @ResponseBody
+    @ConfigAnonymous // 匿名用户即可读取上传配置
+    public FileUploadOptions uploadOptions(@PathVariable("type") String type) {
+        FileUploadLimit limit = this.service.getUploadLimit(type, getUserIdentity());
+        boolean publicReadable = this.service.isPublicReadable(type);
+        return new FileUploadOptions(limit, publicReadable);
     }
 
     @Override

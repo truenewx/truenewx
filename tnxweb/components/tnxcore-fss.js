@@ -28,9 +28,9 @@ const fss = {
         }
         return config;
     },
-    loadUploadLimit(type, callback) {
+    loadUploadOptions(type, callback) {
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/upload-limit/' + type, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/upload-options/' + type, callback, {
             app: config.appName
         });
     },

@@ -11,14 +11,15 @@
         list-type="picture-card"
         :file-list="fileList"
         :headers="uploadHeaders"
-        :multiple="uploadLimit ? uploadLimit.number > 1 : false"
+        :multiple="uploadOptions ? uploadOptions.number > 1 : false"
         :accept="uploadAccept">
         <template #default>
             <tnxel-icon type="Plus" :size="plusSize"/>
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
-                <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadLimit && uploadLimit.imageable">
+                <img class="el-upload-list__item-thumbnail" :src="file.url"
+                    v-if="uploadOptions && uploadOptions.imageable">
                 <div v-else>
                     <i class="el-icon-document"></i> {{ file.name }}
                 </div>
@@ -30,7 +31,7 @@
                 </span>
                 <div class="el-upload-list__item-actions">
                     <span class="el-upload-list__item-preview" @click="previewFile(file)"
-                        v-if="uploadLimit && uploadLimit.imageable">
+                        v-if="uploadOptions && uploadOptions.imageable">
                         <i class="el-icon-zoom-in"></i>
                     </span>
                     <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
@@ -60,7 +61,7 @@ export default {
             type: String,
             required: true,
         },
-        uploadLimit: Object,
+        uploadOptions: Object,
         fileList: {
             type: Array,
             default: () => [],
@@ -103,34 +104,41 @@ export default {
     },
     computed: {
         tip() {
-            if (!this.readOnly && this.uploadLimit) {
-                let tip = '';
-                const separator = '，';
-                if (this.uploadLimit.number > 1) {
-                    tip += separator + this.tipMessages.number.format(this.uploadLimit.number);
-                }
-                if (this.uploadLimit.capacity > 0) {
-                    const capacity = this.tnx.util.string.getCapacityCaption(this.uploadLimit.capacity, 2);
-                    tip += separator + this.tipMessages.capacity.format(capacity);
-                }
-                if (this.uploadLimit.extensions && this.uploadLimit.extensions.length) {
-                    const extensions = this.uploadLimit.extensions.join('、');
-                    if (this.uploadLimit.extensionsRejected) {
-                        tip += separator + this.tipMessages.excludedExtensions.format(extensions);
-                    } else {
-                        tip += separator + this.tipMessages.extensions.format(extensions);
+            let tip = '';
+            if (this.uploadOptions) {
+                if (!this.readOnly) {
+                    const separator = '，';
+                    if (this.uploadOptions.number > 1) {
+                        tip += separator + this.tipMessages.number.format(this.uploadOptions.number);
+                    }
+                    if (this.uploadOptions.capacity > 0) {
+                        const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity, 2);
+                        tip += separator + this.tipMessages.capacity.format(capacity);
+                    }
+                    if (this.uploadOptions.extensions && this.uploadOptions.extensions.length) {
+                        const extensions = this.uploadOptions.extensions.join('、');
+                        if (this.uploadOptions.extensionsRejected) {
+                            tip += separator + this.tipMessages.excludedExtensions.format(extensions);
+                        } else {
+                            tip += separator + this.tipMessages.extensions.format(extensions);
+                        }
+                    }
+                    if (tip.length > 0) {
+                        tip = tip.substr(separator.length);
+                    }
+                    if (this.uploadOptions.publicReadable) {
+                        if (tip.length) {
+                            tip += '；';
+                        }
+                        tip += '该文件将对外公开，请慎重选择上传。';
                     }
                 }
-                if (tip.length > 0) {
-                    tip = tip.substr(separator.length);
-                }
-                return tip;
             }
-            return undefined;
+            return tip;
         },
         uploadAccept() {
-            if (this.uploadLimit && this.uploadLimit.mimeTypes) {
-                return this.uploadLimit.mimeTypes.join(',');
+            if (this.uploadOptions && this.uploadOptions.mimeTypes) {
+                return this.uploadOptions.mimeTypes.join(',');
             }
             return undefined;
         },
@@ -141,15 +149,15 @@ export default {
             let width = this.width;
             let height = this.height;
             let uploadSize = undefined;
-            if (this.uploadLimit.sizes && this.uploadLimit.sizes.length) {
-                uploadSize = this.uploadLimit.sizes[0];
+            if (this.uploadOptions.sizes && this.uploadOptions.sizes.length) {
+                uploadSize = this.uploadOptions.sizes[0];
             }
             if (uploadSize) {
                 width = width || uploadSize.width;
                 height = height || uploadSize.height;
             }
             width = width || 128;
-            height = height || (this.uploadLimit.imageable ? 128 : 40);
+            height = height || (this.uploadOptions.imageable ? 128 : 40);
             return {width, height};
         },
         itemPanelStyle() {
@@ -167,11 +175,11 @@ export default {
         },
     },
     watch: {
-        uploadLimit() {
+        uploadOptions() {
             this.render();
         },
         fileList() {
-            if (this.uploadLimit && this.uploadLimit.number !== undefined) {
+            if (this.uploadOptions && this.uploadOptions.number !== undefined) {
                 this.render();
             }
         }
@@ -224,15 +232,15 @@ export default {
                 return false;
             }
             // 校验数量
-            if (this.uploadLimit.number > 0 && this.uploadFiles.length > this.uploadLimit.number) {
-                let message = this.tipMessages.number.format(this.uploadLimit.number);
+            if (this.uploadOptions.number > 0 && this.uploadFiles.length > this.uploadOptions.number) {
+                let message = this.tipMessages.number.format(this.uploadOptions.number);
                 message += '，多余的文件未加入上传队列';
                 this.tnx.error(message);
                 return false;
             }
             // 校验容量大小
-            if (this.uploadLimit.capacity > 0 && file.size > this.uploadLimit.capacity) {
-                const capacity = this.tnx.util.string.getCapacityCaption(this.uploadLimit.capacity);
+            if (this.uploadOptions.capacity > 0 && file.size > this.uploadOptions.capacity) {
+                const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity);
                 let message = this.tipMessages.capacity.format(capacity, 2);
                 message += '，文件"' + file.name + '"大小为' + this.tnx.util.string.getCapacityCaption(file.size,
                     2) + '，不符合要求';
@@ -240,17 +248,17 @@ export default {
                 return false;
             }
             // 校验扩展名
-            if (this.uploadLimit.extensions && this.uploadLimit.extensions.length) {
+            if (this.uploadOptions.extensions && this.uploadOptions.extensions.length) {
                 const extension = file.name.substr(file.name.lastIndexOf('.') + 1);
-                if (this.uploadLimit.extensionsRejected) { // 扩展名黑名单模式
-                    if (this.uploadLimit.extensions.containsIgnoreCase(extension)) {
-                        const extensions = this.uploadLimit.extensions.join('、');
+                if (this.uploadOptions.extensionsRejected) { // 扩展名黑名单模式
+                    if (this.uploadOptions.extensions.containsIgnoreCase(extension)) {
+                        const extensions = this.uploadOptions.extensions.join('、');
                         this.tnx.error(this.tipMessages.excludedExtensions.format(extensions));
                         return false;
                     }
                 } else { // 扩展名白名单模式
-                    if (!this.uploadLimit.extensions.containsIgnoreCase(extension)) {
-                        const extensions = this.uploadLimit.extensions.join('、');
+                    if (!this.uploadOptions.extensions.containsIgnoreCase(extension)) {
+                        const extensions = this.uploadOptions.extensions.join('、');
                         let message = this.tipMessages.extensions.format(extensions);
                         message += '，文件"' + file.name + '"不符合要求';
                         this.tnx.error(message);
@@ -266,7 +274,7 @@ export default {
             return new Promise(function(resolve, reject) {
                 if (vm.validate(file)) {
                     let $upload = $('#' + vm.id + ' .el-upload');
-                    if (vm.uploadFiles.length >= vm.uploadLimit.number) {
+                    if (vm.uploadFiles.length >= vm.uploadOptions.number) {
                         $upload.css('visibility', 'hidden');
                     }
 
@@ -308,7 +316,7 @@ export default {
         _resizeFilePanel: function(file, fileList) {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
-            if (fileList.length >= this.uploadLimit.number) {
+            if (fileList.length >= this.uploadOptions.number) {
                 // 隐藏添加框
                 $upload.css({
                     display: 'none',
@@ -348,7 +356,7 @@ export default {
             this.uploadFiles.remove(function(f) {
                 return file.uid === f.uid;
             });
-            if (this.uploadFiles.length < this.uploadLimit.number) {
+            if (this.uploadFiles.length < this.uploadOptions.number) {
                 let container = $('#' + this.id);
                 // 去掉文件列表的宽度，以免其占高度
                 $('.el-upload-list', container).css({

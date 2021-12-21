@@ -28,6 +28,8 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      */
     FileUploadLimit getUploadLimit(String type, I userIdentity);
 
+    boolean isPublicReadable(String type);
+
     /**
      * 指定用户在业务授权类型下写文件
      *
