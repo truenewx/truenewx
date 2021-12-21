@@ -145,15 +145,15 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
                             }
                         }
                     } else {
-                        Binate<Boolean, String> basicConverter = getBasicConverter(fieldType);
+                        JpaEntityColumn column = getColumn(metaData, tableName, field, null);
+                        Binate<Boolean, String> basicConverter = getBasicConverter(fieldType, column);
                         if (basicConverter.getLeft()) {
                             Element basicElement = attributesElement.addElement("basic").addAttribute("name",
                                     field.getName());
-                            JpaEntityColumn column = getColumn(metaData, tableName, field, null);
                             addColumnElement(basicElement, column, true);
                             String converter = basicConverter.getRight();
-                            // 字段类型为Instant时，数据类型为bigint的，才生成属性转换器配置
-                            if (fieldType == Instant.class && !column.getDefinition().startsWith("bigint")) {
+                            // 字段类型为Instant时，未指定特殊的数据类型，则不生成属性转换器配置
+                            if (fieldType == Instant.class && column.getDefinition() == null) {
                                 converter = null;
                             }
                             addConvertElement(basicElement, converter);
@@ -304,12 +304,12 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
         element.addComment(this.messageResolver.resolveMessage(messageCode, args));
     }
 
-    private Binate<Boolean, String> getBasicConverter(Class<?> fieldType) throws Exception {
+    private Binate<Boolean, String> getBasicConverter(Class<?> fieldType, JpaEntityColumn column) throws Exception {
         String converter = null;
         boolean basic = BeanUtils.isSimpleValueType(fieldType);
-        // 不是基础类型或者是枚举类型，则尝试获取转换器，可取得转换器，则说明也是基础类型
-        if (!basic || fieldType.isEnum()) {
-            converter = getConverter(fieldType);
+        // 不是基础类型或者是枚举类型/Instant，则尝试获取转换器，可取得转换器，则说明也是基础类型
+        if (!basic || fieldType.isEnum() || fieldType == Instant.class) {
+            converter = getConverter(fieldType, column);
             if (converter != null) {
                 basic = true;
             }
@@ -317,9 +317,11 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
         return new Binary<>(basic, converter);
     }
 
-    private String getConverter(Class<?> fieldType) throws Exception {
+    private String getConverter(Class<?> fieldType, JpaEntityColumn column) throws Exception {
         if (fieldType == Instant.class) {
-            return InstantZonedMillisSecondStringAttributeConverter.class.getName();
+            if (column == null || "char".equals(column.getDefinition())) {
+                return InstantZonedMillisSecondStringAttributeConverter.class.getName();
+            }
         }
         if (fieldType == Ethnicity.class) {
             return EthnicityConverter.class.getName();
@@ -422,7 +424,7 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
             for (Field field : fields) {
                 if (supports(field)) {
                     Class<?> fieldType = field.getType();
-                    Binate<Boolean, String> basicConverter = getBasicConverter(fieldType);
+                    Binate<Boolean, String> basicConverter = getBasicConverter(fieldType, null);
                     if (basicConverter.getLeft()) { // 值模型暂时只支持基础类型的属性映射
                         String converter = basicConverter.getRight();
                         if (converter != null) { // 内嵌类型映射只需生成属性转换器配置
