@@ -130,7 +130,7 @@ export default {
                         if (tip.length) {
                             tip += '；';
                         }
-                        tip += '该文件将对外公开，请慎重选择上传。';
+                        tip += '该' + (this.uploadOptions.imageable ? '图片' : '文件') + '可能对外公开，请慎重选择上传。';
                     }
                 }
             }
