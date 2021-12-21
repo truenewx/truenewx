@@ -273,6 +273,7 @@ Menu.prototype.isGranted = function(path) {
                 return isGranted(this.authorities, item);
             }
         }
+        return true; // 有匹配菜单项，但各级菜单项均未设置可鉴权，则说明无需鉴权，视为鉴权通过
     }
     return false;
 };
