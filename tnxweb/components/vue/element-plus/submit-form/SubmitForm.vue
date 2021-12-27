@@ -111,13 +111,21 @@ export default {
         disable(disabled) {
             this.disabled = disabled !== false;
         },
-        focusError() {
-            // TODO 使用el-form组件的scrollToField()方法实现滚动到错误字段
+        focusError(errors) {
             let $form = $('#' + this.id);
-            let $item = $('.el-form-item.is-error:first', $form);
-            if ($item.length) {
-                let top = $item.offset().top - $form.offset().top + this.topOffset;
-                $(this.container).scrollTop(top);
+            let fieldNames = Object.keys(errors);
+            let fieldName = fieldNames[0];
+            if (fieldName) {
+                let $item = $('.el-form-item label[for=' + fieldName + ']', $form).parents('.el-form-item');
+                if ($item.length) {
+                    let $input = $('input:first', $item);
+                    if ($input.length) {
+                        $input.focus();
+                        return;
+                    }
+                }
+                // 没有找到错误字段输入框，则滚动到错误栏目处
+                this.$refs.form.scrollToField(fieldName);
             }
         },
         validate(callback, errorFocus) {
@@ -126,10 +134,10 @@ export default {
                 if (typeof callback === 'function') {
                     callback(true);
                 }
-            }).catch(function() {
+            }).catch(function(errors) {
                 if (_this.errorFocus && errorFocus !== false) {
                     _this.$nextTick(function() {
-                        _this.focusError.call(_this);
+                        _this.focusError.call(_this, errors);
                     });
                 }
                 if (typeof callback === 'function') {
