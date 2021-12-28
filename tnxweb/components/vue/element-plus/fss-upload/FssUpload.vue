@@ -1,6 +1,7 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
-        :read-only="readOnly" :width="width" :height="height" :on-success="onSuccess" :on-removed="onRemove"/>
+        :read-only="readOnly" :width="width" :height="height" :center="center"
+        :on-success="onSuccess" :on-removed="onRemove"/>
 </template>
 
 <script>
@@ -28,6 +29,7 @@ export default {
         height: {
             type: [Number, String],
         },
+        center: Boolean,
     },
     emits: ['update:modelValue'],
     data() {
@@ -82,8 +84,13 @@ export default {
             const vm = this;
             let fssConfig = vm.tnx.fss.getClientConfig();
             vm.tnx.app.rpc.ensureLogined(function() {
+                let storageUrls;
                 if (vm.modelValue) {
-                    let storageUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
+                    storageUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
+                } else {
+                    storageUrls = [];
+                }
+                if (storageUrls.length) {
                     vm.tnx.app.rpc.get(fssConfig.contextUrl + '/metas', {
                         storageUrls: storageUrls
                     }, function(metas) {

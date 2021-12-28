@@ -1,7 +1,6 @@
 <template>
-    <el-upload ref="upload" name="file" class="tnxel-upload-container"
+    <el-upload ref="upload" name="file" class="tnxel-upload-container" :class="{center: center}"
         :id="id"
-        :hidden="hiddenContainer"
         :action="action"
         :before-upload="beforeUpload"
         :on-progress="onProgress"
@@ -83,7 +82,8 @@ export default {
             default: function(errors) {
                 window.tnx.app.rpc.handleErrors(errors);
             }
-        }
+        },
+        center: Boolean,
     },
     data() {
         const tnx = window.tnx;
@@ -91,7 +91,7 @@ export default {
             tnx: tnx,
             id: 'upload-container-' + tnx.util.string.random(32),
             tipMessages: {
-                number: '最多只能上传{0}个文件',
+                number: '一次最多上传{0}个文件',
                 capacity: '单个文件不能超过{0}',
                 extensions: '只能上传{0}文件',
                 excludedExtensions: '不能上传{0}文件',
@@ -99,7 +99,6 @@ export default {
             uploadHeaders: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            hiddenContainer: true,
         };
     },
     computed: {
@@ -199,9 +198,8 @@ export default {
                 $upload.css({
                     width: width,
                     height: height,
+                    display: 'inline-flex',
                 });
-
-                vm.hiddenContainer = false;
 
                 if (vm.fileList && vm.fileList.length) {
                     for (let file of vm.fileList) {
@@ -406,12 +404,26 @@ export default {
 </script>
 
 <style>
-.tnxel-upload-container .el-upload {
+.tnxel-upload-container.center {
+    display: flex;
+    flex-direction: column;
+}
+
+.tnxel-upload-container .el-upload--picture-card {
     border-radius: .25rem;
-    display: inline-flex;
+    display: none;
     align-items: center;
     justify-content: center;
     margin-bottom: 0.5rem;
+}
+
+.tnxel-upload-container.center .el-upload--picture-card {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.tnxel-upload-container .el-upload--picture-card i {
+    margin-top: 0;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card {
@@ -457,9 +469,9 @@ export default {
     align-items: center;
     justify-content: center;
     font-size: 1rem;
-    color: #fff;
+    color: white;
     opacity: 0.5;
-    background-color: #000000;
+    background-color: black;
 }
 
 .el-form-item__content .tnxel-upload-container .el-upload__tip {
