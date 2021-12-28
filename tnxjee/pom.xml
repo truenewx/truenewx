@@ -34,6 +34,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <feign.version>10.12</feign.version><!-- 与spring-cloud-starter-openfeign依赖的版本保持一致 -->
         <swagger.version>2.10.5</swagger.version>
+        <logback.version>1.2.10</logback.version><!-- 修正安全漏洞 -->
     </properties>
     <build>
         <plugins>
