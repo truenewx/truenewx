@@ -127,12 +127,12 @@ export default {
             const baseline = 33 + (50 - 33) * heightRatio;
             const baseTop = docHeight * baseline / 100;
             let top = (baseTop - height / 2);
-            top = Math.max(top, 4); // 至少顶部留4px空隙
+            top = Math.max(top, 8); // 至少顶部留8px空隙
             this.middleTop = top + 'px';
             $dialog.css({
                 'margin-top': this.top,
                 'width': this.width,
-                'max-height': 'calc(100vh - 8px)', // 最大高度时上下各留4px空隙
+                'max-height': 'calc(100vh - 16px)', // 最大高度时上下各留8px空隙
             });
 
             if (observe) {
@@ -203,7 +203,8 @@ export default {
     padding: 1rem 1rem 0 1rem;
     margin-bottom: 1rem;
     color: inherit;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .el-dialog__footer {
