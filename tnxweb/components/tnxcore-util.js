@@ -915,6 +915,24 @@ export const DomUtil = {
             }
         };
     },
+    observeHeightChange(element, callback) {
+        let oldHeight = window.getComputedStyle(element).getPropertyValue('height');
+        const MutationObserver = window.MutationObserver || window.webkitMutationObserver || window.MozMutationObserver;
+        let observer = new MutationObserver(function(mutations) {
+            let height = window.getComputedStyle(element).getPropertyValue('height');
+            if (height !== oldHeight) {
+                oldHeight = height;
+                callback();
+            }
+        });
+        observer.observe(element, {
+            childList: true, // 直接子节点的变动（增、改、删）
+            attributes: true, // 属性的变动
+            characterData: true, // 节点内容或节点文本的变动
+            subtree: true, // 是否应用于所有后代节点
+        });
+        return observer;
+    }
 }
 
 export const util = {

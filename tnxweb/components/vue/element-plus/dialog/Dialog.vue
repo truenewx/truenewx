@@ -29,12 +29,15 @@
 <script>
 import $ from 'jquery';
 
+const util = window.tnx.util;
+
 export default {
     name: 'TnxelDialog',
     components: {
         'tnxel-dialog-content': null,
     },
     props: {
+        container: String,
         title: String,
         content: String,
         contentProps: Object,
@@ -54,8 +57,10 @@ export default {
                 width: '512px',
                 // 以上均为element的Dialog组件配置项
                 onShown: undefined, // 对话框展示后的事件回调
+                onClosed: undefined, // 对话框关闭后的事件回调
             },
             middleTop: '40vh',
+            heightChangeObserver: null,
         };
     },
     computed: {
@@ -81,21 +86,7 @@ export default {
     mounted() {
         let vm = this;
         this.$nextTick(function() {
-            let $dialog = $('.el-dialog:last');
-            const height = $dialog.height();
-            const docHeight = window.tnx.util.dom.getDocHeight();
-            // 对话框高度占文档高度的比例
-            const heightRatio = height / docHeight;
-            // 为了获得更好的视觉舒适度，根据高度比确定对话框中线位置：从33vh->50vh
-            const baseline = 33 + (50 - 33) * heightRatio;
-            const baseTop = docHeight * baseline / 100;
-            let top = (baseTop - height / 2);
-            top = Math.max(top, 5); // 至少顶部留5px空隙
-            this.middleTop = top + 'px';
-            $dialog.css({
-                'margin-top': vm.top,
-                'width': vm.width,
-            });
+            vm.locate(true);
 
             if (vm.$refs.content && !vm.$refs.content.close) {
                 vm.$refs.content.close = function() {
@@ -115,6 +106,38 @@ export default {
                 classObject['theme-' + this.theme] = true;
             }
             return classObject;
+        },
+        locate(observe) {
+            let $dialog = undefined;
+            if (this.container) {
+                let $container = $(this.container);
+                if ($container.length) {
+                    $dialog = $container.next('.el-overlay').find('.el-dialog');
+                }
+            }
+            if (!$dialog?.length) {
+                $dialog = $('.el-dialog:last');
+            }
+
+            const height = $dialog.height();
+            const docHeight = window.tnx.util.dom.getDocHeight();
+            // 对话框高度占文档高度的比例
+            const heightRatio = height / docHeight;
+            // 为了获得更好的视觉舒适度，根据高度比确定对话框中线位置：从33vh->50vh
+            const baseline = 33 + (50 - 33) * heightRatio;
+            const baseTop = docHeight * baseline / 100;
+            let top = (baseTop - height / 2);
+            top = Math.max(top, 4); // 至少顶部留4px空隙
+            this.middleTop = top + 'px';
+            $dialog.css({
+                'margin-top': this.top,
+                'width': this.width,
+                'max-height': 'calc(100vh - 8px)', // 最大高度时上下各留4px空隙
+            });
+
+            if (observe) {
+                this.heightChangeObserver = util.dom.observeHeightChange($dialog[0], this.locate);
+            }
         },
         btnClick(index) {
             const button = this.buttons[index];
@@ -143,12 +166,21 @@ export default {
             if (typeof this.options.onClosed === 'function') {
                 this.options.onClosed.call(this.$refs.content);
             }
+            if (this.heightChangeObserver) {
+                this.heightChangeObserver.disconnect();
+            }
         }
     }
 }
 </script>
 
 <style>
+.el-dialog {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
 .el-dialog__header {
     padding: 0;
 }
@@ -168,8 +200,10 @@ export default {
 }
 
 .el-dialog__body {
-    padding: 1rem;
+    padding: 1rem 1rem 0 1rem;
+    margin-bottom: 1rem;
     color: inherit;
+    overflow: auto;
 }
 
 .el-dialog__footer {

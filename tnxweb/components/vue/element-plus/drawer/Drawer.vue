@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import $ from 'jquery';
 
 export default {
     name: 'TnxelDrawer',
@@ -56,6 +55,7 @@ export default {
                 // 以上均为element的Drawer组件配置项
                 width: undefined,
                 onShown: undefined, // 对话框展示后的事件回调
+                onClosed: undefined, // 对话框关闭后的事件回调
             },
         };
     },
@@ -106,11 +106,6 @@ export default {
             done();
         },
         onClosed() {
-            if (this.id) {
-                let $drawer = $('.tnxel-drawer#' + this.id);
-                $drawer.next('.el-overlay').remove();
-                $drawer.remove();
-            }
             if (typeof this.options.onClosed === 'function') {
                 this.options.onClosed.call(this.$refs.content);
             }
