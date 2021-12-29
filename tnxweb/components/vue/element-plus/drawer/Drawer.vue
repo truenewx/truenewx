@@ -134,10 +134,11 @@ export default {
 
 .el-drawer__body {
     padding: 0;
+    flex-grow: 1;
+    max-height: calc(100vh - 60px);
 }
 
 .tnxel-drawer-main {
-    padding: 1rem;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -145,16 +146,19 @@ export default {
 
 .tnxel-drawer-main .tnxel-drawer-content {
     flex-grow: 1;
+    padding: 1rem 1rem 0 1rem;
+    overflow: auto;
 }
 
 .tnxel-drawer-footer {
-    margin-top: 1rem;
-    padding: 0;
+    padding: 1rem;
     display: flex;
     flex-direction: row-reverse;
+    justify-content: start;
 }
 
 .tnxel-drawer-footer .el-button {
-    margin-left: 0.5rem;
+    margin-left: 0;
+    margin-right: 0.5rem;
 }
 </style>
