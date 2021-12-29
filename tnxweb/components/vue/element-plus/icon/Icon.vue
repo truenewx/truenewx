@@ -4,6 +4,7 @@
         <ArrowDown v-else-if="type === 'ArrowDown'"/>
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
         <Bottom v-else-if="type === 'Bottom'"/>
+        <CaretBottom v-else-if="type === 'CaretBottom'"/>
         <CaretTop v-else-if="type === 'CaretTop'"/>
         <Check v-else-if="type === 'Check'"/>
         <CircleCheck v-else-if="type === 'CircleCheck'"/>
@@ -42,6 +43,7 @@ import {
     ArrowDown,
     ArrowRight,
     Bottom,
+    CaretBottom,
     CaretTop,
     Check,
     CircleCheck,
@@ -79,6 +81,7 @@ const components = {
     ArrowDown,
     ArrowRight,
     Bottom,
+    CaretBottom,
     CaretTop,
     Check,
     CircleCheck,
