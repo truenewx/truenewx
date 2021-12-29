@@ -1,10 +1,12 @@
 <template>
     <el-dropdown-item class="tnxel-dropdown-item">
-        <template v-if="icon">
-            <tnxel-icon :type="icon"/>
-            <span><slot></slot></span>
-        </template>
-        <slot v-else></slot>
+        <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32" :disabled="!tooltip">
+            <span v-if="icon">
+                <tnxel-icon :type="icon"/>
+                <span><slot></slot></span>
+            </span>
+            <slot v-else></slot>
+        </el-tooltip>
     </el-dropdown-item>
 </template>
 
@@ -13,6 +15,11 @@ export default {
     name: 'TnxelDropdownItem',
     props: {
         icon: String,
+        tooltip: String,
+        tooltipPlacement: {
+            type: String,
+            default: 'right',
+        },
     },
 }
 </script>
