@@ -201,7 +201,6 @@ export default {
 
 .el-dialog__body {
     padding: 1rem 1rem 0 1rem;
-    margin-bottom: 1rem;
     color: inherit;
     overflow-x: hidden;
     overflow-y: auto;
@@ -212,7 +211,7 @@ export default {
 }
 
 .tnxel-dialog-footer {
-    padding: 0 1rem 1rem 1rem;
+    padding: 1rem;
     display: flex;
     flex-direction: row-reverse;
 }
