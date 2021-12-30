@@ -27,6 +27,7 @@ public class ExcelDoc {
     public static final String EXTENSION_XLS = FileExtensions.XLS;
     public static final String EXTENSION_XLSX = FileExtensions.XLSX;
 
+    private String filename;
     private Workbook origin;
     private FormulaEvaluator evaluator;
     private Map<String, CellStyle> styles = new HashMap<>();
@@ -55,6 +56,14 @@ public class ExcelDoc {
         } else {
             this.origin = new XSSFWorkbook(in);
         }
+    }
+
+    public String getFilename() {
+        return this.filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public Workbook getOrigin() {

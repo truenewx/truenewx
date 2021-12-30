@@ -57,10 +57,8 @@ public class ExcelRow {
     }
 
     public ExcelCell setCellValue(int columnIndex, Object value) {
-        ExcelCell cell = getCell(columnIndex);
-        if (cell != null) {
-            cell.setCellValue(value);
-        }
+        ExcelCell cell = getCell(columnIndex, true);
+        cell.setCellValue(value);
         return cell;
     }
 

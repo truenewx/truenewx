@@ -2,6 +2,7 @@ package org.truenewx.tnxjeex.office.excel;
 
 import java.util.function.BiConsumer;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.truenewx.tnxjeex.office.excel.exports.ExcelExportUtil;
@@ -33,9 +34,22 @@ public class ExcelSheet {
         return this.doc.getOrigin().getSheetIndex(this.origin);
     }
 
-    public ExcelRow createRow(int rowIndex) {
+    public ExcelRow createRow(int rowIndex, boolean copyStyleFromPreviousRow) {
         Row row = this.origin.createRow(rowIndex);
+        if (copyStyleFromPreviousRow) {
+            Row prevRow = this.origin.getRow(rowIndex - 1);
+            row.setRowStyle(prevRow.getRowStyle());
+            int cellNum = prevRow.getLastCellNum();
+            for (int i = 0; i < cellNum; i++) {
+                Cell cell = row.createCell(i);
+                cell.setCellStyle(prevRow.getCell(i).getCellStyle());
+            }
+        }
         return new ExcelRow(this, row);
+    }
+
+    public ExcelRow createRow(int rowIndex) {
+        return createRow(rowIndex, false);
     }
 
     public ExcelRow getRow(int rowIndex, boolean createIfNull) {
