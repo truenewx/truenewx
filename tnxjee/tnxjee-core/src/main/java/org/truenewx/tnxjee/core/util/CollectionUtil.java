@@ -275,6 +275,28 @@ public class CollectionUtil {
         }
     }
 
+    public static List<Integer> toList(int[] array) {
+        if (array == null) {
+            return null;
+        }
+        List<Integer> list = new ArrayList<>();
+        for (int e : array) {
+            list.add(e);
+        }
+        return list;
+    }
+
+    public static List<Long> toList(long[] array) {
+        if (array == null) {
+            return null;
+        }
+        List<Long> list = new ArrayList<>();
+        for (long e : array) {
+            list.add(e);
+        }
+        return list;
+    }
+
     public static <K, V> Map<K, V> clone(Map<K, V> map) {
         if (map == null) {
             return null;
