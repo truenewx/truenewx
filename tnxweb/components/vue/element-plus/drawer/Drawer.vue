@@ -16,9 +16,11 @@
             <div class="tnxel-drawer-title" :class="themeClass" v-html="title"></div>
         </template>
         <div class="tnxel-drawer-main" :class="themeClass">
-            <div class="tnxel-drawer-content" v-html="contentValue" v-if="contentValue"></div>
-            <tnxel-drawer-content ref="content" class="tnxel-drawer-content" v-bind="contentProps" v-else>
-            </tnxel-drawer-content>
+            <div class="tnxel-drawer-content">
+                <template v-html="contentValue" v-if="contentValue"/>
+                <tnxel-drawer-content ref="content" v-bind="contentProps" v-else>
+                </tnxel-drawer-content>
+            </div>
             <div class="tnxel-drawer-footer" v-if="buttons && buttons.length">
                 <el-button v-for="(button, index) in buttons" :type="button.type" :key="index"
                     @click="btnClick(index)">{{ button.caption || button.text }}
