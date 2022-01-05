@@ -16,8 +16,8 @@
         </template>
         <div :class="mergeClass()" v-html="contentValue" v-if="contentValue"></div>
         <tnxel-dialog-content :class="mergeClass()" ref="content" v-bind="contentProps" v-else></tnxel-dialog-content>
-        <template #footer>
-            <div class="tnxel-dialog-footer" :class="mergeClass()" v-if="buttons && buttons.length">
+        <template #footer v-if="buttons && buttons.length">
+            <div class="tnxel-dialog-footer" :class="mergeClass()">
                 <el-button v-for="(button, index) in buttons" :type="button.type" :key="index"
                     @click="btnClick(index)">{{ button.caption || button.text }}
                 </el-button>
@@ -148,9 +148,17 @@ export default {
             }
             this.close();
         },
-        close() {
+        close(callback) {
             const vm = this;
             this.beforeClose(function() {
+                if (typeof callback === 'function') {
+                    vm.options.onClosed = util.function.around(vm.options.onClosed, function(onClosed) {
+                        if (onClosed) {
+                            onClosed();
+                        }
+                        callback();
+                    });
+                }
                 vm.visible = false;
             });
         },
@@ -200,7 +208,7 @@ export default {
 }
 
 .el-dialog__body {
-    padding: 1rem 1rem 0 1rem;
+    padding: 1rem;
     color: inherit;
     overflow-x: hidden;
     overflow-y: auto;

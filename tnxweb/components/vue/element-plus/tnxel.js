@@ -119,11 +119,15 @@ const tnxel = Object.assign({}, tnxvue, {
         this._dialogs.push(dialogVm);
         return dialogVm;
     },
-    closeDialog(all) {
+    closeDialog(all, callback) {
+        if (typeof all === 'function') {
+            callback = all;
+            all = false;
+        }
         if (this._dialogs.length) {
             let dialog = this._dialogs.pop();
             while (dialog) {
-                dialog.close();
+                dialog.close(callback);
                 if (all) {
                     dialog = this._dialogs.pop();
                 } else {
@@ -172,11 +176,15 @@ const tnxel = Object.assign({}, tnxvue, {
         this._drawers.push(drawerVm);
         return drawerVm;
     },
-    closeDrawer(all) {
+    closeDrawer(all, callback) {
+        if (typeof all === 'function') {
+            callback = all;
+            all = false;
+        }
         if (this._drawers.length) {
             let drawer = this._drawers.pop();
             while (drawer) {
-                drawer.close();
+                drawer.close(callback);
                 if (all) {
                     drawer = this._drawers.pop();
                 } else {

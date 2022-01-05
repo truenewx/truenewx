@@ -93,9 +93,17 @@ export default {
             }
             this.close();
         },
-        close() {
+        close(callback) {
             const vm = this;
             this.beforeClose(function() {
+                if (typeof callback === 'function') {
+                    vm.options.onClosed = util.function.around(vm.options.onClosed, function(onClosed) {
+                        if (onClosed) {
+                            onClosed();
+                        }
+                        callback();
+                    });
+                }
                 vm.visible = false;
             });
         },
