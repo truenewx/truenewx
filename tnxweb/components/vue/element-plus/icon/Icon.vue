@@ -14,6 +14,8 @@
         <Close v-else-if="type === 'Close'"/>
         <CloseBold v-else-if="type === 'CloseBold'"/>
         <CopyDocument v-else-if="type === 'CopyDocument'"/>
+        <Document v-else-if="type === 'Document'"/>
+        <Delete v-else-if="type === 'Delete'"/>
         <DeleteFilled v-else-if="type === 'DeleteFilled'"/>
         <DocumentCopy v-else-if="type === 'DocumentCopy'"/>
         <Edit v-else-if="type === 'Edit'"/>
@@ -35,6 +37,7 @@
         <UserFilled v-else-if="type === 'UserFilled'"/>
         <View v-else-if="type === 'View'"/>
         <WarningFilled v-else-if="type === 'WarningFilled'"/>
+        <ZoomIn v-else-if="type === 'ZoomIn'"/>
     </el-icon>
 </template>
 
@@ -53,7 +56,9 @@ import {
     Close,
     CloseBold,
     CopyDocument,
+    Delete,
     DeleteFilled,
+    Document,
     DocumentCopy,
     Edit,
     Folder,
@@ -74,7 +79,8 @@ import {
     Top,
     UserFilled,
     View,
-    WarningFilled
+    WarningFilled,
+    ZoomIn,
 } from '@element-plus/icons';
 
 const components = {
@@ -91,6 +97,8 @@ const components = {
     Close,
     CloseBold,
     CopyDocument,
+    Document,
+    Delete,
     DeleteFilled,
     DocumentCopy,
     Edit,
@@ -113,6 +121,7 @@ const components = {
     UserFilled,
     View,
     WarningFilled,
+    ZoomIn,
 };
 
 export default {
