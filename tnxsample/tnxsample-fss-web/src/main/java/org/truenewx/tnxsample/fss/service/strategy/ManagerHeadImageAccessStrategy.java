@@ -34,7 +34,7 @@ public class ManagerHeadImageAccessStrategy extends AbstractFssAccessStrategy {
     }
 
     @Override
-    public String getRelativeDir(String scope, IntegerUserIdentity userIdentity) {
+    public String getRelativeDir(IntegerUserIdentity userIdentity, String scope) {
         if (isValidUserIdentity(userIdentity)) {
             return Strings.SLASH + userIdentity.getId();
         }

@@ -109,12 +109,13 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
     void delete(I userIdentity, String storageUrl);
 
     /**
-     * 复制指定文件为新的业务范围所表示的文件，仅在存储文件名由业务范围决定时有效
+     * 复制指定文件为目标业务范围所表示的文件，仅在存储文件名由业务范围决定时有效
      *
      * @param userIdentity 用户标识
      * @param storageUrl   原文件存储地址
-     * @param newScope     新的业务范围
+     * @param targetScope  目标业务范围
      * @return 新文件的存储地址
      */
-    String copy(I userIdentity, String storageUrl, String newScope);
+    String copy(I userIdentity, String storageUrl, String targetScope);
+
 }
