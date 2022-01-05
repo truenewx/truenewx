@@ -289,7 +289,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssStoragePath targetStoragePath = new FssStoragePath(type, relativeDir, storageFilename);
 
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
-            String targetStorageUrl = targetStoragePath.toString();
+            String targetStorageUrl = targetStoragePath.getUrl();
             accessor.copy(sourceStoragePath.toString(), targetStorageUrl);
             strategy.onWritten(userIdentity, targetScope, targetStorageUrl);
             return targetStorageUrl;
