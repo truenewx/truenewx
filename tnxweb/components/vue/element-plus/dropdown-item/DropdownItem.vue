@@ -1,10 +1,10 @@
 <template>
     <el-dropdown-item class="tnxel-dropdown-item">
         <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32" :disabled="!tooltip">
-            <span v-if="icon">
+            <div class="flex-v-center" v-if="icon">
                 <tnxel-icon :type="icon"/>
                 <span><slot></slot></span>
-            </span>
+            </div>
             <slot v-else></slot>
         </el-tooltip>
     </el-dropdown-item>
