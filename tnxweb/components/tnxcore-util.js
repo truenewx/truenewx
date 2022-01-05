@@ -76,6 +76,7 @@ const DATE_PATTERNS = {
     dateTime: 'yyyy-MM-dd HH:mm:ss',
     date: 'yyyy-MM-dd',
     time: 'HH:mm:ss',
+    timeMillisecond: 'HH:mm:ss.S',
     timeMinute: 'HH:mm',
     dateMinute: 'yyyy-MM-dd HH:mm',
     dateMonth: 'yyyy-MM',
@@ -97,8 +98,9 @@ Object.assign(Date.prototype, {
         }
         for (let key in date) {
             if (new RegExp('(' + key + ')').test(pattern)) {
+                let prefix = key === 'S' ? '000' : '00';
                 pattern = pattern.replace(RegExp.$1,
-                    RegExp.$1.length === 1 ? date[key] : ('00' + date[key]).substr(('' + date[key]).length));
+                    RegExp.$1.length === 1 ? date[key] : (prefix + date[key]).substr(('' + date[key]).length));
             }
         }
         return pattern;
@@ -111,6 +113,9 @@ Object.assign(Date.prototype, {
     },
     formatTime() {
         return this.format(DATE_PATTERNS.time);
+    },
+    formatTimeMillisecond() {
+        return this.format(DATE_PATTERNS.timeMillisecond);
     },
     formatTimeMinute() {
         return this.format(DATE_PATTERNS.timeMinute);
