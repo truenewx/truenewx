@@ -4,7 +4,7 @@
         :id="id"
         :action="action"
         :before-upload="_beforeUpload"
-        :on-progress="onProgress"
+        :on-progress="_onProgress"
         :on-success="_onSuccess"
         :on-error="_onError"
         :with-credentials="true"
@@ -82,6 +82,7 @@ export default {
         },
         iconSize: Number,
         beforeUpload: Function,
+        onProgress: Function,
         onSuccess: Function,
         onError: Function,
         onRemoved: Function,
@@ -346,8 +347,11 @@ export default {
                 resolve(file);
             }
         },
-        onProgress(event, file, fileList) {
+        _onProgress(event, file, fileList) {
             file.uploading = true;
+            if (this.onProgress) {
+                this.onProgress(file);
+            }
             this._resizeFilePanel(file, fileList);
         },
         _resizeFilePanel(file, fileList) {
