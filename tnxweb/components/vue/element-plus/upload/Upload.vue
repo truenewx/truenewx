@@ -1,46 +1,47 @@
 <template>
-    <el-upload ref="upload" name="file" class="tnxel-upload-container" :class="{center: center}"
+    <el-upload ref="upload" name="file" class="tnxel-upload-container"
+        :class="{center: center, imageable: uploadOptions.imageable}"
         :id="id"
         :action="action"
-        :before-upload="beforeUpload"
+        :before-upload="_beforeUpload"
         :on-progress="onProgress"
         :on-success="_onSuccess"
-        :on-error="onError"
+        :on-error="_onError"
         :with-credentials="true"
         list-type="picture-card"
         :file-list="fileList"
+        :show-file-list="showFileList"
         :headers="uploadHeaders"
         :multiple="uploadOptions ? uploadOptions.number > 1 : false"
         :accept="uploadAccept">
         <template #default>
-            <tnxel-icon type="Plus" :size="plusSize"/>
+            <tnxel-icon :type="icon" :size="uploadIconSize"/>
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
                 <img class="el-upload-list__item-thumbnail" :src="file.url"
                     v-if="uploadOptions && uploadOptions.imageable">
-                <div v-else>
-                    <i class="el-icon-document"></i> {{ file.name }}
+                <div class="el-upload-list__item-caption" v-else>
+                    <tnxel-icon type="Document"/>
+                    <span>{{ file.name }}</span>
                 </div>
                 <label class="el-upload-list__item-status-label">
-                    <i class="el-icon-upload-success el-icon-check"></i>
+                    <tnxel-icon type="Check"/>
                 </label>
                 <span class="el-upload-list__item-uploading" v-if="file.uploading">
-                    <i class="el-icon-loading"></i>
+                    <tnxel-icon type="Loading"/>
                 </span>
                 <div class="el-upload-list__item-actions">
-                    <span class="el-upload-list__item-preview" @click="previewFile(file)"
-                        v-if="uploadOptions && uploadOptions.imageable">
-                        <i class="el-icon-zoom-in"></i>
-                    </span>
-                    <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
-                        <i class="el-icon-delete"></i>
-                    </span>
+                    <div>
+                        <tnxel-icon type="ZoomIn" @click="previewFile(file)"
+                            v-if="uploadOptions && uploadOptions.imageable"/>
+                        <tnxel-icon type="Delete" @click="removeFile(file)" v-if="!readOnly"/>
+                    </div>
                 </div>
             </div>
         </template>
-        <template #tip>
-            <div class="el-upload__tip" v-if="tip" v-text="tip"></div>
+        <template #tip v-if="tip && !hiddenTip">
+            <div class="el-upload__tip" v-text="tip"></div>
         </template>
     </el-upload>
 </template>
@@ -75,15 +76,29 @@ export default {
         height: {
             type: [Number, String],
         },
+        icon: {
+            type: String,
+            default: 'Plus',
+        },
+        iconSize: Number,
+        beforeUpload: Function,
         onSuccess: Function,
+        onError: Function,
         onRemoved: Function,
         handleErrors: {
             type: Function,
-            default: function(errors) {
+            default(errors) {
                 window.tnx.app.rpc.handleErrors(errors);
             }
         },
         center: Boolean,
+        hiddenTip: Boolean,
+        showFileList: {
+            type: Boolean,
+            default() {
+                return true;
+            }
+        },
     },
     data() {
         const tnx = window.tnx;
@@ -160,17 +175,23 @@ export default {
             return {width, height};
         },
         itemPanelStyle() {
-            return {
-                width: window.tnx.util.string.getPixelString(this.uploadSize.width),
+            let style = {
                 height: window.tnx.util.string.getPixelString(this.uploadSize.height),
-            };
+            }
+            if (this.uploadOptions && this.uploadOptions.imageable) {
+                style.width = window.tnx.util.string.getPixelString(this.uploadSize.width);
+            }
+            return style;
         },
-        plusSize() {
+        uploadIconSize() {
+            if (this.iconSize) {
+                return this.iconSize;
+            }
             let width = this.uploadSize.width;
             let height = this.uploadSize.height;
-            let plusSize = Math.floor(Math.min(width, height) / 3);
-            plusSize = Math.max(16, Math.min(plusSize, 32));
-            return plusSize;
+            let iconSize = Math.floor(Math.min(width, height) / 3);
+            iconSize = Math.max(16, Math.min(iconSize, 32));
+            return iconSize;
         },
     },
     watch: {
@@ -208,7 +229,7 @@ export default {
                 }
             });
         },
-        getFileId: function(file) {
+        getFileId(file) {
             if (!file.id) {
                 if (file.url) { // 有URL的文件通过URL即可唯一确定
                     file.id = this.tnx.util.md5(file.url);
@@ -220,7 +241,7 @@ export default {
             }
             return file.id;
         },
-        validate: function(file) {
+        validate(file) {
             // 校验文件重复
             const vm = this;
             if (this.uploadFiles.contains(function(f) {
@@ -266,7 +287,7 @@ export default {
             }
             return true;
         },
-        beforeUpload: function(file) {
+        _beforeUpload(file) {
             const vm = this;
             const rpc = this.tnx.app.rpc;
             return new Promise(function(resolve, reject) {
@@ -280,10 +301,10 @@ export default {
                     // fss作为应用部署，且上传目标即为fss应用，则需确保用户在fss应用中已登录
                     if (fssConfig.appName && vm.action.startsWith(fssConfig.baseUrl + fssConfig.contextUrl)) {
                         rpc.ensureLogined(function() {
-                            resolve(file);
+                            vm._doBeforeUpload(file, resolve, reject);
                         }, {
                             app: fssConfig.appName,
-                            toLogin: function(loginFormUrl, originalUrl, originalMethod) {
+                            toLogin(loginFormUrl, originalUrl, originalMethod) {
                                 // 此时已可知在CAS服务器上未登录，即未登录任一服务
                                 $upload.css('visibility', 'unset');
                                 reject(file);
@@ -300,18 +321,36 @@ export default {
                             }
                         });
                     } else {
-                        resolve(file);
+                        vm._doBeforeUpload(file, resolve, reject);
                     }
                 } else {
                     reject(file);
                 }
             });
         },
-        onProgress: function(event, file, fileList) {
+        _doBeforeUpload(file, resolve, reject) {
+            if (this.beforeUpload) {
+                let promise = this.beforeUpload(file);
+                if (promise instanceof Promise) {
+                    promise.then(function() {
+                        resolve(file);
+                    }).catch(function() {
+                        reject(file);
+                    });
+                } else if (promise === false) {
+                    reject(file);
+                } else {
+                    resolve(file);
+                }
+            } else {
+                resolve(file);
+            }
+        },
+        onProgress(event, file, fileList) {
             file.uploading = true;
             this._resizeFilePanel(file, fileList);
         },
-        _resizeFilePanel: function(file, fileList) {
+        _resizeFilePanel(file, fileList) {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
             if (fileList.length >= this.uploadOptions.number) {
@@ -328,13 +367,13 @@ export default {
             }
             $listItemContainer.css({'min-height': $upload.outerHeight(true)});
         },
-        _onSuccess: function(uploadedFile, file, fileList) {
+        _onSuccess(result, file, fileList) {
             file.uploading = false;
             if (this.onSuccess) {
-                this.onSuccess(uploadedFile, file, fileList);
+                this.onSuccess(result, file, fileList);
             }
         },
-        onError: function(error, file, fileList) {
+        _onError(error, file, fileList) {
             $('#' + this.id + ' .el-upload').show();
             let message = JSON.parse(error.message);
             if (message) {
@@ -342,32 +381,44 @@ export default {
                     this.tnx.app.rpc.handle500Error(message.message, {
                         error: this.handleErrors
                     });
+                    if (this.onError) {
+                        this.onError(file, message.message);
+                    }
                     return;
                 } else if (message.errors) {
                     this.handleErrors(message.errors);
+                    if (this.onError) {
+                        let errorMessage = '';
+                        for (let error of message.errors) {
+                            errorMessage += error.message + '\n';
+                        }
+                        errorMessage = errorMessage.trim();
+                        this.onError(file, errorMessage);
+                    }
                     return;
                 }
             }
             console.error(error.message);
+            if (this.onError) {
+                this.onError(file, error.message);
+            }
         },
-        removeFile: function(file) {
+        removeFile(file) {
             this.uploadFiles.remove(function(f) {
                 return file.uid === f.uid;
             });
             if (this.uploadFiles.length < this.uploadOptions.number) {
                 let container = $('#' + this.id);
-                // 去掉文件列表的宽度，以免其占高度
-                $('.el-upload-list', container).css({
-                    width: 'unset'
-                });
-                // 显示添加按钮
-                $('.el-upload', container).show();
+                // 去掉文件列表的样式，以免其占高度
+                $('.el-upload-list', container).removeAttr('style');
+                // 恢复添加框默认样式
+                $('.el-upload', container).css('display', 'inline-flex');
             }
             if (this.onRemoved) {
                 this.onRemoved(file);
             }
         },
-        previewFile: function(file) {
+        previewFile(file) {
             if (!file.width || !file.height) {
                 const image = new Image();
                 image.src = file.previewUrl || file.url;
@@ -381,7 +432,7 @@ export default {
                 this._doPreviewFile(file);
             }
         },
-        _doPreviewFile: function(file) {
+        _doPreviewFile(file) {
             const dialogPadding = 16;
             let top = (this.tnx.util.dom.getDocHeight() - file.height) / 2 - dialogPadding;
             top = Math.max(top, 5); // 最高顶部留5px空隙
@@ -393,7 +444,7 @@ export default {
                 width: width + 'px',
             });
         },
-        size: function() {
+        size() {
             if (this.uploadFiles && this.uploadFiles.length) {
                 return this.uploadFiles.length;
             }
@@ -407,6 +458,12 @@ export default {
 .tnxel-upload-container.center {
     display: flex;
     flex-direction: column;
+}
+
+.tnxel-upload-container:not(.imageable) {
+    display: flex;
+    flex-direction: column-reverse;
+
 }
 
 .tnxel-upload-container .el-upload--picture-card {
@@ -432,12 +489,20 @@ export default {
     max-width: 100%;
 }
 
+.tnxel-upload-container.center .el-upload-list--picture-card {
+    justify-content: center;
+}
+
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item {
     transition: none;
     border-radius: .25rem;
     width: unset;
     height: unset;
     line-height: 0;
+}
+
+.tnxel-upload-container:not(.imageable) .el-upload-list--picture-card .el-upload-list__item {
+    margin: 0.5rem 0 0 0;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item.is-ready {
@@ -451,12 +516,31 @@ export default {
     flex-wrap: wrap;
 }
 
+.tnxel-upload-container .el-upload-list__panel .el-upload-list__item-caption {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-thumbnail {
     object-fit: contain;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-actions {
     font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-actions i {
+    cursor: pointer;
+    margin-left: 3px;
+    margin-right: 3px;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-uploading {
@@ -474,8 +558,12 @@ export default {
     background-color: black;
 }
 
-.el-form-item__content .tnxel-upload-container .el-upload__tip {
+.tnxel-upload-container .el-upload__tip {
     line-height: 1;
     margin-top: 0;
+}
+
+.tnxel-upload-container.center .el-upload__tip {
+    text-align: center;
 }
 </style>

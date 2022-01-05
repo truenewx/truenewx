@@ -1,7 +1,8 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
-        :read-only="readOnly" :width="width" :height="height" :center="center"
-        :on-success="onSuccess" :on-removed="onRemove"/>
+        :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
+        :hidden-tip="hiddenTip" :show-file-list="showFileList"
+        :before-upload="beforeUpload" :on-success="_onSuccess" :on-error="onError" :on-removed="_onRemove"/>
 </template>
 
 <script>
@@ -29,7 +30,20 @@ export default {
         height: {
             type: [Number, String],
         },
+        icon: String,
+        iconSize: Number,
         center: Boolean,
+        hiddenTip: Boolean,
+        showFileList: {
+            type: Boolean,
+            default() {
+                return true;
+            }
+        },
+        onSuccess: Function,
+        onError: Function,
+        onRemove: Function,
+        beforeUpload: Function,
     },
     emits: ['update:modelValue'],
     data() {
@@ -57,7 +71,7 @@ export default {
         this._initialize();
     },
     methods: {
-        equals: function(fileList, storageUrls) {
+        equals(fileList, storageUrls) {
             if (!Array.isArray(storageUrls)) {
                 storageUrls = [storageUrls];
             }
@@ -72,7 +86,7 @@ export default {
             }
             return true;
         },
-        contains: function(fileList, storageUrl) {
+        contains(fileList, storageUrl) {
             for (let file of fileList) {
                 if (file.storageUrl === storageUrl) {
                     return true;
@@ -80,7 +94,7 @@ export default {
             }
             return false;
         },
-        _initialize: function() {
+        _initialize() {
             const vm = this;
             let fssConfig = vm.tnx.fss.getClientConfig();
             vm.tnx.app.rpc.ensureLogined(function() {
@@ -119,12 +133,12 @@ export default {
                 }
             }, {
                 app: fssConfig.appName,
-                toLogin: function(loginFormUrl, originalUrl, originalMethod) {
+                toLogin(loginFormUrl, originalUrl, originalMethod) {
                     return true;
                 }
             });
         },
-        _loadUploadOptions: function() {
+        _loadUploadOptions() {
             // 上传限制为空才执行加载，避免多次重复加载
             if (Object.keys(this.uploadOptions).length === 0) {
                 let vm = this;
@@ -133,20 +147,23 @@ export default {
                 });
             }
         },
-        _getFullReadUrl: function(readUrl) {
+        _getFullReadUrl(readUrl) {
             if (readUrl && readUrl.startsWith('//')) {
                 return window.location.protocol + readUrl;
             }
             return readUrl;
         },
-        onSuccess: function(uploadedFile, file, fileList) {
-            if (uploadedFile) {
-                file.storageUrl = uploadedFile.storageUrl;
+        _onSuccess(result, file, fileList) {
+            if (result) {
+                file.storageUrl = result.storageUrl;
                 this.fileList = fileList;
                 this.emitInput();
+                if (this.onSuccess) {
+                    this.onSuccess(file);
+                }
             }
         },
-        onRemove: function(file) {
+        _onRemove(file) {
             for (let i = 0; i < this.fileList.length; i++) {
                 let _file = this.fileList[i];
                 if (_file.id === file.id) {
@@ -155,8 +172,11 @@ export default {
                 }
             }
             this.emitInput();
+            if (this.onRemove) {
+                this.onRemove(file);
+            }
         },
-        emitInput: function() {
+        emitInput() {
             let storageUrls = [];
             for (let file of this.uploadFiles) {
                 if (file.storageUrl) {
@@ -170,7 +190,7 @@ export default {
             }
             this.$emit('update:modelValue', storageUrls);
         },
-        size: function() {
+        size() {
             return this.$refs.upload.size();
         },
         /**
@@ -178,7 +198,7 @@ export default {
          * @param reject 没有完成上传时的处理函数，传入文件对象参数
          * @returns 文件存储路径或其数组，有上传未完成时返回false
          */
-        validateUploaded: function(reject) {
+        validateUploaded(reject) {
             if (this.uploadOptions.number > 1) {
                 const storageUrls = [];
                 for (let file of this.uploadFiles) {
@@ -203,7 +223,7 @@ export default {
             }
             return null;
         },
-        _doValidateUploadedReject: function(reject, file) {
+        _doValidateUploadedReject(reject, file) {
             if (typeof reject === 'function') {
                 reject(file);
             } else {
