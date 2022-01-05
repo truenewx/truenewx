@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.core.beans;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.util.LogUtil;
@@ -13,7 +14,7 @@ import org.truenewx.tnxjee.core.util.MathUtil;
  *
  * @author jianglei
  */
-public abstract class DelayContextInitializedBean implements ContextInitializedBean {
+public abstract class DelayContextInitializedBean implements ContextInitializedBean, DisposableBean {
 
     /**
      * 默认的最小延时执行毫秒数
@@ -33,6 +34,11 @@ public abstract class DelayContextInitializedBean implements ContextInitializedB
                 LogUtil.error(beanClass, e);
             }
         }, getDelayMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        this.executor.shutdown();
     }
 
     protected long getDelayMillis() {
