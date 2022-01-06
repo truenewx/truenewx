@@ -111,11 +111,12 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
     /**
      * 复制指定文件为目标业务范围所表示的文件，仅在存储文件名由业务范围决定时有效
      *
-     * @param userIdentity 用户标识
-     * @param storageUrl   原文件存储地址
-     * @param targetScope  目标业务范围
+     * @param userIdentity     用户标识
+     * @param sourceStorageUrl 原文件存储地址
+     * @param targetType
+     * @param targetScope      目标业务范围
      * @return 新文件的存储地址
      */
-    String copy(I userIdentity, String storageUrl, String targetScope);
+    String copy(I userIdentity, String sourceStorageUrl, String targetType, String targetScope);
 
 }

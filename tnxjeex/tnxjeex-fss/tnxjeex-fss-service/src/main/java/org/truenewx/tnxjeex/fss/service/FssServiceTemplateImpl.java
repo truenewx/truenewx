@@ -268,30 +268,37 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public String copy(I userIdentity, String storageUrl, String targetScope) {
-        FssStoragePath sourceStoragePath = FssStoragePath.of(storageUrl);
+    public String copy(I userIdentity, String sourceStorageUrl, String targetType, String targetScope) {
+        FssStoragePath sourceStoragePath = FssStoragePath.of(sourceStorageUrl);
         if (sourceStoragePath != null) {
-            String type = sourceStoragePath.getType();
-            FssAccessStrategy<I> strategy = getStrategy(type);
-            // 获取相对目录，同时校验写权限
-            String relativeDir = getRelativeDirForWrite(strategy, userIdentity, targetScope);
-            // 获取文件名
-            String storageFilename = strategy.getFilename(userIdentity, targetScope);
-            if (StringUtils.isBlank(storageFilename)) {
-                throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE);
+            FssAccessStrategy<I> sourceStrategy = getStrategy(sourceStoragePath.getType());
+            FssAccessStrategy<I> targetStrategy = getStrategy(targetType);
+            // 跨文件存储服务提供商无法复制（暂时没有跨文件存储服务提供商的需要，实际上也是可行的，只是性能较差，代码复杂）
+            if (sourceStrategy.getProvider() != targetStrategy.getProvider()) {
+                throw new BusinessException(FssExceptionCodes.CANNOT_COPY_BETWEEN_PROVIDERS);
             }
+            // 获取目标相对目录，同时校验写权限
+            String targetRelativeDir = getRelativeDirForWrite(targetStrategy, userIdentity, targetScope);
+            // 获取目标存储文件名
+            String targetStorageFilename = targetStrategy.getFilename(userIdentity, targetScope);
+            if (StringUtils.isBlank(targetStorageFilename)) {
+                throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
+                        targetScope, targetType);
+            }
+            // 目标文件扩展名与来源文件相同
             String extension = FilenameUtils.getExtension(sourceStoragePath.getFilename());
             if (StringUtils.isNotBlank(extension) && !extension.startsWith(Strings.DOT)) {
                 extension = Strings.DOT + extension;
             }
-            storageFilename += extension.toLowerCase();
-            // 构建存储路径
-            FssStoragePath targetStoragePath = new FssStoragePath(type, relativeDir, storageFilename);
-
-            FssAccessor accessor = this.accessors.get(strategy.getProvider());
+            targetStorageFilename += extension.toLowerCase();
+            // 构建目标存储路径
+            FssStoragePath targetStoragePath = new FssStoragePath(targetType, targetRelativeDir, targetStorageFilename);
             String targetStorageUrl = targetStoragePath.getUrl();
-            accessor.copy(sourceStoragePath.toString(), targetStorageUrl);
-            strategy.onWritten(userIdentity, targetScope, targetStorageUrl);
+            if (!sourceStorageUrl.equals(targetStorageUrl)) { // 存储路径不同才有必要复制
+                FssAccessor accessor = this.accessors.get(targetStrategy.getProvider());
+                accessor.copy(sourceStoragePath.toString(), targetStoragePath.toString());
+                targetStrategy.onWritten(userIdentity, targetScope, targetStorageUrl);
+            }
             return targetStorageUrl;
         }
         return null;

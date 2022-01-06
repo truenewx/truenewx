@@ -36,8 +36,13 @@ public class FssExceptionCodes {
     public static final String NO_EXTENSION = "error.fss.no_extension";
 
     /**
-     * 根据返回无法生成存储文件名，因此无法复制
+     * 根据业务范围无法生成存储文件名，因此无法复制
      */
     public static final String CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE = "error.fss.cannot_copy_without_storage_filename_by_scope";
+
+    /**
+     * 不能在文件存储服务提供商之间复制
+     */
+    public static final String CANNOT_COPY_BETWEEN_PROVIDERS = "error.fss.cannot_copy_between_providers";
 
 }
