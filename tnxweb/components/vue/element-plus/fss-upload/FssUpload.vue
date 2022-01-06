@@ -3,6 +3,7 @@
         :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
         :hidden-tip="hiddenTip" :show-file-list="showFileList"
         :before-upload="beforeUpload"
+        :on-prepare="onPrepare"
         :on-progress="onProgress"
         :on-success="_onSuccess"
         :on-error="onError"
@@ -45,6 +46,7 @@ export default {
             }
         },
         beforeUpload: Function,
+        onPrepare: Function,
         onProgress: Function,
         onSuccess: Function,
         onError: Function,

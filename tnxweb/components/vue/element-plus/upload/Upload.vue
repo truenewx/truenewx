@@ -3,6 +3,7 @@
         :class="{center: center, imageable: uploadOptions.imageable}"
         :id="id"
         :action="action"
+        :on-change="_onChange"
         :before-upload="_beforeUpload"
         :on-progress="_onProgress"
         :on-success="_onSuccess"
@@ -82,6 +83,10 @@ export default {
         },
         iconSize: Number,
         beforeUpload: Function,
+        /**
+         * 所有准备上传的文件均已经过预处理决定是否上传时的钩子
+         */
+        onPrepare: Function,
         onProgress: Function,
         onSuccess: Function,
         onError: Function,
@@ -115,6 +120,7 @@ export default {
             uploadHeaders: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
+            lastReadyFileUid: null, // 最后一个准备上传的文件的uid，缓存以便于判断是否所有准备上传的文件都经过预处理决定是否上传
         };
     },
     computed: {
@@ -288,6 +294,12 @@ export default {
             }
             return true;
         },
+        _onChange(file, fileList) {
+            if (file.status === 'ready') { // 简单赋值以确保缓存，即使多次赋值也无妨
+                let lastFile = fileList[fileList.length - 1];
+                this.lastReadyFileUid = lastFile?.uid;
+            }
+        },
         _beforeUpload(file) {
             const vm = this;
             const rpc = this.tnx.app.rpc;
@@ -309,6 +321,7 @@ export default {
                                 // 此时已可知在CAS服务器上未登录，即未登录任一服务
                                 $upload.css('visibility', 'unset');
                                 reject(file);
+                                vm._toTriggerAllUploadEvent(file);
                                 // 从当前应用登录表单地址
                                 rpc.get('/authentication/login-url', function(loginUrl) {
                                     if (loginUrl) {
@@ -326,25 +339,37 @@ export default {
                     }
                 } else {
                     reject(file);
+                    vm._toTriggerAllUploadEvent(file);
                 }
             });
+        },
+        _toTriggerAllUploadEvent(file) {
+            if (this.onPrepare && file.uid === this.lastReadyFileUid) {
+                this.onPrepare();
+            }
         },
         _doBeforeUpload(file, resolve, reject) {
             if (this.beforeUpload) {
                 let promise = this.beforeUpload(file);
                 if (promise instanceof Promise) {
+                    let vm = this;
                     promise.then(function() {
                         resolve(file);
+                        vm._toTriggerAllUploadEvent(file);
                     }).catch(function() {
                         reject(file);
+                        vm._toTriggerAllUploadEvent(file);
                     });
                 } else if (promise === false) {
                     reject(file);
+                    this._toTriggerAllUploadEvent(file);
                 } else {
                     resolve(file);
+                    this._toTriggerAllUploadEvent(file);
                 }
             } else {
                 resolve(file);
+                this._toTriggerAllUploadEvent(file);
             }
         },
         _onProgress(event, file, fileList) {
