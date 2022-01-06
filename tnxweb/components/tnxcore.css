@@ -109,6 +109,10 @@ ul {
     cursor: pointer;
 }
 
+.cursor-default {
+    cursor: default;
+}
+
 .text-transparent {
     color: transparent !important;
 }
