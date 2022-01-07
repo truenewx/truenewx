@@ -3,7 +3,6 @@
         :class="{center: center, imageable: uploadOptions.imageable}"
         :id="id"
         :action="action"
-        :on-change="_onChange"
         :before-upload="_beforeUpload"
         :on-progress="_onProgress"
         :on-success="_onSuccess"
@@ -16,7 +15,9 @@
         :multiple="uploadOptions ? uploadOptions.number > 1 : false"
         :accept="uploadAccept">
         <template #default>
-            <tnxel-icon :type="icon" :size="uploadIconSize"/>
+            <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
+                <tnxel-icon :type="icon" :size="uploadIconSize" :title="tip === 'title' ? tipContent : undefined"/>
+            </el-tooltip>
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
@@ -41,8 +42,8 @@
                 </div>
             </div>
         </template>
-        <template #tip v-if="tip && !hiddenTip">
-            <div class="el-upload__tip" v-text="tip"></div>
+        <template #tip v-if="tipContent && (typeof tip !== 'string')">
+            <div class="el-upload__tip" v-text="tipContent"></div>
         </template>
     </el-upload>
 </template>
@@ -84,9 +85,9 @@ export default {
         iconSize: Number,
         beforeUpload: Function,
         /**
-         * 所有准备上传的文件均已经过预处理决定是否上传时的钩子
+         * 所有可上传的文件均已开始上传时的钩子
          */
-        onPrepare: Function,
+        onUpload: Function,
         onProgress: Function,
         onSuccess: Function,
         onError: Function,
@@ -94,11 +95,18 @@ export default {
         handleErrors: {
             type: Function,
             default(errors) {
-                window.tnx.app.rpc.handleErrors(errors);
+                if (errors?.length) {
+                    window.tnx.app.rpc.handleErrors(errors);
+                }
             }
         },
         center: Boolean,
-        hiddenTip: Boolean,
+        tip: {
+            type: [Boolean, String, Function],
+            default() {
+                return true;
+            }
+        },
         showFileList: {
             type: Boolean,
             default() {
@@ -120,42 +128,43 @@ export default {
             uploadHeaders: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            lastReadyFileUid: null, // 最后一个准备上传的文件的uid，缓存以便于判断是否所有准备上传的文件都经过预处理决定是否上传
+            uploadFileNum: 0,
         };
     },
     computed: {
-        tip() {
-            let tip = '';
-            if (this.uploadOptions) {
-                if (!this.readOnly) {
-                    const separator = '，';
-                    if (this.uploadOptions.number > 1) {
-                        tip += separator + this.tipMessages.number.format(this.uploadOptions.number);
-                    }
-                    if (this.uploadOptions.capacity > 0) {
-                        const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity, 2);
-                        tip += separator + this.tipMessages.capacity.format(capacity);
-                    }
-                    if (this.uploadOptions.extensions && this.uploadOptions.extensions.length) {
-                        const extensions = this.uploadOptions.extensions.join('、');
-                        if (this.uploadOptions.extensionsRejected) {
-                            tip += separator + this.tipMessages.excludedExtensions.format(extensions);
-                        } else {
-                            tip += separator + this.tipMessages.extensions.format(extensions);
-                        }
-                    }
-                    if (tip.length > 0) {
-                        tip = tip.substr(separator.length);
-                    }
-                    if (this.uploadOptions.publicReadable) {
-                        if (tip.length) {
-                            tip += '；';
-                        }
-                        tip += '该' + (this.uploadOptions.imageable ? '图片' : '文件') + '可能对外公开，请慎重选择上传。';
+        tipContent() {
+            let content = '';
+            if (this.tip !== false && this.uploadOptions && !this.readOnly) {
+                const separator = '，';
+                if (this.uploadOptions.number > 1) {
+                    content += separator + this.tipMessages.number.format(this.uploadOptions.number);
+                }
+                if (this.uploadOptions.capacity > 0) {
+                    const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity, 2);
+                    content += separator + this.tipMessages.capacity.format(capacity);
+                }
+                if (this.uploadOptions.extensions && this.uploadOptions.extensions.length) {
+                    const extensions = this.uploadOptions.extensions.join('、');
+                    if (this.uploadOptions.extensionsRejected) {
+                        content += separator + this.tipMessages.excludedExtensions.format(extensions);
+                    } else {
+                        content += separator + this.tipMessages.extensions.format(extensions);
                     }
                 }
+                if (content.length > 0) {
+                    content = content.substr(separator.length);
+                }
+                if (this.uploadOptions.publicReadable) {
+                    if (content.length) {
+                        content += '；';
+                    }
+                    content += '该' + (this.uploadOptions.imageable ? '图片' : '文件') + '可能对外公开，请慎重选择上传。';
+                }
+                if (typeof this.tip === 'function') {
+                    content = this.tip(content);
+                }
             }
-            return tip;
+            return content;
         },
         uploadAccept() {
             if (this.uploadOptions && this.uploadOptions.mimeTypes) {
@@ -261,7 +270,10 @@ export default {
             if (this.uploadOptions.number > 0 && this.uploadFiles.length > this.uploadOptions.number) {
                 let message = this.tipMessages.number.format(this.uploadOptions.number);
                 message += '，多余的文件未加入上传队列';
-                this.tnx.error(message);
+                this.handleErrors([{
+                    code: 'error.upload.number',
+                    message: message,
+                }]);
                 return false;
             }
             // 校验容量大小
@@ -270,7 +282,10 @@ export default {
                 let message = this.tipMessages.capacity.format(capacity, 2);
                 message += '，文件"' + file.name + '"大小为' + this.tnx.util.string.getCapacityCaption(file.size,
                     2) + '，不符合要求';
-                this.tnx.error(message);
+                this.handleErrors([{
+                    code: 'error.upload.capacity',
+                    message: message,
+                }]);
                 return false;
             }
             // 校验扩展名
@@ -279,7 +294,11 @@ export default {
                 if (this.uploadOptions.extensionsRejected) { // 扩展名黑名单模式
                     if (this.uploadOptions.extensions.containsIgnoreCase(extension)) {
                         const extensions = this.uploadOptions.extensions.join('、');
-                        this.tnx.error(this.tipMessages.excludedExtensions.format(extensions));
+                        let message = this.tipMessages.excludedExtensions.format(extensions);
+                        this.handleErrors([{
+                            code: 'error.upload.extension',
+                            message: message,
+                        }]);
                         return false;
                     }
                 } else { // 扩展名白名单模式
@@ -287,20 +306,24 @@ export default {
                         const extensions = this.uploadOptions.extensions.join('、');
                         let message = this.tipMessages.extensions.format(extensions);
                         message += '，文件"' + file.name + '"不符合要求';
-                        this.tnx.error(message);
+                        this.handleErrors([{
+                            code: 'error.upload.extension',
+                            message: message,
+                        }]);
                         return false;
                     }
                 }
             }
             return true;
         },
-        _onChange(file, fileList) {
-            if (file.status === 'ready') { // 简单赋值以确保缓存，即使多次赋值也无妨
-                let lastFile = fileList[fileList.length - 1];
-                this.lastReadyFileUid = lastFile?.uid;
-            }
-        },
         _beforeUpload(file) {
+            if (this.uploadFiles.length === 1) { // 在检查首个准备上传的文件前，清空可能存在的错误消息
+                this.handleErrors([]);
+            }
+            // 指定了onUpload，则记录准备上传的文件数量
+            if (this.onUpload && this.uploadFileNum < this.uploadFiles.length) {
+                this.uploadFileNum = this.uploadFiles.length;
+            }
             const vm = this;
             const rpc = this.tnx.app.rpc;
             return new Promise(function(resolve, reject) {
@@ -321,7 +344,6 @@ export default {
                                 // 此时已可知在CAS服务器上未登录，即未登录任一服务
                                 $upload.css('visibility', 'unset');
                                 reject(file);
-                                vm._toTriggerAllUploadEvent(file);
                                 // 从当前应用登录表单地址
                                 rpc.get('/authentication/login-url', function(loginUrl) {
                                     if (loginUrl) {
@@ -339,45 +361,42 @@ export default {
                     }
                 } else {
                     reject(file);
-                    vm._toTriggerAllUploadEvent(file);
                 }
             });
-        },
-        _toTriggerAllUploadEvent(file) {
-            if (this.onPrepare && file.uid === this.lastReadyFileUid) {
-                this.onPrepare();
-            }
         },
         _doBeforeUpload(file, resolve, reject) {
             if (this.beforeUpload) {
                 let promise = this.beforeUpload(file);
                 if (promise instanceof Promise) {
-                    let vm = this;
                     promise.then(function() {
                         resolve(file);
-                        vm._toTriggerAllUploadEvent(file);
                     }).catch(function() {
                         reject(file);
-                        vm._toTriggerAllUploadEvent(file);
                     });
                 } else if (promise === false) {
                     reject(file);
-                    this._toTriggerAllUploadEvent(file);
                 } else {
                     resolve(file);
-                    this._toTriggerAllUploadEvent(file);
                 }
             } else {
                 resolve(file);
-                this._toTriggerAllUploadEvent(file);
             }
         },
         _onProgress(event, file, fileList) {
             file.uploading = true;
-            if (this.onProgress) {
+            if (file.percentage === 0) { // 首次执行
+                this._resizeFilePanel(file, fileList);
+                if (this.onUpload) {
+                    if (file.uid === fileList[fileList.length - 1].uid) {
+                        let resolvedNum = fileList.length;
+                        let rejectedNum = this.uploadFileNum - resolvedNum;
+                        this.uploadFileNum = 0;
+                        this.onUpload(resolvedNum, rejectedNum);
+                    }
+                }
+            } else if (this.onProgress) {
                 this.onProgress(file);
             }
-            this._resizeFilePanel(file, fileList);
         },
         _resizeFilePanel(file, fileList) {
             const $container = $('#' + this.id);
@@ -407,15 +426,15 @@ export default {
             let message = JSON.parse(error.message);
             if (message) {
                 if (message.status === 500) {
-                    this.tnx.app.rpc.handle500Error(message.message, {
-                        error: this.handleErrors
-                    });
                     if (this.onError) {
                         this.onError(file, message.message);
+                    } else {
+                        this.tnx.app.rpc.handle500Error(message.message, {
+                            error: this.handleErrors
+                        });
                     }
                     return;
                 } else if (message.errors) {
-                    this.handleErrors(message.errors);
                     if (this.onError) {
                         let errorMessage = '';
                         for (let error of message.errors) {
@@ -423,6 +442,8 @@ export default {
                         }
                         errorMessage = errorMessage.trim();
                         this.onError(file, errorMessage);
+                    } else {
+                        this.handleErrors(message.errors);
                     }
                     return;
                 }

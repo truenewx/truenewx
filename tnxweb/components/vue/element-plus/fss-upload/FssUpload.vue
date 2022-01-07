@@ -1,13 +1,14 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
         :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
-        :hidden-tip="hiddenTip" :show-file-list="showFileList"
+        :tip="tip" :show-file-list="showFileList"
         :before-upload="beforeUpload"
-        :on-prepare="onPrepare"
+        :on-upload="onUpload"
         :on-progress="onProgress"
         :on-success="_onSuccess"
         :on-error="onError"
-        :on-removed="_onRemove"/>
+        :on-removed="_onRemove"
+        :handle-errors="handleErrors"/>
 </template>
 
 <script>
@@ -38,7 +39,12 @@ export default {
         icon: String,
         iconSize: Number,
         center: Boolean,
-        hiddenTip: Boolean,
+        tip: {
+            type: [Boolean, String, Function],
+            default() {
+                return true;
+            }
+        },
         showFileList: {
             type: Boolean,
             default() {
@@ -46,11 +52,12 @@ export default {
             }
         },
         beforeUpload: Function,
-        onPrepare: Function,
+        onUpload: Function,
         onProgress: Function,
         onSuccess: Function,
         onError: Function,
         onRemove: Function,
+        handleErrors: Function,
     },
     emits: ['update:modelValue'],
     data() {
