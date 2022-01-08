@@ -114,7 +114,9 @@ public class CollectionUtil {
             return ((Map<?, ?>) iterable).size();
         } else {
             int size = 0;
-            for (Object obj : iterable) {
+            Iterator<?> iterator = iterable.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
                 size++;
             }
             return size;
