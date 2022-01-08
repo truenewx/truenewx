@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.util.Assert;
@@ -14,6 +15,7 @@ import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
 /**
  * 自有文件存储服务访问器
@@ -46,7 +48,7 @@ public class OwnFssAccessor implements FssAccessor {
     public void write(InputStream in, String path, String filename) throws IOException {
         // 先上传内容到一个新建的临时文件中，以免在处理过程中原文件被读取
         File tempFile = createTempFile(path);
-        OutputStream out = this.fileStreamProvider.getOutputStream(path, tempFile, filename);
+        OutputStream out = this.fileStreamProvider.getWriteStream(path, tempFile, filename);
         IOUtils.copy(in, out);
         out.close();
 
@@ -118,16 +120,18 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public boolean read(String path, OutputStream out) throws IOException {
+    public Charset getCharset(String path) {
+        File file = getStorageFile(path);
+        return FssUtil.getCharset(file);
+    }
+
+    @Override
+    public InputStream getReadStream(String path) throws IOException {
         File file = getStorageFile(path);
         if (file.exists()) {
-            InputStream in = this.fileStreamProvider.getInputStream(file);
-            IOUtils.copy(in, out);
-            in.close();
-            return true;
+            return this.fileStreamProvider.getReadStream(file);
         }
-        // 如果文件不存在，则需要从远程服务器读取内容，并缓存到本地文件
-        return false;
+        return null;
     }
 
     @Override

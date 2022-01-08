@@ -20,7 +20,7 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public OutputStream getOutputStream(String path, File target, String originalFilename) throws IOException {
+    public OutputStream getWriteStream(String path, File target, String originalFilename) throws IOException {
         return new EncryptOutputStream(new FileOutputStream(target), originalFilename, this.salt);
     }
 
@@ -33,7 +33,7 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public InputStream getInputStream(File source) throws IOException {
+    public InputStream getReadStream(File source) throws IOException {
         return new EncryptInputStream(new FileInputStream(source), this.salt);
     }
 

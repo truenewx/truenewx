@@ -18,7 +18,7 @@ public interface OwnFssFileStreamProvider {
      * @param originalFilename 原始文件名
      * @return 写入输出流
      */
-    OutputStream getOutputStream(String path, File target, String originalFilename) throws IOException;
+    OutputStream getWriteStream(String path, File target, String originalFilename) throws IOException;
 
     /**
      * 获取指定文件的原始文件名
@@ -35,6 +35,6 @@ public interface OwnFssFileStreamProvider {
      * @param source 来源文件
      * @return 读取输入流
      */
-    InputStream getInputStream(File source) throws IOException;
+    InputStream getReadStream(File source) throws IOException;
 
 }

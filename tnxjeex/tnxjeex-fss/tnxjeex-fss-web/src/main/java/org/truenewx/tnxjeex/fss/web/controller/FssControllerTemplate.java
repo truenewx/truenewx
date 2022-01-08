@@ -333,11 +333,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     public String read(String path) {
         if (StringUtils.isNotBlank(path)) {
             I userIdentity = getUserIdentity();
-            try {
-                return this.service.read(userIdentity, path);
-            } catch (IOException e) {
-                LogUtil.error(getClass(), e);
-            }
+            return this.service.read(userIdentity, path);
         }
         return null;
     }

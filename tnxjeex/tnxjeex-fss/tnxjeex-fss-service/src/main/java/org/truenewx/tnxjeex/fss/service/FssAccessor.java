@@ -2,7 +2,7 @@ package org.truenewx.tnxjeex.fss.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
@@ -28,12 +28,26 @@ public interface FssAccessor {
     /**
      * 获取指定文件的最后修改时间
      *
-     * @param path 存储路径
+     * @param path 文件路径
      * @return 最后修改时间毫秒数，指定文件不存在时返回null
      */
     Long getLastModifiedTime(String path);
 
-    boolean read(String path, OutputStream out) throws IOException;
+    /**
+     * 获取指定文件的字符编码
+     *
+     * @param path 文件路径
+     * @return 指定文件的字符编码，无法获取则返回null
+     */
+    Charset getCharset(String path);
+
+    /**
+     * 获取指定文件的读取输入流
+     *
+     * @param path 文件路径
+     * @return 读取输入流
+     */
+    InputStream getReadStream(String path) throws IOException;
 
     void delete(String path);
 

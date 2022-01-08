@@ -2,15 +2,16 @@ package org.truenewx.tnxjeex.fss.service.aliyun;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
+import com.aliyun.oss.ClientException;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.ObjectMetadata;
 
 /**
@@ -49,8 +50,7 @@ public class AliyunFssAccessor implements FssAccessor {
     @Override
     public String getOriginalFilename(String path) {
         try {
-            path = AliyunOssUtil.standardizePath(path);
-            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(getBucketName(), path);
+            ObjectMetadata meta = getObjectMetadata(path);
             String filename = meta.getUserMetadata().get("filename");
             if (StringUtils.isNotBlank(filename)) {
                 try {
@@ -64,11 +64,15 @@ public class AliyunFssAccessor implements FssAccessor {
         }
     }
 
+    private ObjectMetadata getObjectMetadata(String path) {
+        path = AliyunOssUtil.standardizePath(path);
+        return this.account.getOssClient().getObjectMetadata(getBucketName(), path);
+    }
+
     @Override
     public Long getLastModifiedTime(String path) {
         try {
-            path = AliyunOssUtil.standardizePath(path);
-            ObjectMetadata meta = this.account.getOssClient().getObjectMetadata(getBucketName(), path);
+            ObjectMetadata meta = getObjectMetadata(path);
             return meta.getLastModified().getTime();
         } catch (Exception e) {
             return null;
@@ -76,15 +80,18 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public boolean read(String path, OutputStream out) throws IOException {
+    public Charset getCharset(String path) {
+        ObjectMetadata meta = getObjectMetadata(path);
+        return Charset.forName(meta.getContentEncoding());
+    }
+
+    @Override
+    public InputStream getReadStream(String path) throws IOException {
         try {
             path = AliyunOssUtil.standardizePath(path);
-            InputStream in = this.account.getOssClient().getObject(getBucketName(), path).getObjectContent();
-            IOUtils.copy(in, out);
-            in.close();
-            return true;
-        } catch (Exception e) {
-            return false;
+            return this.account.getOssClient().getObject(getBucketName(), path).getObjectContent();
+        } catch (OSSException | ClientException e) {
+            throw new IOException(e);
         }
     }
 

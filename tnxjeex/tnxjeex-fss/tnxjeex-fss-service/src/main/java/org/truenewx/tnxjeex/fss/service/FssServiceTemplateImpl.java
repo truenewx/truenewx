@@ -4,17 +4,20 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.util.ArrayUtil;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
@@ -85,7 +88,9 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String storageFilename = strategy.getFilename(userIdentity, scope);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
-            in = new BufferedInputStream(in);
+            if (!(in instanceof BufferedInputStream)) {
+                in = new BufferedInputStream(in);
+            }
             in.mark(Integer.MAX_VALUE);
             storageFilename = EncryptUtil.encryptByMd5(in);
             in.reset();
@@ -243,14 +248,45 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public void read(I userIdentity, String storageUrl, OutputStream out) throws IOException {
+    public void read(I userIdentity, String storageUrl, OutputStream out) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             String path = strategy.getContextPath() + fsp.getRelativePath();
-            accessor.read(path, out);
+            try {
+                InputStream in = accessor.getReadStream(path);
+                if (in != null) {
+                    IOUtils.copy(in, out);
+                    in.close();
+                }
+            } catch (IOException e) {
+                LogUtil.error(getClass(), e);
+            }
         }
+    }
+
+    @Override
+    public String read(I userIdentity, String storageUrl) {
+        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+        if (fsp != null) {
+            FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
+            FssAccessor accessor = this.accessors.get(strategy.getProvider());
+            String path = strategy.getContextPath() + fsp.getRelativePath();
+            try {
+                InputStream in = accessor.getReadStream(path);
+                if (in != null) {
+                    Charset charset = accessor.getCharset(path);
+                    String encoding = charset == null ? null : charset.toString();
+                    String content = IOUtils.toString(in, encoding);
+                    in.close();
+                    return content;
+                }
+            } catch (IOException e) {
+                LogUtil.error(getClass(), e);
+            }
+        }
+        return null;
     }
 
     @Override
