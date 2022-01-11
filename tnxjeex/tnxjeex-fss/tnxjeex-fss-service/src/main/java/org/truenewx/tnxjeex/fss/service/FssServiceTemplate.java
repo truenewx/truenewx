@@ -8,6 +8,7 @@ import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.Service;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
+import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 
 /**
  * 文件存储服务模版
@@ -71,16 +72,19 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param storageUrl   存储地址
      * @return 最后修改时间毫秒数，指定资源不存在时返回null
      */
-    Long getLastModifiedTime(I userIdentity, String storageUrl);
+    FssFileDetail getDetail(I userIdentity, String storageUrl) throws IOException;
 
     /**
      * 指定用户读取指定路径的文件内容到指定输出流中
      *
-     * @param userIdentity 用户标识
-     * @param storageUrl   存储地址
-     * @param out          输出流
+     * @param userIdentity   用户标识
+     * @param storageUrl     存储地址
+     * @param out            输出流
+     * @param offset         输入流偏移量
+     * @param expectedLength 期望读取长度，<0表示读取整个文件
+     * @return 实际读取的数据长度
      */
-    void read(I userIdentity, String storageUrl, OutputStream out);
+    long read(I userIdentity, String storageUrl, OutputStream out, long offset, long expectedLength);
 
     /**
      * 读取指定指定路径的文件内容为字符串

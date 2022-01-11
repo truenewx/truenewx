@@ -14,11 +14,6 @@ public class UploadExceptionCodes {
     public static final String CAPACITY_EXCEEDS_LIMIT = "error.service.upload.capacity_exceeds_limit";
 
     /**
-     * 不支持空扩展名
-     */
-    public static final String NOT_SUPPORT_BLANK_EXTENSION = "error.service.upload.not_support_blank_extension";
-
-    /**
      * 仅支持指定扩展名
      */
     public static final String ONLY_SUPPORTED_EXTENSION = "error.service.upload.only_supported_extension";

@@ -98,10 +98,7 @@ public class FileUploadLimit {
             throw new BusinessException(UploadExceptionCodes.CAPACITY_EXCEEDS_LIMIT,
                     MathUtil.getCapacityCaption(this.capacity, 2));
         }
-        String extension = FilenameUtils.getExtension(filename);
-        if (StringUtils.isBlank(extension)) {
-            throw new BusinessException(UploadExceptionCodes.NOT_SUPPORT_BLANK_EXTENSION);
-        }
+        String extension = getExtension(filename);
         if (ArrayUtils.isNotEmpty(this.extensions)) { // 上传限制中没有设置扩展名，则不限定扩展名
             if (this.extensionsRejected) { // 拒绝扩展名模式
                 if (ArrayUtil.containsIgnoreCase(this.extensions, extension)) {
@@ -119,6 +116,17 @@ public class FileUploadLimit {
             extension = Strings.DOT + extension;
         }
         return extension;
+    }
+
+    /**
+     * 从指定文件名中获取扩展名，不含句点，没有扩展名的返回空字符串
+     *
+     * @param filename 文件名
+     * @return 扩展名
+     */
+    public static String getExtension(String filename) {
+        String extension = FilenameUtils.getExtension(filename);
+        return extension == null ? Strings.EMPTY : extension;
     }
 
 }

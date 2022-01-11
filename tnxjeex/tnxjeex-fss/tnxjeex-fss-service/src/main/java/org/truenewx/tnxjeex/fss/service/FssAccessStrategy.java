@@ -50,13 +50,13 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     String getRelativeDir(I userIdentity, String scope);
 
     /**
-     * 获取指定文件的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
+     * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
      *
      * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
      * @param scope        业务范围
-     * @return 指定文件的最后一级文件名
+     * @return 指定文件存储时的最后一级文件名
      */
-    default String getFilename(I userIdentity, String scope) {
+    default String getStorageFilename(I userIdentity, String scope) {
         return null;
     }
 
@@ -78,13 +78,14 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     }
 
     /**
-     * 判断指定用户可否读取指定相对路径下的文件
+     * 判断指定用户可否读取指定相对路径下的指定存储文件
      *
-     * @param userIdentity 用户标识
-     * @param relativeDir  相对目录，不包含文件名
-     * @return 指定用户可否读取指定相对路径下的文件
+     * @param userIdentity    用户标识
+     * @param relativeDir     相对目录
+     * @param storageFilename 存储文件名
+     * @return 指定用户可否读取指定相对路径下的指定存储文件
      */
-    default boolean isReadable(I userIdentity, String relativeDir) {
+    default boolean isReadable(I userIdentity, String relativeDir, String storageFilename) {
         return isPublicReadable();
     }
 
@@ -98,14 +99,27 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     }
 
     /**
-     * 判断指定用户可否删除指定相对路径下的文件
+     * 判断指定用户可否删除指定相对路径下的指定存储文件
      *
-     * @param userIdentity 用户标识
-     * @param relativeDir  相对目录，不包含文件名
-     * @return 指定用户可否删除指定相对路径下的文件
+     * @param userIdentity    用户标识
+     * @param relativeDir     相对目录
+     * @param storageFilename 存储文件名
+     * @return 指定用户可否删除指定相对路径下的指定存储文件
      */
-    default boolean isDeletable(I userIdentity, String relativeDir) {
+    default boolean isDeletable(I userIdentity, String relativeDir, String storageFilename) {
         return false;
+    }
+
+    /**
+     * 获取指定文件下载时的最后一级文件名，不含扩展名，返回null表示使用存储文件名
+     *
+     * @param userIdentity    用户标识
+     * @param relativeDir     相对路径
+     * @param storageFilename 存储文件名
+     * @return 指定文件下载时的最后一级文件名
+     */
+    default String getDownloadFilename(I userIdentity, String relativeDir, String storageFilename) {
+        return null;
     }
 
 }

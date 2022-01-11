@@ -46,7 +46,7 @@ public class ManagerHeadImageAccessStrategy extends AbstractFssAccessStrategy {
     }
 
     @Override
-    public boolean isReadable(IntegerUserIdentity userIdentity, String relativeDir) {
+    public boolean isReadable(IntegerUserIdentity userIdentity, String relativeDir, String storageFilename) {
         return isValidUserIdentity(userIdentity); // 管理员可以读其他管理员的头像
     }
 

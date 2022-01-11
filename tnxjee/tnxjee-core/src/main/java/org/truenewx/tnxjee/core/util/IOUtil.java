@@ -1,17 +1,6 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +27,8 @@ public class IOUtil {
      * 文件路径分隔符
      */
     public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
+
+    public static final int DEFAULT_BUFFER_SIZE = 4096;
 
     private IOUtil() {
     }
@@ -202,7 +193,7 @@ public class IOUtil {
         // 把basename中classpath:替换为classpath*:后进行查找
         StringBuilder searchBasename = new StringBuilder(
                 basename.replace(ResourceUtils.CLASSPATH_URL_PREFIX, ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX))
-                        .append(Strings.ASTERISK);
+                .append(Strings.ASTERISK);
         if (!extension.startsWith(Strings.DOT)) {
             searchBasename.append(Strings.DOT);
         }
@@ -374,6 +365,44 @@ public class IOUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 从指定输入流当前位置开始，偏移指定偏移量后，尽可能地复制指定期望长度的内容至指定输出流，即使中途因错中止，也返回实际已复制的长度
+     *
+     * @param in             输入流
+     * @param out            输出流
+     * @param offset         偏移量
+     * @param expectedLength 期望复制长度，<0时表示复制剩余全部
+     * @return 实际已复制的长度，无论复制过程中是否出现错误而中止
+     */
+    public static long copyAsPossible(InputStream in, OutputStream out, long offset, long expectedLength) {
+        // 改编自IOUtils.copyLarge(InputStream input, OutputStream output, long inputOffset, long length, byte[] buffer)
+        long actualTotal = 0;
+        try {
+            if (offset > 0) {
+                IOUtils.skipFully(in, offset);
+            }
+            if (expectedLength == 0) {
+                return 0;
+            }
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            final int bufferLength = buffer.length;
+            int bytesToRead = bufferLength;
+            if (expectedLength > 0 && expectedLength < bufferLength) {
+                bytesToRead = (int) expectedLength;
+            }
+            int copyNum;
+            while (bytesToRead > 0 && (copyNum = in.read(buffer, 0, bytesToRead)) >= 0) {
+                out.write(buffer, 0, copyNum);
+                actualTotal += copyNum;
+                if (expectedLength > 0) {
+                    bytesToRead = (int) Math.min(expectedLength - actualTotal, bufferLength);
+                }
+            }
+        } catch (IOException ignored) {
+        }
+        return actualTotal;
     }
 
 }

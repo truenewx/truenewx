@@ -6,10 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
@@ -24,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +29,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.tuple.LongRange;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.OS;
@@ -683,6 +682,20 @@ public class WebUtil {
         } else {
             return CollectionUtil.getFirst(request.getFileMap().values(), null);
         }
+    }
+
+    public static List<LongRange> getHeaderRanges(HttpServletRequest request) {
+        String range = request.getHeader(HttpHeaders.RANGE);
+        if (StringUtils.isNotBlank(range) && range.matches("^bytes=\\d*-\\d*(,\\s*\\d*-\\d*)*$")) {
+            List<LongRange> ranges = new ArrayList<>();
+            String[] array = range.substring(6).split(Strings.COMMA);
+            for (String part : array) {
+                String expression = Strings.LEFT_SQUARE_BRACKET + part.replace('-', ',') + Strings.RIGHT_SQUARE_BRACKET;
+                ranges.add(LongRange.parse(expression));
+            }
+            return ranges;
+        }
+        return Collections.emptyList();
     }
 
 }

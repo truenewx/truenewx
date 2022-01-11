@@ -10,10 +10,10 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
+import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
@@ -96,25 +96,14 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public String getOriginalFilename(String path) {
-        try {
-            File file = getStorageFile(path);
-            if (file.exists()) {
-                String filename = this.fileStreamProvider.getOriginalFilename(path, file);
-                // 文件存在则一定返回非null结果
-                return filename == null ? file.getName() : filename;
-            }
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-        return null;
-    }
-
-    @Override
-    public Long getLastModifiedTime(String path) {
+    public FssFileDetail getDetail(String path) throws IOException {
         File file = getStorageFile(path);
         if (file.exists()) {
-            return file.lastModified();
+            String filename = this.fileStreamProvider.getOriginalFilename(file);
+            if (filename == null) {
+                filename = file.getName();
+            }
+            return new FssFileDetail(filename, file.lastModified(), file.length());
         }
         return null;
     }

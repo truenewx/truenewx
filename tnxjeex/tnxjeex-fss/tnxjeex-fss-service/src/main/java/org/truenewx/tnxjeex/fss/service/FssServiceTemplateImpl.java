@@ -15,14 +15,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
-import org.truenewx.tnxjee.core.util.ArrayUtil;
-import org.truenewx.tnxjee.core.util.EncryptUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.NetUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
+import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
 
@@ -85,7 +83,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String extension = uploadLimit.validate(fileSize, filename);
         String relativeDir = getRelativeDirForWrite(strategy, userIdentity, scope);
         // 获取文件名
-        String storageFilename = strategy.getFilename(userIdentity, scope);
+        String storageFilename = strategy.getStorageFilename(userIdentity, scope);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
             if (!(in instanceof BufferedInputStream)) {
@@ -202,7 +200,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     private FssAccessStrategy<I> validateUserRead(I userIdentity, FssStoragePath fsp) {
         if (fsp.isValid()) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
-            if (strategy.isReadable(userIdentity, fsp.getRelativeDir())) {
+            if (strategy.isReadable(userIdentity, fsp.getRelativeDir(), fsp.getFilename())) {
                 return strategy;
             }
         }
@@ -217,18 +215,22 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
                 FssAccessor accessor = this.accessors.get(strategy.getProvider());
                 String path = strategy.getContextPath() + fsp.getRelativePath();
-                String filename = accessor.getOriginalFilename(path);
-                if (filename != null) {
-                    FssFileMeta meta = new FssFileMeta(storageUrl);
-                    meta.setName(filename);
-                    meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
-                    meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
-                    FileUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
-                    if (uploadLimit.isImageable()) {
-                        meta.setImageable(true);
-                        meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+                try {
+                    FssFileDetail detail = accessor.getDetail(path);
+                    if (detail != null) {
+                        FssFileMeta meta = new FssFileMeta(storageUrl);
+                        meta.setName(detail.getFilename());
+                        meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
+                        meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
+                        FileUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+                        if (uploadLimit.isImageable()) {
+                            meta.setImageable(true);
+                            meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+                        }
+                        return meta;
                     }
-                    return meta;
+                } catch (IOException e) {
+                    LogUtil.error(getClass(), e);
                 }
             }
         }
@@ -236,19 +238,25 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public Long getLastModifiedTime(I userIdentity, String storageUrl) {
+    public FssFileDetail getDetail(I userIdentity, String storageUrl) throws IOException {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             String path = strategy.getContextPath() + fsp.getRelativePath();
-            return accessor.getLastModifiedTime(path);
+            FssFileDetail detail = accessor.getDetail(path);
+            String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getRelativeDir(),
+                    fsp.getFilename());
+            if (StringUtils.isNotBlank(downloadFilename)) {
+                detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
+            }
+            return detail;
         }
         return null;
     }
 
     @Override
-    public void read(I userIdentity, String storageUrl, OutputStream out) {
+    public long read(I userIdentity, String storageUrl, OutputStream out, long offset, long expectedLength) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
@@ -257,13 +265,19 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             try {
                 InputStream in = accessor.getReadStream(path);
                 if (in != null) {
-                    IOUtils.copy(in, out);
-                    in.close();
+                    long actualLength = IOUtil.copyAsPossible(in, out, offset, expectedLength);
+                    try {
+                        in.close();
+                    } catch (IOException e) { // 处理此处的IOException，已确保返回读取长度
+                        LogUtil.error(getClass(), e);
+                    }
+                    return actualLength;
                 }
             } catch (IOException e) {
                 LogUtil.error(getClass(), e);
             }
         }
+        return 0;
     }
 
     @Override
@@ -294,7 +308,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
-            if (!strategy.isDeletable(userIdentity, fsp.getRelativeDir())) {
+            if (!strategy.isDeletable(userIdentity, fsp.getRelativeDir(), fsp.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, fsp.getUrl());
             }
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
@@ -316,7 +330,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             // 获取目标相对目录，同时校验写权限
             String targetRelativeDir = getRelativeDirForWrite(targetStrategy, userIdentity, targetScope);
             // 获取目标存储文件名
-            String targetStorageFilename = targetStrategy.getFilename(userIdentity, targetScope);
+            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope);
             if (StringUtils.isBlank(targetStorageFilename)) {
                 throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
                         targetScope, targetType);

@@ -23,11 +23,10 @@ public interface OwnFssFileStreamProvider {
     /**
      * 获取指定文件的原始文件名
      *
-     * @param path 存储路径
      * @param file 文件
      * @return 原始文件名
      */
-    String getOriginalFilename(String path, File file) throws IOException;
+    String getOriginalFilename(File file) throws IOException;
 
     /**
      * 获取指定文件的读取输入流

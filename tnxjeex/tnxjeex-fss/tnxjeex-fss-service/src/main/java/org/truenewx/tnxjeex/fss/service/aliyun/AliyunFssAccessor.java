@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
+import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
 import com.aliyun.oss.ClientException;
@@ -47,36 +48,22 @@ public class AliyunFssAccessor implements FssAccessor {
         this.account.getOssClient().putObject(getBucketName(), path, in, objectMetadata);
     }
 
-    @Override
-    public String getOriginalFilename(String path) {
-        try {
-            ObjectMetadata meta = getObjectMetadata(path);
-            String filename = meta.getUserMetadata().get("filename");
-            if (StringUtils.isNotBlank(filename)) {
-                try {
-                    filename = EncryptUtil.decryptByBase64(filename);
-                } catch (Exception ignored) {
-                }
-            }
-            return filename;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private ObjectMetadata getObjectMetadata(String path) {
         path = AliyunOssUtil.standardizePath(path);
         return this.account.getOssClient().getObjectMetadata(getBucketName(), path);
     }
 
     @Override
-    public Long getLastModifiedTime(String path) {
-        try {
-            ObjectMetadata meta = getObjectMetadata(path);
-            return meta.getLastModified().getTime();
-        } catch (Exception e) {
-            return null;
+    public FssFileDetail getDetail(String path) {
+        ObjectMetadata meta = getObjectMetadata(path);
+        String filename = meta.getUserMetadata().get("filename");
+        if (StringUtils.isNotBlank(filename)) {
+            try {
+                filename = EncryptUtil.decryptByBase64(filename);
+            } catch (Exception ignored) {
+            }
         }
+        return new FssFileDetail(filename, meta.getLastModified().getTime(), meta.getContentLength());
     }
 
     @Override

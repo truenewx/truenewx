@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -25,6 +26,7 @@ import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.tuple.LongRange;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
@@ -40,10 +42,9 @@ import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
+import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.web.model.FileUploadOptions;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
-
-import com.aliyun.oss.internal.Mimetypes;
 
 /**
  * 文件存储控制器模板
@@ -62,20 +63,6 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     private Executor executor;
 
     protected String downloadUrlPrefix;
-
-    /**
-     * 获取指定用户上传指定业务类型的文件上传限制条件
-     *
-     * @param type 业务类型
-     * @return 指定用户上传指定业务类型的文件上传限制条件
-     */
-    @GetMapping("/upload-limit/{type}")
-    @ResponseBody
-    @ConfigAnonymous // 匿名用户即可读取上传限制
-    @Deprecated
-    public FileUploadLimit getUploadLimit(@PathVariable("type") String type) {
-        return this.service.getUploadLimit(type, getUserIdentity());
-    }
 
     /**
      * 获取指定用户上传指定业务类型的文件上传配置
@@ -297,16 +284,69 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     public String download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         I userIdentity = getUserIdentity();
         String path = getDownloadPath(request);
-        long modifiedTime = this.service.getLastModifiedTime(userIdentity, path);
+        FssFileDetail detail = this.service.getDetail(userIdentity, path);
+        if (detail == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return null;
+        }
+        response.reset();
+        response.setBufferSize(IOUtil.DEFAULT_BUFFER_SIZE); // 必须与输出文件流时的缓存区大小保持一致
+        WebUtil.setDownloadFilename(request, response, detail.getFilename());
+        long modifiedTime = detail.getLastModifiedTime();
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
-        response.setContentType(Mimetypes.getInstance().getMimetype(path));
         long modifiedSince = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
         if (modifiedSince == modifiedTime) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // 如果相等则返回表示未修改的状态码
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // 如果相等则返回表示未修改的状态码：304
         } else {
+            long totalLength = detail.getLength();
             ServletOutputStream out = response.getOutputStream();
-            this.service.read(userIdentity, path, out);
-            out.close();
+            List<LongRange> ranges = WebUtil.getHeaderRanges(request);
+            if (ranges.isEmpty()) { // 不分段
+                this.service.read(userIdentity, path, out, 0, -1);
+                out.close();
+            } else if (ranges.size() == 1) { // 单个分段
+                response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+
+                LongRange range = ranges.get(0);
+                Long beginIndex = range.getMin();
+                if (beginIndex == null) {
+                    beginIndex = 0L;
+                }
+                long expectedLength = range.getLength();
+                long actualLength = this.service.read(userIdentity, path, out, beginIndex, expectedLength);
+
+                long endIndex = beginIndex + actualLength - 1; // 结束索引为包含关系，需要减1
+                String contentRange = "bytes " + beginIndex + Strings.MINUS + endIndex + Strings.SLASH + totalLength;
+                response.setHeader(HttpHeaders.CONTENT_RANGE, contentRange);
+                response.setContentLengthLong(actualLength);
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 表示分段下载的状态码：206
+            } else { // 多重分段
+                response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+                String rangeContentType = response.getContentType(); // 之前设置的响应ContentType作为分段ContentType
+                String boundary = "MULTIPART_BOUNDARY_" + request.getSession().getId();
+                response.setContentType("multipart/byteranges; boundary=" + boundary);
+                for (LongRange range : ranges) {
+                    out.println();
+                    out.println("--" + boundary);
+                    out.println(HttpHeaders.CONTENT_TYPE + ": " + rangeContentType);
+                    Long beginIndex = range.getMin();
+                    if (beginIndex == null) {
+                        beginIndex = 0L;
+                    }
+                    Long endIndex = range.getMax();
+                    if (endIndex == null) {
+                        endIndex = totalLength - 1;
+                    }
+                    String contentRange = "bytes " + beginIndex + Strings.MINUS + endIndex + Strings.SLASH + totalLength;
+                    LogUtil.info(getClass(), "====== Request Range: {}, Response Content Range: {}", range,
+                            contentRange);
+                    out.println(HttpHeaders.CONTENT_RANGE + ": " + contentRange);
+                    this.service.read(userIdentity, path, out, beginIndex, range.getLength());
+                    out.println();
+                    out.println("--" + boundary + "--");
+                }
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 表示分段下载的状态码：206
+            }
         }
         return null;
     }

@@ -25,7 +25,7 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public String getOriginalFilename(String path, File file) throws IOException {
+    public String getOriginalFilename(File file) throws IOException {
         EncryptInputStream in = new EncryptInputStream(new FileInputStream(file), this.salt);
         String filename = in.readAttachment();
         in.close();
