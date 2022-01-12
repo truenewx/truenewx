@@ -26,11 +26,11 @@ import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.core.util.*;
-import org.truenewx.tnxjee.core.util.tuple.LongRange;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
+import org.truenewx.tnxjee.web.model.HttpHeaderRange;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.bind.annotation.ResponseStream;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
@@ -278,19 +278,27 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         return metas;
     }
 
+    @RequestMapping(value = "/dl/**", method = RequestMethod.HEAD)
+    @ConfigAnonymous
+    public String downloadHead(HttpServletRequest request, HttpServletResponse response) {
+        return null;
+    }
+
     @GetMapping("/dl/**")
     @ResponseStream
     @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
-    public String download(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         I userIdentity = getUserIdentity();
         String path = getDownloadPath(request);
         FssFileDetail detail = this.service.getDetail(userIdentity, path);
         if (detail == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return;
         }
         response.reset();
-        response.setBufferSize(IOUtil.DEFAULT_BUFFER_SIZE); // 必须与输出文件流时的缓存区大小保持一致
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+        int bufferSize = IOUtil.DEFAULT_BUFFER_SIZE;
+        response.setBufferSize(bufferSize); // 必须与输出文件流时的缓存区大小保持一致
         WebUtil.setDownloadFilename(request, response, detail.getFilename());
         long modifiedTime = detail.getLastModifiedTime();
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
@@ -300,55 +308,62 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         } else {
             long totalLength = detail.getLength();
             ServletOutputStream out = response.getOutputStream();
-            List<LongRange> ranges = WebUtil.getHeaderRanges(request);
+            List<HttpHeaderRange> ranges = WebUtil.getHeaderRanges(request);
             if (ranges.isEmpty()) { // 不分段
                 this.service.read(userIdentity, path, out, 0, -1);
-                out.close();
             } else if (ranges.size() == 1) { // 单个分段
-                response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-
-                LongRange range = ranges.get(0);
-                Long beginIndex = range.getMin();
-                if (beginIndex == null) {
-                    beginIndex = 0L;
+                HttpHeaderRange range = ranges.get(0);
+                long beginIndex = range.getBeginIndex(0L);
+                long endIndex = range.getEndIndex(totalLength - 1); // 结束索引为包含关系，需要减1
+                if (beginIndex > endIndex) {
+                    response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + totalLength);
+                    response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                    return;
                 }
-                long expectedLength = range.getLength();
-                long actualLength = this.service.read(userIdentity, path, out, beginIndex, expectedLength);
 
-                long endIndex = beginIndex + actualLength - 1; // 结束索引为包含关系，需要减1
+                long contentLength;
+                // 分段下载整个文件的请求，只输出一个缓存区的数据，以最快速度向客户端返回文件总长度
+                if (beginIndex == 0 && range.getEndIndex() == null) {
+                    contentLength = bufferSize;
+                } else { // 分段下载非整个文件的请求，最大一次性输出64MB的数据
+                    contentLength = Math.min(endIndex - beginIndex + 1, bufferSize * 1024 * 16);
+                }
+                endIndex = beginIndex + contentLength - 1;
                 String contentRange = "bytes " + beginIndex + Strings.MINUS + endIndex + Strings.SLASH + totalLength;
                 response.setHeader(HttpHeaders.CONTENT_RANGE, contentRange);
-                response.setContentLengthLong(actualLength);
-                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 表示分段下载的状态码：206
+                response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+                LogUtil.info(getClass(), "====== Range: {}, Content Range: {}, Content Length: {}",
+                        range, contentRange, contentLength + " bytes");
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+                // 先设置头信息和状态，最后传输数据
+                long time0 = System.currentTimeMillis();
+                long actualLength = this.service.read(userIdentity, path, out, beginIndex, contentLength);
+                LogUtil.info(getClass(), "====== Output: {} bytes and {}ms", actualLength,
+                        System.currentTimeMillis() - time0);
             } else { // 多重分段
-                response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 表示分段下载的状态码：206
+
                 String rangeContentType = response.getContentType(); // 之前设置的响应ContentType作为分段ContentType
                 String boundary = "MULTIPART_BOUNDARY_" + request.getSession().getId();
                 response.setContentType("multipart/byteranges; boundary=" + boundary);
-                for (LongRange range : ranges) {
+                for (HttpHeaderRange range : ranges) {
+                    // 严格按照标准格式依次执行，不可更改代码顺序
                     out.println();
                     out.println("--" + boundary);
                     out.println(HttpHeaders.CONTENT_TYPE + ": " + rangeContentType);
-                    Long beginIndex = range.getMin();
-                    if (beginIndex == null) {
-                        beginIndex = 0L;
-                    }
-                    Long endIndex = range.getMax();
-                    if (endIndex == null) {
-                        endIndex = totalLength - 1;
-                    }
-                    String contentRange = "bytes " + beginIndex + Strings.MINUS + endIndex + Strings.SLASH + totalLength;
-                    LogUtil.info(getClass(), "====== Request Range: {}, Response Content Range: {}", range,
-                            contentRange);
+                    String contentRange = "bytes " + range + Strings.SLASH + totalLength;
                     out.println(HttpHeaders.CONTENT_RANGE + ": " + contentRange);
-                    this.service.read(userIdentity, path, out, beginIndex, range.getLength());
+                    long beginIndex = range.getBeginIndex(0L);
+                    long time0 = System.currentTimeMillis();
+                    long actualLength = this.service.read(userIdentity, path, out, beginIndex, range.getLength(-1));
                     out.println();
                     out.println("--" + boundary + "--");
+                    LogUtil.info(getClass(), "====== Range: {}, Content Range: {}, Write: {}ms, Length: {}",
+                            range, contentRange, (System.currentTimeMillis() - time0), actualLength + " bytes");
                 }
-                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 表示分段下载的状态码：206
             }
         }
-        return null;
     }
 
     protected String getDownloadPath(HttpServletRequest request) {

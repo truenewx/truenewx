@@ -29,11 +29,11 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.*;
-import org.truenewx.tnxjee.core.util.tuple.LongRange;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.OS;
 import org.truenewx.tnxjee.model.spec.enums.Program;
+import org.truenewx.tnxjee.web.model.HttpHeaderRange;
 
 /**
  * Web工具类
@@ -567,7 +567,7 @@ public class WebUtil {
         } else {
             filename = new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         }
-        response.setHeader("content-disposition", "attachment;filename=" + filename);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
     }
 
     /**
@@ -684,14 +684,13 @@ public class WebUtil {
         }
     }
 
-    public static List<LongRange> getHeaderRanges(HttpServletRequest request) {
-        String range = request.getHeader(HttpHeaders.RANGE);
-        if (StringUtils.isNotBlank(range) && range.matches("^bytes=\\d*-\\d*(,\\s*\\d*-\\d*)*$")) {
-            List<LongRange> ranges = new ArrayList<>();
-            String[] array = range.substring(6).split(Strings.COMMA);
+    public static List<HttpHeaderRange> getHeaderRanges(HttpServletRequest request) {
+        String rangeValue = request.getHeader(HttpHeaders.RANGE);
+        if (StringUtils.isNotBlank(rangeValue) && rangeValue.matches("^bytes=\\d*-\\d*(,\\s*\\d*-\\d*)*$")) {
+            List<HttpHeaderRange> ranges = new ArrayList<>();
+            String[] array = rangeValue.substring(6).split(Strings.COMMA);
             for (String part : array) {
-                String expression = Strings.LEFT_SQUARE_BRACKET + part.replace('-', ',') + Strings.RIGHT_SQUARE_BRACKET;
-                ranges.add(LongRange.parse(expression));
+                ranges.add(new HttpHeaderRange(part));
             }
             return ranges;
         }

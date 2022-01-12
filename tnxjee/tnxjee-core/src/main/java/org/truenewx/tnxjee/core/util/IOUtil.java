@@ -370,39 +370,40 @@ public class IOUtil {
     /**
      * 从指定输入流当前位置开始，偏移指定偏移量后，尽可能地复制指定期望长度的内容至指定输出流，即使中途因错中止，也返回实际已复制的长度
      *
-     * @param in             输入流
-     * @param out            输出流
-     * @param offset         偏移量
-     * @param expectedLength 期望复制长度，<0时表示复制剩余全部
+     * @param in     输入流
+     * @param out    输出流
+     * @param offset 偏移量
+     * @param length 期望复制长度，<0时表示复制剩余全部
      * @return 实际已复制的长度，无论复制过程中是否出现错误而中止
      */
-    public static long copyAsPossible(InputStream in, OutputStream out, long offset, long expectedLength) {
+    public static long copyAsPossible(InputStream in, OutputStream out, long offset, long length) {
         // 改编自IOUtils.copyLarge(InputStream input, OutputStream output, long inputOffset, long length, byte[] buffer)
-        long actualTotal = 0;
+        long totalRead = 0; // 已读总量
         try {
             if (offset > 0) {
                 IOUtils.skipFully(in, offset);
             }
-            if (expectedLength == 0) {
+            if (length == 0) {
                 return 0;
             }
             byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
             final int bufferLength = buffer.length;
             int bytesToRead = bufferLength;
-            if (expectedLength > 0 && expectedLength < bufferLength) {
-                bytesToRead = (int) expectedLength;
+            if (length > 0 && length < bufferLength) {
+                bytesToRead = (int) length;
             }
-            int copyNum;
-            while (bytesToRead > 0 && (copyNum = in.read(buffer, 0, bytesToRead)) >= 0) {
-                out.write(buffer, 0, copyNum);
-                actualTotal += copyNum;
-                if (expectedLength > 0) {
-                    bytesToRead = (int) Math.min(expectedLength - actualTotal, bufferLength);
+            int bufferRead; // 缓存区已读量
+            while (bytesToRead > 0 && (bufferRead = in.read(buffer, 0, bytesToRead)) >= 0) {
+                out.write(buffer, 0, bufferRead);
+                totalRead += bufferRead;
+                if (length > 0) {
+                    bytesToRead = (int) Math.min(length - totalRead, bufferLength);
                 }
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LogUtil.warn(IOUtil.class, e.getMessage());
         }
-        return actualTotal;
+        return totalRead;
     }
 
 }
