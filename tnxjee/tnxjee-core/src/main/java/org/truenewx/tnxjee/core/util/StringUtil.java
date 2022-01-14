@@ -92,6 +92,8 @@ public class StringUtil {
 
     public static final String CHINESE_PATTERN = "^[\\u4E00-\\u9FA5]+$";
 
+    public static final String LETTERS_PATTERN = "^[a-zA-Z]+$";
+
     private static final PathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     private static final Map<String, ResourceBundle> resourceBundleCache = new Hashtable<>();
@@ -523,11 +525,21 @@ public class StringUtil {
     }
 
     public static boolean isIpv4(String s) {
-        return s != null && s.matches(StringUtil.IPv4_PATTERN);
+        return s != null && s.matches(IPv4_PATTERN);
     }
 
     public static boolean isIpv6(String s) {
-        return s != null && s.matches(StringUtil.IPv6_PATTERN);
+        return s != null && s.matches(IPv6_PATTERN);
+    }
+
+    /**
+     * 判断指定字符串是否全英文字母
+     *
+     * @param s 字符串
+     * @return 指定字符串是否全英文字母
+     */
+    public static boolean isLetters(String s) {
+        return s != null && s.matches(LETTERS_PATTERN);
     }
 
     /**

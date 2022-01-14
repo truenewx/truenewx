@@ -65,8 +65,8 @@ public class HtmlTagLimitValidator implements ConstraintValidator<HtmlTagLimit, 
             if (tag.startsWith(Strings.SLASH)) { // 标签结束处
                 tag = tag.substring(Strings.SLASH.length());
             }
-            // 存在标签但不在允许的标签清单（即使为空）中，则返回true
-            if (!ArrayUtils.contains(allowedTags, tag.toLowerCase())) {
+            // 全部为英文字母的才可能是标签。存在标签但不在允许的标签清单（即使为空）中，则返回true
+            if (StringUtil.isLetters(tag) && !ArrayUtils.contains(allowedTags, tag.toLowerCase())) {
                 return true;
             }
             leftIndex = s.indexOf(Strings.LESS_THAN, rightIndex);
