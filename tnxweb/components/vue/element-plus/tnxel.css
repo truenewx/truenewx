@@ -32,7 +32,7 @@
 }
 
 .bg-muted {
-    background-color: var(--el-color-info-lighter) !important;
+    background-color: var(--el-bg-color) !important;
 }
 
 .border,
