@@ -11,7 +11,8 @@ const regExps = {
     integer: /^(-?[1-9]\d{0,2}(,?\d{3}))|0*$/,
     email: /^[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})@[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})$/,
     idCardNo: /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/,
-    url: /^https?:\/\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/
+    url: /^https?:\/\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/,
+    opposableUrl: /^(https?:\/)?\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/,
 }
 
 function validateRegExp(regExpName, fieldValue, fieldCaption) {
@@ -250,6 +251,19 @@ function getRule(validationName, validationValue, fieldMeta) {
             };
             break;
         case 'url':
+            rule = {
+                validator(r, fieldValue, callback, source, options) {
+                    if (validationValue) {
+                        let message = validateRegExp(validationName, fieldValue, fieldCaption);
+                        if (message) {
+                            return callback(new Error(message));
+                        }
+                    }
+                    return callback();
+                }
+            };
+            break;
+        case 'opposableUrl':
             rule = {
                 validator(r, fieldValue, callback, source, options) {
                     if (validationValue) {
