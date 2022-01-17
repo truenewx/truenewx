@@ -5,6 +5,9 @@
                 <tnxel-icon :type="icon"/>
                 <span><slot></slot></span>
             </div>
+            <div :title="title" v-else-if="title">
+                <slot></slot>
+            </div>
             <slot v-else></slot>
         </el-tooltip>
     </el-dropdown-item>
