@@ -18,6 +18,7 @@
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
                 <tnxel-icon :type="icon" :size="uploadIconSize" :title="tip === 'title' ? tipContent : undefined"/>
             </el-tooltip>
+            <div class="upload-trigger" v-if="triggerText">{{ triggerText }}</div>
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
@@ -83,6 +84,7 @@ export default {
             default: 'Plus',
         },
         iconSize: Number,
+        triggerText: String,
         beforeUpload: Function,
         /**
          * 所有可上传的文件均已开始上传时的钩子
@@ -226,15 +228,7 @@ export default {
             // 需在vue渲染之后才可正常操作dom元素
             this.$nextTick(function() {
                 const $container = $('#' + vm.id);
-                // 初始化显示尺寸
-                let width = vm.uploadSize.width;
-                let height = vm.uploadSize.height;
-                width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
-                height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
-                const $upload = $('.el-upload', $container);
-                $upload.css({
-                    width: width,
-                    height: height,
+                $('.el-upload', $container).css({
                     display: 'inline-flex',
                 });
 
@@ -513,7 +507,6 @@ export default {
 .tnxel-upload-container:not(.imageable) {
     display: flex;
     flex-direction: column-reverse;
-
 }
 
 .tnxel-upload-container .el-upload--picture-card {
@@ -522,11 +515,27 @@ export default {
     align-items: center;
     justify-content: center;
     margin-bottom: 0.5rem;
+    width: fit-content;
+    height: fit-content;
+}
+
+.tnxel-upload-container .el-upload--picture-card:hover {
+    color: unset;
+}
+
+.tnxel-upload-container .el-upload--picture-card .upload-trigger {
+    margin-left: 0.25rem;
 }
 
 .tnxel-upload-container.center .el-upload--picture-card {
     margin-right: auto;
     margin-left: auto;
+    flex-direction: column;
+}
+
+.tnxel-upload-container.center .el-upload--picture-card .upload-trigger {
+    margin-left: 0;
+    margin-top: 0.25rem;
 }
 
 .tnxel-upload-container .el-upload--picture-card i {
