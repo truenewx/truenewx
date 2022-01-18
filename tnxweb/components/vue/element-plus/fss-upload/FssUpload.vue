@@ -1,7 +1,7 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
         :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
-        :tip="tip" :show-file-list="showFileList"
+        :trigger-text="triggerText" :tip="tip" :show-file-list="showFileList"
         :before-upload="beforeUpload"
         :on-upload="onUpload"
         :on-progress="onProgress"
@@ -38,6 +38,7 @@ export default {
         },
         icon: String,
         iconSize: Number,
+        triggerText: String,
         center: Boolean,
         tip: {
             type: [Boolean, String, Function],
