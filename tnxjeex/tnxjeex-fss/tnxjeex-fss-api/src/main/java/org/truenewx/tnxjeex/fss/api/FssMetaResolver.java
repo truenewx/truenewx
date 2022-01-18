@@ -44,4 +44,13 @@ public interface FssMetaResolver {
     String resolveReadUrl(@RequestParam(value = "storageUrl", required = false) String storageUrl,
             @RequestParam("thumbnail") boolean thumbnail);
 
+    /**
+     * 根据存储地址获取下载地址，下载地址为相对于当前应用的相对读取地址，通过当前应用进行鉴权
+     *
+     * @param storageUrl 存储地址
+     * @return 下载地址
+     */
+    @GetMapping("/download-url")
+    String resolveDownloadUrl(@RequestParam("storageUrl") String storageUrl);
+
 }

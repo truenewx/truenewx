@@ -1,7 +1,7 @@
 <template>
     <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
         :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
-        :trigger-text="triggerText" :tip="tip" :show-file-list="showFileList"
+        :trigger-text="triggerText" :tip="tip" :show-file-list="showFileList" :data="params"
         :before-upload="beforeUpload"
         :on-upload="onUpload"
         :on-progress="onProgress"
@@ -52,6 +52,7 @@ export default {
                 return true;
             }
         },
+        onlyStorage: Boolean,
         beforeUpload: Function,
         onUpload: Function,
         onProgress: Function,
@@ -66,6 +67,9 @@ export default {
         return {
             tnx: tnx,
             action: tnx.fss.getUploadUrl(this.type, this.scope),
+            params: {
+                onlyStorage: this.onlyStorage,
+            },
             uploadOptions: {},
             fileList: [],
         };

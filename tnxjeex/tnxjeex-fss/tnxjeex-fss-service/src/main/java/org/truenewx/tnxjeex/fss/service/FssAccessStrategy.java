@@ -32,7 +32,7 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     FileUploadLimit getUploadLimit(I userIdentity);
 
     /**
-     * 获取存储路径上下文根，要求在同一个系统中唯一。其与存储类型一一对应，不被包含在存储路径中
+     * 获取存储路径上下文根，与存储类型一一对应，不被包含在存储路径中，要求在同一个系统中唯一，以便于根据存储路径判断所属业务类型
      *
      * @return 存储路径上下文根
      */

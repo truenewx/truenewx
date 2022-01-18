@@ -16,9 +16,11 @@
         :accept="uploadAccept">
         <template #default>
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
-                <tnxel-icon :type="icon" :size="uploadIconSize" :title="tip === 'title' ? tipContent : undefined"/>
+                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined">
+                    <tnxel-icon :type="icon" :size="uploadIconSize"/>
+                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
+                </div>
             </el-tooltip>
-            <div class="upload-trigger" v-if="triggerText">{{ triggerText }}</div>
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
@@ -517,29 +519,39 @@ export default {
     margin-bottom: 0.5rem;
     width: fit-content;
     height: fit-content;
+    background-color: transparent;
 }
 
 .tnxel-upload-container .el-upload--picture-card:hover {
-    color: unset;
+    color: inherit;
 }
 
 .tnxel-upload-container .el-upload--picture-card .upload-trigger {
+    display: flex;
+    align-items: center;
+}
+
+.tnxel-upload-container .el-upload--picture-card .upload-trigger-text {
     margin-left: 0.25rem;
 }
 
 .tnxel-upload-container.center .el-upload--picture-card {
     margin-right: auto;
     margin-left: auto;
-    flex-direction: column;
 }
 
 .tnxel-upload-container.center .el-upload--picture-card .upload-trigger {
+    flex-direction: column;
+}
+
+.tnxel-upload-container.center .el-upload--picture-card .upload-trigger-text {
     margin-left: 0;
     margin-top: 0.25rem;
 }
 
 .tnxel-upload-container .el-upload--picture-card i {
     margin-top: 0;
+    color: inherit;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card {

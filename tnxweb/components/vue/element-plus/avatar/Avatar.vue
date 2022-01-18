@@ -73,7 +73,7 @@ export default {
     },
     methods: {
         load() {
-            if (this.url && this.url.startsWith('fss://')) {
+            if (this.url && this.url.startsWith(window.tnx.fss.PROTOCOL)) {
                 let rpc = window.tnx.app.rpc;
                 let fssConfig = window.tnx.fss.getClientConfig();
                 let vm = this;

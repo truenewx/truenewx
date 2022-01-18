@@ -8,15 +8,16 @@ public class FileExtensions {
     private FileExtensions() {
     }
 
-    //图片
+    // 图片
     public static final String JPG = "jpg";
+    public static final String JPEG = "jpeg";
     public static final String PNG = "png";
+    public static final String SVG = "svg";
     public static final String GIF = "gif";
-    public static final String[] IMAGES_NORMAL = { JPG, PNG };
-    public static final String[] IMAGES_ALL = { JPG, PNG, GIF };
+    public static final String[] IMAGES_NORMAL = { JPG, JPEG, PNG, SVG };
+    public static final String[] IMAGES_ALL = { JPG, JPEG, PNG, SVG, GIF };
 
     // Office文档
-
     public static final String XLS = "xls";
     public static final String XLSX = "xlsx";
 

@@ -19,6 +19,7 @@ public class FssFileMeta {
     private String storageUrl;
     private String readUrl;
     private String thumbnailReadUrl;
+    private String downloadUrl;
     private Boolean imageable;
     private FlatSize size;
 
@@ -63,6 +64,14 @@ public class FssFileMeta {
 
     public void setThumbnailReadUrl(String thumbnailReadUrl) {
         this.thumbnailReadUrl = thumbnailReadUrl;
+    }
+
+    public String getDownloadUrl() {
+        return this.downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
     }
 
     public Boolean getImageable() {

@@ -43,6 +43,7 @@ import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
 import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
+import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
 import org.truenewx.tnxjeex.fss.web.model.FileUploadOptions;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
 
@@ -135,10 +136,11 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         if (!onlyStorage) { // 不只需要存储地址
             result.setName(filename);
             String readUrl = this.service.getReadUrl(userIdentity, storageUrl, false);
-            result.setReadUrl(getFullReadUrl(readUrl));
+            result.setReadUrl(getFullReadUrl(readUrl, true));
             // 缩略读取地址附加的缩略参数对最终URL可能产生影响，故需要重新生成，而不能在读取URL上简单附加缩略参数
             String thumbnailReadUrl = this.service.getReadUrl(userIdentity, storageUrl, true);
-            result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl));
+            result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl, true));
+            result.setDownloadUrl(resolveDownloadUrl(storageUrl));
             FileUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
             if (uploadLimit.isImageable()) {
                 result.setImageable(true);
@@ -154,18 +156,20 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     public String resolveReadUrl(String storageUrl, boolean thumbnail) {
         if (StringUtils.isNotBlank(storageUrl)) {
             String readUrl = this.service.getReadUrl(getUserIdentity(), storageUrl, thumbnail);
-            return getFullReadUrl(readUrl);
+            return getFullReadUrl(readUrl, true);
         }
         return null;
     }
 
-    private String getFullReadUrl(String readUrl) {
+    private String getFullReadUrl(String readUrl, boolean withContextUrl) {
         // 读取地址以/开头但不以//开头，则视为相对地址，相对地址需考虑添加下载路径前缀、上下文根和主机地址
         if (readUrl != null && readUrl.startsWith(Strings.SLASH) && !readUrl.startsWith("//")) {
             // 加上下载路径前缀
             readUrl = getDownloadUrlPrefix() + readUrl;
             // 加上上下文根路径
-            readUrl = getContextUrl() + readUrl;
+            if (withContextUrl) {
+                readUrl = getContextUrl() + readUrl;
+            }
         }
         return readUrl;
     }
@@ -183,6 +187,15 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             }
             return contextUrl;
         }
+    }
+
+    @Override
+    public String resolveDownloadUrl(String storageUrl) {
+        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+        if (fsp != null) {
+            return getFullReadUrl(fsp.toString(), false);
+        }
+        return null;
     }
 
     @Override
@@ -259,8 +272,9 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         if (StringUtils.isNotBlank(storageUrl)) {
             FssFileMeta meta = this.service.getMeta(getUserIdentity(), storageUrl);
             if (meta != null) {
-                meta.setReadUrl(getFullReadUrl(meta.getReadUrl()));
-                meta.setThumbnailReadUrl(getFullReadUrl(meta.getThumbnailReadUrl()));
+                meta.setReadUrl(getFullReadUrl(meta.getReadUrl(), true));
+                meta.setThumbnailReadUrl(getFullReadUrl(meta.getThumbnailReadUrl(), true));
+                meta.setDownloadUrl(resolveDownloadUrl(storageUrl));
             }
             return meta;
         }
@@ -276,12 +290,6 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             metas[i] = resolveMeta(storageUrls[i]);
         }
         return metas;
-    }
-
-    @RequestMapping(value = "/dl/**", method = RequestMethod.HEAD)
-    @ConfigAnonymous
-    public String downloadHead(HttpServletRequest request, HttpServletResponse response) {
-        return null;
     }
 
     @GetMapping("/dl/**")

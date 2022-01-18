@@ -41,7 +41,18 @@ const fss = {
             url += '/' + scope;
         }
         return url;
-    }
+    },
+    upload(type, scope, file, callback) {
+        let formData = new FormData();
+        formData.append('file', file);
+        let url = this.getUploadUrl(type, scope);
+        window.tnx.app.rpc.post(url, formData, function(meta) {
+            callback(meta);
+        }, {
+            headers: {'Content-Type': 'multipart/form-data'},
+            app: this.getClientConfig().appName,
+        });
+    },
 };
 
 export default fss;

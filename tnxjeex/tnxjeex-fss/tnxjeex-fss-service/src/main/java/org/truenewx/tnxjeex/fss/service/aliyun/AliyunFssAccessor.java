@@ -3,8 +3,10 @@ package org.truenewx.tnxjeex.fss.service.aliyun;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
@@ -23,9 +25,22 @@ import com.aliyun.oss.model.ObjectMetadata;
 public class AliyunFssAccessor implements FssAccessor {
 
     private AliyunAccount account;
+    private FssAccessor delegate;
+    private ExecutorService executorService;
 
     public AliyunFssAccessor(AliyunAccount account) {
         this.account = account;
+    }
+
+    public void setDelegate(FssAccessor delegate) {
+        if (!(delegate instanceof AliyunFssAccessor)) {
+            this.delegate = delegate;
+        }
+    }
+
+    @Autowired
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @Override
@@ -39,6 +54,9 @@ public class AliyunFssAccessor implements FssAccessor {
 
     @Override
     public void write(InputStream in, String path, String filename) throws IOException {
+        String originalPath = path;
+        String originalFilename = filename;
+
         ObjectMetadata objectMetadata = new ObjectMetadata();
         if (StringUtils.isNotBlank(filename)) {
             filename = EncryptUtil.encryptByBase64(filename); // 中文文件名会乱码导致签名校验失败
@@ -46,6 +64,16 @@ public class AliyunFssAccessor implements FssAccessor {
         }
         path = AliyunOssUtil.standardizePath(path);
         this.account.getOssClient().putObject(getBucketName(), path, in, objectMetadata);
+
+        if (this.delegate != null) {
+            this.executorService.submit(() -> {
+                try {
+                    this.delegate.write(in, originalPath, originalFilename);
+                } catch (IOException e) {
+                    LogUtil.error(getClass(), e);
+                }
+            });
+        }
     }
 
     private ObjectMetadata getObjectMetadata(String path) {
@@ -54,7 +82,13 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssFileDetail getDetail(String path) {
+    public FssFileDetail getDetail(String path) throws IOException {
+        if (this.delegate != null) {
+            FssFileDetail detail = this.delegate.getDetail(path);
+            if (detail != null) {
+                return detail;
+            }
+        }
         ObjectMetadata meta = getObjectMetadata(path);
         String filename = meta.getUserMetadata().get("filename");
         if (StringUtils.isNotBlank(filename)) {
@@ -74,6 +108,12 @@ public class AliyunFssAccessor implements FssAccessor {
 
     @Override
     public InputStream getReadStream(String path) throws IOException {
+        if (this.delegate != null) {
+            InputStream readStream = this.delegate.getReadStream(path);
+            if (readStream != null) {
+                return readStream;
+            }
+        }
         try {
             path = AliyunOssUtil.standardizePath(path);
             return this.account.getOssClient().getObject(getBucketName(), path).getObjectContent();
@@ -84,20 +124,37 @@ public class AliyunFssAccessor implements FssAccessor {
 
     @Override
     public void delete(String path) {
+        String originalPath = path;
+
         path = AliyunOssUtil.standardizePath(path);
         try {
             this.account.getOssClient().deleteObject(getBucketName(), path);
         } catch (Exception e) {
             LogUtil.warn(getClass(), e);
         }
+
+        if (this.delegate != null) {
+            this.executorService.submit(() -> {
+                this.delegate.delete(originalPath);
+            });
+        }
     }
 
     @Override
     public void copy(String sourcePath, String targetPath) {
+        String originalSourcePath = sourcePath;
+        String originalTargetPath = targetPath;
+
         sourcePath = AliyunOssUtil.standardizePath(sourcePath);
         targetPath = AliyunOssUtil.standardizePath(targetPath);
         String bucketName = getBucketName();
         this.account.getOssClient().copyObject(bucketName, sourcePath, bucketName, targetPath);
+
+        if (this.delegate != null) {
+            this.executorService.submit(() -> {
+                this.delegate.copy(originalSourcePath, originalTargetPath);
+            });
+        }
     }
 
 }
