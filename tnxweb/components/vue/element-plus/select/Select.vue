@@ -12,10 +12,10 @@
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
-            <el-button type="text" :class="emptyClass" v-if="emptyText" @click="clear">
+            <el-button type="text" :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
             </el-button>
-            <el-tag v-for="item in items" :key="item[valueName]" :type="theme" :size="size"
+            <el-tag v-for="item in items" :key="item[valueName]" :type="theme"
                 :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" :data-value="item[valueName]"
                 @click="select(item[valueName])">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
@@ -29,7 +29,7 @@
     </div>
     <div class="tnxel-text-button-group d-flex flex-wrap" v-else-if="selector === 'text' || selector === 'texts'">
         <template v-if="items">
-            <el-button type="text" :class="emptyClass" v-if="emptyText" @click="clear">
+            <el-button type="text" :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
             </el-button>
             <el-button v-for="item in items" :key="item[valueName]" :type="isSelected(item[valueName]) ? '' : 'text'"
@@ -359,13 +359,8 @@ export default {
     border-color: transparent;
 }
 
-.tnxel-text-button-group .el-button--default {
+.tnxel-text-button-group .el-button:not(.el-button--text) {
     border-color: var(--el-color-primary);
     color: var(--el-color-primary);
-}
-
-.el-form-item__content > .tnxel-text-button-group {
-    margin-top: 2px;
-    margin-bottom: 2px;
 }
 </style>
