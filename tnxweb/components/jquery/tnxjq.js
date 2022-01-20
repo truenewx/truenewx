@@ -34,6 +34,12 @@ const tnxjq = $.extend({}, tnxcore, {
 });
 
 Object.assign(tnxjq.util.dom, {
+    /**
+     * 获取指定值在指定元素内容中的位置
+     * @param element 元素
+     * @param value 值
+     * @returns {rowIndex: number, columnIndex: number}
+     */
     getPosition(element, value) {
         let $element = $(element);
         let lines = value.split('\n');
@@ -62,6 +68,11 @@ Object.assign(tnxjq.util.dom, {
             return {rowIndex: lines.length - 1, columnIndex: lastLine.length};
         }
     },
+    /**
+     * 将指定元素内部的内容滚动到指定值所在的位置
+     * @param element 被滚动的元素
+     * @param value 定位的值
+     */
     scrollTo(element, value) {
         let position = this.getPosition(element, value);
         let $element = $(element);
