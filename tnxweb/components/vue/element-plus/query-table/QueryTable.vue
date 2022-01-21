@@ -3,7 +3,7 @@
         <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
             :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
             :row-class-name="rowClassName" @cell-click="selectRow">
-            <el-table-column class="select-column" header-align="center" align="center" width="50px" v-if="selectable">
+            <el-table-column class="select-column" header-align="center" align="center" width="60px" v-if="selectable">
                 <template #header>
                     <el-checkbox :model-value="pageAllSelected" :indeterminate="allSelectedIndeterminate"
                         @change="selectAll" v-if="selectable === 'all'"/>
