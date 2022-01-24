@@ -51,6 +51,8 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      */
     String getReadUrl(I userIdentity, String storageUrl, boolean thumbnail);
 
+    String getOriginalFilename(I userIdentity, String storageUrl);
+
     /**
      * 获取指定资源的读取元信息
      *

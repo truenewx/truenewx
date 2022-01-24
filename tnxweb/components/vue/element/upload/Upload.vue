@@ -26,9 +26,8 @@
                 <span class="el-upload-list__item-uploading" v-if="file.uploading">
                     <i class="el-icon-loading"></i>
                 </span>
-                <span class="el-upload-list__item-actions">
-                    <span class="el-upload-list__item-preview" @click="previewFile(file)"
-                        v-if="uploadLimit && uploadLimit.imageable">
+                <span class="el-upload-list__item-actions" :title="file.name">
+                    <span class="el-upload-list__item-preview" @click="previewFile(file)" v-if="previewable(file)">
                         <i class="el-icon-zoom-in"></i>
                     </span>
                     <span class="el-upload-list__item-delete" @click="removeFile(file)" v-if="!readOnly">
@@ -159,8 +158,8 @@ export default {
             let plusSize = Math.floor(Math.min(width, height) / 3);
             plusSize = Math.max(16, Math.min(plusSize, 32));
 
-            width = window.tnx.util.string.getPixelString(width);
-            height = window.tnx.util.string.getPixelString(height);
+            width = this.tnx.util.string.getPixelString(width);
+            height = this.tnx.util.string.getPixelString(height);
             const $upload = $('.el-upload', $container);
             $upload.css({
                 width: width,
@@ -337,17 +336,25 @@ export default {
             }
         },
         previewFile: function(file) {
-            if (!file.width || !file.height) {
-                const image = new Image();
-                image.src = file.previewUrl || file.url;
-                const _this = this;
-                image.onload = function() {
-                    file.width = image.width;
-                    file.height = image.height;
-                    _this._doPreviewFile(file);
-                }
+            let extension = this.getExtension(file);
+            if (extension === 'pdf') {
+                let url = this.tnx.util.net.appendParams(file.previewUrl, {
+                    inline: true
+                });
+                window.open(url);
             } else {
-                this._doPreviewFile(file);
+                if (!file.width || !file.height) {
+                    const image = new Image();
+                    image.src = file.previewUrl || file.url;
+                    const _this = this;
+                    image.onload = function() {
+                        file.width = image.width;
+                        file.height = image.height;
+                        _this._doPreviewFile(file);
+                    }
+                } else {
+                    this._doPreviewFile(file);
+                }
             }
         },
         _doPreviewFile: function(file) {
@@ -357,7 +364,7 @@ export default {
             let width = file.width;
             width = Math.min(width, this.tnx.util.dom.getDocWidth() - 10); // 最宽两边各留10px空隙
             const content = '<img src="' + file.url + '" style="max-width: 100%;">';
-            this.tnx.dialog(content, '', [], {
+            this.tnx.dialog(content, '图片预览', [], {
                 top: top + 'px',
                 width: width + 'px',
             });
@@ -367,12 +374,29 @@ export default {
                 return this.uploadFiles.length;
             }
             return 0;
-        }
+        },
+        getExtension(file) {
+            let extension = this.tnx.util.net.getExtension(file.name);
+            if (extension) {
+                return extension.toLowerCase();
+            }
+            return '';
+        },
+        previewable(file) {
+            let extension = this.getExtension(file);
+            return ['jpg', 'png', 'gif', 'svg', 'pdf'].contains(extension);
+        },
     }
 }
 </script>
+
 <style>
+.el-upload-list--picture-card {
+    flex-wrap: wrap;
+}
+
 .el-upload-list--picture-card .el-upload-list__item {
     height: fit-content;
+    line-height: 18px;
 }
 </style>

@@ -82,30 +82,32 @@ export default {
             vm.tnx.app.rpc.ensureLogined(function() {
                 if (vm.value) {
                     let storageUrls = Array.isArray(vm.value) ? vm.value : [vm.value];
-                    vm.tnx.app.rpc.get(vm.tnx.fss.getBaseUrl() + '/metas', {
-                        storageUrls: storageUrls
-                    }, function(metas) {
-                        let fileList = [];
-                        metas.forEach(meta => {
-                            if (meta) {
-                                fileList.push({
-                                    name: meta.name,
-                                    url: vm._getFullReadUrl(meta.thumbnailReadUrl || meta.readUrl),
-                                    previewUrl: vm._getFullReadUrl(meta.readUrl),
-                                    storageUrl: meta.storageUrl,
-                                });
-                            }
+                    if (storageUrls.length) {
+                        vm.tnx.app.rpc.get(vm.tnx.fss.getBaseUrl() + '/metas', {
+                            storageUrls: storageUrls
+                        }, function(metas) {
+                            let fileList = [];
+                            metas.forEach(meta => {
+                                if (meta) {
+                                    fileList.push({
+                                        name: meta.name,
+                                        url: vm._getFullReadUrl(meta.thumbnailReadUrl || meta.readUrl),
+                                        previewUrl: vm._getFullReadUrl(meta.readUrl),
+                                        storageUrl: meta.storageUrl,
+                                    });
+                                }
+                            });
+                            vm.fileList = fileList;
+                            vm.$nextTick(function() {
+                                vm._loadUploadLimit();
+                            });
                         });
-                        vm.fileList = fileList;
-                        vm.$nextTick(function() {
-                            vm._loadUploadLimit();
-                        });
-                    });
-                } else {
-                    vm.$nextTick(function() {
-                        vm._loadUploadLimit();
-                    });
+                        return;
+                    }
                 }
+                vm.$nextTick(function() {
+                    vm._loadUploadLimit();
+                });
             }, {
                 app: vm.tnx.fss.getAppName(),
                 toLogin: function(loginFormUrl, originalUrl, originalMethod) {

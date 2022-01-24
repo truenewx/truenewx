@@ -42,8 +42,6 @@ import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
 
-import com.aliyun.oss.internal.Mimetypes;
-
 /**
  * 文件存储控制器模板
  *
@@ -278,7 +276,12 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         String path = getDownloadPath(request);
         long modifiedTime = this.service.getLastModifiedTime(userIdentity, path);
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
-        response.setContentType(Mimetypes.getInstance().getMimetype(path));
+        if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
+            response.setContentType(Mimetypes.getInstance().getMimetype(path));
+        } else {
+            String filename = this.service.getOriginalFilename(userIdentity, path);
+            WebUtil.setDownloadFilename(request, response, filename);
+        }
         long modifiedSince = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
         if (modifiedSince == modifiedTime) {
             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // 如果相等则返回表示未修改的状态码
