@@ -131,9 +131,6 @@ export default {
         uploadFiles() {
             return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
         },
-        uploadable() {
-            return this.uploadLimit && this.fileList.length < this.uploadLimit.number;
-        },
     },
     watch: {
         uploadLimit() {
@@ -182,7 +179,6 @@ export default {
                         _this._resizeFilePanel(file, _this.fileList);
                     }
                 });
-
             }
         },
         getFileId: function(file) {
@@ -375,3 +371,8 @@ export default {
     }
 }
 </script>
+<style>
+.el-upload-list--picture-card .el-upload-list__item {
+    height: fit-content;
+}
+</style>
