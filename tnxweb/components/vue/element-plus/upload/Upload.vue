@@ -38,8 +38,7 @@
                 </span>
                 <div class="el-upload-list__item-actions">
                     <div>
-                        <tnxel-icon type="ZoomIn" @click="previewFile(file)"
-                            v-if="uploadOptions && uploadOptions.imageable"/>
+                        <tnxel-icon type="ZoomIn" @click="previewFile(file)" v-if="previewable(file)"/>
                         <tnxel-icon type="Delete" @click="removeFile(file)" v-if="!readOnly"/>
                     </div>
                 </div>
@@ -465,17 +464,25 @@ export default {
             }
         },
         previewFile(file) {
-            if (!file.width || !file.height) {
-                const image = new Image();
-                image.src = file.previewUrl || file.url;
-                const _this = this;
-                image.onload = function() {
-                    file.width = image.width;
-                    file.height = image.height;
-                    _this._doPreviewFile(file);
-                }
+            let extension = this.getExtension(file);
+            if (extension === 'pdf') {
+                let url = this.tnx.util.net.appendParams(file.previewUrl, {
+                    inline: true
+                });
+                window.open(url);
             } else {
-                this._doPreviewFile(file);
+                if (!file.width || !file.height) {
+                    const image = new Image();
+                    image.src = file.previewUrl || file.url;
+                    const _this = this;
+                    image.onload = function() {
+                        file.width = image.width;
+                        file.height = image.height;
+                        _this._doPreviewFile(file);
+                    }
+                } else {
+                    this._doPreviewFile(file);
+                }
             }
         },
         _doPreviewFile(file) {
@@ -495,7 +502,18 @@ export default {
                 return this.uploadFiles.length;
             }
             return 0;
-        }
+        },
+        getExtension(file) {
+            let extension = this.tnx.util.net.getExtension(file.name);
+            if (extension) {
+                return extension.toLowerCase();
+            }
+            return '';
+        },
+        previewable(file) {
+            let extension = this.getExtension(file);
+            return ['jpg', 'png', 'gif', 'svg', 'pdf'].contains(extension);
+        },
     }
 }
 </script>

@@ -810,6 +810,20 @@ export const NetUtil = {
         let userAgent = navigator.userAgent.toLowerCase();
         return userAgent.contains('micromessenger');
     },
+    getExtension(url, withDot) {
+        if (url) {
+            let index = url.indexOf('?');
+            if (index >= 0) {
+                url = url.substring(0, index);
+            }
+            index = url.lastIndexOf('.');
+            if (index >= 0) {
+                return url.substring(withDot ? index : index + 1);
+            }
+            return '';
+        }
+        return undefined;
+    },
     pushState(url) {
         if (window.history.pushState) {
             if (url.startsWith('/')) {

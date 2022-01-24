@@ -307,7 +307,11 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
         int bufferSize = IOUtil.DEFAULT_BUFFER_SIZE;
         response.setBufferSize(bufferSize); // 必须与输出文件流时的缓存区大小保持一致
-        WebUtil.setDownloadFilename(request, response, detail.getFilename());
+        if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
+            response.setContentType(Mimetypes.getInstance().getMimetype(path));
+        } else {
+            WebUtil.setDownloadFilename(request, response, detail.getFilename());
+        }
         long modifiedTime = detail.getLastModifiedTime();
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
         long modifiedSince = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
