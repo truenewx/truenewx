@@ -38,11 +38,13 @@ public class ExcelSheet {
         Row row = this.origin.createRow(rowIndex);
         if (copyStyleFromPreviousRow) {
             Row prevRow = this.origin.getRow(rowIndex - 1);
-            row.setRowStyle(prevRow.getRowStyle());
-            int cellNum = prevRow.getLastCellNum();
-            for (int i = 0; i < cellNum; i++) {
-                Cell cell = row.createCell(i);
-                cell.setCellStyle(prevRow.getCell(i).getCellStyle());
+            if (prevRow != null) {
+                row.setRowStyle(prevRow.getRowStyle());
+                int cellNum = prevRow.getLastCellNum();
+                for (int i = 0; i < cellNum; i++) {
+                    Cell cell = row.createCell(i);
+                    cell.setCellStyle(prevRow.getCell(i).getCellStyle());
+                }
             }
         }
         return new ExcelRow(this, row);
@@ -71,7 +73,9 @@ public class ExcelSheet {
     public void forEach(BiConsumer<ExcelRow, Integer> consumer, int startIndex) {
         for (int i = startIndex; i <= this.origin.getLastRowNum(); i++) {
             Row row = this.origin.getRow(i);
-            consumer.accept(new ExcelRow(this, row), i);
+            if (row != null) {
+                consumer.accept(new ExcelRow(this, row), i);
+            }
         }
     }
 
