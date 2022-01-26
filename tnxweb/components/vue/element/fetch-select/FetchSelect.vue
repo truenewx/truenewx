@@ -1,7 +1,7 @@
 <template>
     <el-select v-model="model" :loading="loading" :filterable="filterable" remote :remote-method="load"
         :placeholder="finalPlaceholder" :disabled="disabled" :title="title" :clearable="empty" default-first-option
-        @clear="clear" v-if="items">
+        @clear="clear">
         <el-option v-for="item in items" :key="item[valueName]" :value="item[valueName]" :label="label(item)"/>
         <el-option label="还有更多结果..." disabled v-if="more"/>
     </el-select>
