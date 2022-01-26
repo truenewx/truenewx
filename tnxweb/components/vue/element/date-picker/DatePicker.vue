@@ -2,14 +2,15 @@
     <div class="d-flex" v-if="permanentable">
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
             :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
-            :disabled="disabled || model.permanent" class="flex-grow-1" @change="emitModelValue"/>
+            :disabled="disabled || model.permanent" :class="{'flex-grow-1': !pickerWidth}" :style="{width: pickerWidth}"
+            @change="emitModelValue"/>
         <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent"
             @change="onPermanentChange">{{ permanentText }}
         </el-checkbox>
     </div>
     <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
         :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
-        :disabled="disabled" v-else/>
+        :disabled="disabled" :style="{width: pickerWidth}" v-else/>
 </template>
 
 <script>
@@ -37,6 +38,7 @@ export default {
         defaultValue: [Date, Number, String],
         earliest: [Date, Number, String],
         latest: [Date, Number, String],
+        pickerWidth: String,
     },
     data() {
         let vm = this;
