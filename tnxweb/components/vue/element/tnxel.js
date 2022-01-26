@@ -32,6 +32,7 @@ import FssView from './fss-view';
 import Curd from './curd';
 import Button from './button';
 import Tabs from './tabs';
+import TableColumn from './table-column';
 
 const components = Object.assign({}, tnxvue.components, {
     Alert,
@@ -59,6 +60,7 @@ const components = Object.assign({}, tnxvue.components, {
     Curd,
     Button,
     Tabs,
+    TableColumn,
 });
 
 const tnxel = Object.assign({}, tnxvue, {

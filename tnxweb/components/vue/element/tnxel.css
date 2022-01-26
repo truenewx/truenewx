@@ -254,6 +254,12 @@ el-header ul.tnxel-nav,
     padding-top: 0;
 }
 
+.new-error-line .el-form-item__content,
+.el-form-item__content + .new-error-line {
+    flex-wrap: wrap;
+}
+
+.new-error-line .el-form-item__error--inline,
 .w-100 + .el-form-item__error--inline,
 .el-col-24 + .el-form-item__error--inline {
     position: absolute;
