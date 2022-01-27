@@ -18,12 +18,13 @@ const messages = {
     minValue: '{0}最小可以为{1}',
     email: '{0}只能包含字母、数字、下划线、-和.，@两边各自的长度应小于64',
     idCardNo: '{0}不是正确的身份证号码格式',
-    url: '{0}应为格式正确的网址链接',
+    url: '{0}应为格式正确的网址链接绝对路径',
+    opposableUrl: '{0}应为格式正确的网址链接绝对路径或相对路径',
     regex: '{0}格式错误{1}',
     notContains: '{0}不能包含：{1}',
-    rejectTags: '{0}不能包含任何标签',
-    allowedTags: '{0}只能包含标签：{1}',
-    forbiddenTags: '{0}不能包含标签：{1}'
+    rejectTags: '{0}不能包含任何html标签',
+    allowedTags: '{0}只能包含html标签：{1}，不可使用其它html标签',
+    forbiddenTags: '{0}不能包含html标签：{1}，可以使用其它html标签',
 }
 
 export function getErrorMessage(validationName, fieldCaption) {

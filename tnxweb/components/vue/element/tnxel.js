@@ -338,6 +338,99 @@ tnxel.boolean = {
     }
 }
 
+tnxel.table = {
+    validateCellInput(inputElement, fieldRules, column) {
+        return new Promise((resolve, reject) => {
+            let fieldName = column.property;
+            if (inputElement && fieldName && fieldRules?.length) {
+                let rules = {};
+                rules[fieldName] = fieldRules;
+                let source = {};
+                let $input = $(inputElement);
+                source[fieldName] = $input.val();
+                window.tnx.app.validator.validate(rules, source, function(errors) {
+                    let _column = {
+                        property: column.property,
+                        label: column.label,
+                        width: column.width,
+                        required: typeof column.required === 'boolean' ? column.required
+                            : fieldRules.contains(r => r.required),
+                    };
+                    if (errors?.length) {
+                        $input.parent().addClass('is-error');
+                        if (!$input.is('[readonly]')) {
+                            $input.focus();
+                        }
+
+                        let fieldLabel = column.label || '';
+                        _column.message = fieldLabel + errors[0].message;
+                        reject(_column);
+                    } else {
+                        $input.parent().removeClass('is-error');
+                        resolve(_column);
+                    }
+                });
+            } else {
+                resolve({
+                    property: column.property,
+                    label: column.label,
+                    width: column.width,
+                    required: column.required,
+                });
+            }
+        });
+    },
+    loopValidatableInput(tableRef, rules, callback) {
+        let columnNodes = tableRef.$slots.default;
+        for (let columnIndex = 0; columnIndex < columnNodes.length; columnIndex++) {
+            let columnNode = columnNodes[columnIndex];
+            let props = columnNode.componentOptions?.propsData;
+            if (props) {
+                let fieldRules = rules[props.prop];
+                if (fieldRules) {
+                    let $trs = $('tbody > tr', tableRef.$el);
+                    for (let tr of $trs) {
+                        let $td = $(tr).children('td:eq(' + columnIndex + ')');
+                        let inputElement = $('input', $td)[0];
+                        if (inputElement) {
+                            callback(inputElement, fieldRules, {
+                                property: props.prop,
+                                label: props.label,
+                                width: props.width,
+                                required: props.required,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    },
+    validateTableInputs(tableRef, rules) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+            let validatableInputNum = 0;
+            _this.loopValidatableInput(tableRef, rules, () => {
+                validatableInputNum++;
+            });
+
+            let resolvedNum = 0;
+            let rejected = false;
+            _this.loopValidatableInput(tableRef, rules, (inputElement, fieldRules, column) => {
+                _this.validateCellInput(inputElement, fieldRules, column).then(col => {
+                    if (++resolvedNum >= validatableInputNum) {
+                        resolve(col);
+                    }
+                }).catch(error => {
+                    if (!rejected) {
+                        rejected = true;
+                        reject(error);
+                    }
+                });
+            });
+        });
+    },
+}
+
 tnxel.libs.Vue.use(tnxel);
 
 const rpc = tnxel.app.rpc;

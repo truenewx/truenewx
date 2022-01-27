@@ -1,6 +1,6 @@
 <template>
     <el-table-column
-        :label="required ? undefined : label"
+        :label="label"
         :prop="prop"
         :header-align="headerAlign || align"
         :align="align"

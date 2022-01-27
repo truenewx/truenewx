@@ -4,13 +4,15 @@
  * async-validator组件详见：https://github.com/yiminghe/async-validator
  */
 import validator from '../tnxcore-validator';
+import AsyncValidator from 'async-validator';
 
 const regExps = {
     number: /^-?([1-9]\d{0,2}((,?\d{3})*|\d*)(\.\d*)?|0?\.\d*|0)$/,
     integer: /^(-?[1-9]\d{0,2}(,?\d{3}))|0*$/,
     email: /^[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})@[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})$/,
     idCardNo: /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/,
-    url: /^https?:\/\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/
+    url: /^https?:\/\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/,
+    opposableUrl: /^(https?:\/)?\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/,
 }
 
 function validateRegExp(regExpName, fieldValue, fieldCaption) {
@@ -93,10 +95,10 @@ function getRule(validationName, validationValue, fieldMeta) {
                 validator(r, fieldValue, callback, source, options) {
                     if (typeof validationValue === 'number' && typeof fieldValue === 'string') {
                         // 回车符计入长度
-                        const enterLength = fieldValue.indexOf('\n') < 0 ? 0 : fieldValue.match(/\n/g).length;
-                        const fieldLength = fieldValue.length + enterLength;
+                        let enterLength = fieldValue.indexOf('\n') < 0 ? 0 : fieldValue.match(/\n/g).length;
+                        let fieldLength = fieldValue.length + enterLength;
                         if (fieldLength > validationValue) {
-                            const message = validator.getErrorMessage(validationName, fieldCaption,
+                            let message = validator.getErrorMessage(validationName, fieldCaption,
                                 validationValue, fieldLength - validationValue);
                             return callback(new Error(message));
                         }
@@ -111,7 +113,7 @@ function getRule(validationName, validationValue, fieldMeta) {
                     validator(r, fieldValue, callback, source, options) {
                         if (fieldValue && typeof fieldValue === 'string') {
                             if (!/^[0-9]+$/.test(fieldValue)) {
-                                const message = validator.getErrorMessage(validationName, fieldCaption);
+                                let message = validator.getErrorMessage(validationName, fieldCaption);
                                 return callback(new Error(message));
                             }
                         }
@@ -124,13 +126,101 @@ function getRule(validationName, validationValue, fieldMeta) {
             if (validationValue === true) {
                 rule = {
                     validator(r, fieldValue, callback, source, options) {
-                        if (validationValue && fieldValue) {
-                            const limitedValues = ['<', '>', '\'', '"', '\\'];
+                        if (fieldValue) {
+                            let limitedValues = ['<', '>', '\'', '"', '\\'];
                             for (let i = 0; i < limitedValues.length; i++) {
                                 if (fieldValue.indexOf(limitedValues[i]) >= 0) {
-                                    const s = limitedValues.join(' ');
-                                    const message = validator.getErrorMessage('notContains', fieldCaption, s);
+                                    let s = limitedValues.join(' ');
+                                    let message = validator.getErrorMessage('notContains', fieldCaption, s);
                                     return callback(new Error(message));
+                                }
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
+        case 'notContains':
+            if (validationValue) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (fieldValue) {
+                            let limitedValues = validationValue.split(' ');
+                            for (let i = 0; i < limitedValues.length; i++) {
+                                if (fieldValue.indexOf(limitedValues[i]) >= 0) {
+                                    let message = validator.getErrorMessage('notContains', fieldCaption,
+                                        validationValue);
+                                    return callback(new Error(message));
+                                }
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
+        case 'rejectHtmlTags':
+            if (validationValue === true) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (fieldValue) {
+                            if (/<[a-z]+[ ]*[/]?[ ]*>/gi.test(fieldValue)) {
+                                let message = validator.getErrorMessage(validationName, fieldCaption);
+                                return callback(new Error(message));
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
+        case 'allowedHtmlTags':
+            if (validationValue) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (fieldValue) {
+                            let tags = validationValue.toLowerCase().split(',');
+                            if (tags.length) {
+                                fieldValue = fieldValue.toLowerCase();
+                                let leftIndex = fieldValue.indexOf('<');
+                                let rightIndex = leftIndex >= 0 ? fieldValue.indexOf('>', leftIndex) : -1;
+                                while (leftIndex >= 0 && rightIndex >= 0) {
+                                    let sub = fieldValue.substring(leftIndex + 1, rightIndex); // <>中间的部分
+                                    let spaceIndex = sub.indexOf(' ');
+                                    let tag = spaceIndex >= 0 ? sub.substring(0, spaceIndex) : sub;
+                                    if (tag.startsWith('/')) { // 标签结束处
+                                        tag = tag.substring(1);
+                                    }
+                                    if (!tags.contains(tag.toLowerCase())) {
+                                        let message = validator.getErrorMessage(validationName, fieldCaption,
+                                            tags.join(', '));
+                                        return callback(new Error(message)); // 存在不允许的标签，则报错
+                                    }
+                                    leftIndex = fieldValue.indexOf('<', rightIndex);
+                                    rightIndex = leftIndex >= 0 ? fieldValue.indexOf('>', leftIndex) : -1;
+                                }
+                            }
+                        }
+                        return callback();
+                    }
+                };
+            }
+            break;
+        case 'forbiddenHtmlTags':
+            if (validationValue) {
+                rule = {
+                    validator(r, fieldValue, callback, source, options) {
+                        if (fieldValue) {
+                            let tags = validationValue.toLowerCase().split(',');
+                            if (tags.length) {
+                                fieldValue = fieldValue.toLowerCase();
+                                for (let tag of tags) {
+                                    if (fieldValue.contains('<' + tag + '>') || fieldValue.contains('<' + tag + ' ')) {
+                                        let message = validator.getErrorMessage(validationName, fieldCaption,
+                                            tags.join(', '));
+                                        return callback(new Error(message));
+                                    }
                                 }
                             }
                         }
@@ -161,6 +251,19 @@ function getRule(validationName, validationValue, fieldMeta) {
             };
             break;
         case 'url':
+            rule = {
+                validator(r, fieldValue, callback, source, options) {
+                    if (validationValue) {
+                        let message = validateRegExp(validationName, fieldValue, fieldCaption);
+                        if (message) {
+                            return callback(new Error(message));
+                        }
+                    }
+                    return callback();
+                }
+            };
+            break;
+        case 'opposableUrl':
             rule = {
                 validator(r, fieldValue, callback, source, options) {
                     if (validationValue) {
@@ -231,14 +334,14 @@ function getRule(validationName, validationValue, fieldMeta) {
  * @returns {{}}
  */
 export function getRules(meta) {
-    const rules = {};
+    let rules = {};
     Object.keys(meta).forEach(fieldName => {
-        const fieldMeta = meta[fieldName];
+        let fieldMeta = meta[fieldName];
         if (fieldMeta.validation) {
-            const fieldRules = [];
+            let fieldRules = [];
             Object.keys(fieldMeta.validation).forEach(validationName => {
-                const validationValue = fieldMeta.validation[validationName];
-                const rule = getRule(validationName, validationValue, fieldMeta);
+                let validationValue = fieldMeta.validation[validationName];
+                let rule = getRule(validationName, validationValue, fieldMeta);
                 if (rule) {
                     fieldRules.push(rule);
                 }
@@ -255,5 +358,8 @@ export default {
     validateRegExp,
     getRule,
     getRules,
-    getErrorMessage: validator.getErrorMessage
+    getErrorMessage: validator.getErrorMessage,
+    validate: function(rules, source, callback) {
+        return new AsyncValidator(rules).validate(source, callback);
+    },
 }

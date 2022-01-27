@@ -27,7 +27,8 @@
     "jquery": "^3.6.0",
     "md5": "^2.3.0",
     "vue": "^2.6.12",
-    "vue-router": "^3.5.2"
+    "vue-router": "^3.5.2",
+    "async-validator": "~1.8.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.12",
