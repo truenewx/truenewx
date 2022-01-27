@@ -3,7 +3,7 @@
         <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-right-0': suffix}" v-model.trim="model"
             :min="min" :max="max" controls-position="right" :placeholder="placeholder" :disabled="disabled"
             :controls="controls" :step="step || Math.pow(10, -this.scale)" :precision="scale" step-strictly
-            @change="onChange"/>
+            @change="onChange" @blur="$emit('blur', $event)"/>
         <div class="el-input-group__append" v-if="suffix">{{ suffix }}</div>
     </el-col>
 </template>
@@ -33,7 +33,7 @@ export default {
         },
         required: Boolean,
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'blur'],
     data() {
         return {
             model: this.modelValue,

@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import $ from 'jquery';
+
 const util = window.tnx.util;
 
 export default {
@@ -128,6 +130,13 @@ export default {
                 }
                 if (formItem && formItem.elForm && formItem.prop) {
                     formItem.elForm.validateField(formItem.prop);
+                } else { // 不隶属于表单栏目，则简单地移除错误框效果
+                    let $element = $(this.$el);
+                    if ($element.is('.el-input')) {
+                        $element.removeClass('is-error');
+                    } else {
+                        $('.el-input', $element).removeClass('is-error');
+                    }
                 }
             }
         },

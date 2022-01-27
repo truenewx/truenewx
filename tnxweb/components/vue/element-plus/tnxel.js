@@ -35,6 +35,7 @@ import Select from './select/Select';
 import Slider from './slider/Slider';
 import StepsNav from './steps-nav/StepsNav';
 import SubmitForm from './submit-form/SubmitForm';
+import TabColumn from './table-column/TableColumn';
 import Tabs from './tabs/Tabs';
 import Transfer from './transfer/Transfer';
 import Upload from './upload/Upload';
@@ -68,6 +69,7 @@ const components = Object.assign({}, tnxvue.components, {
     Slider,
     StepsNav,
     SubmitForm,
+    TabColumn,
     Tabs,
     Transfer,
     Upload,
@@ -472,6 +474,8 @@ tnxel.boolean = {
         return cellValue;
     }
 }
+
+tnxel.table = {}
 
 const rpc = tnxel.app.rpc;
 rpc.handleErrors = tnxel.util.function.around(rpc.handleErrors, function(handleErrors, errors, options) {
