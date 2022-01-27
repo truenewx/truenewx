@@ -189,6 +189,9 @@ public class ExcelImportHelper {
                 EnumType enumType = this.enumDictResolver.getEnumType(enumItemKey.type(), enumItemKey.subtype(),
                         locale);
                 if (enumType != null) {
+                    if (StringUtils.isBlank(text)) {
+                        return null;
+                    }
                     EnumItem enumItem = enumType.getItemByCaption(text);
                     if (enumItem != null) {
                         return (V) enumItem.getKey();
@@ -203,6 +206,9 @@ public class ExcelImportHelper {
             }
             RegionCode regionCode = field.getAnnotation(RegionCode.class);
             if (regionCode != null) {
+                if (StringUtils.isBlank(text)) {
+                    return null;
+                }
                 Region region = getNationalRegionSource().parseSubRegion(text, regionCode.withSuffix(), locale);
                 if (region != null) {
                     return (V) region.getCode();
@@ -216,18 +222,17 @@ public class ExcelImportHelper {
             }
             return (V) text;
         } else if (fieldType.isEnum()) {
-            if (StringUtils.isNotBlank(text)) {
-                Class<Enum> enumClass = (Class<Enum>) fieldType;
-                return (V) getEnumValue(rowModel, fieldName, componentIndex, text, enumClass, locale);
+            if (StringUtils.isBlank(text)) {
+                return null;
             }
-            return null;
+            Class<Enum> enumClass = (Class<Enum>) fieldType;
+            return (V) getEnumValue(rowModel, fieldName, componentIndex, text, enumClass, locale);
         } else if (fieldType == boolean.class || fieldType == Boolean.class) {
-            if (StringUtils.isNotBlank(text)) {
-                BooleanEnum enumValue = getEnumValue(rowModel, fieldName, componentIndex, text, BooleanEnum.class,
-                        locale);
-                return (V) Boolean.valueOf(enumValue == BooleanEnum.TRUE);
+            if (StringUtils.isBlank(text)) {
+                return null;
             }
-            return null;
+            BooleanEnum enumValue = getEnumValue(rowModel, fieldName, componentIndex, text, BooleanEnum.class, locale);
+            return (V) Boolean.valueOf(enumValue == BooleanEnum.TRUE);
         }
         throw new BusinessException(ExcelExceptionCodes.IMPORT_SUPPORTED_FIELD_TYPE,
                 rowModel.getClass().getSimpleName(), fieldType.getSimpleName(), fieldName);
