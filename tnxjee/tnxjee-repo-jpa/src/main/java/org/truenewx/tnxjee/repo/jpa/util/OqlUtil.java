@@ -136,6 +136,24 @@ public class OqlUtil {
         return buildOrConditionString(params, fieldName, ArrayUtil.toList(fieldParamValues), comparison);
     }
 
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            Collection<?> fieldParamValues) {
+        return buildOrConditionString(params, fieldName, fieldParamValues, null);
+    }
+
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            Object[] fieldParamValues) {
+        return buildOrConditionString(params, fieldName, fieldParamValues, null);
+    }
+
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName, int[] fieldParamValues) {
+        return buildOrConditionString(params, fieldName, fieldParamValues, null);
+    }
+
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName, long[] fieldParamValues) {
+        return buildOrConditionString(params, fieldName, fieldParamValues, null);
+    }
+
     /**
      * 构建指定字段的为null条件子句
      *
