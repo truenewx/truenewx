@@ -538,8 +538,8 @@ el-card {
 
 .el-message-box__btns {
     padding: 0 1rem 1rem 1rem;
-    display: flex;
     flex-direction: row-reverse;
+    justify-content: flex-start;
 }
 
 .el-message-box__btns button:nth-child(2) {

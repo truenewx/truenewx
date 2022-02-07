@@ -112,5 +112,6 @@ export default {
 
 .tnxel-transfer .el-transfer__buttons .el-button + .el-button {
     margin-left: 0;
+    margin-top: 10px;
 }
 </style>
