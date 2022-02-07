@@ -81,7 +81,7 @@ import {
     View,
     WarningFilled,
     ZoomIn,
-} from '@element-plus/icons';
+} from '@element-plus/icons-vue';
 
 const components = {
     ArrowDown,
