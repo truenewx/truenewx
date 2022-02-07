@@ -2,7 +2,9 @@ package org.truenewx.tnxjee.core.util;
 
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -442,6 +444,13 @@ public class CollectionUtil {
             }
         }
         return -1;
+    }
+
+    public static <T, R> List<R> map(List<T> list, Function<? super T, ? extends R> mapper) {
+        if (list != null) {
+            return list.stream().map(mapper).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }
