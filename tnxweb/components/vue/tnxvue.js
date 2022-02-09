@@ -5,8 +5,8 @@
 import tnxcore from '../tnxcore.js';
 import validator from './tnxvue-validator';
 import createRouter from './tnxvue-router';
-import Text from './text';
-import Percent from './percent';
+import Text from './text/Text';
+import Percent from './percent/Percent';
 import * as Vue from 'vue';
 import mitt from 'mitt';
 
