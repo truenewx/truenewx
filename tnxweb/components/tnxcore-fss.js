@@ -7,6 +7,7 @@
  * - 非应用：嵌入在某个应用中，且不向其它应用提供服务，适用于系统只包含一个应用的简单场景，没有专属的RPC客户端
  */
 const fss = {
+    PROTOCOL: 'fss://',
     defaultAppName: 'fss',
     getClientConfig() {
         const rpc = window.tnx.app.rpc;

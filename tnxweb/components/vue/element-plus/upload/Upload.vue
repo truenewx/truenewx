@@ -228,8 +228,16 @@ export default {
             let vm = this;
             // 需在vue渲染之后才可正常操作dom元素
             this.$nextTick(function() {
+                // 初始化显示尺寸
+                let width = vm.uploadSize.width;
+                let height = vm.uploadSize.height;
+                width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
+                height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
+
                 const $container = $('#' + vm.id);
                 $('.el-upload', $container).css({
+                    width: width,
+                    height: height,
                     display: 'inline-flex',
                 });
 
@@ -569,7 +577,6 @@ export default {
 
 .tnxel-upload-container .el-upload--picture-card i {
     margin-top: 0;
-    color: inherit;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card {

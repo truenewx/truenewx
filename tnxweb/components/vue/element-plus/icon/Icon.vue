@@ -2,6 +2,7 @@
     <el-icon :class="className" :color="color" :style="style">
         <Loading v-if="type === 'Loading'"/>
         <ArrowDown v-else-if="type === 'ArrowDown'"/>
+        <ArrowLeft v-else-if="type === 'ArrowLeft'"/>
         <ArrowRight v-else-if="type === 'ArrowRight'"/>
         <Bottom v-else-if="type === 'Bottom'"/>
         <CaretBottom v-else-if="type === 'CaretBottom'"/>
@@ -27,6 +28,8 @@
         <Pointer v-else-if="type === 'Pointer'"/>
         <QuestionFilled v-else-if="type === 'QuestionFilled'"/>
         <Rank v-else-if="type === 'Rank'"/>
+        <Remove v-else-if="type === 'Remove'"/>
+        <RemoveFilled v-else-if="type === 'RemoveFilled'"/>
         <Right v-else-if="type === 'Right'"/>
         <Search v-else-if="type === 'Search'"/>
         <Select v-else-if="type === 'Select'"/>
@@ -44,6 +47,7 @@
 <script>
 import {
     ArrowDown,
+    ArrowLeft,
     ArrowRight,
     Bottom,
     CaretBottom,
@@ -70,6 +74,8 @@ import {
     Pointer,
     QuestionFilled,
     Rank,
+    Remove,
+    RemoveFilled,
     Right,
     Search,
     Select,
@@ -85,6 +91,7 @@ import {
 
 const components = {
     ArrowDown,
+    ArrowLeft,
     ArrowRight,
     Bottom,
     CaretBottom,
@@ -111,6 +118,8 @@ const components = {
     Pointer,
     QuestionFilled,
     Rank,
+    Remove,
+    RemoveFilled,
     Right,
     Search,
     Select,

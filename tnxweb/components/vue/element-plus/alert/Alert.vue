@@ -91,3 +91,9 @@ export default {
     }
 }
 </script>
+
+<style>
+.el-alert__title {
+    text-align: left;
+}
+</style>

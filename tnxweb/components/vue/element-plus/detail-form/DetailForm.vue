@@ -76,3 +76,9 @@ export default {
     }
 }
 </script>
+
+<style>
+.tnxel-detail-form .el-form-item {
+    margin-bottom: 0.75rem;
+}
+</style>

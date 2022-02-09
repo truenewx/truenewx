@@ -1,8 +1,8 @@
 <template>
     <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" :disabled="disabled || !tooltipContent"
         v-if="disabled === false || disabledTip !== false">
-        <el-dropdown split-button :type="type" :disabled="disabled" :title="title" :size="size" @click="clickButton"
-            @command="clickItem" v-if="dropdownItems.length">
+        <el-dropdown split-button :type="type" :class="className" :disabled="disabled" :title="title" :size="size"
+            @click="clickButton" @command="clickItem" v-if="dropdownItems.length">
             <i :class="icon" style="margin-right: 0.5rem;" v-if="icon"></i>
             <template v-if="!hiddenCaption">
                 <slot v-if="$slots.default"></slot>
@@ -18,7 +18,7 @@
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
-        <el-button :type="type" :disabled="disabled" :title="title" @click="clickButton" :size="size"
+        <el-button :type="type" :class="className" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
             <tnxel-icon :type="icon" v-if="icon"/>
             <span v-if="!hiddenCaption && ($slots.default || menuItem)">
@@ -79,6 +79,9 @@ export default {
         }
     },
     computed: {
+        className() {
+            return this.$attrs.class;
+        },
         tooltipContent() {
             let content = this.tooltip;
             if (content === false) {
