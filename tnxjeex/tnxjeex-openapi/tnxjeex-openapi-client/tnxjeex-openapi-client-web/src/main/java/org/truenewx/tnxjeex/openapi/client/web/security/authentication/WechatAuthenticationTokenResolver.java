@@ -66,6 +66,13 @@ public abstract class WechatAuthenticationTokenResolver
         return map;
     }
 
+    /**
+     * 从指定HTTP请求中获取微信登录编码，加载微信用户信息<br/>
+     * 注意：一个登录编码通过本方法加载一次后将失效，这意味着本方法不是幂等的
+     *
+     * @param request HTTP请求
+     * @return 微信用户信息
+     */
     public WechatUser resolveUser(HttpServletRequest request) {
         String loginCode = getParam(request, PARAMETER_CODE);
         return getAccessor(request).loadUser(loginCode);
