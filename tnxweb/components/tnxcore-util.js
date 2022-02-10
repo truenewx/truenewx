@@ -766,7 +766,24 @@ export const NetUtil = {
                 return anchor.substr(index + 1);
             }
         }
-        return undefined;
+        return '';
+    },
+    /**
+     * 获取当前页面的地址
+     */
+    getUrl(withOrigin, withAnchor, withParameter) {
+        let url = '';
+        if (withOrigin) {
+            url += window.location.origin;
+        }
+        url += window.location.pathname;
+        if (withAnchor) {
+            url += window.location.hash;
+        }
+        if (withParameter) {
+            url += this.getParameterString();
+        }
+        return url;
     },
     isIntranetHostname(hostname) {
         if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0:0:0:0:0:0:0:1') { // 本机
@@ -951,7 +968,35 @@ export const DomUtil = {
             subtree: true, // 是否应用于所有后代节点
         });
         return observer;
-    }
+    },
+    _ctrlKeyObservers: {},
+    /**
+     * 获取监听Ctrl快捷键时的当前地址，默认返回当前页面的锚点，应用可根据实际需要覆写本方法
+     * @returns {string} 监听Ctrl快捷键时的当前地址
+     */
+    getObserveCtrlKeyCurrentPage() {
+        return util.net.getAnchor();
+    },
+    observeCtrlKey(page, key, observer) {
+        if (Object.keys(this._ctrlKeyObservers).length === 0) {
+            let _this = this;
+            // 必须拦截onkeydown才能阻止浏览器默认事件，拦截onkeyup时浏览器的默认onkeydown仍会执行
+            window.onkeydown = function(event) {
+                if (event.ctrlKey) {
+                    let _key = event.key + '@' + _this.getObserveCtrlKeyCurrentPage();
+                    let _observer = _this._ctrlKeyObservers[_key];
+                    if (_observer) {
+                        _observer();
+                        event.returnValue = false;
+                    }
+                }
+            }
+        }
+        let pages = Array.isArray(page) ? page : [page];
+        for (let p of pages) {
+            this._ctrlKeyObservers[key + '@' + p] = observer;
+        }
+    },
 }
 
 export const util = {
