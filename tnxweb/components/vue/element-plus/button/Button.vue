@@ -96,7 +96,7 @@ export default {
             return undefined;
         },
         title() {
-            return this.disabled ? this.disabledTip : undefined;
+            return this.disabled ? this.disabledTip : this.$attrs.title;
         }
     },
     created() {
