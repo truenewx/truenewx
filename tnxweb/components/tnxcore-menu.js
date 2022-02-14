@@ -5,26 +5,30 @@
 function isGranted(authorities, item) {
     prepareItem(item);
 
-    if (item.rank || item.permission) {
+    if (item.type || item.rank || item.permission) {
         for (let authority of authorities) {
-            // 菜单不限定级别视为级别匹配；已获级别权限为全部视为级别匹配；已获级别等于菜单限定级别视为级别匹配
-            let rankMatched = !item.rank || authority.rank === '*' || authority.rank === item.rank;
-            if (rankMatched) {
-                // 级别匹配，还需进一步比较许可
-                if (item.permission) {
-                    // 权限许可集包含全部许可，或菜单项许可，则视为结果匹配
-                    if (authority.permissions && (authority.permissions.contains('*')
-                        || authority.permissions.containsIgnoreCase(item.permission))) {
+            // 匹配原则： 菜单不限定视为匹配；已获权限为全部视为匹配；已获权限等于菜单限定权限视为匹配
+            let typeMatched = !item.type || authority.type === '*' || authority.type === item.type;
+            if (typeMatched) {
+                let rankMatched = !item.rank || authority.rank === '*' || authority.rank === item.rank;
+                if (rankMatched) {
+                    if (!item.permission) {
                         return true;
                     }
-                } else { // 级别匹配，且未限定许可，则视为结果匹配
-                    return true;
+                    if (Array.isArray(authority.permissions)) {
+                        if (authority.permissions.contains('*')
+                            || authority.permissions.containsIgnoreCase(item.permission)) {
+                            return true;
+                        }
+                    }
                 }
             }
-            // 级别不匹配，则检查下一条权限
+            // 不匹配，则检查下一条权限
         }
         return false;
-    } else if (item.subs && item.subs.length) {
+    }
+    // 当前节点未指定类型、级别和许可，且包含下级菜单，则返回undefined表示无法判断
+    if (item.subs?.length) {
         return undefined;
     }
     return true;
@@ -65,7 +69,7 @@ function applyGrantedItemToItems(authorities, item, items) {
     } else if (granted === false) { // 授权不匹配
         // 不做处理
     } else { // 无法判断，需到子节点中查找
-        if (item.subs && item.subs.length) {
+        if (item.subs?.length) {
             const subs = [];
             for (let sub of item.subs) {
                 if (isGranted(authorities, sub)) {
@@ -269,8 +273,9 @@ Menu.prototype.isGranted = function(path) {
     if (breadcrumbItems.length) {
         for (let i = breadcrumbItems.length - 1; i >= 0; i--) {
             let item = breadcrumbItems[i];
-            if (item.rank || item.permission) {
-                return isGranted(this.authorities, item);
+            let granted = isGranted(this.authorities, item);
+            if (granted !== undefined) {
+                return granted;
             }
         }
         return true; // 有匹配菜单项，但各级菜单项均未设置可鉴权，则说明无需鉴权，视为鉴权通过
