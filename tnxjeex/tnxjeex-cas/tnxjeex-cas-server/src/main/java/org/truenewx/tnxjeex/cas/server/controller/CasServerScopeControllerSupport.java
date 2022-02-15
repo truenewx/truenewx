@@ -7,14 +7,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjee.webmvc.security.web.AjaxRedirectStrategy;
-import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeApplicator;
+import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeResolver;
 import org.truenewx.tnxjeex.cas.server.security.authentication.logout.CasServerLogoutHandler;
 
 /**
@@ -25,17 +27,25 @@ public abstract class CasServerScopeControllerSupport {
     @Autowired
     private CasServerLogoutHandler logoutHandler;
     @Autowired
-    private CasServerScopeApplicator scopeApplicator;
+    private CasServerScopeResolver scopeResolver;
     @Autowired
     private AjaxRedirectStrategy redirectStrategy;
 
-    @RequestMapping("/scope")
+    @GetMapping("/scope")
     @ConfigAuthority
-    public void scope(@RequestParam(value = "scope", required = false) String scope,
+    @ResponseBody
+    public String getScope() {
+        UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
+        return this.scopeResolver.resolveScope(userDetails);
+    }
+
+    @RequestMapping("/scope/put")
+    @ConfigAuthority
+    public void putScope(@RequestParam(value = "scope", required = false) String scope,
             @RequestParam(value = WebConstants.DEFAULT_LOGIN_SUCCESS_REDIRECT_PARAMETER, required = false) String next,
             HttpServletRequest request, HttpServletResponse response) {
         UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
-        if (this.scopeApplicator.applyScope(userDetails, scope)) {
+        if (this.scopeResolver.applyScope(userDetails, scope)) {
             this.logoutHandler.logoutClients(request);
         }
         if (StringUtils.isNotBlank(next)) {

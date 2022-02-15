@@ -27,7 +27,7 @@ import org.truenewx.tnxjeex.cas.server.repo.AppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryAppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryTicketGrantingTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.TicketGrantingTicketRepo;
-import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeApplicator;
+import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeResolver;
 
 /**
  * CAS票据管理器实现
@@ -36,8 +36,8 @@ import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeApp
 public class CasTicketManagerImpl implements CasTicketManager {
     @Autowired
     private ServerProperties serverProperties;
-    @Autowired(required = false) // 没有登录范围区别的系统没有范围应用者实现
-    private CasServerScopeApplicator scopeApplicator;
+    @Autowired(required = false) // 没有登录范围区别的系统没有范围解决器实现
+    private CasServerScopeResolver scopeResolver;
     private TicketGrantingTicketRepo ticketGrantingTicketRepo = new MemoryTicketGrantingTicketRepo();
     private AppTicketRepo appTicketRepo = new MemoryAppTicketRepo();
     @Autowired(required = false) // 一般情况下无需进行转换，没有该转换器实现
@@ -129,9 +129,9 @@ public class CasTicketManagerImpl implements CasTicketManager {
             AppTicket appTicket = this.appTicketRepo.findByTicketGrantingTicketIdAndApp(ticketGrantingTicketId, app);
             if (appTicket == null) { // 不存在则创建新的
                 // 创建新的服务票据前，先进行可能的范围切换动作
-                if (this.scopeApplicator != null) {
+                if (this.scopeResolver != null) {
                     UserSpecificDetails<?> userDetails = ticketGrantingTicket.getUserDetails();
-                    if (this.scopeApplicator.applyScope(userDetails, scope)) {
+                    if (this.scopeResolver.applyScope(userDetails, scope)) {
                         this.ticketGrantingTicketRepo.save(ticketGrantingTicket);
                     }
                 }

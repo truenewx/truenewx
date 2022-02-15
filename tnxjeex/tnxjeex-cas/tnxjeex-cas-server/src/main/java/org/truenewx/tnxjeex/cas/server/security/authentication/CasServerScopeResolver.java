@@ -3,9 +3,11 @@ package org.truenewx.tnxjeex.cas.server.security.authentication;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 
 /**
- * Cas服务端业务范围应用者
+ * Cas服务端业务范围解决器
  */
-public interface CasServerScopeApplicator {
+public interface CasServerScopeResolver {
+
+    String resolveScope(UserSpecificDetails<?> userDetails);
 
     /**
      * 将指定业务范围应用到指定用户特性细节中
