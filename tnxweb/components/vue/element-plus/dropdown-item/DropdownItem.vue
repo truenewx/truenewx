@@ -1,11 +1,12 @@
 <template>
-    <el-dropdown-item class="tnxel-dropdown-item">
-        <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32" :disabled="!tooltip">
-            <div class="flex-v-center" :title="title" v-if="icon">
-                <tnxel-icon :type="icon"/>
+    <el-dropdown-item>
+        <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32"
+            :disabled="!tooltip">
+            <div class="w-100 flex-v-center" :title="title" v-if="icon">
+                <tnxel-icon :type="icon" :size="iconSize"/>
                 <span><slot></slot></span>
             </div>
-            <div :title="title" v-else-if="title">
+            <div class="w-100" :title="title" v-else-if="title">
                 <slot></slot>
             </div>
             <slot v-else></slot>
@@ -18,6 +19,7 @@ export default {
     name: 'TnxelDropdownItem',
     props: {
         icon: String,
+        iconSize: Number,
         title: String,
         tooltip: String,
         tooltipPlacement: {
@@ -27,10 +29,3 @@ export default {
     },
 }
 </script>
-
-<style>
-.tnxel-dropdown-item {
-    display: flex;
-    align-items: center;
-}
-</style>

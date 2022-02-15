@@ -36,6 +36,7 @@
         <Setting v-else-if="type === 'Setting'"/>
         <Sort v-else-if="type === 'Sort'"/>
         <SuccessFilled v-else-if="type === 'SuccessFilled'"/>
+        <Switch v-else-if="type === 'Switch'"/>
         <Top v-else-if="type === 'Top'"/>
         <UserFilled v-else-if="type === 'UserFilled'"/>
         <View v-else-if="type === 'View'"/>
@@ -82,6 +83,7 @@ import {
     Setting,
     Sort,
     SuccessFilled,
+    Switch,
     Top,
     UserFilled,
     View,
@@ -126,6 +128,7 @@ const components = {
     Setting,
     Sort,
     SuccessFilled,
+    Switch,
     Top,
     UserFilled,
     View,
@@ -144,7 +147,16 @@ export default {
         height: [Number, String],
     },
     computed: {
+        isUrlType() {
+            return this.type && (
+                this.type.startsWith('https://') || this.type.startsWith('http://')
+                || this.type.startsWith('../') || this.type.startsWith('./') || this.type.startsWith('/')
+            );
+        },
         className() {
+            if (this.isUrlType) {
+                return undefined;
+            }
             if (this.type && components[this.type]) {
                 let className = 'tnxel-icon-' + this.type;
                 if (this.type === 'Loading') {
@@ -176,8 +188,13 @@ export default {
                     style.height += 'px';
                 }
             }
+            if (this.isUrlType) {
+                style['background-repeat'] = 'no-repeat';
+                style['background-image'] = 'url(' + this.type + ')';
+                style['background-size'] = style.width + ' ' + style.height;
+            }
             return style;
         }
-    }
+    },
 }
 </script>
