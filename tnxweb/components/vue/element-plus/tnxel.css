@@ -694,3 +694,17 @@ el-card {
 i svg {
     vertical-align: unset;
 }
+
+.el-button-group > .el-dropdown:first-child .el-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.el-button-group > .el-dropdown:last-child .el-button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.el-button-group > .el-dropdown:not(:first-child):not(:last-child) .el-button {
+    border-radius: 0;
+}
