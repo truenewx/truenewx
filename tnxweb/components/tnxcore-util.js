@@ -999,6 +999,51 @@ export const DomUtil = {
     },
 }
 
+export const BomUtil = {
+    _opened: {},
+    _openedIntervalId: null,
+    /**
+     * 唯一地打开指定地址的窗口
+     * @param url 地址
+     * @param reload 函数或布尔值。<br/>
+     *               为函数时，参数为(win, url)，返回结果：win和url是否匹配，返回true时仅简单激活win，返回false时用新窗口打开url；<br/>
+     *               为布尔值时，指定激活匹配窗口后是否重新加载页面；
+     */
+    openUniquely(url, reload) {
+        // 先开启侦听
+        if (this._openedIntervalId === null) {
+            this._openedIntervalId = setInterval(function() {
+                const opened = window.tnx.util.bom._opened;
+                Object.keys(opened).forEach(url => {
+                    let win = opened[url];
+                    if (win && win.closed) {
+                        delete opened[url];
+                    }
+                });
+            }, 1000);
+        }
+
+        let win = this._opened[url];
+        if (win && !win.closed) {
+            if (typeof reload === 'function') {
+                // 重载函数返回true表示目标窗口被认可，只需激活即可，否则需执行后续处理
+                if (reload(win, url)) {
+                    win.focus();
+                    return;
+                }
+            } else { // 未提供重载函数，则一律激活目标窗口，是否重载由重载参数指定
+                win.focus();
+                if (reload) {
+                    win.location.reload();
+                }
+                return;
+            }
+        }
+        win = window.open(url);
+        this._opened[url] = win;
+    },
+}
+
 export const util = {
     md5: md5,
     base64: base64,
@@ -1010,6 +1055,7 @@ export const util = {
     array: ArrayUtil,
     net: NetUtil,
     dom: DomUtil,
+    bom: BomUtil,
 };
 
 export default util;
