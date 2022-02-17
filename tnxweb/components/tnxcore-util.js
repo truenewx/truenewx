@@ -406,6 +406,9 @@ export const StringUtil = {
             if (value.toLowerCase().endsWith('px')) {
                 return parseInt(value.substr(0, value.length - 2));
             }
+            if (value.toLowerCase().endsWith('rem')) {
+                return parseInt(value.substr(0, value.length - 3)) * 16;
+            }
         }
         return NaN;
     },
