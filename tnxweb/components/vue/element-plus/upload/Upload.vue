@@ -189,8 +189,6 @@ export default {
                 width = width || uploadSize.width;
                 height = height || uploadSize.height;
             }
-            width = width || 128;
-            height = height || (this.uploadOptions.imageable ? 128 : 40);
             return {width, height};
         },
         itemPanelStyle() {
@@ -206,8 +204,8 @@ export default {
             if (this.iconSize) {
                 return this.iconSize;
             }
-            let width = this.uploadSize.width;
-            let height = this.uploadSize.height;
+            let width = this.uploadSize.width || 0;
+            let height = this.uploadSize.height || 0;
             let iconSize = Math.floor(Math.min(width, height) / 3);
             iconSize = Math.max(16, Math.min(iconSize, 32));
             return iconSize;
@@ -230,9 +228,25 @@ export default {
             this.$nextTick(function() {
                 // 初始化显示尺寸
                 let width = vm.uploadSize.width;
+                if (width) {
+                    if (typeof width === 'string' && !width.endsWith('%')) {
+                        width = window.tnx.util.string.getPixelNumber(width);
+                    }
+                    if (typeof width === 'number') {
+                        width += 2; // 加上边框宽度
+                    }
+                    width = window.tnx.util.string.getPixelString(width);
+                }
                 let height = vm.uploadSize.height;
-                width = window.tnx.util.string.getPixelString(width + 2); // 加上边框宽度
-                height = window.tnx.util.string.getPixelString(height + 2); // 加上边框宽度
+                if (height) {
+                    if (typeof height === 'string' && !height.endsWith('%')) {
+                        height = window.tnx.util.string.getPixelNumber(height);
+                    }
+                    if (typeof height === 'number') {
+                        height += 2; // 加上边框宽度
+                    }
+                    height = window.tnx.util.string.getPixelString(height);
+                }
 
                 const $container = $('#' + vm.id);
                 $('.el-upload', $container).css({
