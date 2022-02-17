@@ -17,7 +17,7 @@
         <template #default>
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
                 <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined">
-                    <tnxel-icon :type="icon" :size="uploadIconSize"/>
+                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </div>
             </el-tooltip>
@@ -27,19 +27,19 @@
                 <img class="el-upload-list__item-thumbnail" :src="file.url"
                     v-if="uploadOptions && uploadOptions.imageable">
                 <div class="el-upload-list__item-caption" v-else>
-                    <tnxel-icon type="Document"/>
+                    <tnxel-icon value="Document"/>
                     <span>{{ file.name }}</span>
                 </div>
                 <label class="el-upload-list__item-status-label">
-                    <tnxel-icon type="Check"/>
+                    <tnxel-icon value="Check"/>
                 </label>
                 <span class="el-upload-list__item-uploading" v-if="file.uploading">
-                    <tnxel-icon type="Loading"/>
+                    <tnxel-icon value="Loading"/>
                 </span>
                 <div class="el-upload-list__item-actions">
                     <div>
-                        <tnxel-icon type="ZoomIn" @click="previewFile(file)" v-if="previewable(file)"/>
-                        <tnxel-icon type="Delete" @click="removeFile(file)" v-if="!readOnly"/>
+                        <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="previewable(file)"/>
+                        <tnxel-icon value="Delete" @click="removeFile(file)" v-if="!readOnly"/>
                     </div>
                 </div>
             </div>

@@ -8,7 +8,7 @@
         </template>
     </el-image>
     <el-avatar :size="size" :style="style" :shape="shape" :src="src" v-else>
-        <tnxel-icon :type="icon" :size="size / 2" style="margin:0" v-if="!src && icon"/>
+        <tnxel-icon :value="icon" :size="size / 2" style="margin:0" v-if="!src && icon"/>
     </el-avatar>
 </template>
 

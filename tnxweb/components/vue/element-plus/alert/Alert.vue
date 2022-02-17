@@ -1,6 +1,6 @@
 <template>
     <div role="alert" class="el-alert" :class="[typeClass, effectClass]">
-        <tnxel-icon class="el-alert__icon flex-center" :type="iconType" :style="iconStyle" v-if="showIcon"/>
+        <tnxel-icon :value="iconType" class="el-alert__icon flex-center" :style="iconStyle" v-if="showIcon"/>
         <div class="el-alert__content" :class="contentClass">
             <div class="el-alert__title" :style="titleStyle">
                 <slot></slot>

@@ -1,47 +1,47 @@
 <template>
     <el-icon :class="className" :color="color" :style="style">
-        <Loading v-if="type === 'Loading'"/>
-        <ArrowDown v-else-if="type === 'ArrowDown'"/>
-        <ArrowLeft v-else-if="type === 'ArrowLeft'"/>
-        <ArrowRight v-else-if="type === 'ArrowRight'"/>
-        <Bottom v-else-if="type === 'Bottom'"/>
-        <CaretBottom v-else-if="type === 'CaretBottom'"/>
-        <CaretTop v-else-if="type === 'CaretTop'"/>
-        <Check v-else-if="type === 'Check'"/>
-        <CircleCheck v-else-if="type === 'CircleCheck'"/>
-        <CircleCheckFilled v-else-if="type === 'CircleCheckFilled'"/>
-        <CircleClose v-else-if="type === 'CircleClose'"/>
-        <CircleCloseFilled v-else-if="type === 'CircleCloseFilled'"/>
-        <Close v-else-if="type === 'Close'"/>
-        <CloseBold v-else-if="type === 'CloseBold'"/>
-        <CopyDocument v-else-if="type === 'CopyDocument'"/>
-        <Document v-else-if="type === 'Document'"/>
-        <Delete v-else-if="type === 'Delete'"/>
-        <DeleteFilled v-else-if="type === 'DeleteFilled'"/>
-        <DocumentCopy v-else-if="type === 'DocumentCopy'"/>
-        <Edit v-else-if="type === 'Edit'"/>
-        <Folder v-else-if="type === 'Folder'"/>
-        <HomeFilled v-else-if="type === 'HomeFilled'"/>
-        <InfoFilled v-else-if="type === 'InfoFilled'"/>
-        <OfficeBuilding v-else-if="type === 'OfficeBuilding'"/>
-        <Plus v-else-if="type === 'Plus'"/>
-        <Pointer v-else-if="type === 'Pointer'"/>
-        <QuestionFilled v-else-if="type === 'QuestionFilled'"/>
-        <Rank v-else-if="type === 'Rank'"/>
-        <Remove v-else-if="type === 'Remove'"/>
-        <RemoveFilled v-else-if="type === 'RemoveFilled'"/>
-        <Right v-else-if="type === 'Right'"/>
-        <Search v-else-if="type === 'Search'"/>
-        <Select v-else-if="type === 'Select'"/>
-        <Setting v-else-if="type === 'Setting'"/>
-        <Sort v-else-if="type === 'Sort'"/>
-        <SuccessFilled v-else-if="type === 'SuccessFilled'"/>
-        <Switch v-else-if="type === 'Switch'"/>
-        <Top v-else-if="type === 'Top'"/>
-        <UserFilled v-else-if="type === 'UserFilled'"/>
-        <View v-else-if="type === 'View'"/>
-        <WarningFilled v-else-if="type === 'WarningFilled'"/>
-        <ZoomIn v-else-if="type === 'ZoomIn'"/>
+        <Loading v-if="value === 'Loading'"/>
+        <ArrowDown v-else-if="value === 'ArrowDown'"/>
+        <ArrowLeft v-else-if="value === 'ArrowLeft'"/>
+        <ArrowRight v-else-if="value === 'ArrowRight'"/>
+        <Bottom v-else-if="value === 'Bottom'"/>
+        <CaretBottom v-else-if="value === 'CaretBottom'"/>
+        <CaretTop v-else-if="value === 'CaretTop'"/>
+        <Check v-else-if="value === 'Check'"/>
+        <CircleCheck v-else-if="value === 'CircleCheck'"/>
+        <CircleCheckFilled v-else-if="value === 'CircleCheckFilled'"/>
+        <CircleClose v-else-if="value === 'CircleClose'"/>
+        <CircleCloseFilled v-else-if="value === 'CircleCloseFilled'"/>
+        <Close v-else-if="value === 'Close'"/>
+        <CloseBold v-else-if="value === 'CloseBold'"/>
+        <CopyDocument v-else-if="value === 'CopyDocument'"/>
+        <Document v-else-if="value === 'Document'"/>
+        <Delete v-else-if="value === 'Delete'"/>
+        <DeleteFilled v-else-if="value === 'DeleteFilled'"/>
+        <DocumentCopy v-else-if="value === 'DocumentCopy'"/>
+        <Edit v-else-if="value === 'Edit'"/>
+        <Folder v-else-if="value === 'Folder'"/>
+        <HomeFilled v-else-if="value === 'HomeFilled'"/>
+        <InfoFilled v-else-if="value === 'InfoFilled'"/>
+        <OfficeBuilding v-else-if="value === 'OfficeBuilding'"/>
+        <Plus v-else-if="value === 'Plus'"/>
+        <Pointer v-else-if="value === 'Pointer'"/>
+        <QuestionFilled v-else-if="value === 'QuestionFilled'"/>
+        <Rank v-else-if="value === 'Rank'"/>
+        <Remove v-else-if="value === 'Remove'"/>
+        <RemoveFilled v-else-if="value === 'RemoveFilled'"/>
+        <Right v-else-if="value === 'Right'"/>
+        <Search v-else-if="value === 'Search'"/>
+        <Select v-else-if="value === 'Select'"/>
+        <Setting v-else-if="value === 'Setting'"/>
+        <Sort v-else-if="value === 'Sort'"/>
+        <SuccessFilled v-else-if="value === 'SuccessFilled'"/>
+        <Switch v-else-if="value === 'Switch'"/>
+        <Top v-else-if="value === 'Top'"/>
+        <UserFilled v-else-if="value === 'UserFilled'"/>
+        <View v-else-if="value === 'View'"/>
+        <WarningFilled v-else-if="value === 'WarningFilled'"/>
+        <ZoomIn v-else-if="value === 'ZoomIn'"/>
     </el-icon>
 </template>
 
@@ -140,7 +140,7 @@ export default {
     name: 'TnxelIcon',
     components: components,
     props: {
-        type: String,
+        value: String,
         color: {},
         size: Number,
         width: [Number, String],
@@ -148,25 +148,25 @@ export default {
     },
     computed: {
         isUrlType() {
-            return this.type && (
-                this.type.startsWith('https://') || this.type.startsWith('http://')
-                || this.type.startsWith('../') || this.type.startsWith('./') || this.type.startsWith('/')
+            return this.value && (
+                this.value.startsWith('https://') || this.value.startsWith('http://')
+                || this.value.startsWith('../') || this.value.startsWith('./') || this.value.startsWith('/')
             );
         },
         className() {
             if (this.isUrlType) {
                 return undefined;
             }
-            if (this.type && components[this.type]) {
-                let className = 'tnxel-icon-' + this.type;
-                if (this.type === 'Loading') {
+            if (this.value && components[this.value]) {
+                let className = 'tnxel-icon-' + this.value;
+                if (this.value === 'Loading') {
                     className += ' is-loading';
                 }
                 return className;
-            } else if (this.type === 'loading') {
-                return 'tnxel-icon-' + this.type + ' el-icon-loading';
+            } else if (this.value === 'loading') {
+                return 'tnxel-icon-' + this.value + ' el-icon-loading';
             } else {
-                return this.type;
+                return this.value;
             }
         },
         style() {
@@ -190,7 +190,7 @@ export default {
             }
             if (this.isUrlType) {
                 style['background-repeat'] = 'no-repeat';
-                style['background-image'] = 'url(' + this.type + ')';
+                style['background-image'] = 'url(' + this.value + ')';
                 style['background-size'] = style.width + ' ' + style.height;
             }
             return style;

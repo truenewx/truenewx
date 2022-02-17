@@ -1,5 +1,5 @@
 <template>
-    <tnxel-icon :type="checked ? trueIcon : falseIcon" class="tnxel-check-icon"
+    <tnxel-icon :value="checked ? trueIcon : falseIcon" class="tnxel-check-icon"
         :class="'text-' + (checked ? trueTheme : falseTheme)" :size="size" @click="click"/>
 </template>
 

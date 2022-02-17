@@ -64,7 +64,7 @@
         <el-button style="width: 100%" :type="theme">
             <div class="d-flex justify-content-between">
                 <span>{{ currentText }}</span>
-                <tnxel-icon type="ArrowDown"/>
+                <tnxel-icon value="ArrowDown"/>
             </div>
         </el-button>
         <template #dropdown v-if="items && items.length">
