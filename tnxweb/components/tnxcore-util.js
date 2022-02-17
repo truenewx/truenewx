@@ -969,6 +969,9 @@ export const DomUtil = {
         });
         return observer;
     },
+}
+
+export const BomUtil = {
     _ctrlKeyObservers: {},
     /**
      * 获取监听Ctrl快捷键时的当前地址，默认返回当前页面的锚点，应用可根据实际需要覆写本方法
@@ -977,6 +980,12 @@ export const DomUtil = {
     getObserveCtrlKeyCurrentPage() {
         return util.net.getAnchor();
     },
+    /**
+     * 侦听窗口级的Ctrl键盘事件
+     * @param page 注册页面标识，一般用页面地址
+     * @param key 注册键盘按键，如：'s'
+     * @param observer 侦听函数，无参数
+     */
     observeCtrlKey(page, key, observer) {
         if (Object.keys(this._ctrlKeyObservers).length === 0) {
             let _this = this;
@@ -994,12 +1003,9 @@ export const DomUtil = {
         }
         let pages = Array.isArray(page) ? page : [page];
         for (let p of pages) {
-            this._ctrlKeyObservers[key + '@' + p] = observer;
+            this._ctrlKeyObservers[key.toLowerCase() + '@' + p] = observer;
         }
     },
-}
-
-export const BomUtil = {
     _opened: {},
     _openedIntervalId: null,
     /**
