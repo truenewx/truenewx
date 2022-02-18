@@ -8,24 +8,26 @@
  */
 const fss = {
     PROTOCOL: 'fss://',
-    defaultAppName: 'fss',
+    appName: undefined,
     getClientConfig() {
         const rpc = window.tnx.app.rpc;
         // 默认配置为非应用部署时的配置
         let config = {
-            appName: undefined,
+            appName: this.appName,
             baseUrl: rpc.getDefaultBaseUrl(),
-            contextUrl: '/' + this.defaultAppName,
+            contextUrl: '/fss',
         }
-        let client = rpc.appClients[this.defaultAppName];
-        if (client) {
-            config.appName = this.defaultAppName;
-            if (client.ref) { // 子应用
-                config.baseUrl = client.ref.baseUrl;
-            } else { // 独立应用
-                config.baseUrl = client.baseUrl;
+        if (this.appName) {
+            let client = rpc.appClients[this.appName];
+            if (client) {
+                config.appName = this.appName;
+                if (client.ref) { // 子应用
+                    config.baseUrl = client.ref.baseUrl;
+                } else { // 独立应用
+                    config.baseUrl = client.baseUrl;
+                }
+                config.contextUrl = '';
             }
-            config.contextUrl = '';
         }
         return config;
     },
@@ -54,6 +56,18 @@ const fss = {
             app: this.getClientConfig().appName,
         });
     },
+    resolveDownloadUrl(storageUrl, callback) {
+        let config = this.getClientConfig();
+        window.tnx.app.rpc.get(config.contextUrl + '/download-url', {storageUrl}, callback, {
+            app: config.appName,
+        });
+    },
+    read(storageUrl, callback) {
+        let config = this.getClientConfig();
+        window.tnx.app.rpc.get(config.contextUrl + '/read', {storageUrl}, callback, {
+            app: config.appName,
+        });
+    }
 };
 
 export default fss;

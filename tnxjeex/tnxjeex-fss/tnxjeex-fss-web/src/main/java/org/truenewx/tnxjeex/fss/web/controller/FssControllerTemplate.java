@@ -140,7 +140,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             // 缩略读取地址附加的缩略参数对最终URL可能产生影响，故需要重新生成，而不能在读取URL上简单附加缩略参数
             String thumbnailReadUrl = this.service.getReadUrl(userIdentity, storageUrl, true);
             result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl, true));
-            result.setDownloadUrl(resolveDownloadUrl(storageUrl));
+            result.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
             FileUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
             if (uploadLimit.isImageable()) {
                 result.setImageable(true);
@@ -161,13 +161,13 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         return null;
     }
 
-    private String getFullReadUrl(String readUrl, boolean withContextUrl) {
+    private String getFullReadUrl(String readUrl, boolean absolute) {
         // 读取地址以/开头但不以//开头，则视为相对地址，相对地址需考虑添加下载路径前缀、上下文根和主机地址
         if (readUrl != null && readUrl.startsWith(Strings.SLASH) && !readUrl.startsWith("//")) {
             // 加上下载路径前缀
             readUrl = getDownloadUrlPrefix() + readUrl;
             // 加上上下文根路径
-            if (withContextUrl) {
+            if (absolute) {
                 readUrl = getContextUrl() + readUrl;
             }
         }
@@ -190,10 +190,12 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     }
 
     @Override
-    public String resolveDownloadUrl(String storageUrl) {
+    @ResponseBody
+    @ConfigAnonymous
+    public String resolveDownloadUrl(String storageUrl, boolean absolute) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
-            return getFullReadUrl(fsp.toString(), false);
+            return getFullReadUrl(fsp.toString(), absolute);
         }
         return null;
     }
@@ -274,7 +276,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             if (meta != null) {
                 meta.setReadUrl(getFullReadUrl(meta.getReadUrl(), true));
                 meta.setThumbnailReadUrl(getFullReadUrl(meta.getThumbnailReadUrl(), true));
-                meta.setDownloadUrl(resolveDownloadUrl(storageUrl));
+                meta.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
             }
             return meta;
         }
@@ -386,21 +388,13 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         return url.substring(index + downloadUrlPrefix.length()); // 通配符部分
     }
 
-    @GetMapping("/read/**")
-    @ResponseBody
-    @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
-    public String read(HttpServletRequest request) throws IOException {
-        String path = getDownloadPath(request);
-        return read(path);
-    }
-
     @Override
     @ResponseBody
     @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
-    public String read(String path) {
-        if (StringUtils.isNotBlank(path)) {
+    public String read(String storageUrl) {
+        if (StringUtils.isNotBlank(storageUrl)) {
             I userIdentity = getUserIdentity();
-            return this.service.read(userIdentity, path);
+            return this.service.read(userIdentity, storageUrl);
         }
         return null;
     }

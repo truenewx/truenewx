@@ -36,7 +36,7 @@ public interface FssControlApi {
             @RequestPart("file") MultipartFile file);
 
     @GetMapping("/read")
-    String read(@RequestParam("path") String path);
+    String read(@RequestParam("storageUrl") String storageUrl);
 
     @PostMapping("/delete")
     void delete(@RequestParam("storageUrl") String storageUrl);

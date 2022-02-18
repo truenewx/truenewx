@@ -48,9 +48,11 @@ public interface FssMetaResolver {
      * 根据存储地址获取下载地址，下载地址为相对于当前应用的相对读取地址，通过当前应用进行鉴权
      *
      * @param storageUrl 存储地址
+     * @param absolute   返回的下载地址是否绝对地址，false-相对当前站点的地址
      * @return 下载地址
      */
     @GetMapping("/download-url")
-    String resolveDownloadUrl(@RequestParam("storageUrl") String storageUrl);
+    String resolveDownloadUrl(@RequestParam("storageUrl") String storageUrl,
+            @RequestParam("absolute") boolean absolute);
 
 }
