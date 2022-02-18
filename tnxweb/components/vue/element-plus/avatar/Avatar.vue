@@ -90,7 +90,7 @@ export default {
                         }
                     });
                 } else {
-                    rpc.get(fssConfig.contextUrl + '/read-url', {
+                    rpc.get(fssConfig.contextUrl + '/read/url', {
                         storageUrl: vm.url,
                         thumbnail: true,
                     }, function(readUrl) {

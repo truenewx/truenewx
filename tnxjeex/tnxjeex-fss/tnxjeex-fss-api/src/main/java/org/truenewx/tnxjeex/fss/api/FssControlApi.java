@@ -35,8 +35,9 @@ public interface FssControlApi {
     String upload(@RequestParam("type") String type, @RequestParam("scope") String scope,
             @RequestPart("file") MultipartFile file);
 
-    @GetMapping("/read")
-    String read(@RequestParam("storageUrl") String storageUrl);
+    @GetMapping("/read/text")
+    String readText(@RequestParam("storageUrl") String storageUrl,
+            @RequestParam(value = "limit", required = false, defaultValue = "0") long limit);
 
     @PostMapping("/delete")
     void delete(@RequestParam("storageUrl") String storageUrl);

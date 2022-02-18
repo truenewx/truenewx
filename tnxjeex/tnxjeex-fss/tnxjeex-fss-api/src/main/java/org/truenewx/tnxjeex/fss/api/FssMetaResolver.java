@@ -40,7 +40,7 @@ public interface FssMetaResolver {
      * @param thumbnail  是否缩略图
      * @return 外部读取地址
      */
-    @GetMapping("/read-url")
+    @GetMapping("/read/url")
     String resolveReadUrl(@RequestParam(value = "storageUrl", required = false) String storageUrl,
             @RequestParam("thumbnail") boolean thumbnail);
 
@@ -51,7 +51,7 @@ public interface FssMetaResolver {
      * @param absolute   返回的下载地址是否绝对地址，false-相对当前站点的地址
      * @return 下载地址
      */
-    @GetMapping("/download-url")
+    @GetMapping("/download/url")
     String resolveDownloadUrl(@RequestParam("storageUrl") String storageUrl,
             @RequestParam("absolute") boolean absolute);
 

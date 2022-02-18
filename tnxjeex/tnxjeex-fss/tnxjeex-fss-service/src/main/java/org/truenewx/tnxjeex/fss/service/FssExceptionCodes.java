@@ -45,4 +45,9 @@ public class FssExceptionCodes {
      */
     public static final String CANNOT_COPY_BETWEEN_PROVIDERS = "error.fss.cannot_copy_between_providers";
 
+    /**
+     * 不是文本文件
+     */
+    public static final String IS_NOT_TEXT_FILE = "error.fss.is_not_text_file";
+
 }

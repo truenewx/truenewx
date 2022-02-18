@@ -103,7 +103,14 @@ public class AliyunFssAccessor implements FssAccessor {
     @Override
     public Charset getCharset(String path) {
         ObjectMetadata meta = getObjectMetadata(path);
-        return Charset.forName(meta.getContentEncoding());
+        String encoding = meta.getContentEncoding();
+        if (encoding != null) {
+            try {
+                return Charset.forName(encoding);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
     }
 
     @Override

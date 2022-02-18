@@ -58,13 +58,13 @@ const fss = {
     },
     resolveDownloadUrl(storageUrl, callback) {
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/download-url', {storageUrl}, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/download/url', {storageUrl}, callback, {
             app: config.appName,
         });
     },
-    read(storageUrl, callback) {
+    readText(storageUrl, callback) {
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/read', {storageUrl}, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/read/text', {storageUrl}, callback, {
             app: config.appName,
         });
     }

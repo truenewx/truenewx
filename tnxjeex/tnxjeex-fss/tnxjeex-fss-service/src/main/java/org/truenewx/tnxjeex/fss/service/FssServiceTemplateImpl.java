@@ -280,20 +280,26 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public String read(I userIdentity, String storageUrl) {
+    public String readText(I userIdentity, String storageUrl, long limit) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
             try {
+                Charset charset = accessor.getCharset(path);
+                if (charset == null) {
+                    throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
+                }
                 InputStream in = accessor.getReadStream(path);
                 if (in != null) {
-                    Charset charset = accessor.getCharset(path);
-                    String encoding = charset == null ? null : charset.toString();
-                    String content = IOUtils.toString(in, encoding);
-                    in.close();
-                    return content;
+                    // 未指定读取限制，或文件大小未超过限制，才读取内容
+                    if (limit <= 0 || in.available() <= limit) {
+                        String encoding = charset.toString();
+                        String content = IOUtils.toString(in, encoding);
+                        in.close();
+                        return content;
+                    }
                 }
             } catch (IOException e) {
                 LogUtil.error(getClass(), e);

@@ -391,10 +391,10 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @Override
     @ResponseBody
     @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
-    public String read(String storageUrl) {
+    public String readText(String storageUrl, long limit) {
         if (StringUtils.isNotBlank(storageUrl)) {
             I userIdentity = getUserIdentity();
-            return this.service.read(userIdentity, storageUrl);
+            return this.service.readText(userIdentity, storageUrl, limit);
         }
         return null;
     }

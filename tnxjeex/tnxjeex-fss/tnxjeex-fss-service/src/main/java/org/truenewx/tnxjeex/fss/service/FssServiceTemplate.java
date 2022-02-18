@@ -6,6 +6,7 @@ import java.io.OutputStream;
 
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.Service;
+import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
@@ -87,13 +88,15 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
     long read(I userIdentity, String storageUrl, OutputStream out, long offset, long expectedLength);
 
     /**
-     * 读取指定指定路径的文件内容为字符串
+     * 读取指定指定路径的文件内容为文本
      *
      * @param userIdentity 用户标识
      * @param storageUrl   存储地址
-     * @return 字符串内容
+     * @param limit        文件大小限制，如果>0，则文件大小超出该限制时不读取内容
+     * @return 文件内容文本
+     * @throws BusinessException 如果指定文件不是文本文件
      */
-    String read(I userIdentity, String storageUrl);
+    String readText(I userIdentity, String storageUrl, long limit);
 
     /**
      * 删除指定文件
