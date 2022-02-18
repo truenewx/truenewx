@@ -406,4 +406,29 @@ public class IOUtil {
         return totalRead;
     }
 
+    public static boolean isBinary(InputStream in) {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        if (!in.markSupported()) {
+            in = new BufferedInputStream(in);
+        }
+        try {
+            in.mark(buffer.length);
+            int length = in.read(buffer);
+            in.reset();
+
+            int ctrlNum = 0;
+            for (int i = 0; i < length; i++) {
+                char c = (char) buffer[i];
+                if (!Character.isWhitespace(c) && Character.isISOControl(c)) {
+                    if (ctrlNum++ > 4) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LogUtil.error(IOUtil.class, e);
+        }
+        return false;
+    }
+
 }
