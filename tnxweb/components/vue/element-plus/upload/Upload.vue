@@ -1,6 +1,6 @@
 <template>
     <el-upload ref="upload" name="file" class="tnxel-upload-container"
-        :class="{center: center, imageable: uploadOptions.imageable}"
+        :class="{center: center}"
         :id="id"
         :action="action"
         :before-upload="_beforeUpload"
@@ -8,7 +8,7 @@
         :on-success="_onSuccess"
         :on-error="_onError"
         :with-credentials="true"
-        list-type="picture-card"
+        :list-type="listType"
         :file-list="fileList"
         :show-file-list="showFileList"
         :headers="uploadHeaders"
@@ -16,7 +16,12 @@
         :accept="uploadAccept">
         <template #default>
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
-                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined">
+                <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
+                    v-if="listType === 'text'">
+                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
+                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
+                </el-button>
+                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined" v-else>
                     <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </div>
@@ -24,22 +29,22 @@
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
-                <img class="el-upload-list__item-thumbnail" :src="file.url"
-                    v-if="uploadOptions && uploadOptions.imageable">
-                <div class="el-upload-list__item-caption" v-else>
+                <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadOptions?.imageable">
+                <div class="el-upload-list__item-name" v-else>
                     <tnxel-icon value="Document"/>
                     <span>{{ file.name }}</span>
                 </div>
                 <label class="el-upload-list__item-status-label">
-                    <tnxel-icon value="Check"/>
+                    <tnxel-icon value="CircleCheck" class="text-success" v-if="listType === 'text'"/>
+                    <tnxel-icon value="Check" v-else/>
                 </label>
                 <span class="el-upload-list__item-uploading" v-if="file.uploading">
                     <tnxel-icon value="Loading"/>
                 </span>
                 <div class="el-upload-list__item-actions">
-                    <div>
-                        <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="previewable(file)"/>
-                        <tnxel-icon value="Delete" @click="removeFile(file)" v-if="!readOnly"/>
+                    <div class="flex-v-center">
+                        <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="isPreviewable(file)"/>
+                        <tnxel-icon value="Delete" @click="removeFile(file)"/>
                     </div>
                 </div>
             </div>
@@ -69,10 +74,6 @@ export default {
         fileList: {
             type: Array,
             default: () => [],
-        },
-        readOnly: {
-            type: Boolean,
-            default: () => false,
         },
         width: {
             type: [Number, String],
@@ -135,9 +136,12 @@ export default {
         };
     },
     computed: {
+        listType() {
+            return this.uploadOptions?.imageable ? 'picture-card' : 'text';
+        },
         tipContent() {
             let content = '';
-            if (this.tip !== false && this.uploadOptions && !this.readOnly) {
+            if (this.tip !== false && this.uploadOptions) {
                 const separator = '，';
                 if (this.uploadOptions.number > 1) {
                     content += separator + this.tipMessages.number.format(this.uploadOptions.number);
@@ -216,7 +220,7 @@ export default {
             this.render();
         },
         fileList() {
-            if (this.uploadOptions && this.uploadOptions.number !== undefined) {
+            if (this.uploadOptions?.number) {
                 this.render();
             }
         }
@@ -248,14 +252,19 @@ export default {
                     height = window.tnx.util.string.getPixelString(height);
                 }
 
-                const $container = $('#' + vm.id);
-                $('.el-upload', $container).css({
+                let $container = $('#' + vm.id);
+                let $upload = $('.el-upload', $container);
+                $upload.css({
                     width: width,
                     height: height,
-                    display: 'inline-flex',
                 });
 
-                if (vm.fileList && vm.fileList.length) {
+                if (vm.fileList || vm.fileList.length < vm.uploadOptions.number) {
+                    $upload.css({
+                        display: 'inline-flex'
+                    });
+                }
+                if (vm.fileList?.length) {
                     for (let file of vm.fileList) {
                         vm._resizeFilePanel(file, vm.fileList);
                     }
@@ -297,8 +306,8 @@ export default {
             if (this.uploadOptions.capacity > 0 && file.size > this.uploadOptions.capacity) {
                 const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity);
                 let message = this.tipMessages.capacity.format(capacity, 2);
-                message += '，文件"' + file.name + '"大小为' + this.tnx.util.string.getCapacityCaption(file.size,
-                    2) + '，不符合要求';
+                message += '，文件"' + file.name + '"大小为' + this.tnx.util.string.getCapacityCaption(file.size, 2)
+                    + '，不符合要求';
                 this.handleErrors([{
                     code: 'error.upload.capacity',
                     message: message,
@@ -308,7 +317,7 @@ export default {
             // 校验扩展名
             if (this.uploadOptions.extensions && this.uploadOptions.extensions.length) {
                 const extension = file.name.substr(file.name.lastIndexOf('.') + 1);
-                if (this.uploadOptions.extensionsRejected) { // 扩展名黑名单模式
+                if (this.uploadOptions.extensionsRejected) { // 扩展名排除模式
                     if (this.uploadOptions.extensions.containsIgnoreCase(extension)) {
                         const extensions = this.uploadOptions.extensions.join('、');
                         let message = this.tipMessages.excludedExtensions.format(extensions);
@@ -318,7 +327,7 @@ export default {
                         }]);
                         return false;
                     }
-                } else { // 扩展名白名单模式
+                } else { // 扩展名包含模式
                     if (!this.uploadOptions.extensions.containsIgnoreCase(extension)) {
                         const extensions = this.uploadOptions.extensions.join('、');
                         let message = this.tipMessages.extensions.format(extensions);
@@ -426,11 +435,14 @@ export default {
                 });
             }
 
-            const $listItemContainer = $(".el-upload-list", $container);
-            if (typeof this.width === 'string' && this.width.endsWith('%')) {
-                $listItemContainer.css({width: '100%'});
+            let fileId = this.getFileId(file);
+            let $filePanel = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container);
+            let uploadStyle = $upload.attr('style');
+            if (uploadStyle) {
+                // 去掉隐藏样式
+                uploadStyle = uploadStyle.replace(/display:\s*none;/, '').trim();
+                $filePanel.attr('style', uploadStyle);
             }
-            $listItemContainer.css({'min-height': $upload.outerHeight(true)});
         },
         _onSuccess(result, file, fileList) {
             file.uploading = false;
@@ -476,10 +488,12 @@ export default {
             });
             if (this.uploadFiles.length < this.uploadOptions.number) {
                 let container = $('#' + this.id);
-                // 去掉文件列表的样式，以免其占高度
-                $('.el-upload-list', container).removeAttr('style');
-                // 恢复添加框默认样式
-                $('.el-upload', container).css('display', 'inline-flex');
+                this.$nextTick(function() {
+                    // 去掉文件列表的样式，以免其占高度
+                    $('.el-upload-list', container).removeAttr('style');
+                    // 恢复添加框默认样式
+                    $('.el-upload', container).css('display', 'inline-flex');
+                });
             }
             if (this.onRemoved) {
                 this.onRemoved(file);
@@ -500,14 +514,14 @@ export default {
                     image.onload = function() {
                         file.width = image.width;
                         file.height = image.height;
-                        _this._doPreviewFile(file);
+                        _this._doPreviewImage(file);
                     }
                 } else {
-                    this._doPreviewFile(file);
+                    this._doPreviewImage(file);
                 }
             }
         },
-        _doPreviewFile(file) {
+        _doPreviewImage(file) {
             const dialogPadding = 16;
             let top = (this.tnx.util.dom.getDocHeight() - file.height) / 2 - dialogPadding;
             top = Math.max(top, 5); // 最高顶部留5px空隙
@@ -532,7 +546,7 @@ export default {
             }
             return '';
         },
-        previewable(file) {
+        isPreviewable(file) {
             let extension = this.getExtension(file);
             return ['jpg', 'png', 'gif', 'svg', 'pdf'].contains(extension);
         },
@@ -541,17 +555,16 @@ export default {
 </script>
 
 <style>
-.tnxel-upload-container.center {
+.tnxel-upload-container {
     display: flex;
     flex-direction: column;
 }
 
-.tnxel-upload-container:not(.imageable) {
-    display: flex;
-    flex-direction: column-reverse;
+.tnxel-upload-container.center {
+    align-items: center;
 }
 
-.tnxel-upload-container .el-upload--picture-card {
+.tnxel-upload-container .el-upload {
     border-radius: .25rem;
     display: none;
     align-items: center;
@@ -562,35 +575,77 @@ export default {
     background-color: transparent;
 }
 
-.tnxel-upload-container .el-upload--picture-card:hover {
+.tnxel-upload-container .el-upload.el-upload--text {
+    order: -1; /* 排在提示文本前 */
+}
+
+.tnxel-upload-container:not(.center) .el-upload.el-upload--text {
+    justify-content: unset;
+}
+
+.tnxel-upload-container .el-upload:hover {
     color: inherit;
 }
 
-.tnxel-upload-container .el-upload--picture-card .upload-trigger {
+.tnxel-upload-container .upload-trigger {
     display: flex;
     align-items: center;
+    min-height: 32px;
 }
 
-.tnxel-upload-container .el-upload--picture-card .upload-trigger-text {
+.tnxel-upload-container button.upload-trigger {
+    height: 32px;
+}
+
+.tnxel-upload-container .upload-trigger-text {
     margin-left: 0.25rem;
+    line-height: 1rem;
 }
 
-.tnxel-upload-container.center .el-upload--picture-card {
+.tnxel-upload-container.center .el-upload {
     margin-right: auto;
     margin-left: auto;
 }
 
-.tnxel-upload-container.center .el-upload--picture-card .upload-trigger {
+.tnxel-upload-container.center .upload-trigger {
     flex-direction: column;
 }
 
-.tnxel-upload-container.center .el-upload--picture-card .upload-trigger-text {
+.tnxel-upload-container.center .upload-trigger-text {
     margin-left: 0;
     margin-top: 0.25rem;
 }
 
-.tnxel-upload-container .el-upload--picture-card i {
+.tnxel-upload-container .el-upload i {
     margin-top: 0;
+}
+
+.tnxel-upload-container .el-upload-list--text {
+    order: -2; /* 排在添加按钮前 */
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-name {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    padding: 0;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-name i {
+    margin: 0;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-status-label {
+    display: flex;
+    align-items: center;
+    position: unset;
+    margin-left: 24px;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-status-label i {
+    font-size: 1rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
 }
 
 .tnxel-upload-container .el-upload-list--picture-card {
@@ -603,6 +658,39 @@ export default {
     justify-content: center;
 }
 
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item {
+    transition: none;
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--el-border-color-base);
+    border-radius: .25rem;
+    width: fit-content;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item .el-upload-list__item-actions {
+    display: none;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:focus .el-upload-list__item-actions,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:active .el-upload-list__item-actions,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:hover .el-upload-list__item-actions {
+    display: unset;
+}
+
+.tnxel-upload-container .el-upload-list__panel {
+    min-height: 32px;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 0.5rem;
+}
+
 .tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item {
     transition: none;
     border-radius: .25rem;
@@ -611,49 +699,24 @@ export default {
     line-height: 0;
 }
 
-.tnxel-upload-container:not(.imageable) .el-upload-list--picture-card .el-upload-list__item {
-    margin: 0.5rem 0 0 0;
-}
-
-.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item.is-ready {
-    display: none;
-}
-
-.tnxel-upload-container .el-upload-list__panel {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.tnxel-upload-container .el-upload-list__panel .el-upload-list__item-caption {
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-thumbnail {
+.tnxel-upload-container .el-upload-list__item-thumbnail {
     object-fit: contain;
 }
 
-.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-actions {
+.tnxel-upload-container .el-upload-list__item-actions {
     font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-actions i {
+.tnxel-upload-container .el-upload-list__item-actions i {
     cursor: pointer;
-    margin-left: 3px;
-    margin-right: 3px;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
 }
 
-.tnxel-upload-container .el-upload-list--picture-card .el-upload-list__item-uploading {
+.tnxel-upload-container .el-upload-list__item-uploading {
     position: absolute;
     width: 100%;
     height: 100%;

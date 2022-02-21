@@ -1,7 +1,15 @@
 <template>
-    <tnxel-upload ref="upload" :action="action" :upload-options="uploadOptions" :file-list="fileList"
-        :read-only="readOnly" :width="width" :height="height" :icon="icon" :icon-size="iconSize" :center="center"
-        :trigger-text="triggerText" :tip="tip" :show-file-list="showFileList" :data="params"
+    <tnxel-upload ref="upload"
+        :action="action"
+        :upload-options="uploadOptions"
+        :file-list="fileList"
+        :width="width" :height="height"
+        :icon="icon" :icon-size="iconSize"
+        :center="center"
+        :trigger-text="triggerText"
+        :tip="tip"
+        :show-file-list="showFileList"
+        :data="params"
         :before-upload="beforeUpload"
         :on-upload="onUpload"
         :on-progress="onProgress"
@@ -26,10 +34,6 @@ export default {
             required: true,
         },
         scope: [Number, String],
-        readOnly: {
-            type: Boolean,
-            default: () => false,
-        },
         width: {
             type: [Number, String],
         },
@@ -52,7 +56,8 @@ export default {
                 return true;
             }
         },
-        onlyStorage: Boolean,
+        onlyStorage: Boolean, // 上传完成后，是否只需要返回存储地址，以减少数据传输量
+        extension: [String, Array], // 可接受的文件扩展名集合，最终实际生效的扩展名集合，是它与服务端上传配置中的扩展名限制集合的并集
         beforeUpload: Function,
         onUpload: Function,
         onProgress: Function,
@@ -162,6 +167,27 @@ export default {
             if (Object.keys(this.uploadOptions).length === 0) {
                 let vm = this;
                 vm.tnx.fss.loadUploadOptions(this.type, function(uploadOptions) {
+                    if (vm.extension) {
+                        let extensions = Array.isArray(vm.extension) ? vm.extension : [vm.extension];
+                        let acceptedExtensions = [];
+                        if (uploadOptions.extensionsRejected) { // 服务端上传限制扩展名为排除模式
+                            for (let extension of extensions) {
+                                if (!uploadOptions.extensions.contains(extension)) { // 取未被排除的
+                                    acceptedExtensions.push(extension);
+                                }
+                            }
+                        } else { // 服务端上传限制扩展名为包含模式
+                            for (let extension of extensions) {
+                                if (uploadOptions.extensions.contains(extension)) { // 取被包含的
+                                    acceptedExtensions.push(extension);
+                                }
+                            }
+                        }
+                        if (acceptedExtensions.length) { // 接受的扩展名清单不为空，则替代服务端配置中的扩展名限制
+                            uploadOptions.extensionsRejected = false;
+                            uploadOptions.extensions = acceptedExtensions;
+                        }
+                    }
                     vm.uploadOptions = uploadOptions;
                 });
             }
