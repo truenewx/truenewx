@@ -37,6 +37,7 @@ export default {
         success: Function,
         rowClassName: String,
         formatter: Function,
+        init: Boolean,
     },
     data() {
         return {
@@ -102,6 +103,11 @@ export default {
     watch: {
         value(value) {
             this.params = this.getParams(value);
+        }
+    },
+    mounted() {
+        if (this.init) {
+            this.query();
         }
     },
     methods: {
