@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.model.CommandModel;
 import org.truenewx.tnxjee.model.Model;
@@ -92,7 +93,7 @@ public class DefaultValidationConfigurationFactory implements ValidationConfigur
     private void addEntityClassRulesFromCommandModelClass(ValidationConfiguration configuration,
             Class<? extends CommandModel<?>> commandModelClass) {
         Class<? extends Entity> entityClass = ClassUtil.getActualGenericType(commandModelClass, CommandModel.class, 0);
-        List<Field> fields = ClassUtil.getSimplePropertyField(commandModelClass);
+        List<Field> fields = ClassUtil.getSimplePropertyField(commandModelClass, PermanentableDate.class);
         for (Field field : fields) {
             // 加入对应实体的校验规则
             // 只加入传输模型中存在的简单属性的校验规则
@@ -127,7 +128,7 @@ public class DefaultValidationConfigurationFactory implements ValidationConfigur
      * @param clazz         类
      */
     private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
-        List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
+        List<Field> fields = ClassUtil.getSimplePropertyField(clazz, PermanentableDate.class);
         for (Field field : fields) {
             addRulesByPropertyAnnotations(configuration, field);
         }

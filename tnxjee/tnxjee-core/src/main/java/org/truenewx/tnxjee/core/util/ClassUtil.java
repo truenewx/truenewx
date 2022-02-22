@@ -342,12 +342,22 @@ public class ClassUtil {
      * 在指定类型中遍历简单类型的属性描述符。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，以及这些类型的数组
      *
      * @param clazz    类型
+     * @param others   除简单属性外的其它支持类型
      * @param consumer 遍历消费者
      */
-    public static void loopSimplePropertyDescriptors(Class<?> clazz, Consumer<PropertyDescriptor> consumer) {
+    public static void loopSimplePropertyDescriptors(Class<?> clazz, Class<?>[] others,
+            Consumer<PropertyDescriptor> consumer) {
         loopPropertyDescriptors(clazz, pd -> {
-            if (BeanUtils.isSimpleProperty(pd.getPropertyType())) {
+            Class<?> propertyType = pd.getPropertyType();
+            if (BeanUtils.isSimpleProperty(propertyType)) {
                 consumer.accept(pd);
+            }
+            if (others != null) {
+                for (Class<?> other : others) {
+                    if (other.isAssignableFrom(propertyType)) {
+                        consumer.accept(pd);
+                    }
+                }
             }
         });
     }
@@ -355,12 +365,13 @@ public class ClassUtil {
     /**
      * 获取指定类的简单属性名。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，以及这些类型的数组
      *
-     * @param clazz 类
+     * @param clazz  类
+     * @param others 除简单属性外的其它支持类型
      * @return 指定类的简单属性名
      */
-    public static Set<String> getSimplePropertyNames(Class<?> clazz) {
+    public static Set<String> getSimplePropertyNames(Class<?> clazz, Class<?>... others) {
         Set<String> names = new HashSet<>();
-        loopSimplePropertyDescriptors(clazz, pd -> {
+        loopSimplePropertyDescriptors(clazz, others, pd -> {
             names.add(pd.getName());
         });
         return names;
@@ -369,12 +380,13 @@ public class ClassUtil {
     /**
      * 获取指定类的所有简单属性字段。简单属性包括：原生类型，枚举，字符串，数字，日期，URI，URL，Locale，Class，以及这些类型的数组
      *
-     * @param clazz 类
+     * @param clazz  类
+     * @param others 除简单属性外的其它支持类型
      * @return 指定类的所有简单属性字段
      */
-    public static List<Field> getSimplePropertyField(Class<?> clazz) {
+    public static List<Field> getSimplePropertyField(Class<?> clazz, Class<?>... others) {
         List<Field> fields = new ArrayList<>();
-        loopSimplePropertyDescriptors(clazz, pd -> {
+        loopSimplePropertyDescriptors(clazz, others, pd -> {
             Field field = findField(clazz, pd.getName());
             if (field != null) {
                 fields.add(field);

@@ -4,11 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -139,7 +135,7 @@ public class AttachFieldUtil {
         Class<?> rawClass = meta.getRawClass();
         if (rawClass.isEnum()) { // 枚举或枚举集合附加枚举中的额外属性
             String rawPropertyName = meta.getName();
-            ClassUtil.loopSimplePropertyDescriptors(rawClass, pd -> {
+            ClassUtil.loopSimplePropertyDescriptors(rawClass, null, pd -> {
                 Method readMethod = pd.getReadMethod();
                 if (readMethod != null) {
                     Object attachedFieldValue = null;
@@ -206,7 +202,7 @@ public class AttachFieldUtil {
 
         Map<String, Object> map = new LinkedHashMap<>();
         Class<?> beanClass = bean.getClass();
-        ClassUtil.loopSimplePropertyDescriptors(beanClass, pd -> {
+        ClassUtil.loopSimplePropertyDescriptors(beanClass, null, pd -> {
             BeanPropertyMeta meta = getPropertyMeta(beanClass, pd);
             if (meta != null) {
                 try {

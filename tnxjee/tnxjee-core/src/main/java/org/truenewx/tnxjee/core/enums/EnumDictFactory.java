@@ -302,7 +302,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                     }
                     EnumItem item = new EnumItem(ordinal, enumConstant.name(), caption);
                     // 枚举如果有额外属性，则添加为枚举项的附加项
-                    ClassUtil.loopSimplePropertyDescriptors(enumClass, pd -> {
+                    ClassUtil.loopSimplePropertyDescriptors(enumClass, null, pd -> {
                         Method readMethod = pd.getReadMethod();
                         if (readMethod != null) {
                             try {
