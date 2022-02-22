@@ -1,15 +1,16 @@
 <template>
     <div class="d-flex" v-if="permanentable">
-        <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
-            :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
-            :disabled="disabled || model.permanent" :class="{'flex-grow-1': !pickerWidth}" :style="{width: pickerWidth}"
+        <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
+            :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate"
+            :picker-options="pickerOptions" :disabled="disabled || model.permanent"
+            :class="{'flex-grow-1': !pickerWidth}" :style="{width: pickerWidth}"
             @change="emitModelValue"/>
         <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent"
             @change="onPermanentChange">{{ permanentText }}
         </el-checkbox>
     </div>
-    <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="false"
-        :placeholder="placeholder" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
+    <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
+        :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
         :disabled="disabled" :style="{width: pickerWidth}" v-else/>
 </template>
 
@@ -41,6 +42,10 @@ export default {
         earliest: [Date, Number, String],
         latest: [Date, Number, String],
         pickerWidth: String,
+        editable: {
+            type: Boolean,
+            default: true,
+        },
     },
     emits: ['update:modelValue'],
     data() {
@@ -94,7 +99,16 @@ export default {
         defaultDateValue() {
             let date = this.defaultDate;
             return date ? date.formatDate() : null;
-        }
+        },
+        placeholderText() {
+            if (this.placeholder) {
+                return this.placeholder;
+            }
+            if (this.model.permanent) {
+                return '';
+            }
+            return this.editable ? '格式：' + this.format : '请选择';
+        },
     },
     watch: {
         modelValue() {
