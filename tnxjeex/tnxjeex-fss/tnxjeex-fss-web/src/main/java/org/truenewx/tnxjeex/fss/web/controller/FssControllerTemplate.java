@@ -28,7 +28,6 @@ import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.web.model.HttpHeaderRange;
 import org.truenewx.tnxjee.web.util.WebUtil;
@@ -39,12 +38,13 @@ import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjeex.fss.api.FssControlApi;
 import org.truenewx.tnxjeex.fss.api.FssMetaResolver;
 import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
+import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
-import org.truenewx.tnxjeex.fss.web.model.FileUploadOptions;
+import org.truenewx.tnxjeex.fss.web.model.FssUploadOptions;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
 
 /**
@@ -74,10 +74,10 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @GetMapping("/upload-options/{type}")
     @ResponseBody
     @ConfigAnonymous // 匿名用户即可读取上传配置
-    public FileUploadOptions uploadOptions(@PathVariable("type") String type) {
-        FileUploadLimit limit = this.service.getUploadLimit(type, getUserIdentity());
+    public FssUploadOptions uploadOptions(@PathVariable("type") String type) {
+        FssUploadLimit limit = this.service.getUploadLimit(type, getUserIdentity());
         boolean publicReadable = this.service.isPublicReadable(type);
-        return new FileUploadOptions(limit, publicReadable);
+        return new FssUploadOptions(limit, publicReadable);
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             String readUrl = this.service.getReadUrl(userIdentity, storageUrl, false);
             result.setReadUrl(getFullReadUrl(readUrl, true));
             result.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
-            FileUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
+            FssUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
             if (uploadLimit.isImageable()) {
                 result.setImageable(true);
                 result.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));

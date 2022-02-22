@@ -31,9 +31,13 @@ const fss = {
         }
         return config;
     },
-    loadUploadOptions(type, callback) {
+    loadUploadOptions(type, params, callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = undefined;
+        }
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/upload-options/' + type, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/upload-options/' + type, params, callback, {
             app: config.appName
         });
     },

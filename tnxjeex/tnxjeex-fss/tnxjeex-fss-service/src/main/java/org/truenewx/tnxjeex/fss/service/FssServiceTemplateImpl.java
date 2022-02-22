@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
@@ -18,9 +19,9 @@ import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
+import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
 
@@ -56,7 +57,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public FileUploadLimit getUploadLimit(String type, I userIdentity) {
+    public FssUploadLimit getUploadLimit(String type, I userIdentity) {
         return getStrategy(type).getUploadLimit(userIdentity);
     }
 
@@ -79,8 +80,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             throws IOException {
         FssAccessStrategy<I> strategy = getStrategy(type);
         // 上传限制校验
-        FileUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
-        String extension = uploadLimit.validate(fileSize, filename);
+        FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+        String extension = validateUploadLimit(uploadLimit, fileSize, filename);
         String relativeDir = getRelativeDirForWrite(strategy, userIdentity, scope);
         // 获取文件名
         String storageFilename = strategy.getStorageFilename(userIdentity, scope);
@@ -109,6 +110,39 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String storageUrl = fsp.getUrl();
         strategy.onWritten(userIdentity, scope, storageUrl);
         return storageUrl;
+    }
+
+    /**
+     * 校验上传限制
+     *
+     * @param fileSize 文件大小
+     * @param filename 文件名
+     * @return 包含.的扩展名
+     */
+    private String validateUploadLimit(FssUploadLimit uploadLimit, long fileSize, String filename) {
+        if (fileSize > uploadLimit.getCapacity()) {
+            throw new BusinessException(FssExceptionCodes.CAPACITY_EXCEEDS_LIMIT,
+                    MathUtil.getCapacityCaption(uploadLimit.getCapacity(), 2));
+        }
+        String[] extensions = uploadLimit.getExtensions();
+        String extension = FssUploadLimit.getExtension(filename);
+        if (ArrayUtils.isNotEmpty(extensions)) { // 上传限制中没有设置扩展名，则不限定扩展名
+            if (uploadLimit.isExtensionsRejected()) { // 拒绝扩展名模式
+                if (ArrayUtil.containsIgnoreCase(extensions, extension)) {
+                    throw new BusinessException(FssExceptionCodes.UNSUPPORTED_EXTENSION,
+                            StringUtils.join(extensions, Strings.COMMA), filename);
+                }
+            } else { // 允许扩展名模式
+                if (!ArrayUtil.containsIgnoreCase(extensions, extension)) {
+                    throw new BusinessException(FssExceptionCodes.ONLY_SUPPORTED_EXTENSION,
+                            StringUtils.join(extensions, Strings.COMMA), filename);
+                }
+            }
+        }
+        if (extension.length() > 0) {
+            extension = Strings.DOT + extension;
+        }
+        return extension;
     }
 
     /**
@@ -221,7 +255,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                         meta.setName(detail.getFilename());
                         meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
                         meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
-                        FileUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+                        FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
                         if (uploadLimit.isImageable()) {
                             meta.setImageable(true);
                             meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
@@ -237,19 +271,23 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public FssFileDetail getDetail(I userIdentity, String storageUrl) throws IOException {
+    public FssFileDetail getDetail(I userIdentity, String storageUrl) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
-            FssFileDetail detail = accessor.getDetail(path);
-            String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getRelativeDir(),
-                    fsp.getFilename());
-            if (StringUtils.isNotBlank(downloadFilename)) {
-                detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
+            try {
+                FssFileDetail detail = accessor.getDetail(path);
+                String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getRelativeDir(),
+                        fsp.getFilename());
+                if (StringUtils.isNotBlank(downloadFilename)) {
+                    detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
+                }
+                return detail;
+            } catch (IOException e) {
+                LogUtil.error(getClass(), e);
             }
-            return detail;
         }
         return null;
     }

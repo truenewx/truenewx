@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.model;
+package org.truenewx.tnxjeex.fss.model;
 
 public class FssFileDetail {
 

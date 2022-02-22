@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
 /**

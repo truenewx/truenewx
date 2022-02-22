@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
-import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
+import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
 /**
@@ -29,7 +29,7 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      * @param userIdentity 用户标识
      * @return 指定用户上传文件的限制条件
      */
-    FileUploadLimit getUploadLimit(I userIdentity);
+    FssUploadLimit getUploadLimit(I userIdentity);
 
     /**
      * 获取存储路径上下文根，与存储类型一一对应，不被包含在存储路径中，要求在同一个系统中唯一，以便于根据存储路径判断所属业务类型

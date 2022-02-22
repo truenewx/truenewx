@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 
 import com.aliyun.oss.ClientException;

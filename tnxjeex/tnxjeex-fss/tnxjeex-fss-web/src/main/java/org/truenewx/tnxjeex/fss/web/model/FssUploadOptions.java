@@ -1,17 +1,17 @@
 package org.truenewx.tnxjeex.fss.web.model;
 
 import org.truenewx.tnxjee.core.spec.FlatSize;
-import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
+import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 
 /**
- * 文件上传配置
+ * 文件存储服务上传配置
  */
-public class FileUploadOptions {
+public class FssUploadOptions {
 
-    private FileUploadLimit limit;
+    private FssUploadLimit limit;
     private boolean publicReadable;
 
-    public FileUploadOptions(FileUploadLimit limit, boolean publicReadable) {
+    public FssUploadOptions(FssUploadLimit limit, boolean publicReadable) {
         this.limit = limit;
         this.publicReadable = publicReadable;
     }
@@ -30,10 +30,6 @@ public class FileUploadOptions {
 
     public String[] getExtensions() {
         return this.limit.getExtensions();
-    }
-
-    public String[] getMimeTypes() {
-        return this.limit.getMimeTypes();
     }
 
     public boolean isImageable() {

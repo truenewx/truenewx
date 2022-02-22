@@ -177,8 +177,14 @@ export default {
                                 }
                             }
                         } else { // 服务端上传限制扩展名为包含模式
-                            for (let extension of extensions) {
-                                if (uploadOptions.extensions.contains(extension)) { // 取被包含的
+                            if (uploadOptions.extensions.length) {
+                                for (let extension of extensions) {
+                                    if (uploadOptions.extensions.contains(extension)) { // 取被包含的
+                                        acceptedExtensions.push(extension);
+                                    }
+                                }
+                            } else { // 未限制扩展名，则直接加入
+                                for (let extension of extensions) {
                                     acceptedExtensions.push(extension);
                                 }
                             }

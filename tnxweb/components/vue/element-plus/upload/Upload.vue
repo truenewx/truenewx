@@ -29,7 +29,7 @@
         </template>
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
-                <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="uploadOptions?.imageable">
+                <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="imageable">
                 <div class="el-upload-list__item-name" v-else>
                     <tnxel-icon value="Document"/>
                     <span>{{ file.name }}</span>
@@ -136,8 +136,21 @@ export default {
         };
     },
     computed: {
+        imageable() {
+            let imageable = false;
+            if (this.uploadOptions?.extensions) {
+                for (let extension of this.uploadOptions.extensions) {
+                    if (this.tnx.util.file.isImage(extension)) {
+                        imageable = true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return imageable;
+        },
         listType() {
-            return this.uploadOptions?.imageable ? 'picture-card' : 'text';
+            return this.imageable ? 'picture-card' : 'text';
         },
         tipContent() {
             let content = '';
@@ -165,7 +178,7 @@ export default {
                     if (content.length) {
                         content += '；';
                     }
-                    content += '该' + (this.uploadOptions.imageable ? '图片' : '文件') + '可能对外公开，请慎重选择上传。';
+                    content += '该' + (this.imageable ? '图片' : '文件') + '可能对外公开，请慎重选择上传。';
                 }
                 if (typeof this.tip === 'function') {
                     content = this.tip(content);
@@ -174,8 +187,12 @@ export default {
             return content;
         },
         uploadAccept() {
-            if (this.uploadOptions && this.uploadOptions.mimeTypes) {
-                return this.uploadOptions.mimeTypes.join(',');
+            if (this.uploadOptions && !this.uploadOptions.extensionsRejected && this.uploadOptions.extensions?.length) {
+                let accept = '';
+                for (let extension of this.uploadOptions.extensions) {
+                    accept += ',.' + extension;
+                }
+                return accept.substr(1);
             }
             return undefined;
         },
@@ -199,7 +216,7 @@ export default {
             let style = {
                 height: window.tnx.util.string.getPixelString(this.uploadSize.height),
             }
-            if (this.uploadOptions && this.uploadOptions.imageable) {
+            if (this.imageable) {
                 style.width = window.tnx.util.string.getPixelString(this.uploadSize.width);
             }
             return style;
@@ -360,53 +377,46 @@ export default {
                     }
 
                     let fssConfig = vm.tnx.fss.getClientConfig();
-                    // fss作为应用部署，且上传目标即为fss应用，则需确保用户在fss应用中已登录
-                    if (fssConfig.appName && vm.action.startsWith(fssConfig.baseUrl + fssConfig.contextUrl)) {
-                        rpc.ensureLogined(function() {
-                            vm._doBeforeUpload(file, resolve, reject);
-                        }, {
-                            app: fssConfig.appName,
-                            toLogin(loginFormUrl, originalUrl, originalMethod) {
-                                // 此时已可知在CAS服务器上未登录，即未登录任一服务
-                                $upload.css('visibility', 'unset');
-                                reject(file);
-                                // 从当前应用登录表单地址
-                                rpc.get('/authentication/login-url', function(loginUrl) {
-                                    if (loginUrl) {
-                                        // 默认登录后跳转回当前页面
-                                        loginUrl += loginUrl.contains('?') ? '&' : '?';
-                                        loginUrl += rpc.loginSuccessRedirectParameter + '=' + window.location.href;
-                                        rpc.toLogin(loginUrl, vm.action, 'POST');
-                                    }
+                    // 上传前需确保用户在fss应用中已登录
+                    rpc.ensureLogined(function() {
+                        if (vm.beforeUpload) {
+                            let promise = vm.beforeUpload(file);
+                            if (promise instanceof Promise) {
+                                promise.then(function() {
+                                    resolve(file);
+                                }).catch(function() {
+                                    reject(file);
                                 });
-                                return true;
+                            } else if (promise === false) {
+                                reject(file);
+                            } else {
+                                resolve(file);
                             }
-                        });
-                    } else {
-                        vm._doBeforeUpload(file, resolve, reject);
-                    }
+                        } else {
+                            resolve(file);
+                        }
+                    }, {
+                        app: fssConfig.appName,
+                        toLogin(loginFormUrl, originalUrl, originalMethod) {
+                            // 此时已可知在CAS服务器上未登录，即未登录任一服务
+                            $upload.css('visibility', 'unset');
+                            reject(file);
+                            // 从当前应用登录表单地址
+                            rpc.get('/authentication/login-url', function(loginUrl) {
+                                if (loginUrl) {
+                                    // 默认登录后跳转回当前页面
+                                    loginUrl += loginUrl.contains('?') ? '&' : '?';
+                                    loginUrl += rpc.loginSuccessRedirectParameter + '=' + window.location.href;
+                                    rpc.toLogin(loginUrl, vm.action, 'POST');
+                                }
+                            });
+                            return true;
+                        }
+                    });
                 } else {
                     reject(file);
                 }
             });
-        },
-        _doBeforeUpload(file, resolve, reject) {
-            if (this.beforeUpload) {
-                let promise = this.beforeUpload(file);
-                if (promise instanceof Promise) {
-                    promise.then(function() {
-                        resolve(file);
-                    }).catch(function() {
-                        reject(file);
-                    });
-                } else if (promise === false) {
-                    reject(file);
-                } else {
-                    resolve(file);
-                }
-            } else {
-                resolve(file);
-            }
         },
         _onProgress(event, file, fileList) {
             file.uploading = true;
@@ -452,7 +462,12 @@ export default {
         },
         _onError(error, file, fileList) {
             $('#' + this.id + ' .el-upload').show();
-            let message = JSON.parse(error.message);
+            let message;
+            try {
+                message = JSON.parse(error.message);
+            } catch (e) {
+                // 忽略JSON解析错误
+            }
             if (message) {
                 if (message.status === 500) {
                     if (this.onError) {
@@ -591,10 +606,8 @@ export default {
     display: flex;
     align-items: center;
     min-height: 32px;
-}
-
-.tnxel-upload-container button.upload-trigger {
-    height: 32px;
+    color: var(--el-text-color-regular);
+    margin: 0 0.5rem;
 }
 
 .tnxel-upload-container .upload-trigger-text {
@@ -618,6 +631,7 @@ export default {
 
 .tnxel-upload-container .el-upload i {
     margin-top: 0;
+    color: inherit;
 }
 
 .tnxel-upload-container .el-upload-list--text {
@@ -680,6 +694,7 @@ export default {
 }
 
 .tnxel-upload-container .el-upload-list__panel {
+    min-width: 32px;
     min-height: 32px;
 }
 
@@ -738,5 +753,29 @@ export default {
 
 .tnxel-upload-container.center .el-upload__tip {
     text-align: center;
+}
+
+.el-dropdown-menu__item .tnxel-upload-container {
+    width: 100%;
+}
+
+.el-dropdown-menu__item .tnxel-upload-container .el-upload {
+    margin-bottom: 0;
+    border: none;
+    justify-content: unset;
+}
+
+.el-dropdown-menu__item:hover .tnxel-upload-container .el-upload .upload-trigger,
+.el-dropdown-menu__item:focus .tnxel-upload-container .el-upload .upload-trigger {
+    color: var(--el-dropdown-menuItem-hover-color);
+}
+
+.el-dropdown-menu__item .tnxel-upload-container .el-upload .upload-trigger {
+    min-height: 0;
+    margin: 0;
+}
+
+.el-dropdown-menu__item .tnxel-upload-container .el-upload .upload-trigger-text {
+    margin-left: 2px;
 }
 </style>

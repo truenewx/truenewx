@@ -50,4 +50,19 @@ public class FssExceptionCodes {
      */
     public static final String IS_NOT_TEXT_FILE = "error.fss.is_not_text_file";
 
+    /**
+     * 容量超限
+     */
+    public static final String CAPACITY_EXCEEDS_LIMIT = "error.fss.capacity_exceeds_limit";
+
+    /**
+     * 仅支持指定扩展名
+     */
+    public static final String ONLY_SUPPORTED_EXTENSION = "error.fss.only_supported_extension";
+
+    /**
+     * 不支持指定扩展名
+     */
+    public static final String UNSUPPORTED_EXTENSION = "error.fss.unsupported_extension";
+
 }

@@ -19,6 +19,8 @@
 </template>
 
 <script>
+const tnx = window.tnx;
+
 export default {
     name: 'TnxelFssView',
     props: {
@@ -45,7 +47,7 @@ export default {
             return undefined;
         },
         imageable() {
-            return ['jpg', 'png', 'gif', 'svg'].contains(this.extension);
+            return tnx.util.file.isImage(this.extension);
         },
         imageWidth() {
             let size = this.meta.size;

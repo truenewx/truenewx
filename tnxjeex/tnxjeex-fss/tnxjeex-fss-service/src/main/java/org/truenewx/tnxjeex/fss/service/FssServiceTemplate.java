@@ -7,9 +7,9 @@ import java.io.OutputStream;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.Service;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjee.service.spec.upload.FileUploadLimit;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
+import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 
 /**
  * 文件存储服务模版
@@ -26,7 +26,7 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param userIdentity 用户标识
      * @return 指定用户上传指定业务类型的文件上传限制条件
      */
-    FileUploadLimit getUploadLimit(String type, I userIdentity);
+    FssUploadLimit getUploadLimit(String type, I userIdentity);
 
     boolean isPublicReadable(String type);
 
@@ -73,7 +73,7 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param storageUrl   存储地址
      * @return 最后修改时间毫秒数，指定资源不存在时返回null
      */
-    FssFileDetail getDetail(I userIdentity, String storageUrl) throws IOException;
+    FssFileDetail getDetail(I userIdentity, String storageUrl);
 
     /**
      * 指定用户读取指定路径的文件内容到指定输出流中
@@ -113,8 +113,25 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param sourceStorageUrl 原文件存储地址
      * @param targetType       目标业务类型
      * @param targetScope      目标业务范围
-     * @return 新文件的存储地址
+     * @return 目标文件的存储地址
      */
     String copy(I userIdentity, String sourceStorageUrl, String targetType, String targetScope);
+
+    /**
+     * 移动指定文件为目标业务范围所表示的文件，仅在存储文件名由业务范围决定时有效
+     *
+     * @param userIdentity     用户标识
+     * @param sourceStorageUrl 原文件存储地址
+     * @param targetType       目标业务类型
+     * @param targetScope      目标业务范围
+     * @return 目标文件的存储地址
+     */
+    default String move(I userIdentity, String sourceStorageUrl, String targetType, String targetScope) {
+        String targetStorageUrl = copy(userIdentity, sourceStorageUrl, targetType, targetScope);
+        if (!sourceStorageUrl.equals(targetStorageUrl)) {
+            delete(userIdentity, sourceStorageUrl);
+        }
+        return targetStorageUrl;
+    }
 
 }

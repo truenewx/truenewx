@@ -1051,6 +1051,41 @@ export const BomUtil = {
         win = window.open(url);
         this._opened[url] = win;
     },
+    closeWindow() {
+        return new Promise((resolve, reject) => {
+            if (window.opener) {
+                window.close();
+                resolve(window.opener);
+            } else {
+                reject();
+            }
+        });
+    },
+}
+
+export const FileUtil = {
+    extensions: {
+        image: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'ico'],
+        video: ['mp4', 'webm', 'mpg', 'mpeg', 'mov', 'avi', 'rm', '3gp', '3gpp', 'mkv', 'rmvb', 'wmv'],
+        audio: ['mp3', 'wav', 'wma', 'acc', 'mid', 'cda', 'aif', 'aiff', 'ra', 'ape'],
+        archive: ['zip', 'rar', '7z', 'war', 'jar', 'gz', 'tar'],
+        binary: ['exe', 'msi', 'bin', 'dll', 'sys', 'com'],
+    },
+    isImage(extension) {
+        return this.extensions.image.contains(extension.toLowerCase());
+    },
+    isVideo(extension) {
+        return this.extensions.video.contains(extension.toLowerCase());
+    },
+    isAudio(extension) {
+        return this.extensions.audio.contains(extension.toLowerCase());
+    },
+    isArchive(extension) {
+        return this.extensions.archive.contains(extension.toLowerCase());
+    },
+    isBinary(extension) {
+        return this.extensions.binary.contains(extension.toLowerCase());
+    },
 }
 
 export const util = {
@@ -1065,6 +1100,7 @@ export const util = {
     net: NetUtil,
     dom: DomUtil,
     bom: BomUtil,
+    file: FileUtil,
 };
 
 export default util;

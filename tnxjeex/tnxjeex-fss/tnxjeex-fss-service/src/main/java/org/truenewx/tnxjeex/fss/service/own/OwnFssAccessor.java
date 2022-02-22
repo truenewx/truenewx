@@ -12,8 +12,8 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
-import org.truenewx.tnxjeex.fss.service.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
