@@ -55,11 +55,11 @@ Object.assign(String.prototype, {
         return array;
     },
     // 部分浏览器没有这个方法支持
-    replaceAll(regex, replcement) {
+    replaceAll(regex, replacement) {
         if (typeof regex === 'string') {
             regex = new RegExp(regex, "gm");
         }
-        return this.replace(regex, replcement);
+        return this.replace(regex, replacement);
     },
     allIndexOf(searchString, position) {
         let indexes = [];
@@ -69,6 +69,13 @@ Object.assign(String.prototype, {
             index = this.indexOf(searchString, index + searchString.length);
         }
         return indexes;
+    },
+    splitToIntArray(separator) {
+        let array = this.split(separator);
+        for (let i = 0; i < array.length; i++) {
+            array[i] = parseInt(array[i]);
+        }
+        return array;
     },
 });
 
