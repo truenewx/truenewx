@@ -130,8 +130,8 @@ function matchesPath(pathPattern, actualPath) {
     let pattern = pathPattern.replace(/\/:[a-zA-Z0-9_]+/g, '/[a-zA-Z0-9_\\*]+');
     if (pattern === pathPattern) { // 无路径参数
         return pathPattern === actualPath;
-    } else { // 有路径参数
-        return new RegExp(pattern, 'g').test(actualPath);
+    } else { // 有路径参数，正则表达式全字符串比较匹配
+        return new RegExp('^' + pattern + '$', 'g').test(actualPath);
     }
 }
 
