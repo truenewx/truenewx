@@ -67,6 +67,7 @@ export default {
             }
         },
         selected: [Object, Array], // 已选择的行对象
+        init: Boolean,
     },
     emits: ['update:modelValue', 'update:selected'],
     data() {
@@ -166,6 +167,11 @@ export default {
         allSelectedRecords() {
             this.$emit('update:selected', this.allSelectedRecords);
         },
+    },
+    mounted() {
+        if (this.init) {
+            this.query();
+        }
     },
     methods: {
         getParams(modelValue) {
