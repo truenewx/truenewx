@@ -55,12 +55,19 @@ Object.assign(String.prototype, {
         return array;
     },
     // 部分浏览器没有这个方法支持
-    replaceAll(regex, replcement) {
+    replaceAll(regex, replacement) {
         if (typeof regex === 'string') {
             regex = new RegExp(regex, "gm");
         }
-        return this.replace(regex, replcement);
-    }
+        return this.replace(regex, replacement);
+    },
+    splitToIntArray(separator) {
+        let array = this.split(separator);
+        for (let i = 0; i < array.length; i++) {
+            array[i] = parseInt(array[i]);
+        }
+        return array;
+    },
 });
 
 const DATE_PATTERNS = {
@@ -632,20 +639,32 @@ export const NetUtil = {
         if (typeof object === 'object') {
             Object.keys(object).forEach(key => {
                 let value = object[key];
-                switch (typeof value) {
-                    case 'function':
-                        value = value();
-                        break;
-                    case 'object':
-                        if (typeof value.toString === 'function') {
-                            value = value.toString();
-                        } else {
-                            value = null;
+                if (value !== undefined && value !== null) {
+                    let toKeyValueString = function(k, v) {
+                        switch (typeof v) {
+                            case 'function':
+                                v = v();
+                                break;
+                            case 'object':
+                                if (typeof v.toString === 'function') {
+                                    v = v.toString();
+                                } else {
+                                    v = null;
+                                }
+                                break;
                         }
-                        break;
-                }
-                if (value) {
-                    s += '&' + key + '=' + value;
+                        if (v !== undefined && v !== null) {
+                            return '&' + k + '=' + encodeURIComponent(v);
+                        }
+                        return '';
+                    }
+                    if (Array.isArray(value)) {
+                        for (let v of value) {
+                            s += toKeyValueString(key, v);
+                        }
+                    } else {
+                        s += toKeyValueString(key, value);
+                    }
                 }
             });
             if (s.length) { // 去掉头部多余的&
