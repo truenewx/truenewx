@@ -181,4 +181,19 @@ public class EntityUtil {
         return JsonUtil.json2Bean(json, type);
     }
 
+    /**
+     * 根据指定id集合的顺序排序指定单体集合
+     *
+     * @param list 单体集合
+     * @param ids  id集合
+     * @param <K>  主键类型
+     */
+    public static <K extends Serializable> void sortByIds(List<? extends Unity<K>> list, List<K> ids) {
+        list.sort((u1, u2) -> {
+            int index1 = ids.indexOf(u1.getId());
+            int index2 = ids.indexOf(u2.getId());
+            return Integer.compare(index1, index2);
+        });
+    }
+
 }
