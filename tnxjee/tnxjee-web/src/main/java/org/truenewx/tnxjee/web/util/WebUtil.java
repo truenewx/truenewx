@@ -587,6 +587,21 @@ public class WebUtil {
     }
 
     /**
+     * 判断请求是否来自微信内嵌浏览器
+     *
+     * @param request 请求
+     * @return 请求是否来自微信内嵌浏览器
+     */
+    public static boolean isRequestFromWechat(HttpServletRequest request) {
+        String userAgent = request.getHeader(WebConstants.HEADER_USER_AGENT);
+        if (userAgent != null) {
+            userAgent = userAgent.toUpperCase();
+            return userAgent.contains("MICROMESSENGER");
+        }
+        return false;
+    }
+
+    /**
      * 获取请求终端信息
      *
      * @param request HTTP请求
