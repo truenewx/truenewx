@@ -34,45 +34,36 @@ import Button from './button';
 import Tabs from './tabs';
 import TableColumn from './table-column';
 
-const components = Object.assign({}, tnxvue.components, {
-    Alert,
-    PermissionTree,
-    QueryForm,
-    SubmitForm,
-    DetailForm,
-    Select,
-    EnumSelect,
-    FetchSelect,
-    FetchTags,
-    FetchCascader,
-    RegionCascader,
-    Paged,
-    QueryTable,
-    Transfer,
-    Avatar,
-    InputNumber,
-    StepsNav,
-    DatePicker,
-    DateRange,
-    Upload,
-    FssUpload,
-    FssView,
-    Curd,
-    Button,
-    Tabs,
-    TableColumn,
-});
-
 const tnxel = Object.assign({}, tnxvue, {
     libs: Object.assign({}, tnxvue.libs, {ElementUI}),
-    components,
-    install(Vue) {
-        Vue.use(ElementUI);
-        Object.keys(components).forEach(key => {
-            const component = components[key];
-            Vue.component(component.name, component);
-        });
-    },
+    components: Object.assign({}, tnxvue.components, {
+        Alert,
+        PermissionTree,
+        QueryForm,
+        SubmitForm,
+        DetailForm,
+        Select,
+        EnumSelect,
+        FetchSelect,
+        FetchTags,
+        FetchCascader,
+        RegionCascader,
+        Paged,
+        QueryTable,
+        Transfer,
+        Avatar,
+        InputNumber,
+        StepsNav,
+        DatePicker,
+        DateRange,
+        Upload,
+        FssUpload,
+        FssView,
+        Curd,
+        Button,
+        Tabs,
+        TableColumn,
+    }),
     dialog() {
         this._closeMessage();
         return dialog.apply(this, arguments);
@@ -229,6 +220,11 @@ const tnxel = Object.assign({}, tnxvue, {
         }
         return result;
     }
+});
+
+tnxel.install = tnxel.util.function.around(tnxel.install, function(install, Vue) {
+    Vue.use(ElementUI);
+    install.call(window.tnx, Vue);
 });
 
 tnxel.date = {

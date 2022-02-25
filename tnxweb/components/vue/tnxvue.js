@@ -9,19 +9,6 @@ import buildRouter from './tnxvue-router';
 import Text from './text';
 import Percent from './percent';
 
-const components = {
-    Div: {
-        name: 'TnxvueDiv',
-        template: '<div><slot></slot></div>'
-    },
-    Span: {
-        name: 'TnxvueSpan',
-        template: '<span><slot></slot></span>'
-    },
-    Text,
-    Percent,
-};
-
 function getDefaultDialogButtons(type, callback, theme) {
     if (callback !== false) {
         if (type === 'confirm') {
@@ -58,9 +45,21 @@ function getDefaultDialogButtons(type, callback, theme) {
 
 const tnxvue = Object.assign({}, tnxcore, {
     libs: Object.assign({}, tnxcore.libs, {Vue}),
-    components,
+    components: {
+        Div: {
+            name: 'TnxvueDiv',
+            template: '<div><slot></slot></div>'
+        },
+        Span: {
+            name: 'TnxvueSpan',
+            template: '<span><slot></slot></span>'
+        },
+        Text,
+        Percent,
+    },
     buildRouter,
     install(Vue) {
+        let components = this.components;
         Object.keys(components).forEach(key => {
             const component = components[key];
             Vue.component(component.name, component);
