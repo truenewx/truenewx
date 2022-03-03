@@ -321,6 +321,11 @@ export const MathUtil = {
 export const StringUtil = {
     toJson: JSON.stringify,
     parseJson: JSON.parse,
+    uuid32() {
+        let objectUrl = URL.createObjectURL(new Blob()).toString();
+        URL.revokeObjectURL(objectUrl);
+        return objectUrl.substring(objectUrl.lastIndexOf('/') + 1).replaceAll('-', '');
+    },
     random(length, chars) {
         if (length >= 0) {
             chars = chars || 'abcdefghijklmnopqrstuvwxyz0123456789'; // 默认取值范围为所有小写字母和数字
@@ -409,7 +414,7 @@ export const StringUtil = {
         }
         // 遍历后没有不匹配的字符，则说明整理匹配
         return true;
-    }
+    },
 }
 
 export const DateUtil = {
