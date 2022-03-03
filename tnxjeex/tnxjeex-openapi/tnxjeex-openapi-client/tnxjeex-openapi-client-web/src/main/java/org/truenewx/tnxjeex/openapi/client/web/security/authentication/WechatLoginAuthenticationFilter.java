@@ -20,6 +20,7 @@ import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.core.BusinessAuthenticationException;
 import org.truenewx.tnxjee.webmvc.security.web.authentication.AjaxAuthenticationSuccessHandler;
+import org.truenewx.tnxjee.webmvc.security.web.authentication.LoginAuthenticationFilter;
 import org.truenewx.tnxjee.webmvc.security.web.authentication.ResolvableExceptionAuthenticationFailureHandler;
 
 /**
@@ -49,11 +50,12 @@ public class WechatLoginAuthenticationFilter extends AbstractAuthenticationProce
             }
         });
 
-        AjaxAuthenticationSuccessHandler successHandler = SpringUtil
-                .getFirstBeanByClass(context, AjaxAuthenticationSuccessHandler.class);
+        AjaxAuthenticationSuccessHandler successHandler = SpringUtil.getFirstBeanByClass(context,
+                AjaxAuthenticationSuccessHandler.class);
         if (successHandler != null) {
             setAuthenticationSuccessHandler(successHandler);
         }
+        LoginAuthenticationFilter.applySuccessTargetUrlParameter(context, getSuccessHandler());
 
         ResolvableExceptionAuthenticationFailureHandler failureHandler = SpringUtil
                 .getFirstBeanByClass(context, ResolvableExceptionAuthenticationFailureHandler.class);
