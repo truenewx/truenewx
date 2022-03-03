@@ -58,13 +58,15 @@ public class ServiceAutoProxyCreator extends TransactionalAutoProxyCreator
             bean = BeanUtil.getTargetSource(bean); // 取到原始目标对象
 
             Object proxy = createProxy(bean, beanName);
-            // 注册事务性bean和非事务性bean
-            Class<?>[] proxyInterfaces = getProxyInterfaces(bean.getClass());
-            for (Class<?> proxyInterface : proxyInterfaces) {
-                this.serviceRegistrar.register((Class<? extends Service>) proxyInterface,
-                        (Service) proxy, (Service) bean);
+            if (proxy != null) {
+                // 注册事务性bean和非事务性bean
+                Class<?>[] proxyInterfaces = getProxyInterfaces(bean.getClass());
+                for (Class<?> proxyInterface : proxyInterfaces) {
+                    this.serviceRegistrar.register((Class<? extends Service>) proxyInterface,
+                            (Service) proxy, (Service) bean);
+                }
+                return proxy;
             }
-            return proxy;
         }
         return super.wrapIfNecessary(bean, beanName);
     }
