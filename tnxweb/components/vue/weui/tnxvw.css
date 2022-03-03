@@ -1,0 +1,37 @@
+/**
+ * tnxvw.css
+ */
+body {
+    --weui-cellMarginLR: 0;
+    background-color: var(--weui-BG-0);
+}
+
+.weui-form,
+.weui-msg {
+    background-color: transparent;
+}
+
+.text-info {
+    color: var(--weui-FG-1);
+}
+
+.text-placeholder {
+    color: var(--weui-FG-2);
+}
+
+.text-warning {
+    color: var(--weui-YELLOW);
+}
+
+.text-error {
+    color: var(--weui-RED);
+}
+
+.weui-dialog__hd {
+    padding-top: 1rem;
+}
+
+.weui-dialog__title {
+    font-weight: 400;
+    font-size: 1rem;
+}

@@ -25,7 +25,7 @@
 
 <script>
 export default {
-    name: 'TnxweMsg',
+    name: 'TnxvwMsg',
     props: {
         icon: String,
         title: String,

@@ -28,7 +28,9 @@
     "md5": "^2.3.0",
     "vue": "^2.6.12",
     "vue-router": "^3.5.2",
-    "async-validator": "~1.8.1"
+    "async-validator": "~1.8.1",
+    "weui": "^2.5.4",
+    "weui.js": "1.2.14"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.12",
