@@ -192,9 +192,11 @@ export default {
                         _this.handle500Error(response.data.message, options);
                         break;
                     }
+                    default: {
+                        _this.handleOtherError(url + ':\n' + error.stack);
+                    }
                 }
             }
-            console.error(url + ':\n' + error.stack);
         });
     },
     _redirectRequest(response, config, options) {
@@ -237,6 +239,9 @@ export default {
         this.handleErrors([{
             message: '哎呀，非常抱歉服务器出了点小小的错误，这并不影响你的其它操作，我们会尽快修正这个错误。'
         }], options);
+    },
+    handleOtherError(message) {
+        console.error(message);
     },
     handleErrors(errors, options) {
         if (errors) {
