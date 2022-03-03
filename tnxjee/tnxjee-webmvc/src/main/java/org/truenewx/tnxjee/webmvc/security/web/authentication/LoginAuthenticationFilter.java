@@ -14,18 +14,23 @@ import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
  */
 public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    public LoginAuthenticationFilter(ApplicationContext context) {
-        ApiMetaProperties apiMetaProperties = SpringUtil.getFirstBeanByClass(context, ApiMetaProperties.class);
-        if (apiMetaProperties != null) {
-            String successTargetUrlParameter = apiMetaProperties.getLoginSuccessRedirectParameter();
-            if (StringUtils.isNotBlank(successTargetUrlParameter)) {
-                AuthenticationSuccessHandler successHandler = getSuccessHandler();
-                if (successHandler instanceof AbstractAuthenticationTargetUrlRequestHandler) {
+    public static void applySuccessTargetUrlParameter(ApplicationContext context,
+            AuthenticationSuccessHandler successHandler) {
+        if (successHandler instanceof AbstractAuthenticationTargetUrlRequestHandler) {
+            ApiMetaProperties apiMetaProperties = SpringUtil.getFirstBeanByClass(context, ApiMetaProperties.class);
+            if (apiMetaProperties != null) {
+                String successTargetUrlParameter = apiMetaProperties.getLoginSuccessRedirectParameter();
+                if (StringUtils.isNotBlank(successTargetUrlParameter)) {
                     ((AbstractAuthenticationTargetUrlRequestHandler) successHandler)
                             .setTargetUrlParameter(successTargetUrlParameter);
                 }
             }
         }
+    }
+
+    public LoginAuthenticationFilter(ApplicationContext context) {
+        applySuccessTargetUrlParameter(context, getSuccessHandler());
+
         ResolvableExceptionAuthenticationFailureHandler failureHandler = SpringUtil
                 .getFirstBeanByClass(context, ResolvableExceptionAuthenticationFailureHandler.class);
         if (failureHandler != null) {
