@@ -126,18 +126,21 @@ public class TransactionalAutoProxyCreator
     }
 
     protected Object createProxy(Object bean, String beanName) {
-        TransactionProxyFactoryBean factoryBean = new TransactionProxyFactoryBean();
-        factoryBean.setBeanClassLoader(this.beanClassLoader);
-        factoryBean.setBeanFactory(this.beanFactory);
-        factoryBean.setTransactionManager(this.transactionManager);
-        factoryBean.setTarget(bean);
-        Class<?> beanClass = bean.getClass();
-        factoryBean.setProxyInterfaces(getProxyInterfaces(beanClass));
-        factoryBean.setTransactionAttributeSource(getTransactionAttributeSource(beanClass));
-        factoryBean.afterPropertiesSet();
-        Object proxy = factoryBean.getObject();
-        this.proxies.put(beanName, proxy); // 缓存代理
-        return proxy;
+        if (this.transactionManager != null) {
+            TransactionProxyFactoryBean factoryBean = new TransactionProxyFactoryBean();
+            factoryBean.setBeanClassLoader(this.beanClassLoader);
+            factoryBean.setBeanFactory(this.beanFactory);
+            factoryBean.setTransactionManager(this.transactionManager);
+            factoryBean.setTarget(bean);
+            Class<?> beanClass = bean.getClass();
+            factoryBean.setProxyInterfaces(getProxyInterfaces(beanClass));
+            factoryBean.setTransactionAttributeSource(getTransactionAttributeSource(beanClass));
+            factoryBean.afterPropertiesSet();
+            Object proxy = factoryBean.getObject();
+            this.proxies.put(beanName, proxy); // 缓存代理
+            return proxy;
+        }
+        return null;
     }
 
     private TransactionAttributeSource getTransactionAttributeSource(Class<?> beanClass) {
