@@ -25,6 +25,7 @@ public abstract class WechatAuthenticationTokenResolver
     private static final String PARAMETER_STATE = "state";
     private static final String UNDEFINED_STATE = "undefined";
     private static final String PARAMETER_CODE = "code";
+    private static final String NULL_VALUE = "null";
 
     public WechatAuthenticationTokenResolver(String loginMode) {
         super(loginMode);
@@ -42,7 +43,9 @@ public abstract class WechatAuthenticationTokenResolver
         String state = getParam(request, PARAMETER_STATE);
         if (StringUtils.isNotBlank(state) && !UNDEFINED_STATE.equals(state)) {
             state = EncryptUtil.decryptByBase64(state);
-            return JsonUtil.json2Map(state);
+            if (!NULL_VALUE.equals(state)) {
+                return JsonUtil.json2Map(state);
+            }
         }
         return Collections.emptyMap();
     }
