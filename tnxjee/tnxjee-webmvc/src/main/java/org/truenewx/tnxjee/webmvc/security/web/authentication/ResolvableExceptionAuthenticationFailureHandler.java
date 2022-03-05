@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSaver;
@@ -58,6 +59,7 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
                 if (this.useForward) {
                     WebMvcProperties.View view = this.webMvcProperties.getView();
                     targetUrl = view.getPrefix() + targetUrl + view.getSuffix();
+                    targetUrl = targetUrl.replaceAll("//", Strings.SLASH);
                     request.getRequestDispatcher(targetUrl).forward(request, response);
                 } else {
                     response.sendRedirect(targetUrl);
