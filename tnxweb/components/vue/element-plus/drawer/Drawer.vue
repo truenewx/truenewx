@@ -31,6 +31,7 @@
 </template>
 
 <script>
+const util = window.tnx.util;
 
 export default {
     name: 'TnxelDrawer',

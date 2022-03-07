@@ -134,7 +134,7 @@ export default {
             if (this.records?.length) {
                 let selected = null;
                 for (let i = 0; i < this.records.length; i++) {
-                    if (selected == null) {
+                    if (selected === null) {
                         selected = this.pageSelectedIndexes[i];
                     } else if (selected !== this.pageSelectedIndexes[i]) {
                         return null;

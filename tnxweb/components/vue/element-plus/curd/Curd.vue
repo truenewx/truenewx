@@ -125,8 +125,6 @@ export default {
                                 }
                             });
                             return false;
-                        } else {
-                            vm._onAdded(model, close);
                         }
                     }
                 }
