@@ -1,18 +1,21 @@
 package org.truenewx.tnxjeex.fss.api;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.truenewx.tnxjee.core.api.RpcApi;
 import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 
 /**
- * 文件存储服务的控制API
+ * 文件存储服务操纵器
  *
  * @author jianglei
  */
 @RpcApi
-public interface FssControlApi {
+public interface FssManipulator {
 
     /**
      * 转储外部资源为内部存储资源
@@ -34,10 +37,6 @@ public interface FssControlApi {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     String upload(@RequestParam("type") String type, @RequestParam("scope") String scope,
             @RequestPart("file") MultipartFile file);
-
-    @GetMapping("/read/text")
-    String readText(@RequestParam("storageUrl") String storageUrl,
-            @RequestParam(value = "limit", required = false, defaultValue = "0") long limit);
 
     @PostMapping("/delete")
     void delete(@RequestParam("storageUrl") String storageUrl);

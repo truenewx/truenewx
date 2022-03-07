@@ -35,7 +35,8 @@ import org.truenewx.tnxjee.webmvc.bind.annotation.ResponseStream;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
-import org.truenewx.tnxjeex.fss.api.FssControlApi;
+import org.truenewx.tnxjeex.fss.api.FssContentReader;
+import org.truenewx.tnxjeex.fss.api.FssManipulator;
 import org.truenewx.tnxjeex.fss.api.FssMetaResolver;
 import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
@@ -52,7 +53,8 @@ import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
  *
  * @author jianglei
  */
-public abstract class FssControllerTemplate<I extends UserIdentity<?>> implements FssMetaResolver, FssControlApi {
+public abstract class FssControllerTemplate<I extends UserIdentity<?>> implements FssMetaResolver, FssManipulator,
+        FssContentReader {
 
     @Value(AppConstants.EL_SPRING_APP_NAME)
     private String appName;
@@ -392,11 +394,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @ResponseBody
     @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
     public String readText(String storageUrl, long limit) {
-        if (StringUtils.isNotBlank(storageUrl)) {
-            I userIdentity = getUserIdentity();
-            return this.service.readText(userIdentity, storageUrl, limit);
-        }
-        return null;
+        I userIdentity = getUserIdentity();
+        return this.service.readText(userIdentity, storageUrl, limit);
     }
 
     @Override

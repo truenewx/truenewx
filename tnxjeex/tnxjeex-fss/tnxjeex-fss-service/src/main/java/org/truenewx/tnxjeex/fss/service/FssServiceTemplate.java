@@ -76,6 +76,15 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
     FssFileDetail getDetail(I userIdentity, String storageUrl);
 
     /**
+     * 获取指定文件的读取输入流
+     *
+     * @param userIdentity 用户标识
+     * @param storageUrl   存储地址
+     * @return 读取输入流
+     */
+    InputStream getReadStream(I userIdentity, String storageUrl);
+
+    /**
      * 指定用户读取指定路径的文件内容到指定输出流中
      *
      * @param userIdentity   用户标识

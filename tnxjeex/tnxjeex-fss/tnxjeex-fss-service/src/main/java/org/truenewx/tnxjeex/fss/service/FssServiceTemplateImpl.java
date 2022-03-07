@@ -17,6 +17,8 @@ import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.tuple.Binary;
+import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
@@ -293,37 +295,52 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public long read(I userIdentity, String storageUrl, OutputStream out, long offset, long expectedLength) {
-        FssStoragePath fsp = FssStoragePath.of(storageUrl);
-        if (fsp != null) {
-            FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
-            FssAccessor accessor = this.accessors.get(strategy.getProvider());
-            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
+    public InputStream getReadStream(I userIdentity, String storageUrl) {
+        Binate<String, FssAccessor> binate = getPathAccessor(userIdentity, storageUrl);
+        if (binate != null) {
+            String path = binate.getLeft();
+            FssAccessor accessor = binate.getRight();
             try {
-                InputStream in = accessor.getReadStream(path);
-                if (in != null) {
-                    long actualLength = IOUtil.copyAsPossible(in, out, offset, expectedLength);
-                    try {
-                        in.close();
-                    } catch (IOException e) { // 处理此处的IOException，已确保返回读取长度
-                        LogUtil.error(getClass(), e);
-                    }
-                    return actualLength;
-                }
+                return accessor.getReadStream(path);
             } catch (IOException e) {
                 LogUtil.error(getClass(), e);
             }
+        }
+        return null;
+    }
+
+    private Binate<String, FssAccessor> getPathAccessor(I userIdentity, String storageUrl) {
+        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+        if (fsp != null) {
+            FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
+            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
+            FssAccessor accessor = this.accessors.get(strategy.getProvider());
+            return new Binary<>(path, accessor);
+        }
+        return null;
+    }
+
+    @Override
+    public long read(I userIdentity, String storageUrl, OutputStream out, long offset, long expectedLength) {
+        InputStream in = getReadStream(userIdentity, storageUrl);
+        if (in != null) {
+            long actualLength = IOUtil.copyAsPossible(in, out, offset, expectedLength);
+            try {
+                in.close();
+            } catch (IOException e) { // 处理此处的IOException，已确保返回读取长度
+                LogUtil.error(getClass(), e);
+            }
+            return actualLength;
         }
         return 0;
     }
 
     @Override
     public String readText(I userIdentity, String storageUrl, long limit) {
-        FssStoragePath fsp = FssStoragePath.of(storageUrl);
-        if (fsp != null) {
-            FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
-            FssAccessor accessor = this.accessors.get(strategy.getProvider());
-            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
+        Binate<String, FssAccessor> binate = getPathAccessor(userIdentity, storageUrl);
+        if (binate != null) {
+            String path = binate.getLeft();
+            FssAccessor accessor = binate.getRight();
             try {
                 Charset charset = accessor.getCharset(path);
                 if (charset == null) {
