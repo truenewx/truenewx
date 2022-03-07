@@ -79,6 +79,11 @@
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.truenewx.tnxjeex.file</groupId>
+                <artifactId>tnxjeex-file-pdf</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.truenewx.tnxjeex.openapi.client</groupId>
                 <artifactId>tnxjeex-openapi-client-model</artifactId>
                 <version>${truenewx.version}</version>

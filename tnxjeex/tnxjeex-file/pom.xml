@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     <groupId>org.truenewx.tnxjeex</groupId>
     <modules>
+        <module>tnxjeex-file-core</module>
         <module>tnxjeex-file-office</module>
         <module>tnxjeex-file-pdf</module>
     </modules>
