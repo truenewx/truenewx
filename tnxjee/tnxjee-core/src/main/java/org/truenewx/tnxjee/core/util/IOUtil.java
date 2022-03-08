@@ -2,6 +2,9 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -427,6 +430,18 @@ public class IOUtil {
             }
         } catch (IOException e) {
             LogUtil.error(IOUtil.class, e);
+        }
+        return false;
+    }
+
+    public static boolean isEmptyDictionary(File file) {
+        if (file.exists() && file.isDirectory()) {
+            try {
+                DirectoryStream<Path> stream = Files.newDirectoryStream(file.toPath());
+                return !stream.iterator().hasNext();
+            } catch (IOException e) {
+                LogUtil.error(IOUtil.class, e);
+            }
         }
         return false;
     }
