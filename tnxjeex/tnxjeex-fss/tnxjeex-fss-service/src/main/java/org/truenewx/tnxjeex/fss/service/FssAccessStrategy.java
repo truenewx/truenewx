@@ -12,7 +12,7 @@ import org.truenewx.tnxjeex.fss.service.model.FssProvider;
  *
  * @author jianglei
  */
-public interface FssAccessStrategy<I extends UserIdentity<?>> {
+public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDeletePredicate {
 
     /**
      * 获取业务类型，要求在同一个系统中唯一
@@ -41,13 +41,14 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     }
 
     /**
-     * 获取指定用户在指定业务范围下的文件相对于上下文根的存储目录，不包含最后一级的文件名
+     * 获取指定用户在指定业务范围下的文件相对于上下文根的目录，不包含最后一级的文件名。<br/>
+     * 该相对目录在存储地址和读取地址中完全相同。
      *
      * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
      * @param scope        业务范围
-     * @return 相对于上下文根的存储目录，返回null表示没有写权限
+     * @return 相对于上下文根的目录，返回null表示没有写权限
      */
-    String getStorageDir(I userIdentity, String scope);
+    String getRelativeDir(I userIdentity, String scope);
 
     /**
      * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
@@ -64,11 +65,11 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      * 获取指定文件下载时的最后一级文件名，不含扩展名，返回null表示使用存储文件名
      *
      * @param userIdentity    用户标识
-     * @param storageDir      存储相对目录
+     * @param relativeDir     相对目录
      * @param storageFilename 存储文件名
      * @return 指定文件下载时的最后一级文件名
      */
-    default String getDownloadFilename(I userIdentity, String storageDir, String storageFilename) {
+    default String getDownloadFilename(I userIdentity, String relativeDir, String storageFilename) {
         return null;
     }
 
@@ -93,11 +94,11 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      * 判断指定用户可否读取指定相对路径下的指定存储文件
      *
      * @param userIdentity    用户标识
-     * @param storageDir      存储相对目录
+     * @param relativeDir     相对目录
      * @param storageFilename 存储文件名
      * @return 指定用户可否读取指定相对路径下的指定存储文件
      */
-    default boolean isReadable(I userIdentity, String storageDir, String storageFilename) {
+    default boolean isReadable(I userIdentity, String relativeDir, String storageFilename) {
         return isPublicReadable();
     }
 

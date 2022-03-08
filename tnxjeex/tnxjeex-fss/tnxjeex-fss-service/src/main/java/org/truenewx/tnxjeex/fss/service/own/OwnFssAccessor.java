@@ -6,8 +6,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.IOUtil;
@@ -16,6 +20,7 @@ import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
+import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
@@ -28,6 +33,7 @@ public class OwnFssAccessor implements FssAccessor {
 
     private File root;
     private OwnFssFileStreamProvider fileStreamProvider;
+    private ExecutorService executorService;
 
     public OwnFssAccessor(String root, OwnFssFileStreamProvider fileStreamProvider) {
         File file = new File(root);
@@ -39,6 +45,11 @@ public class OwnFssAccessor implements FssAccessor {
         Assert.isTrue(file.canRead() && file.canWrite(), "root can not read or write");
         this.root = file;
         this.fileStreamProvider = fileStreamProvider;
+    }
+
+    @Autowired
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @Override
@@ -126,25 +137,42 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void delete(String path) {
+    public void delete(String path, FssDirDeletePredicate dirDeletePredicate) {
         File file = getStorageFile(path);
         if (file.exists()) {
             file.delete();
         }
+
         // 删除上级空目录
-        File parent = file.getParentFile();
-        try {
-            while (parent != null && !Files.isSameFile(parent.toPath(), this.root.toPath())) {
-                if (IOUtil.isEmptyDictionary(parent)) {
-                    parent.delete();
-                    parent = parent.getParentFile();
-                } else {
-                    break;
+        this.executorService.submit(() -> {
+            File parent = file.getParentFile();
+            try {
+                while (parent != null && !Files.isSameFile(parent.toPath(), this.root.toPath())) {
+                    List<String> subDirs = new ArrayList<>();
+                    List<String> filenames = new ArrayList<>();
+                    File[] files = parent.listFiles();
+                    if (files != null) {
+                        for (File f : files) {
+                            if (f.isDirectory()) {
+                                subDirs.add(f.getName());
+                            } else {
+                                filenames.add(f.getName());
+                            }
+                        }
+                    }
+                    String relativeDir = parent.getAbsolutePath().substring(this.root.getAbsolutePath().length())
+                            .replaceAll("\\\\", Strings.SLASH);
+                    if (dirDeletePredicate.isDirDeletable(relativeDir, subDirs, filenames)) {
+                        parent.delete();
+                        parent = parent.getParentFile();
+                    } else {
+                        break;
+                    }
                 }
+            } catch (IOException e) {
+                LogUtil.error(getClass(), e);
             }
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
+        });
     }
 
     @Override

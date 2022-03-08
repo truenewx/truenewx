@@ -26,6 +26,7 @@ import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
 import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
+import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
 /**
  * 文件存储服务模版实现
@@ -84,7 +85,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         // 上传限制校验
         FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
         String extension = validateUploadLimit(uploadLimit, fileSize, filename);
-        String storageDir = getStorageDirForWrite(strategy, userIdentity, scope);
+        String relativeDir = getRelativeDirForWrite(strategy, userIdentity, scope);
         // 获取文件名
         String storageFilename = strategy.getStorageFilename(userIdentity, scope);
         if (StringUtils.isBlank(storageFilename)) {
@@ -98,8 +99,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         }
         storageFilename += extension.toLowerCase();
         // 构建存储路径
-        FssStoragePath fsp = new FssStoragePath(type, storageDir, storageFilename);
-        String storagePath = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
+        FssStoragePath fsp = new FssStoragePath(type, relativeDir, storageFilename);
+        String storagePath = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
         // 写文件
         FssProvider provider = strategy.getProvider();
         FssAccessor accessor = this.accessors.get(provider);
@@ -155,12 +156,12 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
      * @param scope        业务范围
      * @return 相对目录
      */
-    private String getStorageDirForWrite(FssAccessStrategy<I> strategy, I userIdentity, String scope) {
-        String storageDir = strategy.getStorageDir(userIdentity, scope);
-        if (storageDir == null) {
+    private String getRelativeDirForWrite(FssAccessStrategy<I> strategy, I userIdentity, String scope) {
+        String relativeDir = strategy.getRelativeDir(userIdentity, scope);
+        if (relativeDir == null) {
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
-        return NetUtil.standardizeUrl(storageDir);
+        return NetUtil.standardizeUrl(relativeDir);
     }
 
     @Override
@@ -179,7 +180,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 return fsp.toString();
             } else {
                 FssAuthorizer authorizer = this.authorizers.get(provider);
-                String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
+                String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
                 if (thumbnail) {
                     path = appendThumbnailParameters(strategy, path);
                 }
@@ -235,7 +236,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     private FssAccessStrategy<I> validateUserRead(I userIdentity, FssStoragePath fsp) {
         if (fsp.isValid()) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
-            if (strategy.isReadable(userIdentity, fsp.getDir(), fsp.getFilename())) {
+            if (strategy.isReadable(userIdentity, fsp.getRelativeDir(), fsp.getFilename())) {
                 return strategy;
             }
         }
@@ -249,7 +250,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             if (fsp != null) {
                 FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
                 FssAccessor accessor = this.accessors.get(strategy.getProvider());
-                String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
+                String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
                 try {
                     FssFileDetail detail = accessor.getDetail(path);
                     if (detail != null) {
@@ -278,10 +279,10 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
-            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
+            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
             try {
                 FssFileDetail detail = accessor.getDetail(path);
-                String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getDir(),
+                String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getRelativeDir(),
                         fsp.getFilename());
                 if (StringUtils.isNotBlank(downloadFilename)) {
                     detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
@@ -313,7 +314,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
-            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
+            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             return new Binary<>(path, accessor);
         }
@@ -342,14 +343,17 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             String path = binate.getLeft();
             FssAccessor accessor = binate.getRight();
             try {
-                Charset charset = accessor.getCharset(path);
-                if (charset == null) {
-                    throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
-                }
                 InputStream in = accessor.getReadStream(path);
                 if (in != null) {
                     // 未指定读取限制，或文件大小未超过限制，才读取内容
                     if (limit <= 0 || in.available() <= limit) {
+                        Charset charset = accessor.getCharset(path);
+                        if (charset == null) {
+                            charset = FssUtil.getCharset(in);
+                        }
+                        if (charset == null) {
+                            throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
+                        }
                         String encoding = charset.toString();
                         String content = IOUtils.toString(in, encoding);
                         in.close();
@@ -368,12 +372,14 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
-            if (!strategy.isDeletable(userIdentity, fsp.getDir(), fsp.getFilename())) {
+            String relativeDir = fsp.getRelativeDir();
+            if (!strategy.isDeletable(userIdentity, relativeDir, fsp.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, fsp.getUrl());
             }
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
-            String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getPath();
-            accessor.delete(path);
+            String contextPath = NetUtil.standardizeUrl(strategy.getContextPath());
+            String path = contextPath + fsp.getRelativePath();
+            accessor.delete(path, strategy);
         }
     }
 
@@ -388,7 +394,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 throw new BusinessException(FssExceptionCodes.CANNOT_COPY_BETWEEN_PROVIDERS);
             }
             // 获取目标相对目录，同时校验写权限
-            String targetRelativeDir = getStorageDirForWrite(targetStrategy, userIdentity, targetScope);
+            String targetRelativeDir = getRelativeDirForWrite(targetStrategy, userIdentity, targetScope);
             // 获取目标存储文件名
             String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope);
             if (StringUtils.isBlank(targetStorageFilename)) {

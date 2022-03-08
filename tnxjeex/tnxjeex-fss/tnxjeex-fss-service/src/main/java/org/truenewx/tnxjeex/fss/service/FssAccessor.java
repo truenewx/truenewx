@@ -42,7 +42,13 @@ public interface FssAccessor {
      */
     InputStream getReadStream(String path) throws IOException;
 
-    void delete(String path);
+    /**
+     * 删除指定路径的文件或目录
+     *
+     * @param path               文件或目录路径
+     * @param dirDeletePredicate
+     */
+    void delete(String path, FssDirDeletePredicate dirDeletePredicate);
 
     void copy(String sourcePath, String targetPath);
 }

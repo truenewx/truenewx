@@ -3,18 +3,25 @@ package org.truenewx.tnxjeex.fss.service.aliyun;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssAccessor;
+import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
 import com.aliyun.oss.ClientException;
+import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.ListObjectsV2Result;
+import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectMetadata;
 
 /**
@@ -61,6 +68,10 @@ public class AliyunFssAccessor implements FssAccessor {
         if (StringUtils.isNotBlank(filename)) {
             filename = EncryptUtil.encryptByBase64(filename); // 中文文件名会乱码导致签名校验失败
             objectMetadata.getUserMetadata().put("filename", filename);
+        }
+        Charset charset = FssUtil.getCharset(in);
+        if (charset != null) {
+            objectMetadata.setContentEncoding(charset.name());
         }
         path = AliyunOssUtil.standardizePath(path);
         this.account.getOssClient().putObject(getBucketName(), path, in, objectMetadata);
@@ -130,21 +141,35 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void delete(String path) {
-        String originalPath = path;
-
-        path = AliyunOssUtil.standardizePath(path);
+    public void delete(String path, FssDirDeletePredicate dirDeletePredicate) {
+        OSS oss = this.account.getOssClient();
+        String bucketName = getBucketName();
+        String standardizedPath = AliyunOssUtil.standardizePath(path);
         try {
-            this.account.getOssClient().deleteObject(getBucketName(), path);
+            oss.deleteObject(bucketName, standardizedPath);
         } catch (Exception e) {
             LogUtil.warn(getClass(), e);
         }
 
         if (this.delegate != null) {
             this.executorService.submit(() -> {
-                this.delegate.delete(originalPath);
+                this.delegate.delete(path, dirDeletePredicate);
             });
         }
+
+        // 删除上级空目录
+        this.executorService.submit(() -> {
+            int index = standardizedPath.lastIndexOf(Strings.SLASH);
+            while (index > 0) {
+                String parentPath = standardizedPath.substring(0, index);
+                ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
+                List<OSSObjectSummary> summaries = result.getObjectSummaries();
+                for (OSSObjectSummary summary : summaries) {
+                    summary.getType();
+                }
+                index = parentPath.lastIndexOf(Strings.SLASH);
+            }
+        });
     }
 
     @Override
