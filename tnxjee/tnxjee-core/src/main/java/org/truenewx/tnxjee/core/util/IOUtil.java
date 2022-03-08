@@ -1,10 +1,10 @@
 package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -339,32 +339,12 @@ public class IOUtil {
 
     public static boolean copyFile(File source, File target) {
         if (source.exists()) {
-            FileInputStream in = null;
-            FileOutputStream out = null;
             try {
-                createFile(target);
-                in = new FileInputStream(source);
-                FileChannel inChannel = in.getChannel();
-                out = new FileOutputStream(target);
-                out.getChannel().transferFrom(inChannel, 0, inChannel.size());
+                Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.COPY_ATTRIBUTES);
                 return true;
             } catch (IOException e) {
                 LogUtil.error(IOUtil.class, e);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        LogUtil.error(IOUtil.class, e);
-                    }
-                }
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        LogUtil.error(IOUtil.class, e);
-                    }
-                }
             }
         }
         return false;
