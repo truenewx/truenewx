@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.IOUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
@@ -128,6 +130,20 @@ public class OwnFssAccessor implements FssAccessor {
         File file = getStorageFile(path);
         if (file.exists()) {
             file.delete();
+        }
+        // 删除上级空目录
+        File parent = file.getParentFile();
+        try {
+            while (parent != null && !Files.isSameFile(parent.toPath(), this.root.toPath())) {
+                if (IOUtil.isEmptyDictionary(parent)) {
+                    parent.delete();
+                    parent = parent.getParentFile();
+                } else {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
         }
     }
 

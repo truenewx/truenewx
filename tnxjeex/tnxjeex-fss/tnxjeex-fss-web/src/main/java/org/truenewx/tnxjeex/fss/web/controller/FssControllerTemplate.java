@@ -210,8 +210,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         String url = command.getUrl();
         if (StringUtils.isNotBlank(type) && url != null && NetUtil.isHttpUrl(url, true)) {
             String contextUrl = WebUtil.getProtocolAndHost(SpringWebContext.getRequest()) + getDownloadUrlPrefix();
-            // 不是本地读取地址，也不是对外的读取地址，才可以转换
-            if (!url.startsWith(contextUrl + Strings.SLASH) && !this.service.isReadUrl(type, url)) {
+            // 不是本地读取地址，也不是第三方服务商的读取地址，才可以转换
+            if (!url.startsWith(contextUrl + Strings.SLASH) && !this.service.isOutsideReadUrl(type, url)) {
                 try {
                     String filename = getFilename(url, command.getExtension());
                     String fileId = StringUtil.uuid32();

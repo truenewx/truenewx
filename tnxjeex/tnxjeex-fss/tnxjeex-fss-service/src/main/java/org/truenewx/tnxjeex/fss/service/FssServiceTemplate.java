@@ -55,7 +55,14 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      */
     String getReadUrl(I userIdentity, String storageUrl, boolean thumbnail);
 
-    boolean isReadUrl(String type, String url);
+    /**
+     * 判断指定地址是否指定业务类型的外部第三方服务商的读取地址
+     *
+     * @param type 业务类型
+     * @param url  地址
+     * @return 指定地址是否指定业务类型的外部第三方服务商的读取地址
+     */
+    boolean isOutsideReadUrl(String type, String url);
 
     /**
      * 获取指定资源的读取元信息

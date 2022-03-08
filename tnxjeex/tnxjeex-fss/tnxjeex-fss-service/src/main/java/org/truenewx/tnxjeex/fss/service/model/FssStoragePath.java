@@ -12,15 +12,17 @@ import org.truenewx.tnxjeex.fss.model.FssFileMeta;
  */
 public class FssStoragePath {
 
+    // 格式形如：fss://[type]/[dir]/[filename]
+
     private static final String PROTOCOL = FssFileMeta.STORAGE_URL_PROTOCOL;
 
     private String type;
-    private String relativeDir;
+    private String dir;
     private String filename;
 
-    public FssStoragePath(String type, String relativeDir, String filename) {
+    public FssStoragePath(String type, String dir, String filename) {
         this.type = type;
-        this.relativeDir = relativeDir;
+        this.dir = dir;
         this.filename = filename;
     }
 
@@ -57,16 +59,16 @@ public class FssStoragePath {
         return this.type;
     }
 
-    public String getRelativeDir() {
-        return this.relativeDir;
+    public String getDir() {
+        return this.dir;
     }
 
     public String getFilename() {
         return this.filename;
     }
 
-    public String getRelativePath() {
-        String dir = Strings.SLASH.equals(this.relativeDir) ? Strings.EMPTY : this.relativeDir;
+    public String getPath() {
+        String dir = Strings.SLASH.equals(this.dir) ? Strings.EMPTY : this.dir;
         return dir + Strings.SLASH + this.filename;
     }
 
@@ -81,7 +83,7 @@ public class FssStoragePath {
 
     @Override
     public String toString() {
-        return Strings.SLASH + this.type + getRelativePath();
+        return Strings.SLASH + this.type + getPath();
     }
 
 }

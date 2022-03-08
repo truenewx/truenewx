@@ -32,7 +32,7 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     FssUploadLimit getUploadLimit(I userIdentity);
 
     /**
-     * 获取存储路径上下文根，与存储类型一一对应，不被包含在存储路径中，要求在同一个系统中唯一，以便于根据存储路径判断所属业务类型
+     * 获取存储路径上下文根，允许不同业务范围使用相同存储路径上下文根，但使用者需知：这样一来，将无法根据存储路径完全判断所属业务类型
      *
      * @return 存储路径上下文根
      */
@@ -41,13 +41,13 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
     }
 
     /**
-     * 获取指定文件的相对于上下文根的存储目录，不包含最后一级的文件名
+     * 获取指定用户在指定业务范围下的文件相对于上下文根的存储目录，不包含最后一级的文件名
      *
      * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
      * @param scope        业务范围
      * @return 相对于上下文根的存储目录，返回null表示没有写权限
      */
-    String getRelativeDir(I userIdentity, String scope);
+    String getStorageDir(I userIdentity, String scope);
 
     /**
      * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
@@ -57,6 +57,18 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      * @return 指定文件存储时的最后一级文件名
      */
     default String getStorageFilename(I userIdentity, String scope) {
+        return null;
+    }
+
+    /**
+     * 获取指定文件下载时的最后一级文件名，不含扩展名，返回null表示使用存储文件名
+     *
+     * @param userIdentity    用户标识
+     * @param storageDir      存储相对目录
+     * @param storageFilename 存储文件名
+     * @return 指定文件下载时的最后一级文件名
+     */
+    default String getDownloadFilename(I userIdentity, String storageDir, String storageFilename) {
         return null;
     }
 
@@ -81,11 +93,11 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      * 判断指定用户可否读取指定相对路径下的指定存储文件
      *
      * @param userIdentity    用户标识
-     * @param relativeDir     相对目录
+     * @param storageDir      存储相对目录
      * @param storageFilename 存储文件名
      * @return 指定用户可否读取指定相对路径下的指定存储文件
      */
-    default boolean isReadable(I userIdentity, String relativeDir, String storageFilename) {
+    default boolean isReadable(I userIdentity, String storageDir, String storageFilename) {
         return isPublicReadable();
     }
 
@@ -108,18 +120,6 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> {
      */
     default boolean isDeletable(I userIdentity, String relativeDir, String storageFilename) {
         return false;
-    }
-
-    /**
-     * 获取指定文件下载时的最后一级文件名，不含扩展名，返回null表示使用存储文件名
-     *
-     * @param userIdentity    用户标识
-     * @param relativeDir     相对路径
-     * @param storageFilename 存储文件名
-     * @return 指定文件下载时的最后一级文件名
-     */
-    default String getDownloadFilename(I userIdentity, String relativeDir, String storageFilename) {
-        return null;
     }
 
 }
