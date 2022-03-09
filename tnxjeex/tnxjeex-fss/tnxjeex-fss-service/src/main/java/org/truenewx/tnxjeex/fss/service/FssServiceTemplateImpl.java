@@ -345,15 +345,15 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             try {
                 InputStream in = accessor.getReadStream(path);
                 if (in != null) {
+                    Charset charset = accessor.getCharset(path);
+                    if (charset == null) {
+                        charset = FssUtil.getCharset(in);
+                    }
+                    if (charset == null) {
+                        throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
+                    }
                     // 未指定读取限制，或文件大小未超过限制，才读取内容
                     if (limit <= 0 || in.available() <= limit) {
-                        Charset charset = accessor.getCharset(path);
-                        if (charset == null) {
-                            charset = FssUtil.getCharset(in);
-                        }
-                        if (charset == null) {
-                            throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
-                        }
                         String encoding = charset.toString();
                         String content = IOUtils.toString(in, encoding);
                         in.close();
