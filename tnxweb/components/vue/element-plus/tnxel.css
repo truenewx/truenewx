@@ -412,6 +412,11 @@ span.form-item-tip {
     width: 100%;
 }
 
+.el-dropdown > .el-button-group,
+.el-dropdown > .el-button-group > .el-button {
+    height: 100%;
+}
+
 .el-card__header .el-dropdown {
     display: flex;
     align-items: center;
