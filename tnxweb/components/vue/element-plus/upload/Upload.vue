@@ -42,7 +42,7 @@
                     <tnxel-icon value="Loading"/>
                 </span>
                 <div class="el-upload-list__item-actions">
-                    <div class="flex-v-center">
+                    <div class="flex-center">
                         <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="isPreviewable(file)"/>
                         <tnxel-icon value="Delete" @click="removeFile(file)"/>
                     </div>
@@ -723,6 +723,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 3rem;
 }
 
 .tnxel-upload-container .el-upload-list__item-actions i {
