@@ -276,7 +276,8 @@ export default {
                     height: height,
                 });
 
-                if (vm.fileList || vm.fileList.length < vm.uploadOptions.number) {
+                // 不显示文件清单，或文件数量未达到上限，则显示添加框
+                if (!vm.showFileList || (vm.fileList && vm.fileList.length < vm.uploadOptions.number)) {
                     $upload.css({
                         display: 'inline-flex'
                     });
@@ -372,7 +373,7 @@ export default {
             return new Promise(function(resolve, reject) {
                 if (vm.validate(file)) {
                     let $upload = $('#' + vm.id + ' .el-upload');
-                    if (vm.uploadFiles.length >= vm.uploadOptions.number) {
+                    if (vm.showFileList && vm.uploadFiles.length >= vm.uploadOptions.number) {
                         $upload.css('visibility', 'hidden');
                     }
 
@@ -437,7 +438,8 @@ export default {
         _resizeFilePanel(file, fileList) {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
-            if (fileList.length >= this.uploadOptions.number) {
+            // 显示文件清单且文件数量已达上限，则隐藏添加框
+            if (this.showFileList && fileList.length >= this.uploadOptions.number) {
                 // 隐藏添加框
                 $upload.css({
                     display: 'none',
@@ -607,12 +609,16 @@ export default {
     align-items: center;
     min-height: 32px;
     color: var(--el-text-color-regular);
+}
+
+.tnxel-upload-container div.upload-trigger {
     margin: 0 0.5rem;
 }
 
 .tnxel-upload-container .upload-trigger-text {
     margin-left: 0.25rem;
     line-height: 1rem;
+    font-size: 14px;
 }
 
 .tnxel-upload-container.center .el-upload {
@@ -620,7 +626,7 @@ export default {
     margin-left: auto;
 }
 
-.tnxel-upload-container.center .upload-trigger {
+.tnxel-upload-container.center upload-trigger {
     flex-direction: column;
 }
 

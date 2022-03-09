@@ -96,6 +96,9 @@ export default {
     },
     methods: {
         equals(fileList, storageUrls) {
+            if (!storageUrls) {
+                return !fileList.length;
+            }
             if (!Array.isArray(storageUrls)) {
                 storageUrls = [storageUrls];
             }
@@ -151,6 +154,7 @@ export default {
                         app: fssConfig.appName
                     });
                 } else {
+                    vm.fileList = [];
                     vm.$nextTick(function() {
                         vm._loadUploadOptions();
                     });
@@ -207,6 +211,8 @@ export default {
         _onSuccess(result, file, fileList) {
             if (result) {
                 file.storageUrl = result.storageUrl;
+                file.readUrl = result.readUrl;
+                file.downloadUrl = result.downloadUrl;
                 this.fileList = fileList;
                 this.emitInput();
                 if (this.onSuccess) {
