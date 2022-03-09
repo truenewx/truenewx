@@ -412,7 +412,9 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             String targetStorageUrl = targetStoragePath.getUrl();
             if (!sourceStorageUrl.equals(targetStorageUrl)) { // 存储路径不同才有必要复制
                 FssAccessor accessor = this.accessors.get(targetStrategy.getProvider());
-                accessor.copy(sourceStoragePath.toString(), targetStoragePath.toString());
+                String sourcePath = sourceStrategy.getContextPath() + sourceStoragePath.getRelativePath();
+                String targetPath = targetStrategy.getContextPath() + targetStoragePath.getRelativePath();
+                accessor.copy(sourcePath, targetPath);
                 targetStrategy.onWritten(userIdentity, targetScope, targetStorageUrl);
             }
             return targetStorageUrl;
