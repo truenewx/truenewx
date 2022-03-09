@@ -394,7 +394,7 @@ span.form-item-tip {
     display: none;
 }
 
-.el-button {
+.el-button:not(.el-button--large):not(.el-button--small) {
     height: unset;
     min-height: var(--el-button-size);
 }
