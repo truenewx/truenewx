@@ -654,6 +654,33 @@ public class WebUtil {
         return false;
     }
 
+    public static String getHeader(HttpServletRequest request, String name) {
+        String value = request.getHeader(name);
+        if (value == null) {
+            Enumeration<String> values = request.getHeaders(name);
+            if (values != null && values.hasMoreElements()) {
+                StringBuilder sbv = new StringBuilder();
+                while (values.hasMoreElements()) {
+                    sbv.append(", ").append(values.nextElement());
+                }
+                sbv.delete(0, 2);
+                value = sbv.toString();
+            }
+        }
+        return value;
+    }
+
+    public static long getDateHeader(HttpServletRequest request, String name) {
+        String value = getHeader(request, name);
+        if (value != null) {
+            Date date = DateUtil.parseGmt(value);
+            if (date != null) {
+                return date.getTime();
+            }
+        }
+        return -1;
+    }
+
     /**
      * 获取所有请求头信息
      *
@@ -665,13 +692,8 @@ public class WebUtil {
         Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();
-            Enumeration<String> values = request.getHeaders(name);
-            StringBuilder value = new StringBuilder();
-            while (values.hasMoreElements()) {
-                value.append(", ").append(values.nextElement());
-            }
-            value.delete(0, 2);
-            headers.put(name, value.toString());
+            String value = getHeader(request, name);
+            headers.put(name, value);
         }
         return headers;
     }
