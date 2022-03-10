@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
@@ -36,7 +38,7 @@ public class DateUtil {
     /**
      * 长日期格式
      */
-    public static final String LONG_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + Strings.SPACE + DateUtil.TIME_PATTERN;
+    public static final String LONG_DATE_PATTERN = SHORT_DATE_PATTERN + Strings.SPACE + TIME_PATTERN;
     /**
      * 没分隔符长日期格式
      */
@@ -45,14 +47,18 @@ public class DateUtil {
      * 精确到分钟的长日期格式
      */
     public static final String LONG_DATE_PATTERN_TO_MINUTE = "yyyy-MM-dd HH:mm";
+    /**
+     * 格林威治标准时间格式
+     */
+    public static final String GMT_PATTERN = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
 
     private static final long MS_ONE_SECOND = 1000;
 
     private static final long MS_ONE_MINUTE = 60 * 1000;
 
-    private static final long MS_ONE_HOUR = 60 * DateUtil.MS_ONE_MINUTE;
+    private static final long MS_ONE_HOUR = 60 * MS_ONE_MINUTE;
 
-    private static final long MS_ONE_DAY = 24 * 60 * DateUtil.MS_ONE_MINUTE;
+    private static final long MS_ONE_DAY = 24 * 60 * MS_ONE_MINUTE;
 
     private DateUtil() {
     }
@@ -133,7 +139,7 @@ public class DateUtil {
      * @return 日期对象
      */
     public static Date parseShort(String date) {
-        return parse(date, DateUtil.SHORT_DATE_PATTERN);
+        return parse(date, SHORT_DATE_PATTERN);
     }
 
     /**
@@ -143,7 +149,7 @@ public class DateUtil {
      * @return 字符串型日期
      */
     public static String formatShort(Date date) {
-        return format(date, DateUtil.SHORT_DATE_PATTERN);
+        return format(date, SHORT_DATE_PATTERN);
     }
 
     /**
@@ -153,7 +159,7 @@ public class DateUtil {
      * @return 日期对象
      */
     public static Date parseLong(String date) {
-        return parse(date, DateUtil.LONG_DATE_PATTERN);
+        return parse(date, LONG_DATE_PATTERN);
     }
 
     /**
@@ -163,7 +169,7 @@ public class DateUtil {
      * @return 字符串型日期
      */
     public static String formatLong(Date date) {
-        return format(date, DateUtil.LONG_DATE_PATTERN);
+        return format(date, LONG_DATE_PATTERN);
     }
 
     /**
@@ -173,7 +179,23 @@ public class DateUtil {
      * @return 字符串型日期
      */
     public static String formatLongNoDelimiter(Date date) {
-        return format(date, DateUtil.LONG_DATE_NO_DELIMITER_PATTERN);
+        return format(date, LONG_DATE_NO_DELIMITER_PATTERN);
+    }
+
+    /**
+     * 按照格林威治时间格式解析字符串型日期值为日期对象
+     *
+     * @param s 字符串型日期
+     * @return 日期对象
+     */
+    public static Date parseGmt(String s) {
+        DateFormat formatter = new SimpleDateFormat(GMT_PATTERN, Locale.UK);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        try {
+            return formatter.parse(s);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     /**
@@ -233,7 +255,7 @@ public class DateUtil {
         Calendar earlierCalendar = setTimeToCalendar(earlierDate, 0, 0, 0, 0);
         Calendar laterCalendar = setTimeToCalendar(laterDate, 0, 0, 0, 0);
         long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
-        return (int) (dms / DateUtil.MS_ONE_DAY);
+        return (int) (dms / MS_ONE_DAY);
     }
 
     /**
@@ -247,7 +269,7 @@ public class DateUtil {
         Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, 0, 0, 0);
         Calendar laterCalendar = setTimeToCalendar(laterDate, -1, 0, 0, 0);
         long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
-        return (int) (dms / DateUtil.MS_ONE_HOUR);
+        return (int) (dms / MS_ONE_HOUR);
     }
 
     /**
@@ -261,7 +283,7 @@ public class DateUtil {
         Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, 0, 0);
         Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, 0, 0);
         long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
-        return (int) (dms / DateUtil.MS_ONE_MINUTE);
+        return (int) (dms / MS_ONE_MINUTE);
     }
 
     /**
@@ -275,7 +297,7 @@ public class DateUtil {
         Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, -1, 0);
         Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, -1, 0);
         long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
-        return dms / DateUtil.MS_ONE_SECOND;
+        return dms / MS_ONE_SECOND;
     }
 
     /**
