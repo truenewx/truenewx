@@ -13,7 +13,11 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPa
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.truenewx.tnxjeex.file.core.FileCatalogItem;
+import org.truenewx.tnxjee.core.util.ImageUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.service.exception.BusinessException;
+import org.truenewx.tnxjeex.file.core.doc.DocCatalog;
+import org.truenewx.tnxjeex.file.core.doc.DocCatalogItem;
 
 /**
  * PDF文档
@@ -25,38 +29,47 @@ public class PdfDoc {
     private PDDocument origin;
     private PDFRenderer renderer;
 
-    public PdfDoc(File file) throws IOException {
-        this.origin = PDDocument.load(file);
-        this.renderer = new PDFRenderer(this.origin);
+    public PdfDoc(File file) {
+        try {
+            this.origin = PDDocument.load(file);
+            this.renderer = new PDFRenderer(this.origin);
+        } catch (IOException e) {
+            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+        }
     }
 
-    public PdfDoc(InputStream in) throws IOException {
-        this.origin = PDDocument.load(in);
-        this.renderer = new PDFRenderer(this.origin);
+    public PdfDoc(InputStream in) {
+        try {
+            this.origin = PDDocument.load(in);
+            this.renderer = new PDFRenderer(this.origin);
+        } catch (IOException e) {
+            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+        }
     }
 
     public PDDocument getOrigin() {
         return this.origin;
     }
 
-    /**
-     * @return 目录集
-     */
-    public List<FileCatalogItem> getCatalogItems() {
-        List<FileCatalogItem> items = new ArrayList<>();
+    public DocCatalog getCatalog() {
+        DocCatalog summary = new DocCatalog();
+        summary.setPageCount(this.origin.getNumberOfPages());
+        List<DocCatalogItem> items = new ArrayList<>();
         PDDocumentOutline outline = this.origin.getDocumentCatalog().getDocumentOutline();
         if (outline != null) {
             PDOutlineItem outlineItem = outline.getFirstChild();
             while (outlineItem != null) {
-                items.add(toCatalogItem(outlineItem));
+                items.add(toCatalogItem(outlineItem, 1));
                 outlineItem = outlineItem.getNextSibling();
             }
         }
-        return items;
+        summary.setItems(items);
+        return summary;
     }
 
-    private FileCatalogItem toCatalogItem(PDOutlineItem outlineItem) {
-        FileCatalogItem item = new FileCatalogItem();
+    private DocCatalogItem toCatalogItem(PDOutlineItem outlineItem, int level) {
+        DocCatalogItem item = new DocCatalogItem();
+        item.setLevel(level);
         item.setCaption(outlineItem.getTitle());
         try {
             PDDestination dest = outlineItem.getDestination();
@@ -69,25 +82,36 @@ public class PdfDoc {
         // 添加子节点
         Iterable<PDOutlineItem> outlineChildren = outlineItem.children();
         for (PDOutlineItem outlineChild : outlineChildren) {
-            item.addSub(toCatalogItem(outlineChild));
+            item.addSub(toCatalogItem(outlineChild, level + 1));
         }
         return item;
     }
 
-    public int getPageNum() {
-        return this.origin.getNumberOfPages();
-    }
-
-    public BufferedImage renderImage(int pageIndex) throws IOException {
+    public BufferedImage renderImage(int pageIndex) {
         return renderImage(pageIndex, 1);
     }
 
-    public BufferedImage renderImage(int pageIndex, float scale) throws IOException {
-        return this.renderer.renderImage(pageIndex, scale);
+    public BufferedImage renderImage(int pageIndex, float scale) {
+        try {
+            return this.renderer.renderImage(pageIndex, scale);
+        } catch (IOException e) {
+            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+        }
     }
 
-    public void close() throws IOException {
-        this.origin.close();
+    public void close() {
+        try {
+            this.origin.close();
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        File file = new File("C:\\Users\\jiang\\Desktop\\coding\\阿里巴巴Java开发手册-2020版.pdf");
+        PdfDoc doc = new PdfDoc(file);
+        BufferedImage image = doc.renderImage(0);
+        ImageUtil.save(image, "C:\\Users\\jiang\\Desktop\\coding\\", "阿里巴巴Java开发手册-2020版-1", "jpg");
     }
 
 }

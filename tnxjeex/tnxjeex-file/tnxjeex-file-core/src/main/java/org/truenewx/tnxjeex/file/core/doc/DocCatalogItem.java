@@ -1,19 +1,19 @@
-package org.truenewx.tnxjeex.file.core;
+package org.truenewx.tnxjeex.file.core.doc;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 文件目录项
+ * 文档目录项
  *
  * @author jianglei
  */
-public class FileCatalogItem {
+public class DocCatalogItem {
 
     private int level;
     private String caption;
     private int destIndex = -1;
-    private List<FileCatalogItem> subs;
+    private List<DocCatalogItem> subs;
 
     public int getLevel() {
         return this.level;
@@ -39,17 +39,17 @@ public class FileCatalogItem {
         this.destIndex = destIndex;
     }
 
-    public List<FileCatalogItem> getSubs() {
+    public List<DocCatalogItem> getSubs() {
         return this.subs;
     }
 
-    public void setSubs(List<FileCatalogItem> subs) {
+    public void setSubs(List<DocCatalogItem> subs) {
         this.subs = subs;
     }
 
     //////
 
-    public void addSub(FileCatalogItem sub) {
+    public void addSub(DocCatalogItem sub) {
         if (this.subs == null) {
             this.subs = new ArrayList<>();
         }
