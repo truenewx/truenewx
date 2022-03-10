@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -61,10 +62,12 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @Autowired
     private CommonProperties commonProperties;
     @Autowired(required = false)
-    private FssServiceTemplate<I> service;
+    protected FssServiceTemplate<I> service;
     @Autowired
     private Executor executor;
-
+    /**
+     * 下载地址前缀，应用可根据实际情况赋值
+     */
     protected String downloadUrlPrefix;
 
     /**
@@ -302,26 +305,18 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         I userIdentity = getUserIdentity();
         String path = getDownloadPath(request);
-        FssFileDetail detail = this.service.getDetail(userIdentity, path);
-        if (detail == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        response.reset();
-        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-        int bufferSize = IOUtil.DEFAULT_BUFFER_SIZE;
-        response.setBufferSize(bufferSize); // 必须与输出文件流时的缓存区大小保持一致
-        if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
-            response.setContentType(Mimetypes.getInstance().getMimetype(path));
-        } else {
-            WebUtil.setDownloadFilename(request, response, detail.getFilename());
-        }
-        long modifiedTime = detail.getLastModifiedTime();
-        response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
-        long modifiedSince = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-        if (modifiedSince == modifiedTime) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // 如果相等则返回表示未修改的状态码：304
-        } else {
+        int bufferSize = IOUtil.DEFAULT_BUFFER_SIZE; // 必须与输出文件流时的缓存区大小保持一致
+        FssFileDetail detail = resolveFileDetail(userIdentity, path, request, response, fssFileDetail -> {
+            response.reset();
+            response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+            response.setBufferSize(bufferSize);
+            if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
+                response.setContentType(Mimetypes.getInstance().getMimetype(path));
+            } else {
+                WebUtil.setDownloadFilename(request, response, fssFileDetail.getFilename());
+            }
+        });
+        if (detail != null) {
             long totalLength = detail.getLength();
             ServletOutputStream out = response.getOutputStream();
             List<HttpHeaderRange> ranges = WebUtil.getHeaderRanges(request);
@@ -388,6 +383,27 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         String downloadUrlPrefix = getDownloadUrlPrefix();
         int index = url.indexOf(downloadUrlPrefix + Strings.SLASH);
         return url.substring(index + downloadUrlPrefix.length()); // 通配符部分
+    }
+
+    protected FssFileDetail resolveFileDetail(I userIdentity, String storageUrl,
+            HttpServletRequest request, HttpServletResponse response, Consumer<FssFileDetail> prepare) {
+        FssFileDetail detail = this.service.getDetail(userIdentity, storageUrl);
+        if (detail == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } else {
+            if (prepare != null) {
+                prepare.accept(detail);
+            }
+            long modifiedTime = detail.getLastModifiedTime();
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED, modifiedTime);
+            response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+            long modifiedSince = WebUtil.getDateHeader(request, HttpHeaders.IF_MODIFIED_SINCE);
+            if (modifiedSince / 1000 == modifiedTime / 1000) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // 如果相等则返回表示未修改的状态码：304
+                return null;
+            }
+        }
+        return detail;
     }
 
     @Override
