@@ -51,18 +51,18 @@ public class Mimetypes {
         this.properties.load(in);
     }
 
-    private String getMimetypeByExtension(String fileName) {
-        String extension = fileName;
-        int index = fileName.lastIndexOf(Strings.DOT);
-        if (0 <= index && index + 1 < fileName.length()) {
-            extension = fileName.substring(index + 1);
+    private String getMimetypeByExtension(String filename) {
+        String extension = filename;
+        int index = filename.lastIndexOf(Strings.DOT);
+        if (0 <= index && index + 1 < filename.length()) {
+            extension = filename.substring(index + 1);
         }
         extension = extension.toLowerCase();
         return this.properties.getProperty(extension);
     }
 
-    public String getMimetype(String fileName) {
-        String mimeType = getMimetypeByExtension(fileName);
+    public String getMimetype(String filename) {
+        String mimeType = getMimetypeByExtension(filename);
         return mimeType == null ? DEFAULT_MIMETYPE : mimeType;
     }
 
