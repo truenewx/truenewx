@@ -75,7 +75,7 @@ public class PdfDoc {
             PDDestination dest = outlineItem.getDestination();
             if (dest instanceof PDPageDestination) {
                 PDPageDestination pageDest = (PDPageDestination) dest;
-                item.setDestIndex(pageDest.retrievePageNumber());
+                item.setPageIndex(pageDest.retrievePageNumber());
             }
         } catch (Exception ignored) {
         }

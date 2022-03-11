@@ -12,7 +12,7 @@ public class DocCatalogItem {
 
     private int level;
     private String caption;
-    private int destIndex = -1;
+    private int pageIndex = -1;
     private List<DocCatalogItem> subs;
 
     public int getLevel() {
@@ -31,12 +31,12 @@ public class DocCatalogItem {
         this.caption = caption;
     }
 
-    public int getDestIndex() {
-        return this.destIndex;
+    public int getPageIndex() {
+        return this.pageIndex;
     }
 
-    public void setDestIndex(int destIndex) {
-        this.destIndex = destIndex;
+    public void setPageIndex(int pageIndex) {
+        this.pageIndex = pageIndex;
     }
 
     public List<DocCatalogItem> getSubs() {
