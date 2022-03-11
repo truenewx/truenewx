@@ -311,6 +311,7 @@ const tnxel = Object.assign({}, tnxvue, {
         this._closeMessage();
         window.tnx.loadingInstance = ElLoading.service(options);
         this._handleZIndex('.el-loading-mask');
+        return window.tnx.loadingInstance;
     },
     closeLoading() {
         if (window.tnx.loadingInstance) { // 确保绝对的单例
