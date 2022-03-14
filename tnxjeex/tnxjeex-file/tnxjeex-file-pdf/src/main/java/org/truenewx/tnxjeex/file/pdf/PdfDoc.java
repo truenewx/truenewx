@@ -52,8 +52,8 @@ public class PdfDoc {
     }
 
     public DocCatalog getCatalog() {
-        DocCatalog summary = new DocCatalog();
-        summary.setPageCount(this.origin.getNumberOfPages());
+        DocCatalog catalog = new DocCatalog();
+        catalog.setPageCount(this.origin.getNumberOfPages());
         List<DocCatalogItem> items = new ArrayList<>();
         PDDocumentOutline outline = this.origin.getDocumentCatalog().getDocumentOutline();
         if (outline != null) {
@@ -63,8 +63,8 @@ public class PdfDoc {
                 outlineItem = outlineItem.getNextSibling();
             }
         }
-        summary.setItems(items);
-        return summary;
+        catalog.setItems(items);
+        return catalog;
     }
 
     private DocCatalogItem toCatalogItem(PDOutlineItem outlineItem, int level) {

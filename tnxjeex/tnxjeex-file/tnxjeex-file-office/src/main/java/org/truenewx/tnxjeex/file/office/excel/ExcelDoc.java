@@ -1,9 +1,12 @@
 package org.truenewx.tnxjeex.file.office.excel;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,6 +18,8 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.FileExtensions;
+import org.truenewx.tnxjeex.file.core.doc.DocCatalog;
+import org.truenewx.tnxjeex.file.core.doc.DocCatalogItem;
 import org.truenewx.tnxjeex.file.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -68,6 +73,36 @@ public class ExcelDoc {
 
     public Workbook getOrigin() {
         return this.origin;
+    }
+
+    public DocCatalog getCatalog(boolean includingHidden) {
+        DocCatalog catalog = new DocCatalog();
+        List<DocCatalogItem> items = new ArrayList<>();
+        int sheetNum = this.origin.getNumberOfSheets();
+        for (int i = 0; i < sheetNum; i++) {
+            if (includingHidden || !this.origin.isSheetHidden(i)) {
+                Sheet sheet = this.origin.getSheetAt(i);
+                DocCatalogItem item = new DocCatalogItem();
+                item.setCaption(sheet.getSheetName());
+                // 前面可能有被隐藏的sheet，索引严格按照加入顺序编排
+                item.setPageIndex(items.size());
+                items.add(item);
+                if (sheet.isSelected()) {
+                    catalog.setSelectedItemIndexes(List.of(item.getPageIndex()));
+                }
+            }
+        }
+        catalog.setItems(items);
+        catalog.setPageCount(items.size());
+        return catalog;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String extension = FileExtensions.XLSX;
+        String filename = "E:\\工作文档\\效行\\doc\\人事\\工作记录." + extension;
+        ExcelDoc doc = new ExcelDoc(new FileInputStream(filename), extension);
+        DocCatalog catalog = doc.getCatalog(false);
+        System.out.println(catalog);
     }
 
     public CellValue evaluateFormula(Cell cell) {

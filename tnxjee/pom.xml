@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.truenewx</groupId>
@@ -32,9 +31,9 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <feign.version>10.12</feign.version><!-- 与spring-cloud-starter-openfeign依赖的版本保持一致 -->
+        <feign.version>10.12</feign.version> <!-- 与spring-cloud-starter-openfeign依赖的版本保持一致 -->
         <swagger.version>2.10.5</swagger.version>
-        <logback.version>1.2.10</logback.version><!-- 修正安全漏洞 -->
+        <logback.version>1.2.10</logback.version> <!-- 修正安全漏洞 -->
     </properties>
     <build>
         <plugins>
@@ -67,7 +66,8 @@
         </plugins>
     </build>
     <dependencyManagement>
-        <dependencies><!-- ${project.version}是业务子工程的版本号，此处不能采用 -->
+        <dependencies>
+            <!-- ${project.version}是业务子工程的版本号，此处不能采用 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-properties-migrator</artifactId>
@@ -134,9 +134,24 @@
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.17.1</version> <!-- 与poi依赖的版本保持一致 -->
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>2.17.1</version> <!-- 与poi依赖的版本保持一致 -->
+            </dependency>
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.2</version><!-- 与openfeign依赖的版本保持一致 -->
+                <version>2.11.0</version> <!-- 与poi依赖的版本保持一致 -->
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.4</version> <!-- 与poi依赖的版本保持一致 -->
             </dependency>
             <dependency>
                 <groupId>com.github.stuxuhai</groupId>
@@ -151,7 +166,7 @@
             <dependency>
                 <groupId>org.dom4j</groupId>
                 <artifactId>dom4j</artifactId>
-                <version>2.1.3</version><!-- 与Hibernate依赖的版本保持一致 -->
+                <version>2.1.3</version> <!-- 与Hibernate依赖的版本保持一致 -->
             </dependency>
             <dependency>
                 <groupId>de.bwaldvogel</groupId>
@@ -210,14 +225,9 @@
                 <version>3.11.0</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>4.4</version><!-- 与poi依赖的版本保持一致 -->
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-openfeign</artifactId>
-                <version>2.2.9.RELEASE</version><!-- 与spring-cloud-dependencies中的openfeign版本保持一致 -->
+                <version>2.2.9.RELEASE</version> <!-- 与spring-cloud-dependencies中的openfeign版本保持一致 -->
             </dependency>
         </dependencies>
     </dependencyManagement>

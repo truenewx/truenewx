@@ -14,6 +14,10 @@ public class DocCatalog {
      */
     private int pageCount;
     private List<DocCatalogItem> items;
+    /**
+     * 从一级目录项开始直到最终选中目录项的索引清单
+     */
+    private List<Integer> selectedItemIndexes;
 
     public int getPageCount() {
         return this.pageCount;
@@ -29,6 +33,14 @@ public class DocCatalog {
 
     public void setItems(List<DocCatalogItem> items) {
         this.items = items;
+    }
+
+    public List<Integer> getSelectedItemIndexes() {
+        return this.selectedItemIndexes;
+    }
+
+    public void setSelectedItemIndexes(List<Integer> selectedItemIndexes) {
+        this.selectedItemIndexes = selectedItemIndexes;
     }
 
 }
