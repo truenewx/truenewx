@@ -7,7 +7,7 @@
 }
 
 .bg-info {
-    background-color: var(--el-color-info-light) !important;
+    background-color: var(--el-color-info-light-8) !important;
 }
 
 .text-white {
@@ -40,7 +40,7 @@
 .border-bottom,
 .border-start,
 .border-end {
-    border-color: var(--el-border-color-base) !important;
+    border-color: var(--el-border-color) !important;
 }
 
 .text-placeholder {
@@ -281,7 +281,7 @@
 }
 
 .el-form-item--feedback .ignore-feedback .el-input__inner {
-    border-color: var(--el-border-color-base);
+    border-color: var(--el-border-color);
 }
 
 .el-form-item--feedback .ignore-feedback .el-input__validateIcon {
@@ -522,7 +522,7 @@ el-card {
 
 .el-message-box__header {
     padding: 1rem;
-    border-bottom: 1px solid var(--el-border-color-base);
+    border-bottom: 1px solid var(--el-border-color);
 }
 
 .el-message-box {

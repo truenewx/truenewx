@@ -684,7 +684,7 @@ export default {
     align-items: center;
     margin-top: 0;
     margin-bottom: 0.5rem;
-    border: 1px solid var(--el-border-color-base);
+    border: 1px solid var(--el-border-color);
     border-radius: .25rem;
     width: fit-content;
 }
