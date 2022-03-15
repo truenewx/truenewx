@@ -1,6 +1,6 @@
 <template>
     <el-upload ref="upload" name="file" class="tnxel-upload-container"
-        :class="{center: center}"
+        :class="{center: center, 'hide-file-list': !showFileList}"
         :id="id"
         :action="action"
         :before-upload="_beforeUpload"
@@ -10,25 +10,13 @@
         :with-credentials="true"
         :list-type="listType"
         :file-list="fileList"
-        :show-file-list="showFileList"
+        :show-file-list="true"
         :headers="uploadHeaders"
         :multiple="uploadOptions ? uploadOptions.number > 1 : false"
-        :accept="uploadAccept">
-        <template #default>
-            <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
-                <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
-                    v-if="listType === 'text'">
-                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
-                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
-                </el-button>
-                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined" v-else>
-                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
-                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
-                </div>
-            </el-tooltip>
-        </template>
+        :accept="uploadAccept" v-if="uploadOptions">
         <template #file="{file}">
-            <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle">
+            <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle"
+                v-if="showFileList">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="imageable">
                 <div class="el-upload-list__item-name" v-else>
                     <tnxel-icon value="Document"/>
@@ -48,6 +36,19 @@
                     </div>
                 </div>
             </div>
+        </template>
+        <template #trigger>
+            <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
+                <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
+                    v-if="listType === 'text'">
+                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
+                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
+                </el-button>
+                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined" v-else>
+                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
+                    <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
+                </div>
+            </el-tooltip>
         </template>
         <template #tip v-if="tipContent && (typeof tip !== 'string')">
             <div class="el-upload__tip" v-text="tipContent"></div>
@@ -132,7 +133,7 @@ export default {
             uploadHeaders: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            uploadFileNum: 0,
+            files: [], // 文件清单，包含初始文件和新增成功的文件，不包含校验失败的文件
         };
     },
     computed: {
@@ -196,9 +197,6 @@ export default {
             }
             return undefined;
         },
-        uploadFiles() {
-            return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
-        },
         uploadSize() {
             let width = this.width;
             let height = this.height;
@@ -234,16 +232,17 @@ export default {
     },
     watch: {
         uploadOptions() {
-            this.render();
+            this.init();
         },
         fileList() {
             if (this.uploadOptions?.number) {
-                this.render();
+                this.init();
             }
         }
     },
     methods: {
-        render() {
+        init() {
+            this.files = [].concat(this.fileList);
             let vm = this;
             // 需在vue渲染之后才可正常操作dom元素
             this.$nextTick(function() {
@@ -277,12 +276,13 @@ export default {
                 });
 
                 // 不显示文件清单，或文件数量未达到上限，则显示添加框
-                if (!vm.showFileList || (vm.fileList && vm.fileList.length < vm.uploadOptions.number)) {
+                if (!vm.showFileList || vm.files.length < vm.uploadOptions.number) {
                     $upload.css({
                         display: 'inline-flex'
                     });
                 }
-                if (vm.fileList?.length) {
+                // 构建初始化文件显示面板
+                if (vm.fileList) {
                     for (let file of vm.fileList) {
                         vm._resizeFilePanel(file, vm.fileList);
                     }
@@ -302,16 +302,20 @@ export default {
             return file.id;
         },
         validate(file) {
+            // 在检查首个准备上传的文件前，清空可能存在的错误消息
+            if (this.files.length === 0) {
+                this.handleErrors([]);
+            }
             // 校验文件重复
             const vm = this;
-            if (this.uploadFiles.contains(function(f) {
+            if (this.files.contains(function(f) {
                 const raw = f.raw ? f.raw : f;
                 return file.uid !== raw.uid && vm.getFileId(file) === vm.getFileId(raw);
             })) {
                 return false;
             }
             // 校验数量
-            if (this.uploadOptions.number > 0 && this.uploadFiles.length > this.uploadOptions.number) {
+            if (this.files.length >= this.uploadOptions.number) {
                 let message = this.tipMessages.number.format(this.uploadOptions.number);
                 message += '，多余的文件未加入上传队列';
                 this.handleErrors([{
@@ -358,26 +362,20 @@ export default {
                     }
                 }
             }
+            // 校验通过才加入上传中文件清单
+            this.files.push(file);
             return true;
         },
         _beforeUpload(file) {
-            if (this.uploadFiles.length === 1) { // 在检查首个准备上传的文件前，清空可能存在的错误消息
-                this.handleErrors([]);
-            }
-            // 指定了onUpload，则记录准备上传的文件数量
-            if (this.onUpload && this.uploadFileNum < this.uploadFiles.length) {
-                this.uploadFileNum = this.uploadFiles.length;
-            }
             const vm = this;
             const rpc = this.tnx.app.rpc;
             return new Promise(function(resolve, reject) {
                 if (vm.validate(file)) {
                     let $upload = $('#' + vm.id + ' .el-upload');
-                    if (vm.showFileList && vm.uploadFiles.length >= vm.uploadOptions.number) {
+                    if (vm.showFileList && vm.files.length >= vm.uploadOptions.number) {
                         $upload.css('visibility', 'hidden');
                     }
 
-                    let fssConfig = vm.tnx.fss.getClientConfig();
                     // 上传前需确保用户在fss应用中已登录
                     rpc.ensureLogined(function() {
                         if (vm.beforeUpload) {
@@ -397,11 +395,9 @@ export default {
                             resolve(file);
                         }
                     }, {
-                        app: fssConfig.appName,
+                        app: vm.appName,
                         toLogin(loginFormUrl, originalUrl, originalMethod) {
-                            // 此时已可知在CAS服务器上未登录，即未登录任一服务
                             $upload.css('visibility', 'unset');
-                            reject(file);
                             // 从当前应用登录表单地址
                             rpc.get('/authentication/login-url', function(loginUrl) {
                                 if (loginUrl) {
@@ -409,6 +405,9 @@ export default {
                                     loginUrl += loginUrl.contains('?') ? '&' : '?';
                                     loginUrl += rpc.loginSuccessRedirectParameter + '=' + window.location.href;
                                     rpc.toLogin(loginUrl, vm.action, 'POST');
+                                } else {
+                                    // 获取登录地址为空，则说明实际上是登录状态
+                                    resolve(file);
                                 }
                             });
                             return true;
@@ -424,10 +423,10 @@ export default {
             if (file.percentage === 0) { // 首次执行
                 this._resizeFilePanel(file, fileList);
                 if (this.onUpload) {
+                    // 最后一个文件开始上传，触发onUpload事件处理
                     if (file.uid === fileList[fileList.length - 1].uid) {
                         let resolvedNum = fileList.length;
-                        let rejectedNum = this.uploadFileNum - resolvedNum;
-                        this.uploadFileNum = 0;
+                        let rejectedNum = this.files.length - resolvedNum;
                         this.onUpload(resolvedNum, rejectedNum);
                     }
                 }
@@ -439,7 +438,7 @@ export default {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
             // 显示文件清单且文件数量已达上限，则隐藏添加框
-            if (this.showFileList && fileList.length >= this.uploadOptions.number) {
+            if (this.showFileList && this.files.length >= this.uploadOptions.number) {
                 // 隐藏添加框
                 $upload.css({
                     display: 'none',
@@ -448,12 +447,12 @@ export default {
             }
 
             let fileId = this.getFileId(file);
-            let $filePanel = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container);
+            let $fileItem = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container).parent();
             let uploadStyle = $upload.attr('style');
             if (uploadStyle) {
                 // 去掉隐藏样式
                 uploadStyle = uploadStyle.replace(/display:\s*none;/, '').trim();
-                $filePanel.attr('style', uploadStyle);
+                $fileItem.attr('style', uploadStyle);
             }
         },
         _onSuccess(result, file, fileList) {
@@ -500,10 +499,10 @@ export default {
             }
         },
         removeFile(file) {
-            this.uploadFiles.remove(function(f) {
+            this.files.remove(function(f) {
                 return file.uid === f.uid;
             });
-            if (this.uploadFiles.length < this.uploadOptions.number) {
+            if (this.files.length < this.uploadOptions.number) {
                 let container = $('#' + this.id);
                 this.$nextTick(function() {
                     // 去掉文件列表的样式，以免其占高度
@@ -551,8 +550,8 @@ export default {
             });
         },
         size() {
-            if (this.uploadFiles && this.uploadFiles.length) {
-                return this.uploadFiles.length;
+            if (this.files && this.files.length) {
+                return this.files.length;
             }
             return 0;
         },
@@ -579,6 +578,11 @@ export default {
 
 .tnxel-upload-container.center {
     align-items: center;
+}
+
+.tnxel-upload-container.hide-file-list .el-upload-list__item,
+.tnxel-upload-container.hide-file-list .el-upload-list--text {
+    display: none;
 }
 
 .tnxel-upload-container .el-upload {

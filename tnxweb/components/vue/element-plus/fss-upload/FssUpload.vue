@@ -1,5 +1,6 @@
 <template>
     <tnxel-upload ref="upload"
+        :app-name="appName"
         :action="action"
         :upload-options="uploadOptions"
         :file-list="fileList"
@@ -71,6 +72,7 @@ export default {
         const tnx = window.tnx;
         return {
             tnx: tnx,
+            appName: tnx.fss.appName,
             action: tnx.fss.getUploadUrl(this.type, this.scope),
             params: {
                 onlyStorage: this.onlyStorage,
@@ -80,8 +82,8 @@ export default {
         };
     },
     computed: {
-        uploadFiles() {
-            return this.$refs.upload ? this.$refs.upload.uploadFiles : [];
+        uploadingFiles() {
+            return this.$refs.upload?.uploadingFiles || [];
         },
     },
     watch: {
@@ -235,7 +237,7 @@ export default {
         },
         emitInput() {
             let storageUrls = [];
-            for (let file of this.uploadFiles) {
+            for (let file of this.fileList) {
                 if (file.storageUrl) {
                     storageUrls.push(file.storageUrl);
                 } else { // 存在一个未完成上传，则退出
@@ -258,7 +260,7 @@ export default {
         validateUploaded(reject) {
             if (this.uploadOptions.number > 1) {
                 const storageUrls = [];
-                for (let file of this.uploadFiles) {
+                for (let file of this.uploadingFiles) {
                     if (file.storageUrl) {
                         storageUrls.push(file.storageUrl);
                     } else {
@@ -267,8 +269,8 @@ export default {
                     }
                 }
                 return storageUrls;
-            } else if (this.uploadFiles.length) {
-                let file = this.uploadFiles[0];
+            } else if (this.uploadingFiles.length) {
+                let file = this.uploadingFiles[0];
                 if (file) {
                     if (file.storageUrl) {
                         return file.storageUrl;
@@ -290,7 +292,7 @@ export default {
                     }
                 });
             }
-        }
+        },
     }
 }
 </script>
