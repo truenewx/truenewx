@@ -90,7 +90,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String storageFilename = strategy.getStorageFilename(userIdentity, scope);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
-            if (!(in instanceof BufferedInputStream)) {
+            if (!in.markSupported()) {
                 in = new BufferedInputStream(in);
             }
             in.mark(Integer.MAX_VALUE);
@@ -393,13 +393,22 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             if (sourceStrategy.getProvider() != targetStrategy.getProvider()) {
                 throw new BusinessException(FssExceptionCodes.CANNOT_COPY_BETWEEN_PROVIDERS);
             }
+            FssAccessor accessor = this.accessors.get(targetStrategy.getProvider());
+            String sourcePath = sourceStrategy.getContextPath() + sourceStoragePath.getRelativePath();
             // 获取目标相对目录，同时校验写权限
             String targetRelativeDir = getRelativeDirForWrite(targetStrategy, userIdentity, targetScope);
             // 获取目标存储文件名
             String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope);
             if (StringUtils.isBlank(targetStorageFilename)) {
-                throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
-                        targetScope, targetType);
+                // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用
+                try {
+                    InputStream sourceInputStream = accessor.getReadStream(sourcePath);
+                    targetStorageFilename = EncryptUtil.encryptByMd5(sourceInputStream);
+                    sourceInputStream.close();
+                } catch (IOException e) {
+                    throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
+                            targetScope, targetType);
+                }
             }
             // 目标文件扩展名与来源文件相同
             String extension = FilenameUtils.getExtension(sourceStoragePath.getFilename());
@@ -411,8 +420,6 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssStoragePath targetStoragePath = new FssStoragePath(targetType, targetRelativeDir, targetStorageFilename);
             String targetStorageUrl = targetStoragePath.getUrl();
             if (!sourceStorageUrl.equals(targetStorageUrl)) { // 存储路径不同才有必要复制
-                FssAccessor accessor = this.accessors.get(targetStrategy.getProvider());
-                String sourcePath = sourceStrategy.getContextPath() + sourceStoragePath.getRelativePath();
                 String targetPath = targetStrategy.getContextPath() + targetStoragePath.getRelativePath();
                 accessor.copy(sourcePath, targetPath);
                 targetStrategy.onWritten(userIdentity, targetScope, targetStorageUrl);
