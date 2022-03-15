@@ -713,3 +713,11 @@ i svg {
 .el-button-group > .el-dropdown:not(:first-child):not(:last-child) .el-button {
     border-radius: 0;
 }
+
+.el-dialog__header {
+    margin-right: 0;
+}
+
+.el-dialog__headerbtn {
+    top: 0;
+}
