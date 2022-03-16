@@ -1,14 +1,15 @@
 package org.truenewx.tnxjee.core.jackson;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.truenewx.tnxjee.core.util.FilteredNames;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import org.truenewx.tnxjee.core.util.FilteredNames;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 类型区分的属性过滤器
@@ -19,6 +20,16 @@ public class TypedPropertyFilter extends SimpleBeanPropertyFilter {
 
     private FilteredNames getFilteredProperties(Class<?> beanClass) {
         FilteredNames filteredProperties = this.properties.get(beanClass);
+        // 找不到类型直接对应的过滤属性，则查找父类或接口对应的过滤属性
+        if (filteredProperties == null) {
+            for (Map.Entry<Class<?>, FilteredNames> entry : this.properties.entrySet()) {
+                if (entry.getKey().isAssignableFrom(beanClass)) {
+                    filteredProperties = entry.getValue();
+                    this.properties.put(beanClass, filteredProperties);
+                    break;
+                }
+            }
+        }
         if (filteredProperties == null) {
             filteredProperties = new FilteredNames();
             this.properties.put(beanClass, filteredProperties);
