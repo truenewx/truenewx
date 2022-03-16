@@ -74,7 +74,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
      */
     @Bean
     public WebAuthenticationEntryPoint authenticationEntryPoint() {
-        return new WebAuthenticationEntryPoint(this.urlProvider.getDefaultLoginFormUrl());
+        return new WebAuthenticationEntryPoint(this.urlProvider);
     }
 
     /**
