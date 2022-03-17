@@ -123,14 +123,16 @@ public class ExcelSheet {
         return new DisplayingExcelSheetSummary(columns, getRowNum());
     }
 
-    public List<DisplayingExcelRowModel> getDisplayRows(int batchSize, int batchNo) {
+    /**
+     * 获取所有显示行，由于可能存在合并单元格，无法进行分批获取
+     *
+     * @return 所有显示行
+     */
+    public List<DisplayingExcelRowModel> getDisplayRows() {
         List<DisplayingExcelRowModel> displayRows = new ArrayList<>();
-        batchNo = Math.max(batchNo, 1); // 批次号最小为1
-        // 批次大小大于0才进行分批获取
-        int beginRowIndex = batchSize > 0 ? (batchSize * (batchNo - 1)) : 0;
-        int endRowIndex = batchSize > 0 ? (beginRowIndex + batchSize - 1) : this.origin.getLastRowNum();
+        int rowNum = getRowNum();
         int columNum = getColumnNum();
-        for (int i = beginRowIndex; i <= endRowIndex; i++) {
+        for (int i = 0; i < rowNum; i++) {
             ExcelRow row = getRow(i, true);
             displayRows.add(row.toDisplayModel(columNum));
         }
