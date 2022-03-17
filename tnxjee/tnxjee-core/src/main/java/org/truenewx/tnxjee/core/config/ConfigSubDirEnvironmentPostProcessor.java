@@ -20,6 +20,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.truenewx.tnxjee.Framework;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.SpringUtil;
 
 /**
@@ -179,11 +180,11 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
     private int getExtensionOrdinal(String extension) {
         if (extension != null) {
             switch (extension) {
-                case "properties":
+                case FileExtensions.PROPERTIES:
                     return 0;
-                case "yaml":
+                case FileExtensions.YAML:
                     return 1;
-                case "yml":
+                case FileExtensions.YML:
                     return 2;
                 default:
                     break;

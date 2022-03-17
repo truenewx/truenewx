@@ -24,4 +24,9 @@ public class FileExtensions {
     public static final String XLS = "xls";
     public static final String XLSX = "xlsx";
 
+    // 配置文件
+    public static final String PROPERTIES = "properties";
+    public static final String YAML = "yaml";
+    public static final String YML = "yml";
+
 }
