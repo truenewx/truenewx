@@ -1,10 +1,17 @@
 package org.truenewx.tnxjeex.file.office.excel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelColumnModel;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelRowModel;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelSheetSummary;
+import org.truenewx.tnxjeex.file.office.excel.display.ExcelDisplayUtil;
 import org.truenewx.tnxjeex.file.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -16,6 +23,7 @@ public class ExcelSheet {
 
     private Sheet origin;
     private ExcelDoc doc;
+    private List<CellRangeAddress> mergedRegions;
 
     public ExcelSheet(ExcelDoc doc, Sheet origin) {
         this.doc = doc;
@@ -32,6 +40,14 @@ public class ExcelSheet {
 
     public int getSheetIndex() {
         return this.doc.getOrigin().getSheetIndex(this.origin);
+    }
+
+    public int getRowNum() {
+        return this.origin.getLastRowNum() + 1;
+    }
+
+    public int getColumnNum() {
+        return ExcelDisplayUtil.getColumnNum(this.origin);
     }
 
     public ExcelRow createRow(int rowIndex, boolean copyStyleFromPreviousRow) {
@@ -77,6 +93,48 @@ public class ExcelSheet {
                 consumer.accept(new ExcelRow(this, row), i);
             }
         }
+    }
+
+    public List<CellRangeAddress> getMergedRegions() {
+        if (this.mergedRegions == null) {
+            this.mergedRegions = this.origin.getMergedRegions();
+        }
+        return this.mergedRegions;
+    }
+
+    /**
+     * 找出指定单元格在当前工作表中的所属合并区域
+     *
+     * @param cell 单元格
+     * @return 指定单元格在当前工作表中的所属合并区域，null-不属于任何合并区域
+     */
+    public CellRangeAddress locateMergedRegion(Cell cell) {
+        List<CellRangeAddress> mergedRegions = getMergedRegions();
+        for (CellRangeAddress rangeAddress : mergedRegions) {
+            if (rangeAddress.isInRange(cell)) {
+                return rangeAddress;
+            }
+        }
+        return null;
+    }
+
+    public DisplayingExcelSheetSummary getDisplaySummary() {
+        List<DisplayingExcelColumnModel> columns = ExcelDisplayUtil.getColumns(this.origin);
+        return new DisplayingExcelSheetSummary(columns, getRowNum());
+    }
+
+    public List<DisplayingExcelRowModel> getDisplayRows(int batchSize, int batchNo) {
+        List<DisplayingExcelRowModel> displayRows = new ArrayList<>();
+        batchNo = Math.max(batchNo, 1); // 批次号最小为1
+        // 批次大小大于0才进行分批获取
+        int beginRowIndex = batchSize > 0 ? (batchSize * (batchNo - 1)) : 0;
+        int endRowIndex = batchSize > 0 ? (beginRowIndex + batchSize - 1) : this.origin.getLastRowNum();
+        int columNum = getColumnNum();
+        for (int i = beginRowIndex; i <= endRowIndex; i++) {
+            ExcelRow row = getRow(i, true);
+            displayRows.add(row.toDisplayModel(columNum));
+        }
+        return displayRows;
     }
 
 }

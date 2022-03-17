@@ -1,6 +1,5 @@
 package org.truenewx.tnxjeex.file.office.excel;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -95,14 +94,6 @@ public class ExcelDoc {
         catalog.setItems(items);
         catalog.setPageCount(items.size());
         return catalog;
-    }
-
-    public static void main(String[] args) throws IOException {
-        String extension = FileExtensions.XLSX;
-        String filename = "E:\\工作文档\\效行\\doc\\人事\\工作记录." + extension;
-        ExcelDoc doc = new ExcelDoc(new FileInputStream(filename), extension);
-        DocCatalog catalog = doc.getCatalog(false);
-        System.out.println(catalog);
     }
 
     public CellValue evaluateFormula(Cell cell) {
