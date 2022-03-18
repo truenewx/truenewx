@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.core.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -311,7 +312,7 @@ public class MathUtil {
      * @param toPercent 是否转换为百分比
      * @return 格式化后的字符串
      */
-    public static String formatNumber(Object number, int minScale, int maxScale, boolean toPercent) {
+    public static String format(Number number, int minScale, int maxScale, boolean toPercent) {
         if (number == null) {
             return "";
         }
@@ -320,6 +321,10 @@ public class MathUtil {
         format.setMinimumFractionDigits(minScale);
         format.setMaximumFractionDigits(maxScale);
         return format.format(number);
+    }
+
+    public static String format(Number number, String pattern) {
+        return new DecimalFormat(pattern).format(number);
     }
 
     @SuppressWarnings("unchecked")
