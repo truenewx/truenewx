@@ -9,17 +9,13 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.DateUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
-import org.truenewx.tnxjeex.file.office.excel.display.ExcelDisplayUtil;
 
 /**
  * Excel单元格
@@ -68,7 +64,7 @@ public class ExcelCell {
             return date == null ? null : DateUtil.format(date, pattern);
         }
         if (this.origin.getCellType() == CellType.FORMULA) {
-            CellValue cellValue = this.row.getSheet().getDoc().evaluateFormula(this.origin);
+            CellValue cellValue = evaluateFormula();
             if (cellValue != null) {
                 return cellValue.formatAsString();
             }
@@ -80,7 +76,16 @@ public class ExcelCell {
         return readStringValue();
     }
 
-    public boolean isDateFormatted() {
+    /**
+     * 执行公式
+     *
+     * @return 公式执行结果值
+     */
+    public CellValue evaluateFormula() {
+        return this.row.getSheet().getDoc().evaluateFormula(this.origin);
+    }
+
+    private boolean isDateFormatted() {
         CellType cellType = this.origin.getCellType();
         if (cellType != CellType.NUMERIC && cellType != CellType.FORMULA) {
             return false;
@@ -89,14 +94,14 @@ public class ExcelCell {
             return true;
         }
         short dataFormat = this.origin.getCellStyle().getDataFormat();
-        return dataFormat == 177 || dataFormat == 180;
+        return (176 <= dataFormat && dataFormat <= 199) || (202 <= dataFormat && dataFormat <= 212);
     }
 
     public String getDatePattern() {
         if (isDateFormatted()) {
             CellStyle style = this.origin.getCellStyle();
             short dataFormat = style.getDataFormat();
-            String pattern = ExcelDisplayUtil.getConfiguredDatePattern(dataFormat);
+            String pattern = ExcelUtil.getConfiguredDatePattern(dataFormat);
             if (pattern != null) {
                 return pattern;
             }
@@ -205,7 +210,7 @@ public class ExcelCell {
             if (cellType == CellType.NUMERIC) {
                 return BigDecimal.valueOf(this.origin.getNumericCellValue());
             } else if (cellType == CellType.FORMULA) {
-                CellValue cellValue = this.row.getSheet().getDoc().evaluateFormula(this.origin);
+                CellValue cellValue = evaluateFormula();
                 if (cellValue != null) {
                     return BigDecimal.valueOf(cellValue.getNumberValue());
                 }
@@ -222,7 +227,7 @@ public class ExcelCell {
      */
     private String readStringValue() {
         try {
-            String value = this.origin.getStringCellValue();
+            String value = this.origin.getRichStringCellValue().getString();
             return value == null ? null : value.trim(); // Excel单元格里容易出现不易察觉的空格，读取时去掉首尾空格
         } catch (Exception e) {
             throw new ExcelCellFormatException(this.origin.getAddress());
@@ -324,7 +329,19 @@ public class ExcelCell {
     }
 
     public CellStyle getCellStyle() {
-        return this.origin.getCellStyle();
+        CellStyle cellStyle = this.origin.getCellStyle();
+        if (cellStyle.getAlignment() == HorizontalAlignment.GENERAL) {
+            HorizontalAlignment alignment;
+            CellType cellType = this.origin.getCellType();
+            if (cellType == CellType.FORMULA) {
+                CellValue cellValue = evaluateFormula();
+                alignment = ExcelUtil.getDefaultAlignment(cellValue.getCellType());
+            } else {
+                alignment = ExcelUtil.getDefaultAlignment(cellType);
+            }
+            cellStyle.setAlignment(alignment);
+        }
+        return cellStyle;
     }
 
     public void formatStringValue(Object... args) {
