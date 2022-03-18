@@ -10,7 +10,6 @@ import java.util.function.Function;
  * 函数：获取最小数值
  *
  * @author jianglei
- * 
  */
 public class FuncMinNumber implements Function<Class<?>, Number> {
 
@@ -33,7 +32,6 @@ public class FuncMinNumber implements Function<Class<?>, Number> {
         this.values.put(Float.class, Float.MIN_VALUE);
         this.values.put(BigDecimal.class, BigDecimal.valueOf(Double.MIN_VALUE));
         this.values.put(BigInteger.class, BigInteger.valueOf(Long.MIN_VALUE));
-        this.values.put(Float.class, Float.MIN_VALUE);
     }
 
     @Override
