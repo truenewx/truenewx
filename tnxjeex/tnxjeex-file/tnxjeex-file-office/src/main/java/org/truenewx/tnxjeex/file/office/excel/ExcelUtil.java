@@ -37,9 +37,8 @@ public class ExcelUtil {
         }
     }
 
-    public static String getConfiguredDatePattern(short dataFormat) {
-        String key = String.valueOf(dataFormat);
-        return DATE_PATTERN_PROPERTIES.getProperty(key);
+    public static String getConfiguredDataPattern(String dataFormat) {
+        return DATE_PATTERN_PROPERTIES.getProperty(dataFormat);
     }
 
     public static HorizontalAlignment getDefaultAlignment(CellType cellType) {

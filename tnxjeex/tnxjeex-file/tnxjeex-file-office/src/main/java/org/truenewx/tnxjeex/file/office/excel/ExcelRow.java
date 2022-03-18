@@ -74,28 +74,28 @@ public class ExcelRow {
 
     public String getStringCellValue(int columnIndex) {
         Cell cell = this.origin.getCell(columnIndex);
-        return cell == null ? null : new ExcelCell(this, cell).getStringCellValue();
+        return cell == null ? null : new ExcelCell(this, cell).getValueAsString();
     }
 
     public BigDecimal getNumericCellValue(int columnIndex) {
         Cell cell = this.origin.getCell(columnIndex);
-        return cell == null ? null : new ExcelCell(this, cell).getNumericCellValue();
+        return cell == null ? null : new ExcelCell(this, cell).getValueAsDecimal();
     }
 
     public LocalDate getLocalDateCellValue(int columnIndex) {
         Cell cell = this.origin.getCell(columnIndex);
-        return cell == null ? null : new ExcelCell(this, cell).getLocalDateCellValue();
+        return cell == null ? null : new ExcelCell(this, cell).getValueAsDate();
     }
 
     public LocalDate getLocalMonthCellValue(int columnIndex) {
         Cell cell = this.origin.getCell(columnIndex);
-        return cell == null ? null : new ExcelCell(this, cell).getLocalMonthCellValue();
+        return cell == null ? null : new ExcelCell(this, cell).getValueAsMonthDate();
     }
 
     public PermanentableDate getPermanentableDateCellValue(int columnIndex,
             Supplier<String> permanentDateTextSupplier) {
         Cell cell = this.origin.getCell(columnIndex);
-        return cell == null ? null : new ExcelCell(this, cell).getPermanentableDateCellValue(permanentDateTextSupplier);
+        return cell == null ? null : new ExcelCell(this, cell).getValueAsPermanentableDate(permanentDateTextSupplier);
     }
 
     public DisplayingExcelRowModel toDisplayModel(int cellNum) {
@@ -125,8 +125,8 @@ public class ExcelRow {
                         }
                     }
                     if (cell != null) {
-                        String value = cell.getStringCellValue();
-                        CellStyle style = cell.getCellStyle();
+                        String value = cell.getValueAsString();
+                        CellStyle style = cell.getCellStyle(true);
                         cellModels[i] = new DisplayingExcelCellModel(value, style, rowspan, colspan);
                     }
                 } else { // 占位
