@@ -178,13 +178,35 @@ public class StringUtil {
         if (StringUtils.isEmpty(chars)) {
             return false;
         }
-        byte[] bc = chars.getBytes();
-        for (byte b : bc) {
-            if (s.indexOf((char) b) >= 0) {
+        StringBuilder sb = new StringBuilder(chars);
+        for (int i = 0; i < sb.length(); i++) {
+            char c = sb.charAt(i);
+            if (s.indexOf(c) >= 0) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * 判断指定字符串中是否只包含指定比较字符集合中的字符
+     *
+     * @param s     字符串
+     * @param chars 比较字符集合
+     * @return true if 指定字符串中包含指定字符集合中的字符, otherwise false
+     */
+    public static boolean onlyContainsChar(String s, String chars) {
+        if (StringUtils.isEmpty(chars)) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder(s);
+        for (int i = 0; i < sb.length(); i++) {
+            char c = sb.charAt(i);
+            if (chars.indexOf(c) < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
