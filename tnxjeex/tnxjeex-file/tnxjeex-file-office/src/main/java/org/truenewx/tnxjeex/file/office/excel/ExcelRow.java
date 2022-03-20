@@ -128,6 +128,12 @@ public class ExcelRow {
                         String value = cell.getValueAsString();
                         CellStyle style = cell.getCellStyle(true);
                         cellModels[i] = new DisplayingExcelCellModel(value, style, rowspan, colspan);
+                        if (i == 0) {
+                            System.out.println("====== " + (rowIndex + 1)
+                                    + ": " + style.getDataFormatString()
+                                    + " -> " + cell.getDateTimePattern()
+                                    + "        " + value);
+                        }
                     }
                 } else { // 占位
                     cellModels[i] = new DisplayingExcelCellModel();

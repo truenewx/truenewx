@@ -1,24 +1,18 @@
 package org.truenewx.tnxjeex.file.office.excel;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
-import java.util.Locale;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.caption.CaptionUtil;
-import org.truenewx.tnxjee.core.spec.BooleanEnum;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
-import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
 
 /**
@@ -30,6 +24,8 @@ public class ExcelCell {
 
     private Cell origin;
     private ExcelRow row;
+    private DataFormatter dataFormatter;
+    private FormulaEvaluator formulaEvaluator;
 
     public ExcelCell(ExcelRow row, Cell origin) {
         this.origin = origin;
@@ -75,7 +71,7 @@ public class ExcelCell {
      *
      * @return 单元格内容字符串
      */
-    private String loadStringValue() {
+    private String readStringValue() {
         try {
             CellType cellType = this.origin.getCellType();
             if (cellType == CellType.STRING) {
@@ -99,7 +95,7 @@ public class ExcelCell {
      *
      * @return 单元格内容数字
      */
-    private double loadNumberValue() {
+    private Double readNumberValue() {
         try {
             CellType cellType = this.origin.getCellType();
             if (cellType == CellType.NUMERIC) {
@@ -109,16 +105,23 @@ public class ExcelCell {
                 if (cellValue != null) {
                     return cellValue.getNumberValue();
                 }
+            } else if (cellType == CellType.BLANK) {
+                return null;
             }
         } catch (Exception ignored) {
         }
         throw new ExcelCellFormatException(this.origin.getAddress());
     }
 
+    private Date readDateValue() {
+        Double number = readNumberValue();
+        return number == null ? null : DateUtil.getJavaDate(number);
+    }
+
     /**
-     * @return 当前单元格的Java规格的数据格式
+     * @return 当前单元格的Java规格的日期时间格式
      */
-    public ExcelCellFormat getFormat() {
+    public String getDateTimePattern() {
         // 经测试发现，short类型的dataFormat在不同Excel文档中可能具有不同的值，不能用于作为判断依据，只能根据dataFormatString进行转换
         if (isDateTimeType()) {
             CellStyle style = this.origin.getCellStyle();
@@ -145,10 +148,17 @@ public class ExcelCell {
                 pattern = pattern.replaceAll("\\\\ ", Strings.SPACE).replaceAll("\\\\,", Strings.COMMA);
                 // 表示星期几的a替换为E
                 pattern = pattern.replaceAll("a", "E");
-                // 如果格式中存在AM/PM，则为12小时制，否则为24小时制
-                boolean halfDay = pattern.contains("AM/PM");
+                // 如果格式中存在英文或中文的AM/PM，则为12小时制，否则为24小时制
+                String halfDayKey = "AM/PM";
+                boolean halfDay = pattern.contains(halfDayKey);
                 if (halfDay) {
-                    pattern = pattern.replaceAll("AM/PM", "a");
+                    pattern = pattern.replaceAll(halfDayKey, "a");
+                } else {
+                    halfDayKey = ExcelUtil.getConfiguredDataPattern(halfDayKey);
+                    halfDay = pattern.contains(halfDayKey);
+                    if (halfDay) {
+                        pattern = pattern.replaceAll(halfDayKey, "a");
+                    }
                 }
                 // /替换为-，但\/替换为/
                 int slashIndex = pattern.indexOf(Strings.SLASH);
@@ -190,38 +200,9 @@ public class ExcelCell {
                     pattern = pattern.replaceAll("h", "H");
                 }
             }
-            return new ExcelCellFormat(ExcelCellFormatType.DATETIME, pattern);
-        } else if (this.origin.getCellType() == CellType.NUMERIC) { // 不是日期类型的数字类型为数值类型
-            CellStyle style = this.origin.getCellStyle();
-            String pattern = style.getDataFormatString();
-            if ("General".equals(pattern)) {
-                pattern = null;
-            } else if (pattern.contains(Strings.SLASH)) { // 不支持分数形式，极其少见
-                pattern = null;
-            } else {
-                // 最多支持一个;，即两个子模式，一般用于正负号两种情况
-                int semicolonIndex = pattern.indexOf(Strings.SEMICOLON);
-                if (semicolonIndex >= 0) {
-                    int semicolonIndex2 = pattern.indexOf(Strings.SEMICOLON, semicolonIndex + 1);
-                    if (semicolonIndex2 > semicolonIndex) {
-                        pattern = pattern.substring(0, semicolonIndex2);
-                    }
-                }
-                // 去掉占位符:_ 、_)、_-
-                pattern = pattern.replaceAll("(_ )|(_\\)|)(_-)", Strings.EMPTY);
-                // * 替换为空格
-                pattern = pattern.replaceAll("(\\* )|(\\\\ )", Strings.SPACE);
-                // \$替换为$
-                pattern = pattern.replace("\\$", "$");
-                // 科学计数中的E+替换为E，+在Java中不被支持，格式化后再回填
-                pattern = pattern.replaceAll("E\\+", "E");
-                // 去掉双引号
-                pattern = pattern.replaceAll(Strings.DOUBLE_QUOTES, Strings.EMPTY);
-            }
-            return new ExcelCellFormat(ExcelCellFormatType.NUMBER, pattern);
+            return pattern;
         }
-        ExcelCellFormatType type = this.origin.getCellType() == CellType.BOOLEAN ? ExcelCellFormatType.BOOLEAN : ExcelCellFormatType.NORMAL;
-        return new ExcelCellFormat(type, null);
+        return null;
     }
 
     private boolean isDateTimeType() {
@@ -232,8 +213,8 @@ public class ExcelCell {
         if (DateUtil.isCellDateFormatted(this.origin)) {
             return true;
         }
-        short dataFormat = this.origin.getCellStyle().getDataFormat();
-        return (176 <= dataFormat && dataFormat <= 199) || (202 <= dataFormat && dataFormat <= 212);
+        String format = this.origin.getCellStyle().getDataFormatString();
+        return format.contains("[$-804]");
     }
 
     /**
@@ -283,55 +264,51 @@ public class ExcelCell {
         return false;
     }
 
+    private String formatCellValue() {
+        if (this.dataFormatter == null) {
+            this.dataFormatter = new DataFormatter();
+        }
+        if (this.origin.getCellType() == CellType.FORMULA) {
+            if (this.formulaEvaluator == null) {
+                this.formulaEvaluator = this.row.getSheet().getDoc().getOrigin().getCreationHelper()
+                        .createFormulaEvaluator();
+            }
+            return this.dataFormatter.formatCellValue(this.origin, this.formulaEvaluator);
+        } else {
+            return this.dataFormatter.formatCellValue(this.origin);
+        }
+
+    }
+
     /**
      * 获取转换为字符串的值
      *
      * @return 字符串值
      */
     public String getValueAsString() {
-        ExcelCellFormat format = getFormat();
-        ExcelCellFormatType formatType = format.getType();
-        if (formatType == ExcelCellFormatType.DATETIME) {
-            String pattern = format.getPattern(); // 日期时间类型一定有格式
-            double number = loadNumberValue();
-            Date date = DateUtil.getJavaDate(number);
+        // 日期时间类型的单元格用DataFormatter大概率无法正确处理，通过格式转换进行处理
+        String dateTimePattern = getDateTimePattern();
+        if (dateTimePattern != null) {
+            Date date = readDateValue();
             try {
-                return date == null ? null : org.truenewx.tnxjee.core.util.DateUtil.format(date, pattern);
+                return date == null ? null : org.truenewx.tnxjee.core.util.DateUtil.format(date, dateTimePattern);
             } catch (Exception e) {
                 LogUtil.warn(getClass(), e.getMessage());
             }
-            // 默认转换为长时间格式
-            return org.truenewx.tnxjee.core.util.DateUtil.formatLong(date);
-        } else if (formatType == ExcelCellFormatType.NUMBER) {
-            double number = loadNumberValue();
-            String pattern = format.getPattern(); // 数值类型不一定有格式
-            if (pattern != null) {
-                try {
-                    String value = MathUtil.format(number, pattern);
-                    if (pattern.contains("E")) { // 科学计数法，回填+
-                        value = value.replaceAll("E", "E+");
-                    }
-                    return value;
-                } catch (Exception e) {
-                    LogUtil.warn(getClass(), e.getMessage());
-                }
-            }
-            // 默认转换为尽可能短的形式
-            BigDecimal decimal = BigDecimal.valueOf(number);
-            return MathUtil.toShortestString(decimal);
-        } else if (formatType == ExcelCellFormatType.BOOLEAN) {
-            BooleanEnum booleanEnum = BooleanEnum.valueOf(this.origin.getBooleanCellValue());
-            Field field = ClassUtil.getField(booleanEnum);
-            return CaptionUtil.getCaption(field, Locale.getDefault());
-        } else if (this.origin.getCellType() == CellType.FORMULA) { // 常规格式的公式
-            CellValue cellValue = evaluateFormula();
-            // 公式计算结果为数字，则转换为尽可能短的形式
-            if (cellValue != null && cellValue.getCellType() == CellType.NUMERIC) {
-                BigDecimal decimal = BigDecimal.valueOf(cellValue.getNumberValue());
-                return MathUtil.toShortestString(decimal);
-            }
         }
-        return loadStringValue();
+        try {
+            return formatCellValue();
+        } catch (Exception e) {
+            LogUtil.warn(getClass(), e.getMessage());
+        }
+        // 自定义转换和DataFormatter都无法正确处理的，用默认方式处理
+        if (dateTimePattern != null) {
+            // 日期时间类型默认转换为长时间格式
+            Date date = readDateValue();
+            return date == null ? null : org.truenewx.tnxjee.core.util.DateUtil.formatLong(date);
+        }
+        // 其它读取字符串值
+        return readStringValue();
     }
 
     /**
@@ -341,10 +318,10 @@ public class ExcelCell {
      */
     public BigDecimal getValueAsDecimal() {
         try {
-            double number = loadNumberValue();
+            double number = readNumberValue();
             return BigDecimal.valueOf(number);
         } catch (ExcelCellFormatException e) {
-            String text = loadStringValue();
+            String text = readStringValue();
             if (StringUtils.isNotBlank(text)) {
                 try {
                     return new BigDecimal(text);
@@ -369,7 +346,7 @@ public class ExcelCell {
                 return dateTime.toLocalDate();
             }
         }
-        String text = loadStringValue();
+        String text = readStringValue();
         if (StringUtils.isNotBlank(text)) {
             LocalDate date = null;
             if (text.contains(Strings.MINUS)) {
