@@ -24,8 +24,6 @@ public class ExcelCell {
 
     private Cell origin;
     private ExcelRow row;
-    private DataFormatter dataFormatter;
-    private FormulaEvaluator formulaEvaluator;
 
     public ExcelCell(ExcelRow row, Cell origin) {
         this.origin = origin;
@@ -214,7 +212,7 @@ public class ExcelCell {
             return true;
         }
         String format = this.origin.getCellStyle().getDataFormatString();
-        return format.contains("[$-804]");
+        return format.endsWith(";@");
     }
 
     /**
@@ -264,22 +262,6 @@ public class ExcelCell {
         return false;
     }
 
-    private String formatCellValue() {
-        if (this.dataFormatter == null) {
-            this.dataFormatter = new DataFormatter();
-        }
-        if (this.origin.getCellType() == CellType.FORMULA) {
-            if (this.formulaEvaluator == null) {
-                this.formulaEvaluator = this.row.getSheet().getDoc().getOrigin().getCreationHelper()
-                        .createFormulaEvaluator();
-            }
-            return this.dataFormatter.formatCellValue(this.origin, this.formulaEvaluator);
-        } else {
-            return this.dataFormatter.formatCellValue(this.origin);
-        }
-
-    }
-
     /**
      * 获取转换为字符串的值
      *
@@ -297,7 +279,7 @@ public class ExcelCell {
             }
         }
         try {
-            return formatCellValue();
+            return this.row.getSheet().getDoc().formatCellValue(this.origin);
         } catch (Exception e) {
             LogUtil.warn(getClass(), e.getMessage());
         }
@@ -318,8 +300,8 @@ public class ExcelCell {
      */
     public BigDecimal getValueAsDecimal() {
         try {
-            double number = readNumberValue();
-            return BigDecimal.valueOf(number);
+            Double number = readNumberValue();
+            return number == null ? null : BigDecimal.valueOf(number);
         } catch (ExcelCellFormatException e) {
             String text = readStringValue();
             if (StringUtils.isNotBlank(text)) {

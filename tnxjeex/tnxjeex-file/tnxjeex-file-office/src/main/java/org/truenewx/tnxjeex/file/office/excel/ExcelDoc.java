@@ -33,9 +33,10 @@ public class ExcelDoc {
 
     private String filename;
     private Workbook origin;
-    private FormulaEvaluator evaluator;
     private Map<String, CellStyle> styles = new HashMap<>();
     private Map<String, Font> fonts = new HashMap<>();
+    private DataFormatter dataFormatter;
+    private FormulaEvaluator formulaEvaluator;
 
     public ExcelDoc(String extension) {
         extension = standardizeExtension(extension);
@@ -97,14 +98,26 @@ public class ExcelDoc {
     }
 
     public CellValue evaluateFormula(Cell cell) {
-        return getEvaluator().evaluate(cell);
+        return getFormulaEvaluator().evaluate(cell);
     }
 
-    private FormulaEvaluator getEvaluator() {
-        if (this.evaluator == null) {
-            this.evaluator = this.origin.getCreationHelper().createFormulaEvaluator();
+    private FormulaEvaluator getFormulaEvaluator() {
+        if (this.formulaEvaluator == null) {
+            this.formulaEvaluator = this.origin.getCreationHelper().createFormulaEvaluator();
         }
-        return this.evaluator;
+        return this.formulaEvaluator;
+    }
+
+    public String formatCellValue(Cell cell) {
+        if (this.dataFormatter == null) {
+            this.dataFormatter = new DataFormatter();
+        }
+        if (cell.getCellType() == CellType.FORMULA) {
+            return this.dataFormatter.formatCellValue(cell, getFormulaEvaluator());
+        } else {
+            return this.dataFormatter.formatCellValue(cell);
+        }
+
     }
 
     public ExcelSheet cloneSheet(int sourceSheetIndex, String sheetName) {
