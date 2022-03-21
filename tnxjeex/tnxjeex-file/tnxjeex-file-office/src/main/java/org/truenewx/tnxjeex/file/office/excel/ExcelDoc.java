@@ -14,11 +14,13 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.FileExtensions;
-import org.truenewx.tnxjeex.file.core.doc.DocCatalog;
-import org.truenewx.tnxjeex.file.core.doc.DocCatalogItem;
+import org.truenewx.tnxjeex.file.core.doc.DocOutline;
+import org.truenewx.tnxjeex.file.core.doc.DocOutlineItem;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelCellStyle;
 import org.truenewx.tnxjeex.file.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -28,19 +30,17 @@ import org.truenewx.tnxjeex.file.office.excel.exports.ExcelExportUtil;
  */
 public class ExcelDoc {
 
-    public static final String EXTENSION_XLS = FileExtensions.XLS;
-    public static final String EXTENSION_XLSX = FileExtensions.XLSX;
-
     private String filename;
     private Workbook origin;
     private Map<String, CellStyle> styles = new HashMap<>();
     private Map<String, Font> fonts = new HashMap<>();
     private DataFormatter dataFormatter;
     private FormulaEvaluator formulaEvaluator;
+    private DisplayingExcelCellStyle defaultDisplayStyle;
 
     public ExcelDoc(String extension) {
         extension = standardizeExtension(extension);
-        if (EXTENSION_XLS.equalsIgnoreCase(extension)) {
+        if (FileExtensions.XLS.equalsIgnoreCase(extension)) {
             this.origin = new HSSFWorkbook();
         } else {
             this.origin = new XSSFWorkbook();
@@ -56,7 +56,7 @@ public class ExcelDoc {
 
     public ExcelDoc(InputStream in, String extension) throws IOException {
         extension = standardizeExtension(extension);
-        if (EXTENSION_XLS.equalsIgnoreCase(extension)) {
+        if (FileExtensions.XLS.equalsIgnoreCase(extension)) {
             this.origin = new HSSFWorkbook(in);
         } else {
             this.origin = new XSSFWorkbook(in);
@@ -75,26 +75,27 @@ public class ExcelDoc {
         return this.origin;
     }
 
-    public DocCatalog getCatalog(boolean includingHidden) {
-        DocCatalog catalog = new DocCatalog();
-        List<DocCatalogItem> items = new ArrayList<>();
+    public DocOutline getOutline(boolean includingHidden) {
+        ExcelDocOutline outline = new ExcelDocOutline();
+        List<DocOutlineItem> items = new ArrayList<>();
         int sheetNum = this.origin.getNumberOfSheets();
         for (int i = 0; i < sheetNum; i++) {
             if (includingHidden || !this.origin.isSheetHidden(i)) {
                 Sheet sheet = this.origin.getSheetAt(i);
-                DocCatalogItem item = new DocCatalogItem();
+                DocOutlineItem item = new DocOutlineItem();
                 item.setCaption(sheet.getSheetName());
                 // 前面可能有被隐藏的sheet，索引严格按照加入顺序编排
                 item.setPageIndex(items.size());
                 items.add(item);
                 if (sheet.isSelected()) {
-                    catalog.setSelectedItemIndexes(List.of(item.getPageIndex()));
+                    outline.setSelectedItemIndexes(List.of(item.getPageIndex()));
                 }
             }
         }
-        catalog.setItems(items);
-        catalog.setPageCount(items.size());
-        return catalog;
+        outline.setItems(items);
+        outline.setPageCount(items.size());
+        outline.setDefaultStyle(getDefaultDisplayStyle());
+        return outline;
     }
 
     public CellValue evaluateFormula(Cell cell) {
@@ -195,7 +196,7 @@ public class ExcelDoc {
         return font;
     }
 
-    public Font createFont(String name, HSSFFont baseFont, Consumer<Font> consumer) {
+    public Font createFont(String name, Font baseFont, Consumer<Font> consumer) {
         Font font = createFont(name);
         if (baseFont != null) {
             ExcelExportUtil.cloneFont(baseFont, font);
@@ -214,10 +215,23 @@ public class ExcelDoc {
 
     public Font getFont(int sheetIndex, int rowIndex, int columnIndex) {
         CellStyle style = getCellStyle(sheetIndex, rowIndex, columnIndex);
+        return getFont(style);
+    }
+
+    public Font getFont(CellStyle style) {
         if (style instanceof HSSFCellStyle) {
             return ((HSSFCellStyle) style).getFont(this.origin);
         } else if (style instanceof XSSFCellStyle) {
             return ((XSSFCellStyle) style).getFont();
+        }
+        return null;
+    }
+
+    public Color getFontColor(Font font) {
+        if (font instanceof XSSFFont) {
+            return ((XSSFFont) font).getXSSFColor();
+        } else if (font instanceof HSSFFont) {
+            return ((HSSFFont) font).getHSSFColor((HSSFWorkbook) this.origin);
         }
         return null;
     }
@@ -232,6 +246,23 @@ public class ExcelDoc {
             Sheet sheet = this.origin.getSheetAt(i);
             consumer.accept(new ExcelSheet(this, sheet));
         }
+    }
+
+    /**
+     * @return 当前文档默认展示样式
+     */
+    public DisplayingExcelCellStyle getDefaultDisplayStyle() {
+        if (this.defaultDisplayStyle == null) {
+            CellStyle style = this.origin.getCellStyleAt(0);
+            DisplayingExcelCellStyle displayStyle = new DisplayingExcelCellStyle();
+            // 默认展示样式只包含垂直对齐、字体名称、字体大小
+            displayStyle.setVerticalAlignment(style.getVerticalAlignment().name());
+            Font font = getFont(style);
+            displayStyle.setFontName(font.getFontName());
+            displayStyle.setFontSize(font.getFontHeightInPoints());
+            this.defaultDisplayStyle = displayStyle;
+        }
+        return this.defaultDisplayStyle;
     }
 
 }

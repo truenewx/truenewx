@@ -1,14 +1,12 @@
 package org.truenewx.tnxjeex.file.office.excel.display;
 
-import org.apache.poi.ss.usermodel.CellStyle;
-
 /**
  * 展示时的Excel单元格的数据模型
  */
 public class DisplayingExcelCellModel {
 
     private String value;
-    private CellStyle style;
+    private DisplayingExcelCellStyle style;
     /**
      * 合并单元格时占用的行数
      */
@@ -21,13 +19,13 @@ public class DisplayingExcelCellModel {
     public DisplayingExcelCellModel() {
     }
 
-    public DisplayingExcelCellModel(String value, CellStyle style) {
+    public DisplayingExcelCellModel(String value, DisplayingExcelCellStyle style) {
         this();
         this.value = value;
         this.style = style;
     }
 
-    public DisplayingExcelCellModel(String value, CellStyle style, int rowspan, int colspan) {
+    public DisplayingExcelCellModel(String value, DisplayingExcelCellStyle style, int rowspan, int colspan) {
         this(value, style);
         this.rowspan = rowspan;
         this.colspan = colspan;
@@ -37,7 +35,7 @@ public class DisplayingExcelCellModel {
         return this.value;
     }
 
-    public CellStyle getStyle() {
+    public DisplayingExcelCellStyle getStyle() {
         return this.style;
     }
 

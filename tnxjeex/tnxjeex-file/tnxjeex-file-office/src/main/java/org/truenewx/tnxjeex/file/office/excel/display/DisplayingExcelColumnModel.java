@@ -13,12 +13,12 @@ public class DisplayingExcelColumnModel {
      * 列宽像素值
      */
     private int width;
-    private boolean hidden;
+    private Boolean hidden;
 
     public DisplayingExcelColumnModel(String address, int width, boolean hidden) {
         this.address = address;
         this.width = width;
-        this.hidden = hidden;
+        this.hidden = hidden ? Boolean.TRUE : null;
     }
 
     public String getAddress() {
@@ -29,7 +29,7 @@ public class DisplayingExcelColumnModel {
         return this.width;
     }
 
-    public boolean isHidden() {
+    public Boolean getHidden() {
         return this.hidden;
     }
 

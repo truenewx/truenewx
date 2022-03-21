@@ -16,8 +16,8 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.truenewx.tnxjee.core.util.ImageUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjeex.file.core.doc.DocCatalog;
-import org.truenewx.tnxjeex.file.core.doc.DocCatalogItem;
+import org.truenewx.tnxjeex.file.core.doc.DocOutline;
+import org.truenewx.tnxjeex.file.core.doc.DocOutlineItem;
 
 /**
  * PDF文档
@@ -51,24 +51,24 @@ public class PdfDoc {
         return this.origin;
     }
 
-    public DocCatalog getCatalog() {
-        DocCatalog catalog = new DocCatalog();
-        catalog.setPageCount(this.origin.getNumberOfPages());
-        List<DocCatalogItem> items = new ArrayList<>();
-        PDDocumentOutline outline = this.origin.getDocumentCatalog().getDocumentOutline();
-        if (outline != null) {
-            PDOutlineItem outlineItem = outline.getFirstChild();
+    public DocOutline getOutline() {
+        DocOutline outline = new DocOutline();
+        outline.setPageCount(this.origin.getNumberOfPages());
+        List<DocOutlineItem> items = new ArrayList<>();
+        PDDocumentOutline pdOutline = this.origin.getDocumentCatalog().getDocumentOutline();
+        if (pdOutline != null) {
+            PDOutlineItem outlineItem = pdOutline.getFirstChild();
             while (outlineItem != null) {
-                items.add(toCatalogItem(outlineItem, 1));
+                items.add(toOutlineItem(outlineItem, 1));
                 outlineItem = outlineItem.getNextSibling();
             }
         }
-        catalog.setItems(items);
-        return catalog;
+        outline.setItems(items);
+        return outline;
     }
 
-    private DocCatalogItem toCatalogItem(PDOutlineItem outlineItem, int level) {
-        DocCatalogItem item = new DocCatalogItem();
+    private DocOutlineItem toOutlineItem(PDOutlineItem outlineItem, int level) {
+        DocOutlineItem item = new DocOutlineItem();
         item.setLevel(level);
         item.setCaption(outlineItem.getTitle());
         try {
@@ -82,7 +82,7 @@ public class PdfDoc {
         // 添加子节点
         Iterable<PDOutlineItem> outlineChildren = outlineItem.children();
         for (PDOutlineItem outlineChild : outlineChildren) {
-            item.addSub(toCatalogItem(outlineChild, level + 1));
+            item.addSub(toOutlineItem(outlineChild, level + 1));
         }
         return item;
     }

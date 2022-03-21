@@ -13,13 +13,13 @@ public class DisplayingExcelRowModel {
      * 行高像素值
      */
     private int height;
-    private boolean hidden;
+    private Boolean hidden;
     private DisplayingExcelCellModel[] cells = new DisplayingExcelCellModel[0];
 
     public DisplayingExcelRowModel(int number, int height, boolean hidden) {
         this.number = number;
         this.height = height;
-        this.hidden = hidden;
+        this.hidden = hidden ? Boolean.TRUE : null;
     }
 
     public int getNumber() {
@@ -30,7 +30,7 @@ public class DisplayingExcelRowModel {
         return this.height;
     }
 
-    public boolean isHidden() {
+    public Boolean getHidden() {
         return this.hidden;
     }
 

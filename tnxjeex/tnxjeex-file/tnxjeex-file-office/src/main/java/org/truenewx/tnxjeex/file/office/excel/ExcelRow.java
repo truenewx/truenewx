@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelCellModel;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelCellStyle;
 import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelRowModel;
 
 /**
@@ -118,7 +118,7 @@ public class ExcelRow {
                     int colspan = rangeAddress.getLastColumn() - rangeAddress.getFirstColumn() + 1;
                     ExcelCell cell = getCell(i, true); // 该单元格必须非空
                     String value = cell.getValueAsString();
-                    CellStyle style = cell.getCellStyle(true);
+                    DisplayingExcelCellStyle style = cell.getDisplayStyle(StringUtils.isBlank(value));
                     cellModels[i] = new DisplayingExcelCellModel(value, style, rowspan, colspan);
                 } else { // 已合并但不是合并区域的首个单元格，不占用行和列，不赋值
                     cellModels[i] = null;
@@ -126,11 +126,11 @@ public class ExcelRow {
             } else {
                 ExcelCell cell = getCell(i);
                 // 没有创建单元格或单元格为空白，则创建空白模型用于占位
-                if (cell == null || cell.getOrigin().getCellType() == CellType.BLANK) {
+                if (cell == null) {
                     cellModels[i] = new DisplayingExcelCellModel();
                 } else { // 普通单元格
                     String value = cell.getValueAsString();
-                    CellStyle style = cell.getCellStyle(true);
+                    DisplayingExcelCellStyle style = cell.getDisplayStyle(StringUtils.isBlank(value));
                     cellModels[i] = new DisplayingExcelCellModel(value, style);
                 }
             }

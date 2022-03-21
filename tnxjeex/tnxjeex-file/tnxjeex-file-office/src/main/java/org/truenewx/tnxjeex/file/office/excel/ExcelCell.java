@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
+import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelCellStyle;
 
 /**
  * Excel单元格
@@ -402,21 +404,50 @@ public class ExcelCell {
         return null;
     }
 
-    public CellStyle getCellStyle(boolean display) {
-        CellStyle cellStyle = this.origin.getCellStyle();
-        // 用于展示的样式，在水平对齐为一般时，按照数据类型赋予不同的默认值
-        if (display && cellStyle.getAlignment() == HorizontalAlignment.GENERAL) {
-            HorizontalAlignment alignment;
-            CellType cellType = this.origin.getCellType();
-            if (cellType == CellType.FORMULA) {
-                CellValue cellValue = evaluateFormula();
-                alignment = ExcelUtil.getDefaultAlignment(cellValue.getCellType());
-            } else {
-                alignment = ExcelUtil.getDefaultAlignment(cellType);
+    public DisplayingExcelCellStyle getDisplayStyle(boolean onlyBackground) {
+        CellStyle style = this.origin.getCellStyle();
+        ExcelDoc doc = this.row.getSheet().getDoc();
+        DisplayingExcelCellStyle displayStyle = new DisplayingExcelCellStyle();
+        // 背景颜色忽略白色
+        displayStyle.setBackgroundColor(
+                ExcelUtil.getHex(style.getFillForegroundColorColor(), ExcelUtil.RGB_WHITE));
+        if (!onlyBackground) {
+            DisplayingExcelCellStyle defaultDisplayStyle = doc.getDefaultDisplayStyle();
+            // 用于展示的样式，在水平对齐为一般时，按照数据类型赋予不同的默认值
+            HorizontalAlignment alignment = style.getAlignment();
+            if (alignment == HorizontalAlignment.GENERAL) {
+                CellType cellType = this.origin.getCellType();
+                if (cellType == CellType.FORMULA) {
+                    CellValue cellValue = evaluateFormula();
+                    alignment = ExcelUtil.getDefaultAlignment(cellValue.getCellType());
+                } else {
+                    alignment = ExcelUtil.getDefaultAlignment(cellType);
+                }
             }
-            cellStyle.setAlignment(alignment);
+            displayStyle.setAlignment(alignment.name());
+            String verticalAlignment = style.getVerticalAlignment().name();
+            if (!Objects.equals(verticalAlignment, defaultDisplayStyle.getVerticalAlignment())) {
+                displayStyle.setVerticalAlignment(verticalAlignment);
+            }
+            Font font = doc.getFont(style);
+            String fontName = font.getFontName();
+            if (!Objects.equals(fontName, defaultDisplayStyle.getFontName())) {
+                displayStyle.setFontName(fontName);
+            }
+            short fontSize = font.getFontHeightInPoints();
+            if (defaultDisplayStyle.getFontSize() == null || defaultDisplayStyle.getFontSize() != fontSize) {
+                displayStyle.setFontSize(fontSize);
+            }
+            Color fontColor = doc.getFontColor(font);
+            // 字体颜色忽略黑色
+            displayStyle.setFontColor(ExcelUtil.getHex(fontColor, ExcelUtil.RGB_BLACK));
+            displayStyle.setBold(font.getBold());
+            displayStyle.setItalic(font.getItalic());
+            displayStyle.setStrikeout(font.getStrikeout());
+            displayStyle.setUnderline(font.getUnderline());
+            displayStyle.setOffset(font.getTypeOffset());
         }
-        return cellStyle;
+        return displayStyle;
     }
 
     public void formatStringCellValue(Object... args) {

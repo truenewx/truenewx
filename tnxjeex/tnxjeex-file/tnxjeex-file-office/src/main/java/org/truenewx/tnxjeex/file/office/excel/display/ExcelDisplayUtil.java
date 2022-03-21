@@ -1,11 +1,16 @@
 package org.truenewx.tnxjeex.file.office.excel.display;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
+import org.truenewx.tnxjee.core.util.FileExtensions;
+import org.truenewx.tnxjeex.file.office.excel.ExcelDoc;
+import org.truenewx.tnxjeex.file.office.excel.ExcelSheet;
 
 /**
  * Excel展示工具类
@@ -38,6 +43,18 @@ public class ExcelDisplayUtil {
             columns.add(new DisplayingExcelColumnModel(address, width, hidden));
         }
         return columns;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String extension = FileExtensions.XLSX;
+        String filename = "E:\\工作文档\\效行\\doc\\人事\\工作记录." + extension;
+        filename = "C:\\Users\\jiang\\Desktop\\coding\\1." + extension;
+        ExcelDoc doc = new ExcelDoc(new FileInputStream(filename), extension);
+        ExcelSheet sheet = doc.getSheetAt(0);
+        List<DisplayingExcelRowModel> rows = sheet.getDisplayRows();
+//        for (DisplayingExcelRowModel row : rows) {
+//            System.out.println(row.getNumber() + ": " + StringUtils.join(row.getData(), Strings.COMMA));
+//        }
     }
 
 }

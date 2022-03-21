@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 文档目录项
+ * 文档纲要条目
  *
  * @author jianglei
  */
-public class DocCatalogItem {
+public class DocOutlineItem {
 
     private int level;
     private String caption;
     private int pageIndex = -1;
-    private List<DocCatalogItem> subs;
+    private List<DocOutlineItem> subs;
 
     public int getLevel() {
         return this.level;
@@ -39,17 +39,17 @@ public class DocCatalogItem {
         this.pageIndex = pageIndex;
     }
 
-    public List<DocCatalogItem> getSubs() {
+    public List<DocOutlineItem> getSubs() {
         return this.subs;
     }
 
-    public void setSubs(List<DocCatalogItem> subs) {
+    public void setSubs(List<DocOutlineItem> subs) {
         this.subs = subs;
     }
 
     //////
 
-    public void addSub(DocCatalogItem sub) {
+    public void addSub(DocOutlineItem sub) {
         if (this.subs == null) {
             this.subs = new ArrayList<>();
         }

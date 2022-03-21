@@ -3,17 +3,17 @@ package org.truenewx.tnxjeex.file.core.doc;
 import java.util.List;
 
 /**
- * 文档目录
+ * 文档纲要
  *
  * @author jianglei
  */
-public class DocCatalog {
+public class DocOutline {
 
     /**
      * 总页数
      */
     private int pageCount;
-    private List<DocCatalogItem> items;
+    private List<DocOutlineItem> items;
     /**
      * 从一级目录项开始直到最终选中目录项的索引清单
      */
@@ -27,11 +27,11 @@ public class DocCatalog {
         this.pageCount = pageCount;
     }
 
-    public List<DocCatalogItem> getItems() {
+    public List<DocOutlineItem> getItems() {
         return this.items;
     }
 
-    public void setItems(List<DocCatalogItem> items) {
+    public void setItems(List<DocOutlineItem> items) {
         this.items = items;
     }
 
