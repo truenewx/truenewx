@@ -103,15 +103,16 @@ public class ExcelSheet {
     }
 
     /**
-     * 找出指定单元格在当前工作表中的所属合并区域
+     * 找出指定位置在当前工作表中的所属合并区域
      *
-     * @param cell 单元格
-     * @return 指定单元格在当前工作表中的所属合并区域，null-不属于任何合并区域
+     * @param rowIndex    行索引位置
+     * @param columnIndex 列索引位置
+     * @return 指定位置在当前工作表中的所属合并区域，null-不属于任何合并区域
      */
-    public CellRangeAddress locateMergedRegion(Cell cell) {
+    public CellRangeAddress locateMergedRegion(int rowIndex, int columnIndex) {
         List<CellRangeAddress> mergedRegions = getMergedRegions();
         for (CellRangeAddress rangeAddress : mergedRegions) {
-            if (rangeAddress.isInRange(cell)) {
+            if (rangeAddress.isInRange(rowIndex, columnIndex)) {
                 return rangeAddress;
             }
         }

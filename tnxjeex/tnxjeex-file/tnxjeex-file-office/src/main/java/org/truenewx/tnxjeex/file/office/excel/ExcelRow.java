@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
@@ -105,36 +106,36 @@ public class ExcelRow {
         boolean hidden = this.origin.getZeroHeight();
 
         DisplayingExcelRowModel rowModel = new DisplayingExcelRowModel(number, height, hidden);
-        int beginCellIndex = this.origin.getFirstCellNum();
-        if (beginCellIndex >= 0 && cellNum > 0) {
-            ExcelSheet sheet = getSheet();
-            DisplayingExcelCellModel[] cellModels = new DisplayingExcelCellModel[cellNum];
-            for (int i = beginCellIndex; i < cellNum; i++) {
+        ExcelSheet sheet = getSheet();
+        DisplayingExcelCellModel[] cellModels = new DisplayingExcelCellModel[cellNum];
+        for (int i = 0; i < cellNum; i++) {
+            // 首先检查是否位于某个合并单元格区域内
+            CellRangeAddress rangeAddress = sheet.locateMergedRegion(rowIndex, i);
+            if (rangeAddress != null) {
+                // 当前单元格为合并区域的首个单元格，则计算占用行数和列数
+                if (rangeAddress.getFirstRow() == rowIndex && rangeAddress.getFirstColumn() == i) {
+                    int rowspan = rangeAddress.getLastRow() - rangeAddress.getFirstRow() + 1;
+                    int colspan = rangeAddress.getLastColumn() - rangeAddress.getFirstColumn() + 1;
+                    ExcelCell cell = getCell(i, true); // 该单元格必须非空
+                    String value = cell.getValueAsString();
+                    CellStyle style = cell.getCellStyle(true);
+                    cellModels[i] = new DisplayingExcelCellModel(value, style, rowspan, colspan);
+                } else { // 已合并但不是合并区域的首个单元格，不占用行和列，不赋值
+                    cellModels[i] = null;
+                }
+            } else {
                 ExcelCell cell = getCell(i);
-                if (cell != null) {
-                    Integer rowspan = null;
-                    Integer colspan = null;
-                    // 合并单元格处理
-                    CellRangeAddress rangeAddress = sheet.locateMergedRegion(cell.getOrigin());
-                    if (rangeAddress != null) {
-                        if (cell.isFirstIn(rangeAddress)) { // 已合并且为合并区域的首个单元格，则计算占用行数和列数
-                            rowspan = rangeAddress.getLastRow() - rangeAddress.getFirstRow() + 1;
-                            colspan = rangeAddress.getLastColumn() - rangeAddress.getFirstColumn() + 1;
-                        } else { // 已合并但不是合并区域的首个单元格，不占用行和列，不赋值
-                            cell = null;
-                        }
-                    }
-                    if (cell != null) {
-                        String value = cell.getValueAsString();
-                        CellStyle style = cell.getCellStyle(true);
-                        cellModels[i] = new DisplayingExcelCellModel(value, style, rowspan, colspan);
-                    }
-                } else { // 占位
+                // 没有创建单元格或单元格为空白，则创建空白模型用于占位
+                if (cell == null || cell.getOrigin().getCellType() == CellType.BLANK) {
                     cellModels[i] = new DisplayingExcelCellModel();
+                } else { // 普通单元格
+                    String value = cell.getValueAsString();
+                    CellStyle style = cell.getCellStyle(true);
+                    cellModels[i] = new DisplayingExcelCellModel(value, style);
                 }
             }
-            rowModel.setCells(cellModels);
         }
+        rowModel.setCells(cellModels);
         return rowModel;
     }
 

@@ -21,9 +21,14 @@ public class DisplayingExcelCellModel {
     public DisplayingExcelCellModel() {
     }
 
-    public DisplayingExcelCellModel(String value, CellStyle style, Integer rowspan, Integer colspan) {
+    public DisplayingExcelCellModel(String value, CellStyle style) {
+        this();
         this.value = value;
         this.style = style;
+    }
+
+    public DisplayingExcelCellModel(String value, CellStyle style, int rowspan, int colspan) {
+        this(value, style);
         this.rowspan = rowspan;
         this.colspan = colspan;
     }
