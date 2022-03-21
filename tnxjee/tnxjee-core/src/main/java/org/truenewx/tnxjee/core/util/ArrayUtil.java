@@ -324,4 +324,19 @@ public class ArrayUtil {
         return list;
     }
 
+    public static boolean deepEquals(byte[] bytes, short[] shorts) {
+        if (ArrayUtils.isEmpty(bytes) && ArrayUtils.isEmpty(shorts)) {
+            return true;
+        }
+        if (bytes.length != shorts.length) {
+            return false;
+        }
+        for (int i = 0; i < bytes.length; i++) {
+            if (((short) bytes[i]) != shorts[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
