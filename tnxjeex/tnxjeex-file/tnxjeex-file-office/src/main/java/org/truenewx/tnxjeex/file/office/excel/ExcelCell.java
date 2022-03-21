@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.LogUtil;
@@ -423,17 +422,6 @@ public class ExcelCell {
     public void formatStringCellValue(Object... args) {
         String value = getValueAsString();
         setCellValue(String.format(value, args));
-    }
-
-    /**
-     * 判断当前单元格是否指定范围的第一个单元格
-     *
-     * @param rangeAddress 范围地址
-     * @return 当前单元格是否指定范围的第一个单元格
-     */
-    public boolean isFirstIn(CellRangeAddress rangeAddress) {
-        return this.origin.getRowIndex() == rangeAddress.getFirstRow()
-                && this.origin.getColumnIndex() == rangeAddress.getFirstColumn();
     }
 
 }
