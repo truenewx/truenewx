@@ -30,7 +30,7 @@
     "vue": "3.2.30",
     "vue-router": "4.0.12",
     "mitt": "3.0.0",
-    "element-plus": "2.1.2",
+    "element-plus": "2.1.4",
     "@element-plus/icons-vue": "0.2.6",
     "ant-design-vue": "2.2.8",
     "async-validator": "4.0.7"
