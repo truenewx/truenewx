@@ -20,8 +20,6 @@ import org.truenewx.tnxjeex.file.office.excel.display.DisplayingExcelRowModel;
  */
 public class ExcelRow {
 
-    private static float HEIGHT_RATE = 96f / 72f;
-
     private Row origin;
     private ExcelSheet sheet;
 
@@ -102,10 +100,10 @@ public class ExcelRow {
     public DisplayingExcelRowModel toDisplayModel(int cellNum) {
         int rowIndex = getRowIndex();
         int number = rowIndex + 1;
-        int height = (int) (this.origin.getHeightInPoints() * HEIGHT_RATE); // 高度算法并不精确，暂时无需精确结果
+        float heightPt = this.origin.getHeightInPoints();
         boolean hidden = this.origin.getZeroHeight();
 
-        DisplayingExcelRowModel rowModel = new DisplayingExcelRowModel(number, height, hidden);
+        DisplayingExcelRowModel rowModel = new DisplayingExcelRowModel(number, heightPt, hidden);
         ExcelSheet sheet = getSheet();
         DisplayingExcelCellModel[] cellModels = new DisplayingExcelCellModel[cellNum];
         for (int i = 0; i < cellNum; i++) {

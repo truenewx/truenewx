@@ -259,7 +259,7 @@ public class ExcelDoc {
             displayStyle.setVerticalAlignment(style.getVerticalAlignment().name());
             Font font = getFont(style);
             displayStyle.setFontName(font.getFontName());
-            displayStyle.setFontSize(font.getFontHeightInPoints());
+            displayStyle.setFontSizePt(font.getFontHeightInPoints());
             this.defaultDisplayStyle = displayStyle;
         }
         return this.defaultDisplayStyle;

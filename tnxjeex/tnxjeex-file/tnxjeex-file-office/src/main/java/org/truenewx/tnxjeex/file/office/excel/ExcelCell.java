@@ -434,9 +434,9 @@ public class ExcelCell {
             if (!Objects.equals(fontName, defaultDisplayStyle.getFontName())) {
                 displayStyle.setFontName(fontName);
             }
-            short fontSize = font.getFontHeightInPoints();
-            if (defaultDisplayStyle.getFontSize() == null || defaultDisplayStyle.getFontSize() != fontSize) {
-                displayStyle.setFontSize(fontSize);
+            short fontSizePt = font.getFontHeightInPoints();
+            if (defaultDisplayStyle.getFontSizePt() == null || defaultDisplayStyle.getFontSizePt() != fontSizePt) {
+                displayStyle.setFontSizePt(fontSizePt);
             }
             Color fontColor = doc.getFontColor(font);
             // 字体颜色忽略黑色

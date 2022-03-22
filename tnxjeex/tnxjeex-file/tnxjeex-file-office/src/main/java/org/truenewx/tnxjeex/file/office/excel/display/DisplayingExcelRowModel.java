@@ -10,15 +10,15 @@ public class DisplayingExcelRowModel {
      */
     private int number;
     /**
-     * 行高像素值
+     * 行高磅(Point)值
      */
-    private int height;
+    private float heightPt;
     private Boolean hidden;
     private DisplayingExcelCellModel[] cells = new DisplayingExcelCellModel[0];
 
-    public DisplayingExcelRowModel(int number, int height, boolean hidden) {
+    public DisplayingExcelRowModel(int number, float heightPt, boolean hidden) {
         this.number = number;
-        this.height = height;
+        this.heightPt = heightPt;
         this.hidden = hidden ? Boolean.TRUE : null;
     }
 
@@ -26,8 +26,8 @@ public class DisplayingExcelRowModel {
         return this.number;
     }
 
-    public int getHeight() {
-        return this.height;
+    public float getHeightPt() {
+        return this.heightPt;
     }
 
     public Boolean getHidden() {

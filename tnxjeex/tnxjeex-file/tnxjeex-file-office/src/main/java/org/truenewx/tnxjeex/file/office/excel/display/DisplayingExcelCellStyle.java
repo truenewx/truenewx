@@ -39,7 +39,7 @@ public class DisplayingExcelCellStyle {
     private String backgroundColor;
     private String fontColor;
     private String fontName;
-    private Short fontSize;
+    private Short fontSizePt;
     private Boolean bold;
     private Boolean italic;
     private Boolean strikeout;
@@ -86,12 +86,12 @@ public class DisplayingExcelCellStyle {
         this.fontName = fontName;
     }
 
-    public Short getFontSize() {
-        return this.fontSize;
+    public Short getFontSizePt() {
+        return this.fontSizePt;
     }
 
-    public void setFontSize(Short fontSize) {
-        this.fontSize = fontSize;
+    public void setFontSizePt(Short fontSizePt) {
+        this.fontSizePt = fontSizePt;
     }
 
     public Boolean getBold() {
