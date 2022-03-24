@@ -446,4 +446,9 @@ public class IOUtil {
         return false;
     }
 
+    public static String toBase64Data(byte[] bytes, String extension) {
+        String base64String = EncryptUtil.encryptByBase64(bytes);
+        return "data:" + Mimetypes.getInstance().getMimetype(extension) + ";base64," + base64String;
+    }
+
 }
