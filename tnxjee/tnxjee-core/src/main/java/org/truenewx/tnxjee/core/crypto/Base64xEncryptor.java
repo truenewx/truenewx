@@ -4,6 +4,11 @@ import java.util.Random;
 
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 
+/**
+ * 含密钥的BASE64可逆算法加密器
+ *
+ * @author jianglei
+ */
 public class Base64xEncryptor implements KeyBidirectionalEncryptor {
 
     public final static Base64xEncryptor INSTANCE = new Base64xEncryptor();
@@ -16,19 +21,19 @@ public class Base64xEncryptor implements KeyBidirectionalEncryptor {
         String random = String.valueOf(new Random().nextInt(32000));
         String encryptText = EncryptUtil.encryptByMd5(random);
         int j = 0;
-        String temp = "";
-        char encryptTextArray[] = encryptText.toCharArray();
+        StringBuilder temp = new StringBuilder();
+        char[] encryptedTextChars = encryptText.toCharArray();
         String text = source.toString();
-        char textChar[] = text.toCharArray();
+        char[] textChars = text.toCharArray();
         for (int i = 0; i < text.length(); i++) {
-            j = j == encryptTextArray.length ? 0 : j;
-            char c1 = textChar[i];
-            char c2 = encryptTextArray[j++];
+            j = j == encryptedTextChars.length ? 0 : j;
+            char c1 = textChars[i];
+            char c2 = encryptedTextChars[j++];
             char c3 = (char) (c1 ^ c2);
-            char c4 = encryptTextArray[j - 1];
-            temp += c4 + "" + c3;
+            char c4 = encryptedTextChars[j - 1];
+            temp.append(c4).append(c3);
         }
-        return EncryptUtil.encryptByBase64(calculate(temp, key));
+        return EncryptUtil.encryptByBase64(calculate(temp.toString(), key));
     }
 
     @Override
@@ -37,12 +42,12 @@ public class Base64xEncryptor implements KeyBidirectionalEncryptor {
         if (encryptedText == null) {
             return null;
         }
-        String text = "";
-        char encryptedTextChar[] = encryptedText.toCharArray();
+        StringBuilder text = new StringBuilder();
+        char[] encryptedTextChar = encryptedText.toCharArray();
         for (int i = 0; i < encryptedText.length(); i++) {
-            text += (char) (encryptedTextChar[i] ^ encryptedTextChar[++i]);
+            text.append((char) (encryptedTextChar[i] ^ encryptedTextChar[++i]));
         }
-        return text;
+        return text.toString();
     }
 
     private static String calculate(String text, Object key) {
@@ -51,14 +56,13 @@ public class Base64xEncryptor implements KeyBidirectionalEncryptor {
         }
         String keyString = EncryptUtil.encryptByMd5(key);
         int j = 0;
-        String temp = "";
-        char encryptKeyChar[] = keyString.toCharArray();
-        char textChar[] = text.toCharArray();
+        StringBuilder temp = new StringBuilder();
+        char[] encryptedKeyChars = keyString.toCharArray();
+        char[] textChars = text.toCharArray();
         for (int i = 0; i < text.length(); i++) {
             j = j == keyString.length() ? 0 : j;
-            char c = (char) (textChar[i] ^ encryptKeyChar[j++]);
-            temp = temp + c;
+            temp.append((char) (textChars[i] ^ encryptedKeyChars[j++]));
         }
-        return temp;
+        return temp.toString();
     }
 }

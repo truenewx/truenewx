@@ -10,7 +10,9 @@ import org.springframework.core.io.Resource;
 import org.truenewx.tnxjee.core.Strings;
 
 /**
+ * 媒体类型支持
  *
+ * @author jianglei
  */
 public class Mimetypes {
 
