@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>tnxjeex-cas</module>
-        <module>tnxjeex-file</module>
+        <module>tnxjeex-doc</module>
         <module>tnxjeex-fss</module>
         <module>tnxjeex-notice</module>
         <module>tnxjeex-openapi</module>
@@ -74,13 +74,13 @@
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.truenewx.tnxjeex.file</groupId>
-                <artifactId>tnxjeex-file-office</artifactId>
+                <groupId>org.truenewx.tnxjeex.doc</groupId>
+                <artifactId>tnxjeex-doc-msoffice</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.truenewx.tnxjeex.file</groupId>
-                <artifactId>tnxjeex-file-pdf</artifactId>
+                <groupId>org.truenewx.tnxjeex.doc</groupId>
+                <artifactId>tnxjeex-doc-pdf</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
@@ -119,14 +119,29 @@
                 <version>3.11.1</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>5.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>
                 <version>2.0.25</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>5.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-full</artifactId>
+                <version>5.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>5.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.opensagres.xdocreport</groupId>
+                <artifactId>fr.opensagres.poi.xwpf.converter.pdf</artifactId>
+                <version>2.0.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
