@@ -13,8 +13,10 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPa
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.service.exception.BusinessException;
+import org.truenewx.tnxjeex.doc.core.DocExceptionCodes;
 import org.truenewx.tnxjeex.doc.core.DocOutline;
 import org.truenewx.tnxjeex.doc.core.DocOutlineItem;
 
@@ -32,7 +34,7 @@ public class PdfDoc {
         try {
             this.origin = PDDocument.load(file);
         } catch (IOException e) {
-            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.PDF.toUpperCase());
         }
     }
 
@@ -40,7 +42,7 @@ public class PdfDoc {
         try {
             this.origin = PDDocument.load(in);
         } catch (IOException e) {
-            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.PDF.toUpperCase());
         }
     }
 
@@ -95,7 +97,8 @@ public class PdfDoc {
         try {
             return this.renderer.renderImage(pageIndex, scale);
         } catch (IOException e) {
-            throw new BusinessException(PdfExceptionCodes.CAN_NOT_LOAD);
+            LogUtil.error(getClass(), e);
+            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.PDF.toUpperCase());
         }
     }
 

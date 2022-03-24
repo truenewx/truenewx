@@ -17,6 +17,9 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.truenewx.tnxjee.core.util.FileExtensions;
+import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.service.exception.BusinessException;
+import org.truenewx.tnxjeex.doc.core.DocExceptionCodes;
 import org.truenewx.tnxjeex.doc.core.DocOutline;
 import org.truenewx.tnxjeex.doc.core.DocOutlineItem;
 import org.truenewx.tnxjeex.doc.core.util.DocUtil;
@@ -47,12 +50,16 @@ public class ExcelDoc {
         }
     }
 
-    public ExcelDoc(InputStream in, String extension) throws IOException {
+    public ExcelDoc(InputStream in, String extension) {
         extension = DocUtil.standardizeExtension(extension);
-        if (FileExtensions.XLS.equalsIgnoreCase(extension)) {
-            this.origin = new HSSFWorkbook(in);
-        } else {
-            this.origin = new XSSFWorkbook(in);
+        try {
+            if (FileExtensions.XLS.equalsIgnoreCase(extension)) {
+                this.origin = new HSSFWorkbook(in);
+            } else {
+                this.origin = new XSSFWorkbook(in);
+            }
+        } catch (IOException e) {
+            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, extension);
         }
     }
 
@@ -134,8 +141,12 @@ public class ExcelDoc {
         this.origin.removeSheetAt(index);
     }
 
-    public void close() throws IOException {
-        this.origin.close();
+    public void close() {
+        try {
+            this.origin.close();
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
     }
 
     public void write(OutputStream stream) throws IOException {

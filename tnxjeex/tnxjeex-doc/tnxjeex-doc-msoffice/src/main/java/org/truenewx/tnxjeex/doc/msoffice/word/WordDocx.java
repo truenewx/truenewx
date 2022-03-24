@@ -13,8 +13,11 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
 import org.truenewx.tnxjee.core.util.BeanUtil;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
+import org.truenewx.tnxjee.service.exception.BusinessException;
+import org.truenewx.tnxjeex.doc.core.DocExceptionCodes;
 
 import com.lowagie.text.pdf.PdfDocument;
 
@@ -30,8 +33,12 @@ public class WordDocx {
 
     private XWPFDocument origin;
 
-    public WordDocx(InputStream in) throws IOException {
-        this.origin = new XWPFDocument(in);
+    public WordDocx(InputStream in) {
+        try {
+            this.origin = new XWPFDocument(in);
+        } catch (IOException e) {
+            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.DOCX);
+        }
     }
 
     public XWPFDocument getOrigin() {
@@ -76,6 +83,14 @@ public class WordDocx {
             });
             PdfConverter.getInstance().convert(this.origin, out, options);
         } catch (Exception e) {
+            LogUtil.error(getClass(), e);
+        }
+    }
+
+    public void close() {
+        try {
+            this.origin.close();
+        } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
     }
