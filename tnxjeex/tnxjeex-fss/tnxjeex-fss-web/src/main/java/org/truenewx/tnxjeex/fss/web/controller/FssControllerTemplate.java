@@ -209,28 +209,30 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @ResponseBody
     @ConfigAuthority // 登录用户才可转储资源，访问策略可能还有更多限定
     public String transfer(FssTransferCommand command) {
-        String type = command.getType();
-        String url = command.getUrl();
-        if (StringUtils.isNotBlank(type) && url != null && NetUtil.isHttpUrl(url, true)) {
+        String targetType = command.getTargetType();
+        String sourceUrl = command.getSourceUrl();
+        if (StringUtils.isNotBlank(targetType) && sourceUrl != null && NetUtil.isHttpUrl(sourceUrl, true)) {
             String contextUrl = WebUtil.getProtocolAndHost(SpringWebContext.getRequest()) + getDownloadUrlPrefix();
             // 不是本地读取地址，也不是第三方服务商的读取地址，才可以转换
-            if (!url.startsWith(contextUrl + Strings.SLASH) && !this.service.isOutsideReadUrl(type, url)) {
+            if (!sourceUrl.startsWith(contextUrl + Strings.SLASH) && !this.service.isOutsideReadUrl(targetType,
+                    sourceUrl)) {
                 try {
-                    String filename = getFilename(url, command.getExtension());
+                    String filename = getFilename(sourceUrl, command.getExtension());
                     String fileId = StringUtil.uuid32();
-                    File file = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
-                    NetUtil.download(url, null, file);
-                    FssUploadedFileMeta meta = write(type, command.getScope(), fileId, file.length(), filename,
-                            new FileInputStream(file), true);
+                    File tempFile = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
+                    NetUtil.download(sourceUrl, null, tempFile);
+                    FssUploadedFileMeta meta = write(targetType, command.getTargetScope(), fileId, tempFile.length(),
+                            filename,
+                            new FileInputStream(tempFile), true);
                     // 在独立线程中删除临时文件，以免影响正常流程
-                    this.executor.execute(file::delete);
+                    this.executor.execute(tempFile::delete);
                     return meta.getStorageUrl();
                 } catch (IOException e) {
                     LogUtil.error(getClass(), e);
                 }
             }
         }
-        return url;
+        return sourceUrl;
     }
 
     private String getFilename(String url, String extension) {
