@@ -13,4 +13,9 @@ public class DocExceptionCodes {
      */
     public static final String CAN_NOT_LOAD = "error.tnxjeex.doc.can_not_load";
 
+    /**
+     * 建议转换格式
+     */
+    public static final String RECOMMEND_CONVERT_FORMAT = "error.tnxjeex.doc.recommend_convert_format";
+
 }

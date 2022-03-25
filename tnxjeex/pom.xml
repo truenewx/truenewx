@@ -75,12 +75,17 @@
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.doc</groupId>
-                <artifactId>tnxjeex-doc-msoffice</artifactId>
+                <artifactId>tnxjeex-doc-excel</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.doc</groupId>
                 <artifactId>tnxjeex-doc-pdf</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.doc</groupId>
+                <artifactId>tnxjeex-doc-word</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
@@ -127,21 +132,6 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>5.2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml-full</artifactId>
-                <version>5.2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-scratchpad</artifactId>
-                <version>5.2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.opensagres.xdocreport</groupId>
-                <artifactId>fr.opensagres.poi.xwpf.converter.pdf</artifactId>
-                <version>2.0.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

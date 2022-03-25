@@ -42,6 +42,10 @@ public class PdfDoc {
         try {
             this.origin = PDDocument.load(in);
         } catch (IOException e) {
+            try {
+                in.close();
+            } catch (IOException ignored) {
+            }
             throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.PDF.toUpperCase());
         }
     }
