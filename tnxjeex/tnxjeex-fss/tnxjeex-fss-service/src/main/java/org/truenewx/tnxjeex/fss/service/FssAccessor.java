@@ -46,7 +46,7 @@ public interface FssAccessor {
      * 删除指定路径的文件或目录
      *
      * @param path               文件或目录路径
-     * @param dirDeletePredicate
+     * @param dirDeletePredicate 目录删除断言
      */
     void delete(String path, FssDirDeletePredicate dirDeletePredicate);
 

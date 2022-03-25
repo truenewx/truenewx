@@ -61,7 +61,7 @@ public class OwnFssAccessor implements FssAccessor {
     public void write(InputStream in, String path, String filename) throws IOException {
         // 先上传内容到一个新建的临时文件中，以免在处理过程中原文件被读取
         File tempFile = createTempFile(path);
-        OutputStream out = this.fileStreamProvider.getWriteStream(path, tempFile, filename);
+        OutputStream out = this.fileStreamProvider.getWriteStream(tempFile, filename);
         IOUtils.copy(in, out);
         out.close();
 

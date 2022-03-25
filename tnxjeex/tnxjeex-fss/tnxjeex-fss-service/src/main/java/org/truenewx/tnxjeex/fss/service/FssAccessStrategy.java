@@ -112,6 +112,18 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
     }
 
     /**
+     * 判断指定用户可否写入指定相对路径下的指定存储文件
+     *
+     * @param userIdentity    用户标识
+     * @param relativeDir     相对目录
+     * @param storageFilename 存储文件名
+     * @return 指定用户可否写入指定相对路径下的指定存储文件
+     */
+    default boolean isWriteable(I userIdentity, String relativeDir, String storageFilename) {
+        return false;
+    }
+
+    /**
      * 判断指定用户可否删除指定相对路径下的指定存储文件
      *
      * @param userIdentity    用户标识
@@ -120,7 +132,8 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
      * @return 指定用户可否删除指定相对路径下的指定存储文件
      */
     default boolean isDeletable(I userIdentity, String relativeDir, String storageFilename) {
-        return false;
+        // 删除权限默认与写入权限相同
+        return isWriteable(userIdentity, relativeDir, storageFilename);
     }
 
 }

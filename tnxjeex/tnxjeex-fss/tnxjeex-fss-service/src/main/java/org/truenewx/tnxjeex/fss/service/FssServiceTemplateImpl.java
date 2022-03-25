@@ -86,7 +86,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
         String extension = validateUploadLimit(uploadLimit, fileSize, filename);
         String relativeDir = getRelativeDirForWrite(strategy, userIdentity, scope);
-        // 获取文件名
+        // 获取存储文件名
         String storageFilename = strategy.getStorageFilename(userIdentity, scope);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
@@ -162,6 +162,21 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
         return NetUtil.standardizeUrl(relativeDir);
+    }
+
+    @Override
+    public void write(String storageUrl, I userIdentity, String filename, InputStream in) throws IOException {
+        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+        if (fsp != null) {
+            FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
+            if (!strategy.isWriteable(userIdentity, fsp.getRelativeDir(), fsp.getFilename())) {
+                throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
+            }
+            FssProvider provider = strategy.getProvider();
+            FssAccessor accessor = this.accessors.get(provider);
+            String storagePath = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
+            accessor.write(in, storagePath, filename);
+        }
     }
 
     @Override
@@ -297,7 +312,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
     @Override
     public InputStream getReadStream(I userIdentity, String storageUrl) {
-        Binate<String, FssAccessor> binate = getPathAccessor(userIdentity, storageUrl);
+        Binate<String, FssAccessor> binate = getPathAccessorForRead(userIdentity, storageUrl);
         if (binate != null) {
             String path = binate.getLeft();
             FssAccessor accessor = binate.getRight();
@@ -310,7 +325,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         return null;
     }
 
-    private Binate<String, FssAccessor> getPathAccessor(I userIdentity, String storageUrl) {
+    private Binate<String, FssAccessor> getPathAccessorForRead(I userIdentity, String storageUrl) {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
@@ -338,7 +353,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
     @Override
     public String readText(I userIdentity, String storageUrl, long limit) {
-        Binate<String, FssAccessor> binate = getPathAccessor(userIdentity, storageUrl);
+        Binate<String, FssAccessor> binate = getPathAccessorForRead(userIdentity, storageUrl);
         if (binate != null) {
             String path = binate.getLeft();
             FssAccessor accessor = binate.getRight();

@@ -165,7 +165,8 @@ public class AliyunFssAccessor implements FssAccessor {
                 ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
                 List<OSSObjectSummary> summaries = result.getObjectSummaries();
                 for (OSSObjectSummary summary : summaries) {
-                    summary.getType();
+                    String type = summary.getType();
+                    System.out.println(type);
                 }
                 index = parentPath.lastIndexOf(Strings.SLASH);
             }

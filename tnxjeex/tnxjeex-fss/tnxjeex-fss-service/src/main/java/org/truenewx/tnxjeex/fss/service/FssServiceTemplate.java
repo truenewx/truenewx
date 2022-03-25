@@ -46,6 +46,17 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
             throws IOException;
 
     /**
+     * 指定用户将文件写入指定存储地址
+     *
+     * @param storageUrl   存储地址
+     * @param userIdentity 用户标识
+     * @param filename     文件名
+     * @param in           输入流
+     * @throws IOException 如果写的过程中出现错误
+     */
+    void write(String storageUrl, I userIdentity, String filename, InputStream in) throws IOException;
+
+    /**
      * 指定用户获取指定内部存储URL对应的外部读取URL
      *
      * @param userIdentity 用户标识
