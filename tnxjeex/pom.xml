@@ -85,6 +85,11 @@
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.doc</groupId>
+                <artifactId>tnxjeex-doc-ppt</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.doc</groupId>
                 <artifactId>tnxjeex-doc-word</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
@@ -131,6 +136,11 @@
             <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
+                <version>5.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
                 <version>5.2.2</version>
             </dependency>
         </dependencies>

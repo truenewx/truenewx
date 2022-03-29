@@ -33,7 +33,6 @@ import org.truenewx.tnxjeex.doc.excel.exports.ExcelExportUtil;
  */
 public class ExcelDoc {
 
-    private String filename;
     private Workbook origin;
     private Map<String, CellStyle> styles = new HashMap<>();
     private Map<String, Font> fonts = new HashMap<>();
@@ -65,14 +64,6 @@ public class ExcelDoc {
             }
             throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, extension);
         }
-    }
-
-    public String getFilename() {
-        return this.filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
     }
 
     public Workbook getOrigin() {

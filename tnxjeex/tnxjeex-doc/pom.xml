@@ -12,6 +12,7 @@
         <module>tnxjeex-doc-core</module>
         <module>tnxjeex-doc-excel</module>
         <module>tnxjeex-doc-pdf</module>
+        <module>tnxjeex-doc-ppt</module>
         <module>tnxjeex-doc-word</module>
     </modules>
 </project>
