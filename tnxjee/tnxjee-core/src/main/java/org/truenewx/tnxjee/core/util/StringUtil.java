@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.AntPathMatcher;
@@ -100,6 +101,15 @@ public class StringUtil {
 
     private static final Pattern PATTERN_UPPER_CHAR = Pattern.compile("[A-Z]");
 
+    /**
+     * 中文字体英文名集
+     */
+    private static final String[] CHINESE_FAMILIES = { "SimSun", "SimHei", "NSimSun", "FangSong", "KaiTi",
+            "Microsoft YaHei", "MingLiU", "PMingLiU", "STSong", "STZhongsong", "STFangsong", "STCaiyun", "STHupo",
+            "STLiti", "STXingkai", "STXinwei", "STXihei", "STKaiti", "FZShuTi", "FZYaoti", "YouYuan", "LiSu",
+            "STHeiti", "STHeiti Light", "LiHei Pro Medium", "LiSong Pro Light", "Apple LiSung Light",
+            "Apple LiGothic Medium" };
+
     private StringUtil() {
     }
 
@@ -178,6 +188,16 @@ public class StringUtil {
             return false;
         }
         return Pattern.compile(CHINESE_PATTERN).matcher(s).find();
+    }
+
+    /**
+     * 判断指定字体是否中文字体
+     *
+     * @param fontFamily 字体名称
+     * @return 指定字体是否中文字体
+     */
+    public static boolean isChineseFontFamily(String fontFamily) {
+        return containsChinese(fontFamily) || ArrayUtils.contains(CHINESE_FAMILIES, fontFamily);
     }
 
     /**
