@@ -90,7 +90,7 @@ public class StringUtil {
 
     public static final String REGION_CODE_PATTERN = "^[A-Z]{2}[0-9]{6}$";
 
-    public static final String CHINESE_PATTERN = "^[\\u4E00-\\u9FA5]+$";
+    public static final String CHINESE_PATTERN = "[\\u4E00-\\u9FA5]";
 
     public static final String LETTERS_PATTERN = "^[a-zA-Z]+$";
 
@@ -165,6 +165,19 @@ public class StringUtil {
                 break;
         }
         return new String(b);
+    }
+
+    /**
+     * 判断指定字符串中是否包含中文
+     *
+     * @param s 字符串
+     * @return 指定字符串中是否包含中文
+     */
+    public static boolean containsChinese(String s) {
+        if (StringUtils.isBlank(s)) {
+            return false;
+        }
+        return Pattern.compile(CHINESE_PATTERN).matcher(s).find();
     }
 
     /**
