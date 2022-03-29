@@ -2,14 +2,10 @@ package org.truenewx.tnxjeex.doc.ppt.core;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.apache.poi.common.usermodel.fonts.FontGroup;
 import org.apache.poi.ddf.EscherTextboxRecord;
@@ -24,7 +20,7 @@ import org.apache.poi.sl.draw.Drawable;
 import org.apache.poi.sl.usermodel.Shape;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.truenewx.tnxjee.core.Strings;
+import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.LogUtil;
@@ -41,7 +37,10 @@ import org.truenewx.tnxjeex.doc.core.util.DocUtil;
  */
 public class PptDoc {
 
+    private static final String TEXT_PROP_NAME__FONT_INDEX = "font.index";
+
     private SlideShow<?, ?> origin;
+    private String defaultFontFamily = "SimSun"; // 默认字体：宋体，改动时需为中文字体
 
     public PptDoc(InputStream in, String extension) {
         extension = DocUtil.standardizeExtension(extension);
@@ -60,6 +59,12 @@ public class PptDoc {
         return this.origin;
     }
 
+    public void setDefaultFontFamily(String defaultFontFamily) {
+        Assert.isTrue(StringUtil.isChineseFontFamily(defaultFontFamily),
+                "The 'defaultFontFamily' must be a chinese font family");
+        this.defaultFontFamily = defaultFontFamily;
+    }
+
     public DocOutline getOutline() {
         DocOutline outline = new DocOutline();
         outline.setPageCount(this.origin.getSlides().size());
@@ -70,13 +75,15 @@ public class PptDoc {
         return renderImage(pageIndex, 1);
     }
 
+    @SuppressWarnings("unchecked")
     public BufferedImage renderImage(int pageIndex, float scale) {
         Dimension pageSize = this.origin.getPageSize();
         List<? extends Slide<?, ?>> slides = this.origin.getSlides();
         if (0 <= pageIndex && pageIndex < slides.size()) {
             Slide<?, ?> slide = slides.get(pageIndex);
 
-            List<org.apache.poi.sl.usermodel.Shape<?, ?>> shapes = (List<org.apache.poi.sl.usermodel.Shape<?, ?>>) slide.getShapes();
+            List<org.apache.poi.sl.usermodel.Shape<?, ?>> shapes = (List<org.apache.poi.sl.usermodel.Shape<?, ?>>) slide
+                    .getShapes();
             for (Shape<?, ?> shape : shapes) {
                 processFont(shape);
             }
@@ -112,11 +119,11 @@ public class PptDoc {
             for (TextParagraph<?, ?, ?> textParagraph : textShape) {
                 for (TextRun textRun : textParagraph) {
                     String text = textRun.getRawText();
+                    // 文本中包含中文但字体为非中文字体，则一律修改为默认字体，以解决中英文混杂时乱码的问题
                     if (StringUtil.containsChinese(text)) {
-                        String fontName = textRun.getFontFamily();
-                        // 文本中包含中文但字体为非中文字体，则一律修改为宋体，以解决中英文混杂时乱码的问题
-                        if (!StringUtil.containsChinese(fontName)) {
-                            textRun.setFontFamily("SimSun");
+                        String fontFamily = textRun.getFontFamily();
+                        if (!StringUtil.isChineseFontFamily(fontFamily)) {
+                            textRun.setFontFamily(this.defaultFontFamily);
                             fontIndex = textRun.getFontInfo(FontGroup.LATIN).getIndex();
                         }
                     }
@@ -126,16 +133,20 @@ public class PptDoc {
                 if (textShape instanceof HSLFTextShape) {
                     HSLFTextShape hslfTextShape = (HSLFTextShape) textShape;
                     EscherTextboxWrapper textboxWrapper = getTextboxWrapper(hslfTextShape);
-                    if (textboxWrapper != null) {
-                        // 将更改后的字体索引修改至textboxWrapper中，以在后续图片导出时生效
+                    if (textboxWrapper != null) { // 修改样式中的字体索引，该字体索引为生成图片时使用字体的标识
                         StyleTextPropAtom styleTextPropAtom = textboxWrapper.getStyleTextPropAtom();
                         List<TextPropCollection> characterStyles = styleTextPropAtom.getCharacterStyles();
                         for (TextPropCollection textPropCollection : characterStyles) {
+                            boolean modified = false;
                             List<TextProp> textPropList = textPropCollection.getTextPropList();
                             for (TextProp textProp : textPropList) {
-                                if ("font.index".equals(textProp.getName())) {
+                                if (textProp.getName().endsWith(TEXT_PROP_NAME__FONT_INDEX)) {
                                     textProp.setValue(fontIndex);
+                                    modified = true;
                                 }
+                            }
+                            if (!modified) { // 如果样式中原本没有字体索引，则加入字体索引以备用
+                                textPropCollection.addWithName(TEXT_PROP_NAME__FONT_INDEX).setValue(fontIndex);
                             }
                         }
                     }
@@ -176,24 +187,6 @@ public class PptDoc {
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        String path = "C:\\Users\\jiang\\Desktop\\coding\\2";
-        String extension = FileExtensions.PPT;
-        InputStream in = new FileInputStream(path + Strings.DOT + extension);
-        PptDoc doc = new PptDoc(in, extension);
-        in.close();
-        DocOutline outline = doc.getOutline();
-        int i = 3;
-//        for (int i = 0; i < outline.getPageCount(); i++) {
-        BufferedImage image = doc.renderImage(i, 2);
-        String filename = path + Strings.MINUS + i + Strings.DOT + FileExtensions.JPG;
-        FileOutputStream out = new FileOutputStream(filename);
-        ImageIO.write(image, FileExtensions.JPG, out);
-        out.close();
-//        }
-        doc.close();
     }
 
 }
