@@ -1,10 +1,12 @@
 package org.truenewx.tnxjeex.doc.ppt.core;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.common.usermodel.fonts.FontGroup;
@@ -19,7 +21,7 @@ import org.apache.poi.hslf.usermodel.HSLFTextShape;
 import org.apache.poi.sl.draw.Drawable;
 import org.apache.poi.sl.usermodel.Shape;
 import org.apache.poi.sl.usermodel.*;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.*;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.FileExtensions;
@@ -77,17 +79,19 @@ public class PptDoc {
 
     @SuppressWarnings("unchecked")
     public BufferedImage renderImage(int pageIndex, float scale) {
-        Dimension pageSize = this.origin.getPageSize();
         List<? extends Slide<?, ?>> slides = this.origin.getSlides();
         if (0 <= pageIndex && pageIndex < slides.size()) {
             Slide<?, ?> slide = slides.get(pageIndex);
 
             List<org.apache.poi.sl.usermodel.Shape<?, ?>> shapes = (List<org.apache.poi.sl.usermodel.Shape<?, ?>>) slide
                     .getShapes();
+            List<Runnable> preparedTasks = new ArrayList<>();
             for (Shape<?, ?> shape : shapes) {
-                processFont(shape);
+                preparedTasks.addAll(prepare(shape));
             }
+            preparedTasks.forEach(Runnable::run);
 
+            Dimension pageSize = this.origin.getPageSize();
             BufferedImage image = new BufferedImage((int) (pageSize.width * scale), (int) (pageSize.height * scale),
                     BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = image.createGraphics();
@@ -107,11 +111,12 @@ public class PptDoc {
         return null;
     }
 
-    private void processFont(Shape<?, ?> shape) {
+    private List<Runnable> prepare(Shape<?, ?> shape) {
+        List<Runnable> preparedTasks = new ArrayList<>();
         if (shape instanceof GroupShape) {
             GroupShape<?, ?> groupShape = (GroupShape<?, ?>) shape;
             for (Shape<?, ?> child : groupShape) {
-                processFont(child);
+                preparedTasks.addAll(prepare(child));
             }
         } else if (shape instanceof TextShape) {
             TextShape<?, ?> textShape = (TextShape<?, ?>) shape;
@@ -152,7 +157,25 @@ public class PptDoc {
                     }
                 }
             }
+        } else if ((shape instanceof XSLFGraphicFrame) && !(shape instanceof XSLFTable)) {
+            // 遍历完所有形状之后再执行添加
+            preparedTasks.add(() -> {
+                XSLFGraphicFrame xslfGraphicFrame = (XSLFGraphicFrame) shape;
+                Rectangle2D anchor = xslfGraphicFrame.getAnchor();
+                XSLFSheet sheet = xslfGraphicFrame.getSheet();
+                XSLFTextBox textBox = sheet.createTextBox();
+                textBox.setAnchor(anchor);
+                textBox.setText(PptUtil.getMessage("tnxjeex.doc.ppt.unable_to_display_smart_art"));
+                textBox.setVerticalAlignment(VerticalAlignment.MIDDLE);
+                textBox.setLineColor(Color.GRAY);
+                XSLFTextParagraph textParagraph = textBox.getTextParagraphs().get(0);
+                textParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+                XSLFTextRun textRun = textParagraph.getTextRuns().get(0);
+                textRun.setFontColor(Color.GRAY);
+                textRun.setFontFamily(this.defaultFontFamily);
+            });
         }
+        return preparedTasks;
     }
 
     private EscherTextboxWrapper getTextboxWrapper(HSLFTextShape hslfTextShape) {
