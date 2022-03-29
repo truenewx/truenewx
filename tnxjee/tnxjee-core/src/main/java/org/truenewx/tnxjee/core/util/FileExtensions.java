@@ -9,13 +9,14 @@ public class FileExtensions {
     }
 
     // 图片
+    public static final String BMP = "bmp";
     public static final String JPG = "jpg";
     public static final String JPEG = "jpeg";
     public static final String PNG = "png";
     public static final String SVG = "svg";
     public static final String GIF = "gif";
-    public static final String[] IMAGES_NORMAL = { JPG, JPEG, PNG, SVG };
-    public static final String[] IMAGES_ALL = { JPG, JPEG, PNG, SVG, GIF };
+    public static final String[] IMAGES_NORMAL = { BMP, JPG, JPEG, PNG, SVG };
+    public static final String[] IMAGES_ALL = { BMP, JPG, JPEG, PNG, SVG, GIF };
 
     // PDF文档
     public static final String PDF = "pdf";
