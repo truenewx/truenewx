@@ -155,18 +155,20 @@ public class PptDoc {
                 EscherTextboxWrapper textboxWrapper = getTextboxWrapper(hslfTextShape);
                 if (textboxWrapper != null) { // 修改样式中的字体索引，该字体索引为生成图片时使用字体的标识
                     StyleTextPropAtom styleTextPropAtom = textboxWrapper.getStyleTextPropAtom();
-                    List<TextPropCollection> characterStyles = styleTextPropAtom.getCharacterStyles();
-                    for (TextPropCollection textPropCollection : characterStyles) {
-                        boolean modified = false;
-                        List<TextProp> textPropList = textPropCollection.getTextPropList();
-                        for (TextProp textProp : textPropList) {
-                            if (textProp.getName().endsWith(TEXT_PROP_NAME__FONT_INDEX)) {
-                                textProp.setValue(fontIndex);
-                                modified = true;
+                    if (styleTextPropAtom != null) {
+                        List<TextPropCollection> characterStyles = styleTextPropAtom.getCharacterStyles();
+                        for (TextPropCollection textPropCollection : characterStyles) {
+                            boolean modified = false;
+                            List<TextProp> textPropList = textPropCollection.getTextPropList();
+                            for (TextProp textProp : textPropList) {
+                                if (textProp.getName().endsWith(TEXT_PROP_NAME__FONT_INDEX)) {
+                                    textProp.setValue(fontIndex);
+                                    modified = true;
+                                }
                             }
-                        }
-                        if (!modified) { // 如果样式中原本没有字体索引，则加入字体索引以备用
-                            textPropCollection.addWithName(TEXT_PROP_NAME__FONT_INDEX).setValue(fontIndex);
+                            if (!modified) { // 如果样式中原本没有字体索引，则加入字体索引以备用
+                                textPropCollection.addWithName(TEXT_PROP_NAME__FONT_INDEX).setValue(fontIndex);
+                            }
                         }
                     }
                 }
