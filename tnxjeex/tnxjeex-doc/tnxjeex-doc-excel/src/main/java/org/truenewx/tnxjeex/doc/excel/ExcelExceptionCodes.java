@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.excel.core;
+package org.truenewx.tnxjeex.doc.excel;
 
 /**
  * Excel导入异常错误码集

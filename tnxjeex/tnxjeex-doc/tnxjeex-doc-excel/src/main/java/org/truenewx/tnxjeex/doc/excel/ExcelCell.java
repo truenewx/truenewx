@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.excel.core;
+package org.truenewx.tnxjeex.doc.excel;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

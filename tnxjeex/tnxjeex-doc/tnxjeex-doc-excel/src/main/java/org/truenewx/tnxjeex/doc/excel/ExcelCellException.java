@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.excel.core;
+package org.truenewx.tnxjeex.doc.excel;
 
 import org.apache.poi.ss.util.CellAddress;
 import org.truenewx.tnxjee.service.exception.BusinessException;

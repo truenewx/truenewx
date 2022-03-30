@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.excel.core;
+package org.truenewx.tnxjeex.doc.excel;
 
 import org.truenewx.tnxjeex.doc.core.DocOutline;
 import org.truenewx.tnxjeex.doc.excel.display.DisplayingExcelCellStyle;
