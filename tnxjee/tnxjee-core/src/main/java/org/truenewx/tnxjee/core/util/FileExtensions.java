@@ -38,4 +38,7 @@ public class FileExtensions {
     public static final String YAML = "yaml";
     public static final String YML = "yml";
 
+    // 网页文件
+    public static final String HTML = "html";
+
 }
