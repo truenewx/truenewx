@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.ppt.core;
+package org.truenewx.tnxjeex.doc.ppt;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

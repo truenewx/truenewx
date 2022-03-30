@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.doc.ppt.core;
+package org.truenewx.tnxjeex.doc.ppt;
 
 import java.io.IOException;
 import java.io.InputStream;
