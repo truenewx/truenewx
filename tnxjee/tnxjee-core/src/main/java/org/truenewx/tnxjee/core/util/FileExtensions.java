@@ -8,6 +8,10 @@ public class FileExtensions {
     private FileExtensions() {
     }
 
+    // 文本文档
+    public static final String TXT = "txt";
+    public static final String MARKDOWN = "md";
+
     // 图片
     public static final String BMP = "bmp";
     public static final String JPG = "jpg";
