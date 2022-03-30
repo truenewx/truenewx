@@ -1,7 +1,6 @@
 package org.truenewx.tnxjeex.doc.ppt.core;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +21,7 @@ import org.apache.poi.sl.draw.Drawable;
 import org.apache.poi.sl.usermodel.Shape;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.xslf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.FileExtensions;
@@ -31,6 +31,8 @@ import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjeex.doc.core.DocExceptionCodes;
 import org.truenewx.tnxjeex.doc.core.DocOutline;
 import org.truenewx.tnxjeex.doc.core.util.DocUtil;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * PPT文档
@@ -111,6 +113,7 @@ public class PptDoc {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private List<Runnable> prepare(Shape<?, ?> shape) {
         List<Runnable> preparedTasks = new ArrayList<>();
         if (shape instanceof GroupShape) {
@@ -122,60 +125,99 @@ public class PptDoc {
             TextShape<?, ?> textShape = (TextShape<?, ?>) shape;
             Integer fontIndex = null;
             for (TextParagraph<?, ?, ?> textParagraph : textShape) {
-                for (TextRun textRun : textParagraph) {
-                    String text = textRun.getRawText();
-                    // 文本中包含中文但字体为非中文字体，则一律修改为默认字体，以解决中英文混杂时乱码的问题
-                    if (StringUtil.containsChinese(text)) {
-                        String fontFamily = textRun.getFontFamily();
-                        if (!StringUtil.isChineseFontFamily(fontFamily)) {
-                            textRun.setFontFamily(this.defaultFontFamily);
-                            fontIndex = textRun.getFontInfo(FontGroup.LATIN).getIndex();
+                List<TextRun> textRuns = (List<TextRun>) textParagraph.getTextRuns();
+                if (textRuns.isEmpty()) {
+                    if (textParagraph instanceof XSLFTextParagraph) {
+                        XSLFTextParagraph xslfTextParagraph = (XSLFTextParagraph) textParagraph;
+                        if (isMathParagraph(xslfTextParagraph)) {
+                            preparedTasks.add(() -> {
+                                createTextBox((XSLFShape) shape, "tnxjeex.doc.ppt.unable_to_display_formula");
+                            });
                         }
                     }
-                }
-            }
-            if (fontIndex != null) {
-                if (textShape instanceof HSLFTextShape) {
-                    HSLFTextShape hslfTextShape = (HSLFTextShape) textShape;
-                    EscherTextboxWrapper textboxWrapper = getTextboxWrapper(hslfTextShape);
-                    if (textboxWrapper != null) { // 修改样式中的字体索引，该字体索引为生成图片时使用字体的标识
-                        StyleTextPropAtom styleTextPropAtom = textboxWrapper.getStyleTextPropAtom();
-                        List<TextPropCollection> characterStyles = styleTextPropAtom.getCharacterStyles();
-                        for (TextPropCollection textPropCollection : characterStyles) {
-                            boolean modified = false;
-                            List<TextProp> textPropList = textPropCollection.getTextPropList();
-                            for (TextProp textProp : textPropList) {
-                                if (textProp.getName().endsWith(TEXT_PROP_NAME__FONT_INDEX)) {
-                                    textProp.setValue(fontIndex);
-                                    modified = true;
-                                }
-                            }
-                            if (!modified) { // 如果样式中原本没有字体索引，则加入字体索引以备用
-                                textPropCollection.addWithName(TEXT_PROP_NAME__FONT_INDEX).setValue(fontIndex);
+                } else {
+                    for (TextRun textRun : textRuns) {
+                        String text = textRun.getRawText();
+                        // 文本中包含中文但字体为非中文字体，则一律修改为默认字体，以解决中英文混杂时乱码的问题
+                        if (StringUtil.containsChinese(text)) {
+                            String fontFamily = textRun.getFontFamily();
+                            if (!StringUtil.isChineseFontFamily(fontFamily)) {
+                                textRun.setFontFamily(this.defaultFontFamily);
+                                fontIndex = textRun.getFontInfo(FontGroup.LATIN).getIndex();
                             }
                         }
                     }
                 }
             }
-        } else if ((shape instanceof XSLFGraphicFrame) && !(shape instanceof XSLFTable)) {
+            // 使ppt格式文件的字体更改在生成图片时生效
+            if (fontIndex != null && textShape instanceof HSLFTextShape) {
+                HSLFTextShape hslfTextShape = (HSLFTextShape) textShape;
+                EscherTextboxWrapper textboxWrapper = getTextboxWrapper(hslfTextShape);
+                if (textboxWrapper != null) { // 修改样式中的字体索引，该字体索引为生成图片时使用字体的标识
+                    StyleTextPropAtom styleTextPropAtom = textboxWrapper.getStyleTextPropAtom();
+                    List<TextPropCollection> characterStyles = styleTextPropAtom.getCharacterStyles();
+                    for (TextPropCollection textPropCollection : characterStyles) {
+                        boolean modified = false;
+                        List<TextProp> textPropList = textPropCollection.getTextPropList();
+                        for (TextProp textProp : textPropList) {
+                            if (textProp.getName().endsWith(TEXT_PROP_NAME__FONT_INDEX)) {
+                                textProp.setValue(fontIndex);
+                                modified = true;
+                            }
+                        }
+                        if (!modified) { // 如果样式中原本没有字体索引，则加入字体索引以备用
+                            textPropCollection.addWithName(TEXT_PROP_NAME__FONT_INDEX).setValue(fontIndex);
+                        }
+                    }
+                }
+            }
+        } else if (shape.getClass() == XSLFGraphicFrame.class) {
             // 遍历完所有形状之后再执行添加
             preparedTasks.add(() -> {
-                XSLFGraphicFrame xslfGraphicFrame = (XSLFGraphicFrame) shape;
-                Rectangle2D anchor = xslfGraphicFrame.getAnchor();
-                XSLFSheet sheet = xslfGraphicFrame.getSheet();
-                XSLFTextBox textBox = sheet.createTextBox();
-                textBox.setAnchor(anchor);
-                textBox.setText(PptUtil.getMessage("tnxjeex.doc.ppt.unable_to_display_smart_art"));
-                textBox.setVerticalAlignment(VerticalAlignment.MIDDLE);
-                textBox.setLineColor(Color.GRAY);
-                XSLFTextParagraph textParagraph = textBox.getTextParagraphs().get(0);
-                textParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-                XSLFTextRun textRun = textParagraph.getTextRuns().get(0);
-                textRun.setFontColor(Color.GRAY);
-                textRun.setFontFamily(this.defaultFontFamily);
+                createTextBox((XSLFGraphicFrame) shape, "tnxjeex.doc.ppt.unable_to_display_smart_art");
             });
         }
         return preparedTasks;
+    }
+
+    private boolean isMathParagraph(XSLFTextParagraph xslfTextParagraph) {
+        CTTextParagraph ctTextParagraph = xslfTextParagraph.getXmlObject();
+        Node node = ctTextParagraph.getDomNode();
+        NodeList nodeList = node.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node item = nodeList.item(i);
+            if ("m".equals(item.getLocalName())) {
+                nodeList = item.getChildNodes();
+                for (int j = 0; j < nodeList.getLength(); j++) {
+                    item = nodeList.item(j);
+                    if ("oMathPara".equals(item.getLocalName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void createTextBox(XSLFShape templateShape, String messageKey) {
+        XSLFSheet sheet = templateShape.getSheet();
+        XSLFTextBox textBox = sheet.createTextBox();
+        textBox.setAnchor(templateShape.getAnchor());
+        textBox.setText(PptUtil.getMessage(messageKey));
+        textBox.setVerticalAlignment(VerticalAlignment.MIDDLE);
+        textBox.setLineColor(Color.GRAY);
+        XSLFTextParagraph textParagraph = textBox.getTextParagraphs().get(0);
+        textParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+        XSLFTextRun textRun = textParagraph.getTextRuns().get(0);
+        textRun.setFontColor(Color.GRAY);
+        textRun.setFontFamily(this.defaultFontFamily);
+        if (templateShape instanceof XSLFTextShape) {
+            List<XSLFTextParagraph> textParagraphs = ((XSLFTextShape) templateShape).getTextParagraphs();
+            if (textParagraphs.size() > 0) {
+                textParagraph = textParagraphs.get(0);
+                textRun.setFontSize(textParagraph.getDefaultFontSize());
+            }
+        }
     }
 
     private EscherTextboxWrapper getTextboxWrapper(HSLFTextShape hslfTextShape) {
