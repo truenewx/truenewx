@@ -179,9 +179,12 @@ public class PptDoc {
                 }
             }
         } else if (shape.getClass() == XSLFGraphicFrame.class) {
-            // 遍历完所有形状之后再执行添加
-            preparedTasks.add(
-                    () -> createTextBox((XSLFGraphicFrame) shape, "tnxjeex.doc.ppt.unable_to_display_smart_art"));
+            XSLFGraphicFrame graphicFrame = (XSLFGraphicFrame) shape;
+            preparedTasks.add(() -> {
+                String messageKey = graphicFrame.getChart() == null ? "tnxjeex.doc.ppt.unable_to_display_smart_art"
+                        : "tnxjeex.doc.ppt.unable_to_display_chart";
+                createTextBox(graphicFrame, messageKey);
+            });
         }
         return preparedTasks;
     }
