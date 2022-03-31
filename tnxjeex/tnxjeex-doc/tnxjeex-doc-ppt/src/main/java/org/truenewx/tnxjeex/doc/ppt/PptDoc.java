@@ -81,10 +81,8 @@ public class PptDoc {
 
     @SuppressWarnings("unchecked")
     public BufferedImage renderImage(int pageIndex, float scale) {
-        List<? extends Slide<?, ?>> slides = this.origin.getSlides();
-        if (0 <= pageIndex && pageIndex < slides.size()) {
-            Slide<?, ?> slide = slides.get(pageIndex);
-
+        Slide<?, ?> slide = getPage(pageIndex);
+        if (slide != null) {
             List<org.apache.poi.sl.usermodel.Shape<?, ?>> shapes = (List<org.apache.poi.sl.usermodel.Shape<?, ?>>) slide
                     .getShapes();
             List<Runnable> preparedTasks = new ArrayList<>();
@@ -113,6 +111,14 @@ public class PptDoc {
         return null;
     }
 
+    private Slide<?, ?> getPage(int pageIndex) {
+        List<? extends Slide<?, ?>> slides = this.origin.getSlides();
+        if (0 <= pageIndex && pageIndex < slides.size()) {
+            return slides.get(pageIndex);
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     private List<Runnable> prepare(Shape<?, ?> shape) {
         List<Runnable> preparedTasks = new ArrayList<>();
@@ -130,9 +136,8 @@ public class PptDoc {
                     if (textParagraph instanceof XSLFTextParagraph) {
                         XSLFTextParagraph xslfTextParagraph = (XSLFTextParagraph) textParagraph;
                         if (isMathParagraph(xslfTextParagraph)) {
-                            preparedTasks.add(() -> {
-                                createTextBox((XSLFShape) shape, "tnxjeex.doc.ppt.unable_to_display_formula");
-                            });
+                            preparedTasks.add(() -> createTextBox((XSLFShape) shape,
+                                    "tnxjeex.doc.ppt.unable_to_display_formula"));
                         }
                     }
                 } else {
@@ -175,9 +180,8 @@ public class PptDoc {
             }
         } else if (shape.getClass() == XSLFGraphicFrame.class) {
             // 遍历完所有形状之后再执行添加
-            preparedTasks.add(() -> {
-                createTextBox((XSLFGraphicFrame) shape, "tnxjeex.doc.ppt.unable_to_display_smart_art");
-            });
+            preparedTasks.add(
+                    () -> createTextBox((XSLFGraphicFrame) shape, "tnxjeex.doc.ppt.unable_to_display_smart_art"));
         }
         return preparedTasks;
     }
@@ -246,6 +250,46 @@ public class PptDoc {
             return textboxWrapper;
         }
         return null;
+    }
+
+    /**
+     * 判断指定页中是否包含不可渲染为图片的形状
+     *
+     * @param pageIndex 页索引序号
+     * @return 指定页中是否包含不可渲染为图片的形状
+     */
+    @SuppressWarnings("unchecked")
+    public boolean containsUnrenderableShape(int pageIndex) {
+        if (this.origin instanceof XMLSlideShow) {
+            Slide<?, ?> slide = getPage(pageIndex);
+            if (slide != null) {
+                List<XSLFShape> shapes = (List<XSLFShape>) slide.getShapes();
+                for (XSLFShape shape : shapes) {
+                    if (isUnrenderable(shape)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isUnrenderable(XSLFShape shape) {
+        if (shape instanceof XSLFGroupShape) {
+            XSLFGroupShape groupShape = (XSLFGroupShape) shape;
+            for (XSLFShape child : groupShape) {
+                isUnrenderable(child);
+            }
+        } else if (shape instanceof XSLFTextShape) {
+            XSLFTextShape textShape = (XSLFTextShape) shape;
+            for (XSLFTextParagraph textParagraph : textShape) {
+                List<XSLFTextRun> textRuns = textParagraph.getTextRuns();
+                if (textRuns.isEmpty() && isMathParagraph(textParagraph)) {
+                    return true;
+                }
+            }
+        }
+        return shape.getClass() == XSLFGraphicFrame.class;
     }
 
     public void close() {
