@@ -309,7 +309,6 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         String path = getDownloadPath(request);
         int bufferSize = IOUtil.DEFAULT_BUFFER_SIZE; // 必须与输出文件流时的缓存区大小保持一致
         FssFileDetail detail = resolveFileDetail(userIdentity, path, request, response, fssFileDetail -> {
-            response.reset();
             response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
             response.setBufferSize(bufferSize);
             if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
