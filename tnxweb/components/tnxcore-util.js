@@ -850,7 +850,7 @@ export const NetUtil = {
             }
             index = url.lastIndexOf('.');
             if (index >= 0) {
-                return url.substring(withDot ? index : index + 1);
+                return url.substring(withDot ? index : index + 1).toLowerCase();
             }
             return '';
         }
