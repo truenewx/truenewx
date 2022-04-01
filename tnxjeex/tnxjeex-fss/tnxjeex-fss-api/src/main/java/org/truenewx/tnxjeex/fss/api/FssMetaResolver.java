@@ -53,6 +53,6 @@ public interface FssMetaResolver {
      */
     @GetMapping("/download/url")
     String resolveDownloadUrl(@RequestParam("storageUrl") String storageUrl,
-            @RequestParam("absolute") boolean absolute);
+            @RequestParam(value = "absolute", required = false, defaultValue = "true") boolean absolute);
 
 }
