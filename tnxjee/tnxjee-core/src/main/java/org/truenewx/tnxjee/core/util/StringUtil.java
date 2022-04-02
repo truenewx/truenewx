@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -878,25 +879,33 @@ public class StringUtil {
     }
 
     /**
-     * 获取指定文件名的扩展名，如果指定文件名不是一个合法的文件名，则返回null
+     * 获取指定文件名的扩展名，结果一律为小写字母
      *
-     * @param fileName    文件名
+     * @param filename    文件名
      * @param containsDot 是否包含句点
      * @return 指定文件名的扩展名
      */
-    public static String getFileExtension(String fileName, boolean containsDot) {
-        if (fileName.length() == 0 && !containsDot) {
-            return "";
+    public static String getExtension(String filename, boolean containsDot) {
+        String extension = FilenameUtils.getExtension(filename);
+        if (extension != null) {
+            extension = extension.toLowerCase();
+            if (containsDot) {
+                extension = Strings.DOT + extension;
+            }
         }
-        if (".".equals(fileName)) {
-            return containsDot ? "." : "";
-        }
-        int index = fileName.lastIndexOf('.');
-        if (index >= 0) {
-            return containsDot ? fileName.substring(index) : fileName.substring(index + 1);
-        }
-        return null;
+        return extension;
     }
+
+    /**
+     * 获取指定文件名的扩展名，不含句点，结果一律为小写字母
+     *
+     * @param filename 文件名
+     * @return 指定文件名的扩展名
+     */
+    public static String getExtension(String filename) {
+        return getExtension(filename, false);
+    }
+
 
     /**
      * 用指定分隔符连接指定对象数组的字符串值

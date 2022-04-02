@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -22,6 +21,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.SpringUtil;
+import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
  * 基于配置子目录的环境配置后置处理器，于Spring容器启动前加载基于分层机制的自定义配置属性
@@ -120,8 +120,8 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
         list.sort((res1, res2) -> {
             String filename1 = res1.getFilename();
             String filename2 = res2.getFilename();
-            String extension1 = FilenameUtils.getExtension(filename1);
-            String extension2 = FilenameUtils.getExtension(filename2);
+            String extension1 = StringUtil.getExtension(filename1);
+            String extension2 = StringUtil.getExtension(filename2);
             int result = Integer.compare(getExtensionOrdinal(extension1), getExtensionOrdinal(extension2));
             if (result == 0) { // 扩展名序号相同，则简单比较文件名即可，带profile的自然靠前
                 return filename1.compareTo(filename2);
@@ -139,7 +139,7 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
     private void addResources(List<Resource> validList, String locationPattern) throws IOException {
         Resource[] resources = this.resourcePatternResolver.getResources(locationPattern);
         for (Resource resource : resources) {
-            String extension = FilenameUtils.getExtension(resource.getFilename());
+            String extension = StringUtil.getExtension(resource.getFilename());
             if (getExtensionOrdinal(extension) >= 0) {
                 validList.add(resource);
             }
@@ -168,7 +168,7 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
     }
 
     private PropertySourceLoader getSourceLoader(String filename) {
-        String extension = FilenameUtils.getExtension(filename);
+        String extension = StringUtil.getExtension(filename);
         if (getExtensionOrdinal(extension) > 0) {
             return this.yamlLoader;
         } else if (getExtensionOrdinal(extension) == 0) {
