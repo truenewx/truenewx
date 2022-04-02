@@ -346,7 +346,10 @@ public class IOUtil {
                 in = new FileInputStream(source);
                 FileChannel inChannel = in.getChannel();
                 out = new FileOutputStream(target);
-                out.getChannel().transferFrom(inChannel, 0, inChannel.size());
+                FileChannel outChannel = out.getChannel();
+                outChannel.transferFrom(inChannel, 0, inChannel.size());
+                outChannel.close();
+                inChannel.close();
                 return true;
             } catch (IOException e) {
                 LogUtil.error(IOUtil.class, e);
