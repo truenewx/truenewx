@@ -1077,7 +1077,7 @@ export const BomUtil = {
 
 export const FileUtil = {
     extensions: {
-        image: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'ico'],
+        image: ['bmp', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico'],
         video: ['mp4', 'webm', 'mpg', 'mpeg', 'mov', 'avi', 'rm', '3gp', '3gpp', 'mkv', 'rmvb', 'wmv'],
         audio: ['mp3', 'wav', 'wma', 'acc', 'mid', 'cda', 'aif', 'aiff', 'ra', 'ape'],
         archive: ['zip', 'rar', '7z', 'war', 'jar', 'gz', 'tar'],
