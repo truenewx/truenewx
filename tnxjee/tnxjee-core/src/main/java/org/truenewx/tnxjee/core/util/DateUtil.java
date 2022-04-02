@@ -44,6 +44,10 @@ public class DateUtil {
      */
     public static final String LONG_DATE_NO_DELIMITER_PATTERN = "yyyyMMddHHmmss";
     /**
+     * 没分隔符的精确到毫秒的时间戳格式
+     */
+    public static final String LONG_TIMESTAMP_NO_DELIMITER_PATTERN = LONG_DATE_NO_DELIMITER_PATTERN + "S";
+    /**
      * 精确到分钟的长日期格式
      */
     public static final String LONG_DATE_PATTERN_TO_MINUTE = "yyyy-MM-dd HH:mm";
