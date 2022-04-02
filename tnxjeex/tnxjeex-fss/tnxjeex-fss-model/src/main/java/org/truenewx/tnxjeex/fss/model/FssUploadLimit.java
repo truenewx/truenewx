@@ -1,8 +1,6 @@
 package org.truenewx.tnxjeex.fss.model;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.util.Assert;
-import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.FlatSize;
 
 /**
@@ -66,17 +64,6 @@ public class FssUploadLimit {
         this.croppable = croppable;
         this.sizes = sizes;
         return this;
-    }
-
-    /**
-     * 从指定文件名中获取扩展名，不含句点，没有扩展名的返回空字符串
-     *
-     * @param filename 文件名
-     * @return 扩展名
-     */
-    public static String getExtension(String filename) {
-        String extension = FilenameUtils.getExtension(filename);
-        return extension == null ? Strings.EMPTY : extension;
     }
 
 }

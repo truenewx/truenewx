@@ -116,9 +116,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             boolean onlyStorage) {
         try {
             if (file != null) {
-                String filename = file.getOriginalFilename();
                 InputStream in = file.getInputStream();
-                return write(type, scope, fileId, file.getSize(), filename, in, onlyStorage);
+                return write(type, scope, fileId, file.getSize(), file.getOriginalFilename(), in, onlyStorage);
             }
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
@@ -126,11 +125,11 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         return null;
     }
 
-    private FssUploadedFileMeta write(String type, String scope, String fileId, long fileSize, String filename,
+    private FssUploadedFileMeta write(String type, String scope, String fileId, long fileSize, String originalFilename,
             InputStream in, boolean onlyStorage) throws IOException {
         // 注意：此处获得的输入流大小与原始文件的大小可能不相同，可能变大或变小
         I userIdentity = getUserIdentity();
-        String storageUrl = this.service.write(type, scope, userIdentity, fileSize, filename, in);
+        String storageUrl = this.service.write(type, scope, userIdentity, fileSize, originalFilename, in);
         in.close();
 
         if (StringUtils.isBlank(fileId)) { // 如果文件id未指定，则根据存储路径加密得到文件id
@@ -139,7 +138,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
         FssUploadedFileMeta result = new FssUploadedFileMeta(fileId, storageUrl);
         if (!onlyStorage) { // 不只需要存储地址
-            result.setName(filename);
+            result.setName(originalFilename);
             String readUrl = this.service.getReadUrl(userIdentity, storageUrl, false);
             result.setReadUrl(getFullReadUrl(readUrl, true));
             result.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
@@ -217,13 +216,12 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             if (!sourceUrl.startsWith(contextUrl + Strings.SLASH) && !this.service.isOutsideReadUrl(targetType,
                     sourceUrl)) {
                 try {
-                    String filename = getFilename(sourceUrl, command.getExtension());
+                    String sourceFilename = getFilename(sourceUrl, command.getExtension());
                     String fileId = StringUtil.uuid32();
-                    File tempFile = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + filename);
+                    File tempFile = new File(IOUtil.getTomcatTempDir(), fileId + Strings.UNDERLINE + sourceFilename);
                     NetUtil.download(sourceUrl, null, tempFile);
                     FssUploadedFileMeta meta = write(targetType, command.getTargetScope(), fileId, tempFile.length(),
-                            filename,
-                            new FileInputStream(tempFile), true);
+                            sourceFilename, new FileInputStream(tempFile), true);
                     // 在独立线程中删除临时文件，以免影响正常流程
                     this.executor.execute(tempFile::delete);
                     return meta.getStorageUrl();
@@ -314,7 +312,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             if (Boolean.parseBoolean(request.getParameter("inline"))) { // 指定以内联方式下载
                 response.setContentType(Mimetypes.getInstance().getMimetype(path));
             } else {
-                WebUtil.setDownloadFilename(request, response, fssFileDetail.getFilename());
+                WebUtil.setDownloadFilename(request, response, fssFileDetail.getOriginalFilename());
             }
         });
         if (detail != null) {

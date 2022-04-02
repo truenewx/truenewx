@@ -33,28 +33,30 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
     /**
      * 指定用户在业务授权类型下写文件
      *
-     * @param type         业务类型
-     * @param scope        业务范围
-     * @param userIdentity 用户标识
-     * @param fileSize     文件大小
-     * @param filename     文件名
-     * @param in           输入流
+     * @param type             业务类型
+     * @param scope            业务范围
+     * @param userIdentity     用户标识
+     * @param fileSize         文件大小
+     * @param originalFilename 原始文件名
+     * @param in               输入流
      * @return 写好的文件的存储地址
      * @throws IOException 如果写的过程中出现错误
      */
-    String write(String type, String scope, I userIdentity, long fileSize, String filename, InputStream in)
+    String write(String type, String scope, I userIdentity, long fileSize, String originalFilename, InputStream in)
             throws IOException;
 
     /**
      * 指定用户将文件写入指定存储地址
      *
-     * @param storageUrl   存储地址
-     * @param userIdentity 用户标识
-     * @param filename     文件名
-     * @param in           输入流
+     * @param storageUrl       存储地址
+     * @param userIdentity     用户标识
+     * @param fileSize
+     * @param originalFilename 原始文件名
+     * @param in               输入流
      * @throws IOException 如果写的过程中出现错误
      */
-    void write(String storageUrl, I userIdentity, String filename, InputStream in) throws IOException;
+    void write(String storageUrl, I userIdentity, long fileSize, String originalFilename, InputStream in)
+            throws IOException;
 
     /**
      * 指定用户获取指定内部存储URL对应的外部读取URL

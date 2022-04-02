@@ -1,7 +1,7 @@
 package org.truenewx.tnxjeex.fss.api.model;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
  * Fss转储命令
@@ -22,7 +22,7 @@ public class FssTransferCommand {
 
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
-        this.extension = FilenameUtils.getExtension(sourceUrl);
+        this.extension = StringUtil.getExtension(sourceUrl);
     }
 
     public String getExtension() {

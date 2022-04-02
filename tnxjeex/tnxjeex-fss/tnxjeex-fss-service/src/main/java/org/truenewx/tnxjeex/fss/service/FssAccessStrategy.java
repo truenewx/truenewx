@@ -53,11 +53,12 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
     /**
      * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
      *
-     * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
-     * @param scope        业务范围
+     * @param userIdentity     用户标识。登录用户才能写文件，所以此处一定不为null，且已通过写入权限校验
+     * @param scope            业务范围
+     * @param originalFilename 原始文件名
      * @return 指定文件存储时的最后一级文件名
      */
-    default String getStorageFilename(I userIdentity, String scope) {
+    default String getStorageFilename(I userIdentity, String scope, String originalFilename) {
         return null;
     }
 

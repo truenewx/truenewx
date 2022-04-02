@@ -4,6 +4,7 @@ import java.io.*;
 
 import org.truenewx.tnxjee.core.io.EncryptInputStream;
 import org.truenewx.tnxjee.core.io.EncryptOutputStream;
+import org.truenewx.tnxjee.core.util.LogUtil;
 
 /**
  * 自有文件存储服务的文件加密访问流提供者
@@ -25,11 +26,16 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public String getOriginalFilename(File file) throws IOException {
-        EncryptInputStream in = new EncryptInputStream(new FileInputStream(file), this.salt);
-        String filename = in.readAttachment();
-        in.close();
-        return filename;
+    public String getOriginalFilename(File file) {
+        try {
+            EncryptInputStream in = new EncryptInputStream(new FileInputStream(file), this.salt);
+            String filename = in.readAttachment();
+            in.close();
+            return filename;
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
+        return null;
     }
 
     @Override

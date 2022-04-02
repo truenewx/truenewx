@@ -60,14 +60,14 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void write(InputStream in, String path, String filename) throws IOException {
-        String originalPath = path;
-        String originalFilename = filename;
+    public void write(InputStream in, String path, String originalFilename) throws IOException {
+        String path0 = path;
+        String originalFilename0 = originalFilename;
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        if (StringUtils.isNotBlank(filename)) {
-            filename = EncryptUtil.encryptByBase64(filename); // 中文文件名会乱码导致签名校验失败
-            objectMetadata.getUserMetadata().put("filename", filename);
+        if (StringUtils.isNotBlank(originalFilename)) {
+            originalFilename = EncryptUtil.encryptByBase64(originalFilename); // 中文文件名会乱码导致签名校验失败
+            objectMetadata.getUserMetadata().put("filename", originalFilename);
         }
         Charset charset = FssUtil.getCharset(in);
         if (charset != null) {
@@ -79,7 +79,7 @@ public class AliyunFssAccessor implements FssAccessor {
         if (this.delegate != null) {
             this.executorService.submit(() -> {
                 try {
-                    this.delegate.write(in, originalPath, originalFilename);
+                    this.delegate.write(in, path0, originalFilename0);
                 } catch (IOException e) {
                     LogUtil.error(getClass(), e);
                 }
@@ -93,7 +93,7 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssFileDetail getDetail(String path) throws IOException {
+    public FssFileDetail getDetail(String path) {
         if (this.delegate != null) {
             FssFileDetail detail = this.delegate.getDetail(path);
             if (detail != null) {

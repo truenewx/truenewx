@@ -16,7 +16,7 @@ public interface FssAccessor {
 
     FssProvider getProvider();
 
-    void write(InputStream in, String path, String filename) throws IOException;
+    void write(InputStream in, String path, String originalFilename) throws IOException;
 
     /**
      * 获取指定文件的细节
@@ -24,7 +24,7 @@ public interface FssAccessor {
      * @param path 文件路径
      * @return 文件细节，指定文件不存在时返回null
      */
-    FssFileDetail getDetail(String path) throws IOException;
+    FssFileDetail getDetail(String path);
 
     /**
      * 获取指定文件的字符编码

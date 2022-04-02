@@ -58,10 +58,10 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void write(InputStream in, String path, String filename) throws IOException {
+    public void write(InputStream in, String path, String originalFilename) throws IOException {
         // 先上传内容到一个新建的临时文件中，以免在处理过程中原文件被读取
         File tempFile = createTempFile(path);
-        OutputStream out = this.fileStreamProvider.getWriteStream(tempFile, filename);
+        OutputStream out = this.fileStreamProvider.getWriteStream(tempFile, originalFilename);
         IOUtils.copy(in, out);
         out.close();
 
@@ -109,14 +109,14 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssFileDetail getDetail(String path) throws IOException {
+    public FssFileDetail getDetail(String path) {
         File file = getStorageFile(path);
         if (file.exists()) {
-            String filename = this.fileStreamProvider.getOriginalFilename(file);
-            if (filename == null) {
-                filename = file.getName();
+            String originalFilename = this.fileStreamProvider.getOriginalFilename(file);
+            if (originalFilename == null) {
+                originalFilename = file.getName();
             }
-            return new FssFileDetail(filename, file.lastModified(), file.length());
+            return new FssFileDetail(originalFilename, file.lastModified(), file.length());
         }
         return null;
     }

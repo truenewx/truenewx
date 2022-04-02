@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,15 +78,15 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public String write(String type, String scope, I userIdentity, long fileSize, String filename, InputStream in)
-            throws IOException {
+    public String write(String type, String scope, I userIdentity, long fileSize, String originalFilename,
+            InputStream in) throws IOException {
         FssAccessStrategy<I> strategy = getStrategy(type);
         // 上传限制校验
         FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
-        String extension = validateUploadLimit(uploadLimit, fileSize, filename);
+        String extension = validateUploadLimit(uploadLimit, fileSize, originalFilename);
         String relativeDir = getRelativeDirForWrite(strategy, userIdentity, scope);
         // 获取存储文件名
-        String storageFilename = strategy.getStorageFilename(userIdentity, scope);
+        String storageFilename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
             if (!in.markSupported()) {
@@ -104,7 +103,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         // 写文件
         FssProvider provider = strategy.getProvider();
         FssAccessor accessor = this.accessors.get(provider);
-        accessor.write(in, storagePath, filename);
+        accessor.write(in, storagePath, originalFilename);
         // 写好文件之后，如果访问策略是公开匿名可读，则还需要进行相应授权，不过本地自有提供商无需进行授权
         if (strategy.isPublicReadable() && provider != FssProvider.OWN) {
             FssAuthorizer authorizer = this.authorizers.get(provider);
@@ -118,27 +117,27 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     /**
      * 校验上传限制
      *
-     * @param fileSize 文件大小
-     * @param filename 文件名
+     * @param fileSize         文件大小
+     * @param originalFilename 原始文件名
      * @return 包含.的扩展名
      */
-    private String validateUploadLimit(FssUploadLimit uploadLimit, long fileSize, String filename) {
+    private String validateUploadLimit(FssUploadLimit uploadLimit, long fileSize, String originalFilename) {
         if (fileSize > uploadLimit.getCapacity()) {
             throw new BusinessException(FssExceptionCodes.CAPACITY_EXCEEDS_LIMIT,
                     MathUtil.getCapacityCaption(uploadLimit.getCapacity(), 2));
         }
         String[] extensions = uploadLimit.getExtensions();
-        String extension = FssUploadLimit.getExtension(filename);
+        String extension = StringUtil.getExtension(originalFilename);
         if (ArrayUtils.isNotEmpty(extensions)) { // 上传限制中没有设置扩展名，则不限定扩展名
             if (uploadLimit.isExtensionsRejected()) { // 拒绝扩展名模式
                 if (ArrayUtil.containsIgnoreCase(extensions, extension)) {
                     throw new BusinessException(FssExceptionCodes.UNSUPPORTED_EXTENSION,
-                            StringUtils.join(extensions, Strings.COMMA), filename);
+                            StringUtils.join(extensions, Strings.COMMA), originalFilename);
                 }
             } else { // 允许扩展名模式
                 if (!ArrayUtil.containsIgnoreCase(extensions, extension)) {
                     throw new BusinessException(FssExceptionCodes.ONLY_SUPPORTED_EXTENSION,
-                            StringUtils.join(extensions, Strings.COMMA), filename);
+                            StringUtils.join(extensions, Strings.COMMA), originalFilename);
                 }
             }
         }
@@ -165,17 +164,23 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     }
 
     @Override
-    public void write(String storageUrl, I userIdentity, String filename, InputStream in) throws IOException {
+    public void write(String storageUrl, I userIdentity, long fileSize, String originalFilename, InputStream in)
+            throws IOException {
         FssStoragePath fsp = FssStoragePath.of(storageUrl);
         if (fsp != null) {
             FssAccessStrategy<I> strategy = getStrategy(fsp.getType());
+            // 上传限制校验
+            FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+            validateUploadLimit(uploadLimit, fileSize, originalFilename);
+
             if (!strategy.isWriteable(userIdentity, fsp.getRelativeDir(), fsp.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
             }
+
             FssProvider provider = strategy.getProvider();
             FssAccessor accessor = this.accessors.get(provider);
             String storagePath = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
-            accessor.write(in, storagePath, filename);
+            accessor.write(in, storagePath, originalFilename);
         }
     }
 
@@ -266,22 +271,18 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
                 FssAccessor accessor = this.accessors.get(strategy.getProvider());
                 String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
-                try {
-                    FssFileDetail detail = accessor.getDetail(path);
-                    if (detail != null) {
-                        FssFileMeta meta = new FssFileMeta(storageUrl);
-                        meta.setName(detail.getFilename());
-                        meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
-                        meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
-                        FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
-                        if (uploadLimit.isImageable()) {
-                            meta.setImageable(true);
-                            meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
-                        }
-                        return meta;
+                FssFileDetail detail = accessor.getDetail(path);
+                if (detail != null) {
+                    FssFileMeta meta = new FssFileMeta(storageUrl);
+                    meta.setName(detail.getOriginalFilename());
+                    meta.setReadUrl(getReadUrl(userIdentity, fsp, false));
+                    meta.setThumbnailReadUrl(getReadUrl(userIdentity, fsp, true));
+                    FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+                    if (uploadLimit.isImageable()) {
+                        meta.setImageable(true);
+                        meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
                     }
-                } catch (IOException e) {
-                    LogUtil.error(getClass(), e);
+                    return meta;
                 }
             }
         }
@@ -295,17 +296,15 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssAccessStrategy<I> strategy = validateUserRead(userIdentity, fsp);
             FssAccessor accessor = this.accessors.get(strategy.getProvider());
             String path = NetUtil.standardizeUrl(strategy.getContextPath()) + fsp.getRelativePath();
-            try {
-                FssFileDetail detail = accessor.getDetail(path);
+            FssFileDetail detail = accessor.getDetail(path);
+            if (detail != null) {
                 String downloadFilename = strategy.getDownloadFilename(userIdentity, fsp.getRelativeDir(),
                         fsp.getFilename());
                 if (StringUtils.isNotBlank(downloadFilename)) {
                     detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
                 }
-                return detail;
-            } catch (IOException e) {
-                LogUtil.error(getClass(), e);
             }
+            return detail;
         }
         return null;
     }
@@ -360,19 +359,21 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             try {
                 InputStream in = accessor.getReadStream(path);
                 if (in != null) {
-                    Charset charset = accessor.getCharset(path);
-                    if (charset == null) {
-                        charset = FssUtil.getCharset(in);
-                    }
-                    if (charset == null) {
-                        throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
-                    }
-                    // 未指定读取限制，或文件大小未超过限制，才读取内容
-                    if (limit <= 0 || in.available() <= limit) {
-                        String encoding = charset.toString();
-                        String content = IOUtils.toString(in, encoding);
-                        in.close();
-                        return content;
+                    try {
+                        Charset charset = accessor.getCharset(path);
+                        if (charset == null) {
+                            charset = FssUtil.getCharset(in);
+                        }
+                        if (charset == null) {
+                            throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, storageUrl);
+                        }
+                        // 未指定读取限制，或文件大小未超过限制，才读取内容
+                        if (limit <= 0 || in.available() <= limit) {
+                            String encoding = charset.toString();
+                            return IOUtils.toString(in, encoding);
+                        }
+                    } finally {
+                        in.close(); // 确保关闭输入流
                     }
                 }
             } catch (IOException e) {
@@ -413,7 +414,10 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             // 获取目标相对目录，同时校验写权限
             String targetRelativeDir = getRelativeDirForWrite(targetStrategy, userIdentity, targetScope);
             // 获取目标存储文件名
-            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope);
+            FssFileDetail sourceDetail = accessor.getDetail(sourcePath);
+            String originalFilename = sourceDetail == null ? null : sourceDetail.getOriginalFilename();
+            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope,
+                    originalFilename);
             if (StringUtils.isBlank(targetStorageFilename)) {
                 // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用
                 try {
@@ -426,7 +430,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 }
             }
             // 目标文件扩展名与来源文件相同
-            String extension = FilenameUtils.getExtension(sourceStoragePath.getFilename());
+            String extension = StringUtil.getExtension(sourceStoragePath.getFilename());
             if (StringUtils.isNotBlank(extension) && !extension.startsWith(Strings.DOT)) {
                 extension = Strings.DOT + extension;
             }
