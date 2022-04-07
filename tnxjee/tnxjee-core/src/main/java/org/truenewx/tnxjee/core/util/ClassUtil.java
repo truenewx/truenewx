@@ -2,7 +2,6 @@ package org.truenewx.tnxjee.core.util;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -757,20 +756,6 @@ public class ClassUtil {
                     }
                 }
             }
-        }
-        return false;
-    }
-
-    /**
-     * 判断是否可序列化的非具化类型
-     *
-     * @param clazz 类型
-     * @return 是否可序列化的非具化类型
-     */
-    public static boolean isSerializableNonConcrete(Class<?> clazz) {
-        int modifiers = clazz.getModifiers();
-        if ((modifiers & (Modifier.INTERFACE | Modifier.ABSTRACT)) != 0) {
-            return Serializable.class.isAssignableFrom(clazz);
         }
         return false;
     }

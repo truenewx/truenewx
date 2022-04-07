@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.core.util;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Modifier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.function.Predicate;
 
+import org.springframework.beans.BeanUtils;
 import org.truenewx.tnxjee.core.jackson.CompositeLocalTimeDeserializer;
 import org.truenewx.tnxjee.core.jackson.PredicateTypeResolverBuilder;
 
@@ -94,6 +97,7 @@ public class JacksonUtil {
 
     @JsonFilter("DynamicFilter")
     private interface DynamicFilter {
+
     }
 
     public static ObjectMapper buildMapper(PropertyFilter filter, Class<?>... beanClasses) {
@@ -138,9 +142,40 @@ public class JacksonUtil {
     }
 
     public static ObjectMapper withNonConcreteClassProperty(ObjectMapper mapper) {
-        return withClassProperty(mapper, type -> {
-            return type.isJavaLangObject() || ClassUtil.isSerializableNonConcrete(type.getRawClass());
-        });
+        return withClassProperty(mapper, type -> isSerializableNonConcrete(type.getRawClass()));
+    }
+
+    /**
+     * 判断是否可序列化的非具化类型
+     *
+     * @param clazz 类型
+     * @return 是否可序列化的非具化类型
+     */
+    public static boolean isSerializableNonConcrete(Class<?> clazz) {
+        try {
+            if (clazz.isInterface()) { // 接口，需至少包含一个getter方法
+                PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
+                for (PropertyDescriptor pd : pds) {
+                    // 带参数的getter方法会形成属性类型为null的属性描述，应忽略
+                    if (pd.getPropertyType() != null && pd.getReadMethod() != null) {
+                        return true;
+                    }
+                }
+            } else { // 非接口，必须公开且抽象（非抽象的为具化类型），并具有公开的无参构造函数，且至少包含一个具有getter方法的属性
+                int modifiers = clazz.getModifiers();
+                if (Modifier.isPublic(modifiers) && Modifier.isAbstract(modifiers)) {
+                    clazz.getConstructor();
+                    PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
+                    for (PropertyDescriptor pd : pds) {
+                        if (pd.getPropertyType() != null && pd.getReadMethod() != null) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     public static String getTypePropertyName() {

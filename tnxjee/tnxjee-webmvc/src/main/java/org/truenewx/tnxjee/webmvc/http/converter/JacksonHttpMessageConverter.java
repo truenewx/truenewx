@@ -94,9 +94,11 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         String mapperKey = getMapperKey(internal, method);
         ObjectMapper writer = this.writers.get(mapperKey);
         if (writer == null) {
+            // 存在结果过滤设置，或需要生成对象类型字段，则需构建方法特定的映射器
             ResultFilter[] resultFilters = method.getAnnotationsByType(ResultFilter.class);
-            if (ArrayUtils.isNotEmpty(resultFilters) || requiresBuildWriterWithClassProperty(internal, method)) {
-                writer = buildWriter(internal, method.getReturnType(), resultFilters);
+            boolean classPropertyRequired = isClassPropertyRequired(internal, method);
+            if (ArrayUtils.isNotEmpty(resultFilters) || classPropertyRequired) {
+                writer = buildWriter(internal, method.getReturnType(), resultFilters, classPropertyRequired);
                 this.writers.put(mapperKey, writer);
             } else { // 没有结果过滤设置的取默认映射器
                 writer = internal ? this.defaultInternalWriter : this.defaultExternalWriter;
@@ -105,7 +107,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         return writer;
     }
 
-    private boolean requiresBuildWriterWithClassProperty(boolean internal, Method method) {
+    private boolean isClassPropertyRequired(boolean internal, Method method) {
         if (internal) { // 内部调用才可能需要构建输出类型字段的输出器
             // 方法上有@ResultWithClassField注解，则一定输出类型字段
             if (method.getAnnotation(ResultWithClassField.class) != null) {
@@ -117,7 +119,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
                 // 需要序列化的属性中包含集合或可序列化的非具化类型，则需要构建输出类型字段的输出器
                 if (!meta.containsAnnotation(JsonIgnore.class)) {
                     Class<?> type = meta.getType();
-                    if (Iterable.class.isAssignableFrom(type) || ClassUtil.isSerializableNonConcrete(type)) {
+                    if (Iterable.class.isAssignableFrom(type) || JacksonUtil.isSerializableNonConcrete(type)) {
                         return true;
                     }
                 }
@@ -126,7 +128,8 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         return false;
     }
 
-    private ObjectMapper buildWriter(boolean internal, Class<?> resultType, ResultFilter[] resultFilters) {
+    private ObjectMapper buildWriter(boolean internal, Class<?> resultType, ResultFilter[] resultFilters,
+            boolean classPropertyRequired) {
         TypedPropertyFilter filter = new TypedPropertyFilter();
         AttachFieldBeanSerializerModifier attachFieldModifier = new AttachFieldBeanSerializerModifier(this.context);
         for (ResultFilter resultFilter : resultFilters) {
@@ -144,10 +147,11 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             filteredTypes = ArrayUtils.add(filteredTypes, resultType);
         }
         ObjectMapper writer = JacksonUtil.buildMapper(filter, filteredTypes);
-        if (internal) { // 内部输出器需要附加类型属性输出能力
-            JacksonUtil.withNonConcreteClassProperty(writer);
-        } else { // 外部输出器需要附加字段输出能力
+        if (!internal) { // 外部输出器需要附加字段输出能力
             withSerializerModifier(writer, attachFieldModifier);
+        }
+        if (classPropertyRequired) { // 附加类型属性输出能力
+            JacksonUtil.withNonConcreteClassProperty(writer);
         }
         return writer;
     }
