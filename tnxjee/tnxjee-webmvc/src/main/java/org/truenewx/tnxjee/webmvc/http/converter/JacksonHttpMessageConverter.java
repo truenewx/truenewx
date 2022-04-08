@@ -48,19 +48,19 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
     @Autowired
     private ApplicationContext context;
 
-    private final Map<String, ObjectMapper> writers = new HashMap<>();
-    private final ObjectMapper defaultInternalWriter = JacksonUtil.copyDefaultMapper();
-    private final ObjectMapper defaultExternalWriter = JacksonUtil.copyDefaultMapper();
+    private final Map<String, ObjectMapper> mappers = new HashMap<>();
+    private final ObjectMapper defaultInternalMapper = JacksonUtil.copyDefaultMapper();
+    private final ObjectMapper defaultExternalMapper = JacksonUtil.copyDefaultMapper();
 
     public JacksonHttpMessageConverter() {
-        super(JacksonUtil.copyNonConcreteClassedMapper()); // 默认映射器实际上作为了读取器，始终具有读取类型字段的能力
+        super(JacksonUtil.copyClassedMapper()); // 默认映射器实际上作为了读取器，始终具有读取类型字段的能力
         setDefaultCharset(StandardCharsets.UTF_8);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // 默认外部输出器需要附加字段输出能力
-        withSerializerModifier(this.defaultExternalWriter, new AttachFieldBeanSerializerModifier(this.context));
+        // 默认外部映射器需要附加字段输出能力
+        withSerializerModifier(this.defaultExternalMapper, new AttachFieldBeanSerializerModifier(this.context));
     }
 
     private void withSerializerModifier(ObjectMapper mapper, BeanSerializerModifier modifier) {
@@ -80,7 +80,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             if (handlerMethod != null) {
                 Method method = handlerMethod.getMethod();
                 boolean internal = WebMvcUtil.isInternalRpc(request);
-                ObjectMapper mapper = getWriter(internal, method);
+                ObjectMapper mapper = getMapper(internal, method);
                 String json = mapper.writeValueAsString(object);
                 Charset charset = Objects.requireNonNullElse(getDefaultCharset(), StandardCharsets.UTF_8);
                 IOUtils.write(json, outputMessage.getBody(), charset.name());
@@ -90,36 +90,39 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         super.writeInternal(object, type, outputMessage);
     }
 
-    private ObjectMapper getWriter(boolean internal, Method method) {
+    private ObjectMapper getMapper(boolean internal, Method method) {
         String mapperKey = getMapperKey(internal, method);
-        ObjectMapper writer = this.writers.get(mapperKey);
-        if (writer == null) {
+        ObjectMapper mapper = this.mappers.get(mapperKey);
+        if (mapper == null) {
             // 存在结果过滤设置，或需要生成对象类型字段，则需构建方法特定的映射器
             ResultFilter[] resultFilters = method.getAnnotationsByType(ResultFilter.class);
             boolean classPropertyRequired = isClassPropertyRequired(internal, method);
             if (ArrayUtils.isNotEmpty(resultFilters) || classPropertyRequired) {
-                writer = buildWriter(internal, method.getReturnType(), resultFilters, classPropertyRequired);
-                this.writers.put(mapperKey, writer);
-            } else { // 没有结果过滤设置的取默认映射器
-                writer = internal ? this.defaultInternalWriter : this.defaultExternalWriter;
+                mapper = buildMapper(internal, method.getReturnType(), resultFilters, classPropertyRequired);
+                this.mappers.put(mapperKey, mapper);
+            } else { // 取默认映射器
+                mapper = internal ? this.defaultInternalMapper : this.defaultExternalMapper;
             }
         }
-        return writer;
+        return mapper;
     }
 
     private boolean isClassPropertyRequired(boolean internal, Method method) {
-        if (internal) { // 内部调用才可能需要构建输出类型字段的输出器
+        if (internal) { // 内部调用才可能需要构建输出类型字段的映射器
             // 方法上有@ResultWithClassField注解，则一定输出类型字段
             if (method.getAnnotation(ResultWithClassField.class) != null) {
                 return true;
             }
-            Collection<PropertyMeta> metas = ClassUtil.findPropertyMetas(method.getReturnType(), true, false, true,
-                    null);
+            Class<?> returnType = method.getReturnType();
+            if (JacksonUtil.isClassPropertyRequired(returnType)) {
+                return true;
+            }
+            Collection<PropertyMeta> metas = ClassUtil.findPropertyMetas(returnType, true, false, true, null);
             for (PropertyMeta meta : metas) {
-                // 需要序列化的属性中包含集合或可序列化的非具化类型，则需要构建输出类型字段的输出器
+                // 需要序列化的属性中包含集合或可序列化的非具化类型，则需要构建输出类型字段的映射器
                 if (!meta.containsAnnotation(JsonIgnore.class)) {
                     Class<?> type = meta.getType();
-                    if (Iterable.class.isAssignableFrom(type) || JacksonUtil.isSerializableNonConcrete(type)) {
+                    if (JacksonUtil.isClassPropertyRequired(type)) {
                         return true;
                     }
                 }
@@ -128,7 +131,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         return false;
     }
 
-    private ObjectMapper buildWriter(boolean internal, Class<?> resultType, ResultFilter[] resultFilters,
+    private ObjectMapper buildMapper(boolean internal, Class<?> resultType, ResultFilter[] resultFilters,
             boolean classPropertyRequired) {
         TypedPropertyFilter filter = new TypedPropertyFilter();
         AttachFieldBeanSerializerModifier attachFieldModifier = new AttachFieldBeanSerializerModifier(this.context);
@@ -146,14 +149,14 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
         if (!ArrayUtils.contains(filteredTypes, resultType)) {
             filteredTypes = ArrayUtils.add(filteredTypes, resultType);
         }
-        ObjectMapper writer = JacksonUtil.buildMapper(filter, filteredTypes);
-        if (!internal) { // 外部输出器需要附加字段输出能力
-            withSerializerModifier(writer, attachFieldModifier);
-        }
+        ObjectMapper mapper = JacksonUtil.buildMapper(filter, filteredTypes);
         if (classPropertyRequired) { // 附加类型属性输出能力
-            JacksonUtil.withNonConcreteClassProperty(writer);
+            JacksonUtil.withClassProperty(mapper);
         }
-        return writer;
+        if (!internal) { // 外部映射器需要附加字段输出能力
+            withSerializerModifier(mapper, attachFieldModifier);
+        }
+        return mapper;
     }
 
 }

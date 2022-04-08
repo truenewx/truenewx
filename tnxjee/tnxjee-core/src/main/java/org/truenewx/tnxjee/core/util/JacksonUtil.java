@@ -1,13 +1,11 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Modifier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.truenewx.tnxjee.core.jackson.CompositeLocalTimeDeserializer;
@@ -17,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -70,7 +67,7 @@ public class JacksonUtil {
         DEFAULT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // 反序列化时允许未知属性
 
         // 默认的映射器初始化后再初始化带复合类型属性的映射器
-        CLASSED_MAPPER = copyComplexClassedMapper();
+        CLASSED_MAPPER = copyClassedMapper();
     }
 
     public static ObjectMapper copyDefaultMapper() {
@@ -78,26 +75,16 @@ public class JacksonUtil {
     }
 
     /**
-     * 复制一个将复合对象类型写入JSON串的映射器
+     * 复制一个附加类型属性的映射器
      *
-     * @return 将复合对象类型写入JSON串的映射器
+     * @return 附加类型属性的映射器
      */
-    public static ObjectMapper copyComplexClassedMapper() {
-        return withComplexClassProperty(copyDefaultMapper());
-    }
-
-    /**
-     * 复制一个将非具化对象类型写入JSON串的映射器
-     *
-     * @return 将非具化对象类型写入JSON串的映射器
-     */
-    public static ObjectMapper copyNonConcreteClassedMapper() {
-        return withNonConcreteClassProperty(copyDefaultMapper());
+    public static ObjectMapper copyClassedMapper() {
+        return withClassProperty(copyDefaultMapper());
     }
 
     @JsonFilter("DynamicFilter")
     private interface DynamicFilter {
-
     }
 
     public static ObjectMapper buildMapper(PropertyFilter filter, Class<?>... beanClasses) {
@@ -120,62 +107,22 @@ public class JacksonUtil {
     private static void registerFilterable(ObjectMapper mapper, Class<?> beanClass) {
         if (mapper.addMixIn(beanClass, DynamicFilter.class) == null) { // 首次注册才考虑同时注册复合属性类型
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(beanClass, true, false, true,
-                    (propertyType, propertyName) -> {
-                        return ClassUtil.isComplex(propertyType);
-                    });
+                    (propertyType, propertyName) -> ClassUtil.isComplex(propertyType));
             propertyMetas.forEach(meta -> {
                 registerFilterable(mapper, meta.getType());
             });
         }
     }
 
-    public static ObjectMapper withComplexClassProperty(ObjectMapper mapper) {
-        return withClassProperty(mapper, type -> {
-            return ClassUtil.isComplex(type.getRawClass());
-        });
-    }
-
-    public static ObjectMapper withClassProperty(ObjectMapper mapper, Predicate<JavaType> predicate) {
-        PredicateTypeResolverBuilder builder = new PredicateTypeResolverBuilder(predicate);
+    public static ObjectMapper withClassProperty(ObjectMapper mapper) {
+        PredicateTypeResolverBuilder builder = new PredicateTypeResolverBuilder(JacksonUtil::isClassPropertyRequired);
         builder.init(JsonTypeInfo.Id.CLASS, null).inclusion(JsonTypeInfo.As.PROPERTY);
         return mapper.setDefaultTyping(builder);
     }
 
-    public static ObjectMapper withNonConcreteClassProperty(ObjectMapper mapper) {
-        return withClassProperty(mapper, type -> isSerializableNonConcrete(type.getRawClass()));
-    }
-
-    /**
-     * 判断是否可序列化的非具化类型
-     *
-     * @param clazz 类型
-     * @return 是否可序列化的非具化类型
-     */
-    public static boolean isSerializableNonConcrete(Class<?> clazz) {
-        try {
-            if (clazz.isInterface()) { // 接口，需至少包含一个getter方法
-                PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
-                for (PropertyDescriptor pd : pds) {
-                    // 带参数的getter方法会形成属性类型为null的属性描述，应忽略
-                    if (pd.getPropertyType() != null && pd.getReadMethod() != null) {
-                        return true;
-                    }
-                }
-            } else { // 非接口，必须公开且抽象（非抽象的为具化类型），并具有公开的无参构造函数，且至少包含一个具有getter方法的属性
-                int modifiers = clazz.getModifiers();
-                if (Modifier.isPublic(modifiers) && Modifier.isAbstract(modifiers)) {
-                    clazz.getConstructor();
-                    PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
-                    for (PropertyDescriptor pd : pds) {
-                        if (pd.getPropertyType() != null && pd.getReadMethod() != null) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
+    public static boolean isClassPropertyRequired(Class<?> clazz) {
+        return !Iterable.class.isAssignableFrom(clazz) && !Map.class.isAssignableFrom(clazz) && !clazz.isArray()
+                && !BeanUtils.isSimpleValueType(clazz);
     }
 
     public static String getTypePropertyName() {
