@@ -17,7 +17,7 @@ public class PredicateTypeResolverBuilder extends ObjectMapper.DefaultTypeResolv
     private Predicate<Class<?>> predicate;
 
     public PredicateTypeResolverBuilder() {
-        super(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE, LaissezFaireSubTypeValidator.instance);
+        super(ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT, LaissezFaireSubTypeValidator.instance);
     }
 
     public PredicateTypeResolverBuilder(Predicate<Class<?>> predicate) {
@@ -36,6 +36,7 @@ public class PredicateTypeResolverBuilder extends ObjectMapper.DefaultTypeResolv
         while (type.isReferenceType()) {
             type = type.getReferencedType();
         }
+        // 注意：复合类型在此会被视为Object类型，从而使该判断为true
         if (type.isJavaLangObject()) {
             return true;
         }

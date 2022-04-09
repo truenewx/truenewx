@@ -1,13 +1,13 @@
 package org.truenewx.tnxjee.core.util;
 
+import java.lang.reflect.Modifier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Map;
+import java.util.function.Predicate;
 
-import org.springframework.beans.BeanUtils;
 import org.truenewx.tnxjee.core.jackson.CompositeLocalTimeDeserializer;
 import org.truenewx.tnxjee.core.jackson.PredicateTypeResolverBuilder;
 
@@ -66,8 +66,8 @@ public class JacksonUtil {
         DEFAULT_MAPPER.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS); // 反序列化日期类型不从纳秒而是毫秒转换
         DEFAULT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // 反序列化时允许未知属性
 
-        // 默认的映射器初始化后再初始化带复合类型属性的映射器
-        CLASSED_MAPPER = copyClassedMapper();
+        // 默认的附带类型属性映射器只对非具化类型生效
+        CLASSED_MAPPER = copyNonConcreteClassedMapper();
     }
 
     public static ObjectMapper copyDefaultMapper() {
@@ -75,16 +75,26 @@ public class JacksonUtil {
     }
 
     /**
-     * 复制一个附加类型属性的映射器
+     * 复制一个对非具化类型附加类型属性的映射器
      *
-     * @return 附加类型属性的映射器
+     * @return 对非具化类型附加类型属性的映射器
      */
-    public static ObjectMapper copyClassedMapper() {
-        return withClassProperty(copyDefaultMapper());
+    public static ObjectMapper copyNonConcreteClassedMapper() {
+        return withClassProperty(copyDefaultMapper(), JacksonUtil::isNonConcrete);
     }
 
-    @JsonFilter("DynamicFilter")
-    private interface DynamicFilter {
+    public static ObjectMapper withClassProperty(ObjectMapper mapper, Predicate<Class<?>> predicate) {
+        PredicateTypeResolverBuilder builder = new PredicateTypeResolverBuilder(predicate);
+        builder.init(JsonTypeInfo.Id.CLASS, null).inclusion(JsonTypeInfo.As.PROPERTY);
+        return mapper.setDefaultTyping(builder);
+    }
+
+    public static boolean isNonConcrete(Class<?> clazz) {
+        return !ClassUtil.isAggregation(clazz) && (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()));
+    }
+
+    public static ObjectMapper withComplexClassProperty(ObjectMapper mapper) {
+        return withClassProperty(mapper, ClassUtil::isComplex);
     }
 
     public static ObjectMapper buildMapper(PropertyFilter filter, Class<?>... beanClasses) {
@@ -114,15 +124,8 @@ public class JacksonUtil {
         }
     }
 
-    public static ObjectMapper withClassProperty(ObjectMapper mapper) {
-        PredicateTypeResolverBuilder builder = new PredicateTypeResolverBuilder(JacksonUtil::isClassPropertyRequired);
-        builder.init(JsonTypeInfo.Id.CLASS, null).inclusion(JsonTypeInfo.As.PROPERTY);
-        return mapper.setDefaultTyping(builder);
-    }
-
-    public static boolean isClassPropertyRequired(Class<?> clazz) {
-        return !Iterable.class.isAssignableFrom(clazz) && !Map.class.isAssignableFrom(clazz) && !clazz.isArray()
-                && !BeanUtils.isSimpleValueType(clazz);
+    @JsonFilter("DynamicFilter")
+    private interface DynamicFilter {
     }
 
     public static String getTypePropertyName() {

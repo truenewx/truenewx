@@ -28,8 +28,8 @@ import org.truenewx.tnxjee.core.util.JacksonUtil;
 import org.truenewx.tnxjee.core.util.PropertyMeta;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.webmvc.http.annotation.ResultFilter;
-import org.truenewx.tnxjee.webmvc.http.annotation.ResultWithClassField;
 import org.truenewx.tnxjee.webmvc.jackson.AttachFieldBeanSerializerModifier;
+import org.truenewx.tnxjee.webmvc.jackson.JsonWithClassProperty;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 import org.truenewx.tnxjee.webmvc.util.WebMvcUtil;
 
@@ -53,7 +53,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
     private final ObjectMapper defaultExternalMapper = JacksonUtil.copyDefaultMapper();
 
     public JacksonHttpMessageConverter() {
-        super(JacksonUtil.copyClassedMapper()); // 默认映射器实际上作为了读取器，始终具有读取类型字段的能力
+        super(JacksonUtil.copyNonConcreteClassedMapper()); // 默认映射器实际上作为读取器，针对非具化类型读取类型字段
         setDefaultCharset(StandardCharsets.UTF_8);
     }
 
@@ -109,20 +109,25 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
 
     private boolean isClassPropertyRequired(boolean internal, Method method) {
         if (internal) { // 内部调用才可能需要构建输出类型字段的映射器
-            // 方法上有@ResultWithClassField注解，则一定输出类型字段
-            if (method.getAnnotation(ResultWithClassField.class) != null) {
+            // 方法上有@JsonWithClassProperty注解，则一定输出类型字段
+            if (method.getAnnotation(JsonWithClassProperty.class) != null) {
                 return true;
             }
             Class<?> returnType = method.getReturnType();
-            if (JacksonUtil.isClassPropertyRequired(returnType)) {
+            // 结果类型为非具化类型，则需要构建输出类型字段的映射器
+            if (JacksonUtil.isNonConcrete(returnType)) {
                 return true;
             }
             Collection<PropertyMeta> metas = ClassUtil.findPropertyMetas(returnType, true, false, true, null);
             for (PropertyMeta meta : metas) {
-                // 需要序列化的属性中包含集合或可序列化的非具化类型，则需要构建输出类型字段的映射器
                 if (!meta.containsAnnotation(JsonIgnore.class)) {
+                    // 需要序列化的属性标注了@JsonWithClassProperty注解，则一定输出类型字段
+                    if (meta.containsAnnotation(JsonWithClassProperty.class)) {
+                        return true;
+                    }
+                    // 需要序列化的属性中包含非具化类型，则需要构建输出类型字段的映射器
                     Class<?> type = meta.getType();
-                    if (JacksonUtil.isClassPropertyRequired(type)) {
+                    if (JacksonUtil.isNonConcrete(type)) {
                         return true;
                     }
                 }
@@ -150,8 +155,8 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             filteredTypes = ArrayUtils.add(filteredTypes, resultType);
         }
         ObjectMapper mapper = JacksonUtil.buildMapper(filter, filteredTypes);
-        if (classPropertyRequired) { // 附加类型属性输出能力
-            JacksonUtil.withClassProperty(mapper);
+        if (classPropertyRequired) { // 已决定要附加类型属性，则针对所有复合类型均附加类型属性输出能力，以适配集合属性中的复合类型元素
+            JacksonUtil.withComplexClassProperty(mapper);
         }
         if (!internal) { // 外部映射器需要附加字段输出能力
             withSerializerModifier(mapper, attachFieldModifier);

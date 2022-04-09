@@ -80,7 +80,7 @@ public class JsonUtil {
         return toJson(obj, filter);
     }
 
-    public static String toJsonWithComplexClass(Object obj) {
+    public static String toJsonWithClassProperty(Object obj) {
         try {
             return JacksonUtil.CLASSED_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
