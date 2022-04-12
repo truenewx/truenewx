@@ -45,18 +45,20 @@ public class FeignRequestInterceptor implements RequestInterceptor {
         if (request != null) {
             Map<String, Collection<String>> feignHeaders = template.headers();
             Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动
-                if (!feignHeaders.containsKey(headerName)) {
-                    Enumeration<String> requestHeaders = request.getHeaders(headerName);
-                    Collection<String> headerValues = new ArrayList<>();
-                    while (requestHeaders.hasMoreElements()) {
-                        headerValues.add(requestHeaders.nextElement());
-                    }
-                    template.header(headerName, headerValues);
-                    if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
-                        noJwt = false;
+            if (headerNames != null) {
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动
+                    if (!feignHeaders.containsKey(headerName)) {
+                        Enumeration<String> requestHeaders = request.getHeaders(headerName);
+                        Collection<String> headerValues = new ArrayList<>();
+                        while (requestHeaders.hasMoreElements()) {
+                            headerValues.add(requestHeaders.nextElement());
+                        }
+                        template.header(headerName, headerValues);
+                        if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
+                            noJwt = false;
+                        }
                     }
                 }
             }
