@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ExcelImportHelper {
 
     private static final String CONSTANT_GROUPED_ENUM_CAPTION_SEPARATOR = "constant.tnxjeex.doc.excel.grouped_enum_caption_separator";
     private static final String CONSTANT_PERMANENT_DATE_DEFAULT = "constant.tnxjeex.doc.excel.permanent_date_default";
-    private static final String CONSTANT_PERMANENT_DATE = "constant.tnxjeex.office.excel.permanent_date";
+    private static final String CONSTANT_PERMANENT_DATE = "constant.tnxjeex.doc.excel.permanent_date";
 
     @Autowired
     private CodedErrorResolver codedErrorResolver;
@@ -82,7 +83,13 @@ public class ExcelImportHelper {
             errorCode = errorCode.substring(1, errorCode.length() - 1);
         }
         CodedError error = this.codedErrorResolver.resolveError(errorCode, locale, args);
-        rowModel.addFieldError(fieldName, fieldValue == null ? null : fieldValue.toString(), error);
+        String originalText = null;
+        if (fieldValue instanceof Enum) {
+            originalText = this.enumDictResolver.getText((Enum<?>) fieldValue, locale);
+        } else if (fieldValue != null) {
+            originalText = fieldValue.toString();
+        }
+        rowModel.addFieldError(fieldName, originalText, error);
     }
 
     public void addCellError(ImportingExcelRowModel rowModel, String fieldName, int index, Object fieldValue,
@@ -127,8 +134,21 @@ public class ExcelImportHelper {
 
     public void applyValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
             Locale locale, boolean required) {
-        Object value = getCellValue(rowModel, row, columnIndex, fieldName, locale);
-        applyValue(rowModel, fieldName, value, locale, required);
+        Object fieldValue = getCellValue(rowModel, row, columnIndex, fieldName, locale);
+        applyValue(rowModel, fieldName, fieldValue, locale, required);
+    }
+
+    public void applyValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
+            Locale locale, Predicate<Object> requiredPredicate) {
+        Object fieldValue = getCellValue(rowModel, row, columnIndex, fieldName, locale);
+        try {
+            boolean required = requiredPredicate.test(fieldValue);
+            applyValue(rowModel, fieldName, fieldValue, locale, required);
+        } catch (ExcelCellFormatException e) {
+            addCellFormatError(rowModel, fieldName, e, locale);
+        } catch (BusinessException e) {
+            addCellBusinessError(rowModel, fieldName, fieldValue, e, locale);
+        }
     }
 
     /**
@@ -279,6 +299,23 @@ public class ExcelImportHelper {
             }
         }
         BeanUtil.setPropertyValue(rowModel, fieldName, fieldValue);
+    }
+
+    public void applyLocalMonthValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
+            Locale locale, Predicate<Object> requiredPredicate) {
+        try {
+            LocalDate fieldValue = row.getLocalMonthCellValue(columnIndex);
+            try {
+                boolean required = requiredPredicate.test(fieldValue);
+                applyValue(rowModel, fieldName, fieldValue, locale, required);
+            } catch (ExcelCellFormatException e) {
+                addCellFormatError(rowModel, fieldName, e, locale);
+            } catch (BusinessException e) {
+                addCellBusinessError(rowModel, fieldName, fieldValue, e, locale);
+            }
+        } catch (ExcelCellFormatException e) {
+            addCellFormatError(rowModel, fieldName, e, locale);
+        }
     }
 
     public void applyLocalMonthValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
