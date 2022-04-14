@@ -39,6 +39,10 @@ export default {
     props: {
         menu: Object,
         path: String,
+        granted: { // 是否已授权可用，默认不指定，如果指定值，则不再根据menu和path判断是否授权可用
+            type: Boolean,
+            default: null,
+        },
         click: {
             type: [Function, Boolean],
             default: false,
@@ -100,7 +104,9 @@ export default {
         }
     },
     created() {
-        if (this.menu && this.path) {
+        if (this.granted != null) {
+            this.disabled = !this.granted;
+        } else if (this.menu && this.path) {
             let vm = this;
             this.menu.loadGrantedItems(function() {
                 vm.disabled = !vm.menu.isGranted(vm.path);
