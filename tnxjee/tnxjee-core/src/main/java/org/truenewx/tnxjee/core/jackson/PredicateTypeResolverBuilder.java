@@ -27,12 +27,6 @@ public class PredicateTypeResolverBuilder extends ObjectMapper.DefaultTypeResolv
 
     @Override
     public boolean useForType(JavaType type) {
-        while (type.isArrayType()) {
-            type = type.getContentType();
-        }
-        while (type.isReferenceType()) {
-            type = type.getReferencedType();
-        }
         if (type.isPrimitive()) {
             return false;
         }

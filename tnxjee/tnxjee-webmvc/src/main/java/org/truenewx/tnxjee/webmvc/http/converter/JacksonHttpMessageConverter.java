@@ -114,8 +114,7 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
                 return true;
             }
             Class<?> returnType = method.getReturnType();
-            // 非具化类型的结果需要输出类型字段
-            if (JacksonUtil.isNonConcrete(returnType)) {
+            if (isClassPropertyNeeded(returnType)) {
                 return true;
             }
             Collection<PropertyMeta> metas = ClassUtil.findPropertyMetas(returnType, true, false, true, null);
@@ -126,13 +125,25 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
                         return true;
                     }
                     Class<?> type = meta.getType();
-                    if (JacksonUtil.isNonConcrete(type)) { // 非具化类型的属性需要输出类型字段
+                    if (isClassPropertyNeeded(type)) {
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    private boolean isClassPropertyNeeded(Class<?> clazz) {
+        // 运行期无法知晓集合中元素的声明类型，因此集合类型均可能需要附加类型属性
+        if (Iterable.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz)) {
+            return true;
+        }
+        if (clazz.isArray()) { // 类型为数组，则检查其元素类型
+            clazz = clazz.getComponentType();
+        }
+        // 非具化类型需要输出类型字段
+        return JacksonUtil.isNonConcrete(clazz);
     }
 
     private ObjectMapper buildMapper(boolean internal, Class<?> resultType, ResultFilter[] resultFilters,
