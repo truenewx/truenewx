@@ -27,14 +27,14 @@ public class PredicateTypeResolverBuilder extends ObjectMapper.DefaultTypeResolv
 
     @Override
     public boolean useForType(JavaType type) {
-        if (type.isPrimitive()) {
-            return false;
-        }
         while (type.isArrayType()) {
             type = type.getContentType();
         }
         while (type.isReferenceType()) {
             type = type.getReferencedType();
+        }
+        if (type.isPrimitive()) {
+            return false;
         }
         // 注意：复合类型在此会被视为Object类型，从而使该判断为true
         if (type.isJavaLangObject()) {
