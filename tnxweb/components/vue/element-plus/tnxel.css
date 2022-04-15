@@ -399,6 +399,10 @@ span.form-item-tip {
     min-height: var(--el-button-size);
 }
 
+.el-input:not(.el-input--large):not(.el-input--small) .el-button {
+    height: 32px;
+}
+
 .el-button + .el-button {
     margin-left: 0.5rem;
 }
