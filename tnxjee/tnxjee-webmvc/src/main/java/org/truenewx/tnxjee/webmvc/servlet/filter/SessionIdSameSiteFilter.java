@@ -17,8 +17,8 @@ public class SessionIdSameSiteFilter implements Filter {
         String cookie = response.getHeader(WebConstants.HEADER_COOKIE);
         if (cookie != null && cookie.contains("JSESSIONID=") && !cookie.contains("SameSite=")) {
             cookie += "; SameSite=None; Secure";
+            response.setHeader(WebConstants.HEADER_COOKIE, cookie);
         }
-        response.setHeader(WebConstants.HEADER_COOKIE, cookie);
     }
 
 }
