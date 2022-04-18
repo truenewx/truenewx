@@ -30,7 +30,7 @@ public class PredicateTypeResolverBuilder extends ObjectMapper.DefaultTypeResolv
         if (type.isPrimitive()) {
             return false;
         }
-        // 注意：复合类型在此会被视为Object类型，从而使该判断为true
+        // 注意：原生封装类和复合类型在此均会被视为Object类型，从而使该判断为true
         if (type.isJavaLangObject()) {
             return true;
         }

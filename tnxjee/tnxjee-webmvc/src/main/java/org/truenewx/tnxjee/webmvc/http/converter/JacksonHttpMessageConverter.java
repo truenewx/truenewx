@@ -135,13 +135,6 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
     }
 
     private boolean isClassPropertyNeeded(Class<?> clazz) {
-        // 运行期无法知晓集合中元素的声明类型，因此集合类型均可能需要附加类型属性
-        if (Iterable.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz)) {
-            return true;
-        }
-        if (clazz.isArray()) { // 类型为数组，则检查其元素类型
-            clazz = clazz.getComponentType();
-        }
         // 非具化类型需要输出类型字段
         return JacksonUtil.isNonConcrete(clazz);
     }
