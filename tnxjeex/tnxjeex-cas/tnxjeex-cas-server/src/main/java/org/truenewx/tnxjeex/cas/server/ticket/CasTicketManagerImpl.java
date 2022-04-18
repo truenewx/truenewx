@@ -153,6 +153,15 @@ public class CasTicketManagerImpl implements CasTicketManager {
     }
 
     @Override
+    public UserSpecificDetails<?> getUserDetailsInTicketGrantingTicket(HttpServletRequest request) {
+        TicketGrantingTicket ticket = findValidTicketGrantingTicket(request);
+        if (ticket != null) {
+            return ticket.getUserDetails();
+        }
+        return null;
+    }
+
+    @Override
     public List<AppTicket> deleteAppTickets(HttpServletRequest request, String excludedApp) {
         String ticketGrantingTicketId = readTicketGrantingTicketId(request);
         if (ticketGrantingTicketId != null) {

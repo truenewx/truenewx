@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jasig.cas.client.validation.Assertion;
+import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.Service;
 import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
 
@@ -22,6 +23,8 @@ public interface CasTicketManager extends Service {
     boolean checkTicketGrantingTicket(HttpServletRequest request);
 
     String getAppTicketId(HttpServletRequest request, String app, String scope);
+
+    UserSpecificDetails<?> getUserDetailsInTicketGrantingTicket(HttpServletRequest request);
 
     List<AppTicket> deleteAppTickets(HttpServletRequest request, String excludedApp);
 
