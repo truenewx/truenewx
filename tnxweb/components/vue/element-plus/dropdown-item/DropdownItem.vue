@@ -1,7 +1,6 @@
 <template>
-    <el-dropdown-item>
-        <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32"
-            :disabled="!tooltip">
+    <el-dropdown-item :disabled="disabled">
+        <el-tooltip :content="tooltip" :placement="tooltipPlacement" :offset="32" :disabled="!tooltip">
             <div class="w-100 flex-v-center" :title="title" v-if="icon">
                 <tnxel-icon :value="icon" :size="iconSize"/>
                 <span><slot></slot></span>
@@ -26,6 +25,7 @@ export default {
             type: String,
             default: 'right',
         },
+        disabled: Boolean,
     },
 }
 </script>
