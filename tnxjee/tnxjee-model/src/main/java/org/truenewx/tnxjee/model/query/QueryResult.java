@@ -62,7 +62,10 @@ public class QueryResult<T> implements Iterable<T> {
     public <R> QueryResult<R> map(Function<T, R> function) {
         List<R> list = new ArrayList<>();
         this.records.forEach(record -> {
-            list.add(function.apply(record));
+            R r = function.apply(record);
+            if (r != null) {
+                list.add(r);
+            }
         });
         return new QueryResult<>(list, this.paged);
     }
