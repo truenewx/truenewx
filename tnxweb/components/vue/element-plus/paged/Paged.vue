@@ -1,10 +1,10 @@
 <template>
     <div class="tnxel-pagination-container"
-        :class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}">
+        :class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}" v-if="model">
         <slot :paged="value" :change="change" :background="background">
             <el-pagination layout="total, sizes, prev, pager, next" :background="background" @current-change="change"
                 v-model:page-size="model.pageSize" :page-sizes="[model.pageSize || 0]" popper-class="d-none"
-                v-model:current-page="model.pageNo" :total="model.total || 0" v-if="model"/>
+                v-model:current-page="model.pageNo" :total="model.total || 0"/>
         </slot>
     </div>
 </template>

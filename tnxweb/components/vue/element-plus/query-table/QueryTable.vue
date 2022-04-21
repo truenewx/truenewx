@@ -1,9 +1,11 @@
 <template>
-    <div class="tnxel-query-table" :class="{selectable: selectable}">
-        <el-table ref="table" :data="records" :empty-text="emptyRecordText" :size="size" :border="border"
-            :stripe="stripe" @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
+    <div class="tnxel-query-table" :id="id" :class="{selectable: selectable}">
+        <el-table ref="table" :data="records" scrollbar-always-on
+            :size="size" :border="border" :stripe="stripe"
+            @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
             :row-class-name="rowClassName" @cell-click="selectRow">
-            <el-table-column class="select-column" header-align="center" align="center" width="60px" v-if="selectable">
+            <el-table-column header-align="center" align="center" :width="selectable === 'all' ? 24 : 44"
+                v-if="selectable">
                 <template #header>
                     <el-checkbox :model-value="pageAllSelected" :indeterminate="allSelectedIndeterminate"
                         @change="selectAll" v-if="selectable === 'all'"/>
@@ -15,25 +17,48 @@
                 </template>
             </el-table-column>
             <slot></slot>
+            <template #empty>
+                <template v-if="records === null">
+                    <tnxel-icon value="Loading" :size="18" v-if="querying"/>
+                    <template v-else>
+                        <span>尚未开始查询</span>
+                        <span v-if="paramRequired && emptyParams">，请至少提供一个查询条件</span>
+                    </template>
+                </template>
+                <span v-else>&lt;空&gt;</span>
+            </template>
+            <template #append v-if="records && paged && typeof paged.total !== 'number'">
+                <tnxel-button class="py-0 px-1 m-0 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
+                <tnxel-icon class="text-secondary" value="Loading" :size="18" v-if="querying"/>
+                <el-button type="text" class="m-0" @click="onPagedChange(paged.pageNo + 1)" v-else-if="paged.morePage">
+                    加载更多
+                </el-button>
+                <el-button type="text" class="text-secondary" v-else>已没有更多</el-button>
+                <tnxel-button class="py-0 px-1 m-0 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
+            </template>
         </el-table>
-        <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="paged">
+        <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="typeof paged?.total === 'number'">
             <tnxel-paged :value="paged" :change="onPagedChange" :align="pagedAlign" v-if="showPaged"/>
         </slot>
     </div>
 </template>
 
 <script>
+import Icon from '../icon/Icon';
+import Button from '../button/Button';
 import Paged from '../paged/Paged';
 
 export default {
     components: {
+        'tnxel-icon': Icon,
+        'tnxel-button': Button,
         'tnxel-paged': Paged
     },
     name: 'TnxelQueryTable',
     props: {
         app: String,
         url: String,
-        data: Object, // QueryResult
+        data: Object, // QueryResult对象
         modelValue: Object,
         size: String,
         border: {
@@ -68,10 +93,13 @@ export default {
         },
         selected: [Object, Array], // 已选择的行对象
         init: Boolean,
+        paramRequired: Boolean, // 是否至少需要一个查询参数
+        appendMore: Boolean, // 是否记录追加模式，即当查询页码>1时，后续页记录是否追加到现有记录清单中，false-替代现有记录清单
     },
     emits: ['update:modelValue', 'update:selected'],
     data() {
         return {
+            id: window.tnx.util.string.random(16),
             params: this.getParams(this.modelValue),
             records: this.data ? this.data.records : null,
             querying: false,
@@ -81,14 +109,22 @@ export default {
         }
     },
     computed: {
-        emptyRecordText() {
-            if (this.querying) {
-                return '加载中...';
-            } else if (this.records === null) {
-                return '尚未开始查询';
-            } else {
-                return '<空>';
+        emptyParams() {
+            if (this.params) {
+                let keys = Object.keys(this.params);
+                if (keys.length) {
+                    let invalidKeys = ['pageSize', 'pageNo', 'orders', 'ignoring'];
+                    for (let key of keys) {
+                        if (!invalidKeys.contains(key)) {
+                            let value = this.params[key];
+                            if (value !== undefined && value !== null && value !== '') {
+                                return false;
+                            }
+                        }
+                    }
+                }
             }
+            return true;
         },
         defaultSort() {
             let sortableColumnNames = [];
@@ -197,24 +233,39 @@ export default {
                 this.allSelectedRecords = [];
             }
 
-            this.records = null;
-            this.querying = true;
-            let vm = this;
-            window.tnx.app.rpc.get(this.url, this.params, function(result) {
-                vm.querying = false;
-                if (Array.isArray(result)) {
-                    vm.records = vm.format(result);
-                } else {
-                    vm.records = vm.format(result.records);
-                    vm.paged = result.paged;
+            if (this.paramRequired && this.emptyParams) {
+                this.records = null;
+                this.paged = null;
+            } else {
+                this.querying = true;
+                // 在追加记录模式中，如果查询页码大于1，则不清除现有记录，否则清除现有记录
+                if (!this.appendMore || !this.params.pageNo || this.params.pageNo <= 1) {
+                    this.records = null;
+                    this.paged = null;
                 }
-                vm.selectAllToPage();
-                if (vm.success) {
-                    vm.success(vm.records, vm.paged);
-                }
-            }, {
-                app: this.app
-            });
+                let vm = this;
+                window.tnx.app.rpc.get(this.url, this.params, function(result) {
+                    vm.querying = false;
+                    if (Array.isArray(result)) {
+                        vm.records = vm.format(result);
+                    } else {
+                        let records = vm.format(result.records);
+                        if (result.paged.pageNo > 1 && vm.appendMore) { // 追加记录
+                            vm.records = vm.records || [];
+                            vm.records = vm.records.concat(records);
+                        } else { // 替代记录
+                            vm.records = records;
+                        }
+                        vm.paged = result.paged;
+                    }
+                    vm.selectAllToPage();
+                    if (vm.success) {
+                        vm.success(vm.records, vm.paged);
+                    }
+                }, {
+                    app: this.app
+                });
+            }
         },
         format(records) {
             if (this.formatter) {
@@ -295,11 +346,28 @@ export default {
             this.pageSelectedIndexes = [];
             this.allSelectedRecords = [];
         },
+        scrollToTop() {
+            window.tnx.util.dom.scrollToTop();
+        },
     }
 }
 </script>
 
 <style>
+.tnxel-query-table .el-table__empty-text {
+    min-width: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tnxel-query-table .el-table__append-wrapper {
+    height: 41px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .tnxel-query-table.selectable .el-table__row {
     cursor: pointer;
 }
@@ -312,6 +380,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-right: 4px;
 }
-
 </style>
