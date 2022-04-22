@@ -1,7 +1,7 @@
 <template>
     <div class="tnxel-query-table" :id="id" :class="{selectable: selectable}">
         <el-table ref="table" :data="records" scrollbar-always-on
-            :size="size" :border="border" :stripe="stripe"
+            :size="size" :border="border" :stripe="stripe" :max-height="tableMaxHeight"
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
             :row-class-name="rowClassName" @cell-click="selectRow">
             <el-table-column header-align="center" align="center" :width="selectable === 'all' ? 24 : 44"
@@ -27,14 +27,15 @@
                 </template>
                 <span v-else>&lt;空&gt;</span>
             </template>
-            <template #append v-if="records && paged && typeof paged.total !== 'number'">
-                <tnxel-button class="py-0 px-1 m-0 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
+            <template #append v-if="records?.length && paged && typeof paged.total !== 'number'">
+                <tnxel-button class="py-0 px-1 mx-2 border-0" icon="Top" tooltip="回到顶部" plain
+                    @click="scrollToTop"/>
                 <tnxel-icon class="text-secondary" value="Loading" :size="18" v-if="querying"/>
                 <el-button type="text" class="m-0" @click="onPagedChange(paged.pageNo + 1)" v-else-if="paged.morePage">
                     加载更多
                 </el-button>
                 <el-button type="text" class="text-secondary" v-else>已没有更多</el-button>
-                <tnxel-button class="py-0 px-1 m-0 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
+                <tnxel-button class="py-0 px-1 mx-2 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
             </template>
         </el-table>
         <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="typeof paged?.total === 'number'">
@@ -44,6 +45,7 @@
 </template>
 
 <script>
+import $ from 'jquery';
 import Icon from '../icon/Icon';
 import Button from '../button/Button';
 import Paged from '../paged/Paged';
@@ -95,6 +97,7 @@ export default {
         init: Boolean,
         paramRequired: Boolean, // 是否至少需要一个查询参数
         appendMore: Boolean, // 是否记录追加模式，即当查询页码>1时，后续页记录是否追加到现有记录清单中，false-替代现有记录清单
+        fixedHeight: Boolean, // 是否固定高度，true-表格的最大高度固定为容器的高度
     },
     emits: ['update:modelValue', 'update:selected'],
     data() {
@@ -106,6 +109,7 @@ export default {
             paged: this.data ? this.data.paged : null,
             pageSelectedIndexes: [], // 当前页已选择记录的索引
             allSelectedRecords: this.selected || [], // 所有已选择的记录
+            containerHeight: 0,
         }
     },
     computed: {
@@ -125,6 +129,12 @@ export default {
                 }
             }
             return true;
+        },
+        tableMaxHeight() {
+            if (this.fixedHeight && this.containerHeight) {
+                return typeof this.paged?.total === 'number' ? (this.containerHeight - 40) : this.containerHeight;
+            }
+            return undefined;
         },
         defaultSort() {
             let sortableColumnNames = [];
@@ -208,10 +218,17 @@ export default {
         if (this.init) {
             this.query();
         }
+        let vm = this;
+        this.$nextTick(() => {
+            vm.containerHeight = $('.tnxel-query-table[id="' + vm.id + '"]').height();
+        });
     },
     methods: {
         getParams(modelValue) {
             return Object.assign({}, modelValue); // 避免改动传入的参数对象
+        },
+        getContainerElement() {
+
         },
         onPagedChange(pageNo) {
             if (this.pagedChange && this.pagedChange(pageNo) === false) {
@@ -347,7 +364,11 @@ export default {
             this.allSelectedRecords = [];
         },
         scrollToTop() {
-            window.tnx.util.dom.scrollToTop();
+            if (this.tableMaxHeight) {
+                this.$refs.table.setScrollTop(0);
+            } else {
+                window.tnx.util.dom.scrollToTop();
+            }
         },
     }
 }
