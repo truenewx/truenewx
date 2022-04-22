@@ -4,7 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -95,6 +97,9 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             in.mark(Integer.MAX_VALUE);
             storageFilename = EncryptUtil.encryptByMd5(in);
             in.reset();
+        } else { // 编码文件名，以免特殊字符不符合URL规范
+            storageFilename = storageFilename.replace('+', ' '); // 加号编码再解码会丢失，造成读写路径不一致
+            storageFilename = URLEncoder.encode(storageFilename, StandardCharsets.UTF_8);
         }
         storageFilename += extension.toLowerCase();
         // 构建存储路径
