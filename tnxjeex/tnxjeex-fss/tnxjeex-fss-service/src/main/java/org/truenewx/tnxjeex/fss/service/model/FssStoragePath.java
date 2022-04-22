@@ -1,5 +1,9 @@
 package org.truenewx.tnxjeex.fss.service.model;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
@@ -23,7 +27,7 @@ public class FssStoragePath {
     public FssStoragePath(String type, String relativeDir, String filename) {
         this.type = type;
         this.relativeDir = relativeDir;
-        this.filename = filename;
+        this.filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
     }
 
     public static FssStoragePath of(String s) {
@@ -68,8 +72,18 @@ public class FssStoragePath {
     }
 
     public String getRelativePath() {
-        String dir = Strings.SLASH.equals(this.relativeDir) ? Strings.EMPTY : this.relativeDir;
-        return dir + Strings.SLASH + this.filename;
+        return getRelativeUrl(false);
+    }
+
+    private String getRelativeUrl(boolean encodeFilename) {
+        String path = Strings.SLASH.equals(this.relativeDir) ? Strings.EMPTY : this.relativeDir;
+        path += Strings.SLASH;
+        if (encodeFilename) {
+            path += URLEncoder.encode(this.filename, StandardCharsets.UTF_8);
+        } else {
+            path += this.filename;
+        }
+        return path;
     }
 
     public boolean isValid() {
@@ -77,8 +91,13 @@ public class FssStoragePath {
         return StringUtils.isNotBlank(this.type) && StringUtils.isNotBlank(this.filename);
     }
 
+    /**
+     * 获取对应的存储地址。存储地址为URL格式，其中的文件名称部分已编码，以使得中文和特殊字符符合URL规范
+     *
+     * @return 存储地址
+     */
     public String getUrl() {
-        return isValid() ? (PROTOCOL.substring(0, PROTOCOL.length() - 1) + toString()) : null;
+        return isValid() ? (PROTOCOL + this.type + getRelativeUrl(true)) : null;
     }
 
     @Override
