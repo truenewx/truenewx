@@ -2,7 +2,6 @@ package org.truenewx.tnxjeex.fss.service;
 
 import java.util.Map;
 
-import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
@@ -75,17 +74,14 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
     }
 
     /**
-     * 根据存储目录和存储文件名获取定位路径，默认为：/[存储目录去掉存储根目录后的剩余部分]/[存储文件名]
+     * 获取指定用户在指定业务范围下的文件定位路径，不包含业务类型，返回null表示默认为存储路径去掉根目录的部分
      *
-     * @param storageDir      存储目录
-     * @param storageFilename 存储文件名
+     * @param userIdentity 存储目录
+     * @param scope        存储文件名
      * @return 文件定位路径
      */
-    default String getLocationPath(String storageDir, String storageFilename) {
-        String storageRootDir = getStorageRootDir();
-        Assert.isTrue(storageDir.startsWith(storageRootDir + Strings.SLASH),
-                "The storageDir must start with '" + storageRootDir + "/'");
-        return storageDir.substring(storageRootDir.length()) + Strings.SLASH + storageFilename;
+    default String getLocationPath(I userIdentity, String scope) {
+        return null;
     }
 
     /**

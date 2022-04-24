@@ -111,7 +111,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             authorizer.authorizePublicRead(storagePath);
         }
         // 构建定位地址
-        String locationPath = strategy.getLocationPath(storageDir, storageFilename);
+        String locationPath = getLocationPath(strategy, userIdentity, scope, storagePath);
         strategy.onWritten(userIdentity, locationPath);
         return FssFileLocation.toUrl(type, locationPath);
     }
@@ -121,6 +121,14 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String filename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
         // 转换特殊字符，以免无法作为路径的一部分正常加载
         return filename == null ? null : filename.replaceAll("[+%]", Strings.SPACE);
+    }
+
+    private String getLocationPath(FssServiceStrategy<I> strategy, I userIdentity, String scope, String storagePath) {
+        String locationPath = strategy.getLocationPath(userIdentity, scope);
+        if (locationPath == null) {
+            locationPath = storagePath.substring(strategy.getStorageRootDir().length());
+        }
+        return locationPath;
     }
 
     /**
@@ -444,7 +452,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             // 构建目标存储路径
             String targetStoragePath = targetStorageDir + Strings.SLASH + targetStorageFilename;
             // 构建目标定位路径
-            String targetLocationPath = targetStrategy.getLocationPath(targetStorageDir, targetStorageFilename);
+            String targetLocationPath = getLocationPath(targetStrategy, userIdentity, targetScope, targetStoragePath);
             // 存储路径不同才有必要复制
             if (!sourceStoragePath.equals(targetStoragePath)) {
                 accessor.copy(sourceStoragePath, targetStoragePath);
