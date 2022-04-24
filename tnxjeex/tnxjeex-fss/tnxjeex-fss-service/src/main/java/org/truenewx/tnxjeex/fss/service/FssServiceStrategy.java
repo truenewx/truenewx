@@ -113,14 +113,14 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
     }
 
     /**
-     * 判断指定用户可否读取指定相对路径下的指定存储文件
+     * 判断指定用户可否读取指定文件
      *
-     * @param userIdentity    用户标识
-     * @param relativeDir     相对目录
-     * @param storageFilename 存储文件名
-     * @return 指定用户可否读取指定相对路径下的指定存储文件
+     * @param userIdentity     用户标识
+     * @param locationDir      定位目录
+     * @param locationFilename 定位文件名
+     * @return 指定用户可否读取指定文件
      */
-    default boolean isReadable(I userIdentity, String relativeDir, String storageFilename) {
+    default boolean isReadable(I userIdentity, String locationDir, String locationFilename) {
         return isPublicReadable();
     }
 
@@ -134,28 +134,28 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
     }
 
     /**
-     * 判断指定用户可否写入指定相对路径下的指定存储文件
+     * 判断指定用户可否写入指定文件
      *
-     * @param userIdentity    用户标识
-     * @param relativeDir     相对目录
-     * @param storageFilename 存储文件名
-     * @return 指定用户可否写入指定相对路径下的指定存储文件
+     * @param userIdentity     用户标识
+     * @param locationDir      定位目录
+     * @param locationFilename 定位文件名
+     * @return 指定用户可否写入指定文件
      */
-    default boolean isWriteable(I userIdentity, String relativeDir, String storageFilename) {
+    default boolean isWriteable(I userIdentity, String locationDir, String locationFilename) {
         return false;
     }
 
     /**
-     * 判断指定用户可否删除指定相对路径下的指定存储文件
+     * 判断指定用户可否删除指定文件
      *
-     * @param userIdentity    用户标识
-     * @param relativeDir     相对目录
-     * @param storageFilename 存储文件名
-     * @return 指定用户可否删除指定相对路径下的指定存储文件
+     * @param userIdentity     用户标识
+     * @param locationDir      定位目录
+     * @param locationFilename 定位文件名
+     * @return 指定用户可否删除指定文件
      */
-    default boolean isDeletable(I userIdentity, String relativeDir, String storageFilename) {
+    default boolean isDeletable(I userIdentity, String locationDir, String locationFilename) {
         // 删除权限默认与写入权限相同
-        return isWriteable(userIdentity, relativeDir, storageFilename);
+        return isWriteable(userIdentity, locationDir, locationFilename);
     }
 
 }
