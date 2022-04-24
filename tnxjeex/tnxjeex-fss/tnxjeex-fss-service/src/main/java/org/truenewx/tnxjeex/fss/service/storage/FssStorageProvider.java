@@ -1,14 +1,13 @@
-package org.truenewx.tnxjeex.fss.service.model;
+package org.truenewx.tnxjeex.fss.service.storage;
 
 import org.truenewx.tnxjee.core.caption.Caption;
 
 /**
- * 文件存储服务提供商
+ * 文件存储服务的底层存储提供商
  *
  * @author jianglei
- *
  */
-public enum FssProvider {
+public enum FssStorageProvider {
 
     @Caption("阿里云")
     ALIYUN,

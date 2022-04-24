@@ -2,17 +2,19 @@ package org.truenewx.tnxjeex.fss.service;
 
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
-import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
 
 /**
- * 文件存储服务的访问策略
+ * 文件存储服务的服务策略
  *
  * @author jianglei
  */
-public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDeletePredicate {
+public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDeletePredicate {
 
     /**
      * 获取业务类型，要求在同一个系统中唯一
@@ -21,7 +23,7 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
      */
     String getType();
 
-    FssProvider getProvider();
+    FssStorageProvider getProvider();
 
     /**
      * 获取在当前策略下，指定用户上传文件的限制条件
@@ -32,23 +34,22 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
     FssUploadLimit getUploadLimit(I userIdentity);
 
     /**
-     * 获取存储路径上下文根，允许不同业务范围使用相同存储路径上下文根，但使用者需知：这样一来，将无法根据存储路径完全判断所属业务类型
+     * 获取当前业务相对于整个文件存储服务目录的存储根目录，必须以/开头
      *
-     * @return 存储路径上下文根
+     * @return 当前业务相对于整个文件存储服务目录的存储根目录
      */
-    default String getContextPath() {
+    default String getStorageRootDir() {
         return Strings.SLASH + getType();
     }
 
     /**
-     * 获取指定用户在指定业务范围下的文件相对于上下文根的目录，不包含最后一级的文件名。<br/>
-     * 该相对目录在存储地址和读取地址中完全相同。
+     * 获取指定用户在指定业务范围下的文件相对于业务存储根目录的相对目录，不包含最后一级的文件名
      *
      * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
      * @param scope        业务范围
-     * @return 相对于上下文根的目录，返回null表示没有写权限
+     * @return 相对于业务存储根目录的相对目录，返回null表示没有写权限
      */
-    String getRelativeDir(I userIdentity, String scope);
+    String getStorageRelativeDir(I userIdentity, String scope);
 
     /**
      * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
@@ -63,14 +64,39 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
     }
 
     /**
-     * 获取指定文件下载时的最后一级文件名，不含扩展名，返回null表示使用存储文件名
+     * 根据定位目录和定位文件名获取存储路径，默认形如：/[存储根目录]/[定位目录]/[定位文件名]
      *
-     * @param userIdentity    用户标识
-     * @param relativeDir     相对目录
+     * @param locationDir      定位目录
+     * @param locationFilename 定位文件名
+     * @return 存储路径
+     */
+    default String getStoragePath(String locationDir, String locationFilename) {
+        return getStorageRootDir() + NetUtil.standardizeUrl(locationDir) + Strings.SLASH + locationFilename;
+    }
+
+    /**
+     * 根据存储目录和存储文件名获取定位路径，默认为：/[存储目录去掉存储根目录后的剩余部分]/[存储文件名]
+     *
+     * @param storageDir      存储目录
      * @param storageFilename 存储文件名
+     * @return 文件定位路径
+     */
+    default String getLocationPath(String storageDir, String storageFilename) {
+        String storageRootDir = getStorageRootDir();
+        Assert.isTrue(storageDir.startsWith(storageRootDir + Strings.SLASH),
+                "The storageDir must start with '" + storageRootDir + "/'");
+        return storageDir.substring(storageRootDir.length()) + Strings.SLASH + storageFilename;
+    }
+
+    /**
+     * 获取指定文件下载时的最后一级文件名，包含扩展名，返回null则由框架采用上传时的原始文件名
+     *
+     * @param userIdentity     用户标识
+     * @param locationDir      定位目录
+     * @param locationFilename 定位文件名
      * @return 指定文件下载时的最后一级文件名
      */
-    default String getDownloadFilename(I userIdentity, String relativeDir, String storageFilename) {
+    default String getDownloadFilename(I userIdentity, String locationDir, String locationFilename) {
         return null;
     }
 
@@ -78,10 +104,9 @@ public interface FssAccessStrategy<I extends UserIdentity<?>> extends FssDirDele
      * 指定文件的成功写完之后触发的处理方法，默认什么都不做
      *
      * @param userIdentity 用户标识。登录用户才能写文件，所以此处一定不为null
-     * @param scope        业务范围
-     * @param storageUrl   文件的存储地址
+     * @param locationPath 定位路径
      */
-    default void onWritten(I userIdentity, String scope, String storageUrl) {
+    default void onWritten(I userIdentity, String locationPath) {
     }
 
     /**

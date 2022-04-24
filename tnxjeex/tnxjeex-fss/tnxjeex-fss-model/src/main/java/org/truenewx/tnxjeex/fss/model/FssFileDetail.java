@@ -1,5 +1,8 @@
 package org.truenewx.tnxjeex.fss.model;
 
+/**
+ * 文件存储服务的文件细节
+ */
 public class FssFileDetail {
 
     private String originalFilename;

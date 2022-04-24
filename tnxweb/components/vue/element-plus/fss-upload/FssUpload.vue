@@ -97,27 +97,27 @@ export default {
         this._initialize();
     },
     methods: {
-        equals(fileList, storageUrls) {
-            if (!storageUrls) {
+        equals(fileList, locationUrls) {
+            if (!locationUrls) {
                 return !fileList.length;
             }
-            if (!Array.isArray(storageUrls)) {
-                storageUrls = [storageUrls];
+            if (!Array.isArray(locationUrls)) {
+                locationUrls = [locationUrls];
             }
-            if (fileList.length !== storageUrls.length) {
+            if (fileList.length !== locationUrls.length) {
                 return false;
             }
             // 每一个存储地址都必须在文件清单中找到对应文件
-            for (let storageUrl of storageUrls) {
-                if (!this.contains(fileList, storageUrl)) {
+            for (let locationUrl of locationUrls) {
+                if (!this.contains(fileList, locationUrl)) {
                     return false;
                 }
             }
             return true;
         },
-        contains(fileList, storageUrl) {
+        contains(fileList, locationUrl) {
             for (let file of fileList) {
-                if (file.storageUrl === storageUrl) {
+                if (file.locationUrl === locationUrl) {
                     return true;
                 }
             }
@@ -127,15 +127,15 @@ export default {
             const vm = this;
             let fssConfig = vm.tnx.fss.getClientConfig();
             vm.tnx.app.rpc.ensureLogined(function() {
-                let storageUrls;
+                let locationUrls;
                 if (vm.modelValue) {
-                    storageUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
+                    locationUrls = Array.isArray(vm.modelValue) ? vm.modelValue : [vm.modelValue];
                 } else {
-                    storageUrls = [];
+                    locationUrls = [];
                 }
-                if (storageUrls.length) {
+                if (locationUrls.length) {
                     vm.tnx.app.rpc.get(fssConfig.contextUrl + '/metas', {
-                        storageUrls: storageUrls
+                        locationUrls: locationUrls
                     }, function(metas) {
                         let fileList = [];
                         metas.forEach(meta => {
@@ -144,7 +144,7 @@ export default {
                                     name: meta.name,
                                     url: vm._getFullReadUrl(meta.thumbnailReadUrl || meta.readUrl),
                                     previewUrl: vm._getFullReadUrl(meta.readUrl),
-                                    storageUrl: meta.storageUrl,
+                                    locationUrl: meta.locationUrl,
                                 });
                             }
                         });
@@ -212,7 +212,7 @@ export default {
         },
         _onSuccess(result, file, fileList) {
             if (result) {
-                file.storageUrl = result.storageUrl;
+                file.locationUrl = result.locationUrl;
                 file.readUrl = result.readUrl;
                 file.downloadUrl = result.downloadUrl;
                 this.fileList = fileList;
@@ -236,18 +236,18 @@ export default {
             }
         },
         emitInput() {
-            let storageUrls = [];
+            let locationUrls = [];
             for (let file of this.fileList) {
-                if (file.storageUrl) {
-                    storageUrls.push(file.storageUrl);
+                if (file.locationUrl) {
+                    locationUrls.push(file.locationUrl);
                 } else { // 存在一个未完成上传，则退出
                     return;
                 }
             }
             if (this.uploadOptions.number === 1) {
-                storageUrls = storageUrls[0];
+                locationUrls = locationUrls[0];
             }
-            this.$emit('update:modelValue', storageUrls);
+            this.$emit('update:modelValue', locationUrls);
         },
         size() {
             return this.$refs.upload.size();
@@ -259,21 +259,21 @@ export default {
          */
         validateUploaded(reject) {
             if (this.uploadOptions.number > 1) {
-                const storageUrls = [];
+                const locationUrls = [];
                 for (let file of this.uploadingFiles) {
-                    if (file.storageUrl) {
-                        storageUrls.push(file.storageUrl);
+                    if (file.locationUrl) {
+                        locationUrls.push(file.locationUrl);
                     } else {
                         this._doValidateUploadedReject(reject, file);
                         return false;
                     }
                 }
-                return storageUrls;
+                return locationUrls;
             } else if (this.uploadingFiles.length) {
                 let file = this.uploadingFiles[0];
                 if (file) {
-                    if (file.storageUrl) {
-                        return file.storageUrl;
+                    if (file.locationUrl) {
+                        return file.locationUrl;
                     } else {
                         this._doValidateUploadedReject(reject, file);
                         return false;

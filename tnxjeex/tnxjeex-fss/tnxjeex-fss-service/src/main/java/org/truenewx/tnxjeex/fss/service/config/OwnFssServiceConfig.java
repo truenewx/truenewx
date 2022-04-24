@@ -4,9 +4,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.truenewx.tnxjeex.fss.service.own.EncryptOwnFssFileStreamProvider;
-import org.truenewx.tnxjeex.fss.service.own.OwnFssAccessor;
-import org.truenewx.tnxjeex.fss.service.own.OwnFssFileStreamProvider;
+import org.truenewx.tnxjeex.fss.service.storage.own.EncryptOwnFssFileStreamProvider;
+import org.truenewx.tnxjeex.fss.service.storage.own.OwnFssFileStreamProvider;
+import org.truenewx.tnxjeex.fss.service.storage.own.OwnFssStorageAccessor;
 
 /**
  * 自有文件存储服务配置
@@ -22,9 +22,9 @@ public class OwnFssServiceConfig {
 
     @Bean
     @ConditionalOnProperty("tnxjeex.fss.accessor.local.root")
-    public OwnFssAccessor ownFssAccessor(FssLocalAccessorProperties properties,
+    public OwnFssStorageAccessor ownFssAccessor(FssLocalAccessorProperties properties,
             OwnFssFileStreamProvider fileStreamProvider) {
-        return new OwnFssAccessor(properties.getRoot(), fileStreamProvider);
+        return new OwnFssStorageAccessor(properties.getRoot(), fileStreamProvider);
     }
 
 }

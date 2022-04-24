@@ -12,12 +12,12 @@
         <name>read-url</name>
         <tag-class>org.truenewx.tnxjeex.fss.web.tag.FssReadUrlTag</tag-class>
         <body-content>empty</body-content>
-        <description>转换内部存储地址为外部读取地址</description>
+        <description>转换定位地址为外部读取地址</description>
         <attribute>
             <name>value</name>
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>内部存储地址</description>
+            <description>定位地址</description>
         </attribute>
         <attribute>
             <name>thumbnail</name>

@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.own;
+package org.truenewx.tnxjeex.fss.service.storage.own;
 
 import java.io.*;
 

@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.aliyun;
+package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -14,8 +14,8 @@ public class FssUploadedFileMeta extends FssFileMeta {
     protected FssUploadedFileMeta() {
     }
 
-    public FssUploadedFileMeta(String id, String storageUrl) {
-        super(storageUrl);
+    public FssUploadedFileMeta(String id, String locationUrl) {
+        super(locationUrl);
         this.id = id;
     }
 

@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.own;
+package org.truenewx.tnxjeex.fss.service.storage.own;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
-import org.truenewx.tnxjeex.fss.service.FssAccessor;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
-import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
 import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
 /**
@@ -29,13 +29,13 @@ import org.truenewx.tnxjeex.fss.service.util.FssUtil;
  *
  * @author jianglei
  */
-public class OwnFssAccessor implements FssAccessor {
+public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     private File root;
     private OwnFssFileStreamProvider fileStreamProvider;
     private ExecutorService executorService;
 
-    public OwnFssAccessor(String root, OwnFssFileStreamProvider fileStreamProvider) {
+    public OwnFssStorageAccessor(String root, OwnFssFileStreamProvider fileStreamProvider) {
         File file = new File(root);
         if (!file.exists()) { // 目录不存在则创建
             file.mkdirs();
@@ -53,20 +53,20 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssProvider getProvider() {
-        return FssProvider.OWN;
+    public FssStorageProvider getProvider() {
+        return FssStorageProvider.OWN;
     }
 
     @Override
-    public void write(InputStream in, String path, String originalFilename) throws IOException {
+    public void write(InputStream in, String storagePath, String originalFilename) throws IOException {
         // 先上传内容到一个新建的临时文件中，以免在处理过程中原文件被读取
-        File tempFile = createTempFile(path);
+        File tempFile = createTempFile(storagePath);
         OutputStream out = this.fileStreamProvider.getWriteStream(tempFile, originalFilename);
         IOUtils.copy(in, out);
         out.close();
 
         // 然后删除原文件，修改临时文件名为原文件名
-        File file = getStorageFile(path);
+        File file = getStorageFile(storagePath);
         if (file.exists()) {
             file.delete();
         }
@@ -109,8 +109,8 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssFileDetail getDetail(String path) {
-        File file = getStorageFile(path);
+    public FssFileDetail getDetail(String storagePath) {
+        File file = getStorageFile(storagePath);
         if (file.exists()) {
             String originalFilename = this.fileStreamProvider.getOriginalFilename(file);
             if (originalFilename == null) {
@@ -122,14 +122,14 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public Charset getCharset(String path) {
-        File file = getStorageFile(path);
+    public Charset getCharset(String storagePath) {
+        File file = getStorageFile(storagePath);
         return FssUtil.getCharset(file);
     }
 
     @Override
-    public InputStream getReadStream(String path) throws IOException {
-        File file = getStorageFile(path);
+    public InputStream getReadStream(String storagePath) throws IOException {
+        File file = getStorageFile(storagePath);
         if (file.exists()) {
             return this.fileStreamProvider.getReadStream(file);
         }
@@ -137,8 +137,8 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void delete(String path, FssDirDeletePredicate dirDeletePredicate) {
-        File file = getStorageFile(path);
+    public void delete(String storagePath, FssDirDeletePredicate dirDeletePredicate) {
+        File file = getStorageFile(storagePath);
         if (file.exists()) {
             file.delete();
         }
@@ -176,9 +176,9 @@ public class OwnFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void copy(String sourcePath, String targetPath) {
-        File sourceFile = getStorageFile(sourcePath);
-        File targetFile = getStorageFile(targetPath);
+    public void copy(String sourceStoragePath, String targetStoragePath) {
+        File sourceFile = getStorageFile(sourceStoragePath);
+        File targetFile = getStorageFile(targetStoragePath);
         IOUtil.copyFile(sourceFile, targetFile);
     }
 

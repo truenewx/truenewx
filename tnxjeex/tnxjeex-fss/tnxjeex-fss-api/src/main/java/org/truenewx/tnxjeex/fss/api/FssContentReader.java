@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface FssContentReader {
 
     @GetMapping("/read/text")
-    String readText(@RequestParam("storageUrl") String storageUrl,
+    String readText(@RequestParam("locationUrl") String locationUrl,
             @RequestParam(value = "limit", required = false, defaultValue = "0") long limit);
 
 }

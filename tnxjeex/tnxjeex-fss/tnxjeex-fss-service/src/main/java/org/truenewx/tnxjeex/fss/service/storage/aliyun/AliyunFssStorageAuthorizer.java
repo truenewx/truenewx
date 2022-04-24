@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.aliyun;
+package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import java.util.Date;
 
@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.DateUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
-import org.truenewx.tnxjeex.fss.service.FssAuthorizer;
-import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageAuthorizer;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.CannedAccessControlList;
@@ -21,7 +21,7 @@ import com.aliyuncs.auth.sts.AssumeRoleResponse;
  *
  * @author jianglei
  */
-public class AliyunFssAuthorizer implements FssAuthorizer {
+public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
 
     private int tempReadExpiredSeconds = 60; // 临时读取时限默认60秒
     private AliyunAccount account;
@@ -29,7 +29,7 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
     private AliyunStsRoleAssumer readStsRoleAssumer;
     private String contextUrl;
 
-    public AliyunFssAuthorizer(AliyunAccount account) {
+    public AliyunFssStorageAuthorizer(AliyunAccount account) {
         this.account = account;
         this.policyBuilder = new AliyunPolicyBuilder(account);
         // 默认的上下文地址以//开头，不包含具体访问协议，与访问者当前使用协议相同
@@ -51,8 +51,8 @@ public class AliyunFssAuthorizer implements FssAuthorizer {
     }
 
     @Override
-    public FssProvider getProvider() {
-        return FssProvider.ALIYUN;
+    public FssStorageProvider getProvider() {
+        return FssStorageProvider.ALIYUN;
     }
 
     @Override

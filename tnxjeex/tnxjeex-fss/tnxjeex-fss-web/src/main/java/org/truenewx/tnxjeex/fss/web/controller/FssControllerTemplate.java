@@ -41,11 +41,11 @@ import org.truenewx.tnxjeex.fss.api.FssManipulator;
 import org.truenewx.tnxjeex.fss.api.FssMetaResolver;
 import org.truenewx.tnxjeex.fss.api.model.FssTransferCommand;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
+import org.truenewx.tnxjeex.fss.model.FssFileLocation;
 import org.truenewx.tnxjeex.fss.model.FssFileMeta;
 import org.truenewx.tnxjeex.fss.model.FssUploadLimit;
 import org.truenewx.tnxjeex.fss.service.FssExceptionCodes;
 import org.truenewx.tnxjeex.fss.service.FssServiceTemplate;
-import org.truenewx.tnxjeex.fss.service.model.FssStoragePath;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadOptions;
 import org.truenewx.tnxjeex.fss.web.model.FssUploadedFileMeta;
 
@@ -87,15 +87,15 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAuthority // 登录用户才可上传文件，访问策略可能还有更多限定
+    @ConfigAuthority // 登录用户才可上传文件，服务策略可能还有更多限定
     public String upload(String type, String scope, MultipartFile file) {
         FssUploadedFileMeta meta = write(type, scope, file, null, true);
-        return meta == null ? null : meta.getStorageUrl();
+        return meta == null ? null : meta.getLocationUrl();
     }
 
     @PostMapping("/upload/{type}")
     @ResponseBody
-    @ConfigAuthority // 登录用户才可上传文件，访问策略可能还有更多限定
+    @ConfigAuthority // 登录用户才可上传文件，服务策略可能还有更多限定
     public FssUploadedFileMeta upload(@PathVariable("type") String type, MultipartHttpServletRequest request) {
         return upload(type, null, request);
     }
@@ -103,7 +103,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     // 指定业务范围上传
     @PostMapping("/upload/{type}/{scope}")
     @ResponseBody
-    @ConfigAuthority // 登录用户才可上传文件，访问策略可能还有更多限定
+    @ConfigAuthority // 登录用户才可上传文件，服务策略可能还有更多限定
     public FssUploadedFileMeta upload(@PathVariable("type") String type, @PathVariable("scope") String scope,
             MultipartHttpServletRequest request) {
         boolean onlyStorage = Boolean.parseBoolean(request.getParameter("onlyStorage"));
@@ -129,25 +129,25 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             InputStream in, boolean onlyStorage) throws IOException {
         // 注意：此处获得的输入流大小与原始文件的大小可能不相同，可能变大或变小
         I userIdentity = getUserIdentity();
-        String storageUrl = this.service.write(type, scope, userIdentity, fileSize, originalFilename, in);
+        String locationUrl = this.service.write(type, scope, userIdentity, fileSize, originalFilename, in);
         in.close();
 
         if (StringUtils.isBlank(fileId)) { // 如果文件id未指定，则根据存储路径加密得到文件id
-            fileId = EncryptUtil.encryptByMd5(storageUrl);
+            fileId = EncryptUtil.encryptByMd5(locationUrl);
         }
 
-        FssUploadedFileMeta result = new FssUploadedFileMeta(fileId, storageUrl);
-        if (!onlyStorage) { // 不只需要存储地址
+        FssUploadedFileMeta result = new FssUploadedFileMeta(fileId, locationUrl);
+        if (!onlyStorage) { // 不只需要定位地址
             result.setName(originalFilename);
-            String readUrl = this.service.getReadUrl(userIdentity, storageUrl, false);
+            String readUrl = this.service.getReadUrl(userIdentity, locationUrl, false);
             result.setReadUrl(getFullReadUrl(readUrl, true));
-            result.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
+            result.setDownloadUrl(resolveDownloadUrl(locationUrl, false));
             FssUploadLimit uploadLimit = this.service.getUploadLimit(type, userIdentity);
             if (uploadLimit.isImageable()) {
                 result.setImageable(true);
                 result.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
                 // 缩略读取地址附加的缩略参数对最终URL可能产生影响，故需要重新生成，而不能在读取URL上简单附加缩略参数
-                String thumbnailReadUrl = this.service.getReadUrl(userIdentity, storageUrl, true);
+                String thumbnailReadUrl = this.service.getReadUrl(userIdentity, locationUrl, true);
                 result.setThumbnailReadUrl(getFullReadUrl(thumbnailReadUrl, true));
             }
         }
@@ -156,10 +156,10 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAnonymous // 匿名用户即可获取，具体权限由访问策略决定
-    public String resolveReadUrl(String storageUrl, boolean thumbnail) {
-        if (StringUtils.isNotBlank(storageUrl)) {
-            String readUrl = this.service.getReadUrl(getUserIdentity(), storageUrl, thumbnail);
+    @ConfigAnonymous // 匿名用户即可获取，具体权限由服务策略决定
+    public String resolveReadUrl(String locationUrl, boolean thumbnail) {
+        if (StringUtils.isNotBlank(locationUrl)) {
+            String readUrl = this.service.getReadUrl(getUserIdentity(), locationUrl, thumbnail);
             return getFullReadUrl(readUrl, true);
         }
         return null;
@@ -196,8 +196,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @Override
     @ResponseBody
     @ConfigAnonymous
-    public String resolveDownloadUrl(String storageUrl, boolean absolute) {
-        FssStoragePath fsp = FssStoragePath.of(storageUrl);
+    public String resolveDownloadUrl(String locationUrl, boolean absolute) {
+        FssFileLocation fsp = FssFileLocation.of(locationUrl);
         if (fsp != null) {
             return getFullReadUrl(fsp.toString(), absolute);
         }
@@ -206,7 +206,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAuthority // 登录用户才可转储资源，访问策略可能还有更多限定
+    @ConfigAuthority // 登录用户才可转储资源，服务策略可能还有更多限定
     public String transfer(FssTransferCommand command) {
         String targetType = command.getTargetType();
         String sourceUrl = command.getSourceUrl();
@@ -224,7 +224,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
                             sourceFilename, new FileInputStream(tempFile), true);
                     // 在独立线程中删除临时文件，以免影响正常流程
                     this.executor.execute(tempFile::delete);
-                    return meta.getStorageUrl();
+                    return meta.getLocationUrl();
                 } catch (IOException e) {
                     LogUtil.error(getClass(), e);
                 }
@@ -274,14 +274,14 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAnonymous // 匿名用户即可获取，具体权限由访问策略决定
-    public FssFileMeta resolveMeta(String storageUrl) {
-        if (StringUtils.isNotBlank(storageUrl)) {
-            FssFileMeta meta = this.service.getMeta(getUserIdentity(), storageUrl);
+    @ConfigAnonymous // 匿名用户即可获取，具体权限由服务策略决定
+    public FssFileMeta resolveMeta(String locationUrl) {
+        if (StringUtils.isNotBlank(locationUrl)) {
+            FssFileMeta meta = this.service.getMeta(getUserIdentity(), locationUrl);
             if (meta != null) {
                 meta.setReadUrl(getFullReadUrl(meta.getReadUrl(), true));
                 meta.setThumbnailReadUrl(getFullReadUrl(meta.getThumbnailReadUrl(), true));
-                meta.setDownloadUrl(resolveDownloadUrl(storageUrl, false));
+                meta.setDownloadUrl(resolveDownloadUrl(locationUrl, false));
             }
             return meta;
         }
@@ -290,18 +290,18 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAnonymous // 匿名用户即可获取，具体权限由访问策略决定
-    public FssFileMeta[] resolveMetas(String[] storageUrls) {
-        FssFileMeta[] metas = new FssFileMeta[storageUrls.length];
-        for (int i = 0; i < storageUrls.length; i++) {
-            metas[i] = resolveMeta(storageUrls[i]);
+    @ConfigAnonymous // 匿名用户即可获取，具体权限由服务策略决定
+    public FssFileMeta[] resolveMetas(String[] locationUrls) {
+        FssFileMeta[] metas = new FssFileMeta[locationUrls.length];
+        for (int i = 0; i < locationUrls.length; i++) {
+            metas[i] = resolveMeta(locationUrls[i]);
         }
         return metas;
     }
 
     @GetMapping("/dl/**")
     @ResponseStream
-    @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
+    @ConfigAnonymous // 匿名用户即可读取，具体权限由服务策略决定
     public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         I userIdentity = getUserIdentity();
         String path = getDownloadPath(request);
@@ -384,9 +384,9 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         return url.substring(index + downloadUrlPrefix.length()); // 通配符部分
     }
 
-    protected FssFileDetail resolveFileDetail(I userIdentity, String storageUrl,
+    protected FssFileDetail resolveFileDetail(I userIdentity, String locationUrl,
             HttpServletRequest request, HttpServletResponse response, Consumer<FssFileDetail> prepare) {
-        FssFileDetail detail = this.service.getDetail(userIdentity, storageUrl);
+        FssFileDetail detail = this.service.getDetail(userIdentity, locationUrl);
         if (detail == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
@@ -407,28 +407,28 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     @Override
     @ResponseBody
-    @ConfigAnonymous // 匿名用户即可读取，具体权限由访问策略决定
-    public String readText(String storageUrl, long limit) {
+    @ConfigAnonymous // 匿名用户即可读取，具体权限由服务策略决定
+    public String readText(String locationUrl, long limit) {
         I userIdentity = getUserIdentity();
-        return this.service.readText(userIdentity, storageUrl, limit);
+        return this.service.readText(userIdentity, locationUrl, limit);
     }
 
     @Override
     @ResponseBody
-    @ConfigAuthority // 登录用户才可删除文件，访问策略可能还有更多限定
-    public void delete(String storageUrl) {
+    @ConfigAuthority // 登录用户才可删除文件，服务策略可能还有更多限定
+    public void delete(String locationUrl) {
         I userIdentity = getUserIdentity();
-        this.service.delete(userIdentity, storageUrl);
+        this.service.delete(userIdentity, locationUrl);
     }
 
     @Override
     @ResponseBody
-    @ConfigAuthority // 登录用户才可删除文件，访问策略可能还有更多限定
-    public void delete(String[] storageUrls) {
-        if (storageUrls != null) {
+    @ConfigAuthority // 登录用户才可删除文件，服务策略可能还有更多限定
+    public void delete(String[] locationUrls) {
+        if (locationUrls != null) {
             I userIdentity = getUserIdentity();
-            for (String storageUrl : storageUrls) {
-                this.service.delete(userIdentity, storageUrl);
+            for (String locationUrl : locationUrls) {
+                this.service.delete(userIdentity, locationUrl);
             }
         }
     }

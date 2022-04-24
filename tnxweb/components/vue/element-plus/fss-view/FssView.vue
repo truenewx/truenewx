@@ -89,7 +89,7 @@ export default {
                 let fssConfig = window.tnx.fss.getClientConfig();
                 let vm = this;
                 rpc.get(fssConfig.contextUrl + '/meta', {
-                    storageUrl: vm.url,
+                    locationUrl: vm.url,
                 }, function(meta) {
                     vm.meta = meta;
                 }, {

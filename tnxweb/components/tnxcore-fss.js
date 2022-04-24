@@ -60,15 +60,15 @@ const fss = {
             app: this.getClientConfig().appName,
         });
     },
-    resolveDownloadUrl(storageUrl, callback) {
+    resolveDownloadUrl(locationUrl, callback) {
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/download/url', {storageUrl}, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/download/url', {locationUrl}, callback, {
             app: config.appName,
         });
     },
-    readText(storageUrl, callback) {
+    readText(locationUrl, callback) {
         let config = this.getClientConfig();
-        window.tnx.app.rpc.get(config.contextUrl + '/read/text', {storageUrl}, callback, {
+        window.tnx.app.rpc.get(config.contextUrl + '/read/text', {locationUrl}, callback, {
             app: config.appName,
         });
     }

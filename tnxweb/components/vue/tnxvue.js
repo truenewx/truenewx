@@ -279,7 +279,7 @@ Object.assign(tnxvue.app.page, {
                 let refKeys = Object.keys(vm.$refs);
                 for (let refKey of refKeys) {
                     let ref = vm.$refs[refKey];
-                    if (typeof ref.getStorageUrl === 'function') {
+                    if (typeof ref.getLocationUrl === 'function') {
                         if (ref.validateUploaded() === false) {
                             return null;
                         }

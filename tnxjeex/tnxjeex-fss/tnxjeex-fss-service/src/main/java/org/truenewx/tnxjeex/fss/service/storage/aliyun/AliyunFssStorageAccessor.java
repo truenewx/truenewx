@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.aliyun;
+package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,9 +12,9 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
-import org.truenewx.tnxjeex.fss.service.FssAccessor;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
-import org.truenewx.tnxjeex.fss.service.model.FssProvider;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
+import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
 import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 
 import com.aliyun.oss.ClientException;
@@ -29,18 +29,18 @@ import com.aliyun.oss.model.ObjectMetadata;
  *
  * @author jianglei
  */
-public class AliyunFssAccessor implements FssAccessor {
+public class AliyunFssStorageAccessor implements FssStorageAccessor {
 
     private AliyunAccount account;
-    private FssAccessor delegate;
+    private FssStorageAccessor delegate;
     private ExecutorService executorService;
 
-    public AliyunFssAccessor(AliyunAccount account) {
+    public AliyunFssStorageAccessor(AliyunAccount account) {
         this.account = account;
     }
 
-    public void setDelegate(FssAccessor delegate) {
-        if (!(delegate instanceof AliyunFssAccessor)) {
+    public void setDelegate(FssStorageAccessor delegate) {
+        if (!(delegate instanceof AliyunFssStorageAccessor)) {
             this.delegate = delegate;
         }
     }
@@ -51,8 +51,8 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssProvider getProvider() {
-        return FssProvider.ALIYUN;
+    public FssStorageProvider getProvider() {
+        return FssStorageProvider.ALIYUN;
     }
 
     private String getBucketName() {
@@ -60,8 +60,8 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void write(InputStream in, String path, String originalFilename) throws IOException {
-        String path0 = path;
+    public void write(InputStream in, String storagePath, String originalFilename) throws IOException {
+        String path0 = storagePath;
         String originalFilename0 = originalFilename;
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -73,8 +73,8 @@ public class AliyunFssAccessor implements FssAccessor {
         if (charset != null) {
             objectMetadata.setContentEncoding(charset.name());
         }
-        path = AliyunOssUtil.standardizePath(path);
-        this.account.getOssClient().putObject(getBucketName(), path, in, objectMetadata);
+        storagePath = AliyunOssUtil.standardizePath(storagePath);
+        this.account.getOssClient().putObject(getBucketName(), storagePath, in, objectMetadata);
 
         if (this.delegate != null) {
             this.executorService.submit(() -> {
@@ -93,14 +93,14 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public FssFileDetail getDetail(String path) {
+    public FssFileDetail getDetail(String storagePath) {
         if (this.delegate != null) {
-            FssFileDetail detail = this.delegate.getDetail(path);
+            FssFileDetail detail = this.delegate.getDetail(storagePath);
             if (detail != null) {
                 return detail;
             }
         }
-        ObjectMetadata meta = getObjectMetadata(path);
+        ObjectMetadata meta = getObjectMetadata(storagePath);
         String filename = meta.getUserMetadata().get("filename");
         if (StringUtils.isNotBlank(filename)) {
             try {
@@ -112,8 +112,8 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public Charset getCharset(String path) {
-        ObjectMetadata meta = getObjectMetadata(path);
+    public Charset getCharset(String storagePath) {
+        ObjectMetadata meta = getObjectMetadata(storagePath);
         String encoding = meta.getContentEncoding();
         if (encoding != null) {
             try {
@@ -125,26 +125,26 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public InputStream getReadStream(String path) throws IOException {
+    public InputStream getReadStream(String storagePath) throws IOException {
         if (this.delegate != null) {
-            InputStream readStream = this.delegate.getReadStream(path);
+            InputStream readStream = this.delegate.getReadStream(storagePath);
             if (readStream != null) {
                 return readStream;
             }
         }
         try {
-            path = AliyunOssUtil.standardizePath(path);
-            return this.account.getOssClient().getObject(getBucketName(), path).getObjectContent();
+            storagePath = AliyunOssUtil.standardizePath(storagePath);
+            return this.account.getOssClient().getObject(getBucketName(), storagePath).getObjectContent();
         } catch (OSSException | ClientException e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void delete(String path, FssDirDeletePredicate dirDeletePredicate) {
+    public void delete(String storagePath, FssDirDeletePredicate dirDeletePredicate) {
         OSS oss = this.account.getOssClient();
         String bucketName = getBucketName();
-        String standardizedPath = AliyunOssUtil.standardizePath(path);
+        String standardizedPath = AliyunOssUtil.standardizePath(storagePath);
         try {
             oss.deleteObject(bucketName, standardizedPath);
         } catch (Exception e) {
@@ -153,7 +153,7 @@ public class AliyunFssAccessor implements FssAccessor {
 
         if (this.delegate != null) {
             this.executorService.submit(() -> {
-                this.delegate.delete(path, dirDeletePredicate);
+                this.delegate.delete(storagePath, dirDeletePredicate);
             });
         }
 
@@ -174,14 +174,14 @@ public class AliyunFssAccessor implements FssAccessor {
     }
 
     @Override
-    public void copy(String sourcePath, String targetPath) {
-        String originalSourcePath = sourcePath;
-        String originalTargetPath = targetPath;
+    public void copy(String sourceStoragePath, String targetStoragePath) {
+        String originalSourcePath = sourceStoragePath;
+        String originalTargetPath = targetStoragePath;
 
-        sourcePath = AliyunOssUtil.standardizePath(sourcePath);
-        targetPath = AliyunOssUtil.standardizePath(targetPath);
+        sourceStoragePath = AliyunOssUtil.standardizePath(sourceStoragePath);
+        targetStoragePath = AliyunOssUtil.standardizePath(targetStoragePath);
         String bucketName = getBucketName();
-        this.account.getOssClient().copyObject(bucketName, sourcePath, bucketName, targetPath);
+        this.account.getOssClient().copyObject(bucketName, sourceStoragePath, bucketName, targetStoragePath);
 
         if (this.delegate != null) {
             this.executorService.submit(() -> {

@@ -79,7 +79,7 @@ export default {
                 let vm = this;
                 if (vm.preview) {
                     rpc.get(fssConfig.contextUrl + '/meta', {
-                        storageUrl: vm.url
+                        locationUrl: vm.url
                     }, function(meta) {
                         vm.src = meta.thumbnailReadUrl;
                         vm.previewSrcList = [meta.readUrl];
@@ -91,7 +91,7 @@ export default {
                     });
                 } else {
                     rpc.get(fssConfig.contextUrl + '/read/url', {
-                        storageUrl: vm.url,
+                        locationUrl: vm.url,
                         thumbnail: true,
                     }, function(readUrl) {
                         vm.src = readUrl;

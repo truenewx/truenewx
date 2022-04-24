@@ -16,7 +16,7 @@ public class FssFileMeta {
     public static final String STORAGE_URL_PROTOCOL = "fss://";
 
     private String name;
-    private String storageUrl;
+    private String locationUrl;
     private String readUrl;
     private String thumbnailReadUrl;
     private String downloadUrl;
@@ -26,12 +26,12 @@ public class FssFileMeta {
     protected FssFileMeta() {
     }
 
-    public FssFileMeta(String storageUrl) {
-        this.storageUrl = storageUrl;
+    public FssFileMeta(String locationUrl) {
+        this.locationUrl = locationUrl;
     }
 
     public String getId() {
-        return EncryptUtil.encryptByMd5(this.storageUrl);
+        return EncryptUtil.encryptByMd5(this.locationUrl);
     }
 
     public String getName() {
@@ -42,12 +42,12 @@ public class FssFileMeta {
         this.name = name;
     }
 
-    public String getStorageUrl() {
-        return this.storageUrl;
+    public String getLocationUrl() {
+        return this.locationUrl;
     }
 
-    protected void setStorageUrl(String storageUrl) {
-        this.storageUrl = storageUrl;
+    protected void setLocationUrl(String locationUrl) {
+        this.locationUrl = locationUrl;
     }
 
     public String getReadUrl() {

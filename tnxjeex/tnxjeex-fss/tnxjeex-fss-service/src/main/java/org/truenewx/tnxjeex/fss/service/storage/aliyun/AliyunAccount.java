@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.fss.service.aliyun;
+package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import com.aliyun.oss.OSS;
 import com.aliyuncs.IAcsClient;
