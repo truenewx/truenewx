@@ -17,6 +17,7 @@ public class NotContainsRule extends ValidationRule {
     // 尖括号和HTML字符会破坏数据格式，故用特殊的布尔值表示许可，由客户端做特殊判断
     private boolean notContainsAngleBracket;
     private boolean notContainsHtmlChars;
+    private boolean notContainsIllegalFilenameChars;
 
     public Iterable<String> getValues() {
         return this.values;
@@ -52,6 +53,14 @@ public class NotContainsRule extends ValidationRule {
 
     public void setNotContainsHtmlChars(boolean notContainsHtmlChars) {
         this.notContainsHtmlChars = notContainsHtmlChars;
+    }
+
+    public boolean isNotContainsIllegalFilenameChars() {
+        return this.notContainsIllegalFilenameChars;
+    }
+
+    public void setNotContainsIllegalFilenameChars(boolean notContainsIllegalFilenameChars) {
+        this.notContainsIllegalFilenameChars = notContainsIllegalFilenameChars;
     }
 
     @Override

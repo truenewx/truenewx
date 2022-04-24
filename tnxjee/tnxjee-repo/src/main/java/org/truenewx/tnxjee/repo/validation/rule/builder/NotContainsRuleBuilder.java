@@ -16,9 +16,8 @@ import org.truenewx.tnxjee.model.validation.rule.NotContainsRule;
 public class NotContainsRuleBuilder implements ValidationRuleBuilder<NotContainsRule> {
     @Override
     public Class<?>[] getConstraintTypes() {
-        return new Class<?>[]{ NotContains.class, NotContainsSqlChars.class,
-                NotContainsAngleBracket.class, NotContainsHtmlChars.class,
-                NotContainsSpecialChars.class };
+        return new Class<?>[]{ NotContains.class, NotContainsSqlChars.class, NotContainsAngleBracket.class,
+                NotContainsHtmlChars.class, NotContainsIllegalFilenameChars.class, NotContainsSpecialChars.class };
     }
 
     @Override
@@ -31,6 +30,8 @@ public class NotContainsRuleBuilder implements ValidationRuleBuilder<NotContains
             rule.setNotContainsAngleBracket(true);
         } else if (annotation instanceof NotContainsHtmlChars) {
             rule.setNotContainsHtmlChars(true);
+        } else if (annotation instanceof NotContainsIllegalFilenameChars) {
+            rule.setNotContainsIllegalFilenameChars(true);
         } else if (annotation instanceof NotContainsSpecialChars) {
             NotContainsSpecialChars notContainsSpecialChars = (NotContainsSpecialChars) annotation;
             if (!notContainsSpecialChars.comma()) {
