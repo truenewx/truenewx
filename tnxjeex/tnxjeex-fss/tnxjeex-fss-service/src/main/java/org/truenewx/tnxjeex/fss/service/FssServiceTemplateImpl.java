@@ -88,7 +88,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String extension = validateUploadLimit(uploadLimit, fileSize, originalFilename);
         String storageDir = getStorageDirForWrite(strategy, userIdentity, scope);
         // 获取存储文件名
-        String storageFilename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
+        String storageFilename = getStorageFilename(strategy, userIdentity, scope, originalFilename);
         if (StringUtils.isBlank(storageFilename)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
             if (!in.markSupported()) {
@@ -114,6 +114,13 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String locationPath = strategy.getLocationPath(storageDir, storageFilename);
         strategy.onWritten(userIdentity, locationPath);
         return FssFileLocation.toUrl(type, locationPath);
+    }
+
+    private String getStorageFilename(FssServiceStrategy<I> strategy, I userIdentity, String scope,
+            String originalFilename) {
+        String filename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
+        // 转换特殊字符，以免无法作为路径的一部分正常加载
+        return filename == null ? null : filename.replaceAll("[+%]", Strings.SPACE);
     }
 
     /**
@@ -415,7 +422,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             // 获取目标存储文件名
             FssFileDetail sourceDetail = accessor.getDetail(sourceStoragePath);
             String originalFilename = sourceDetail == null ? null : sourceDetail.getOriginalFilename();
-            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope,
+            String targetStorageFilename = getStorageFilename(targetStrategy, userIdentity, targetScope,
                     originalFilename);
             if (StringUtils.isBlank(targetStorageFilename)) {
                 // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用

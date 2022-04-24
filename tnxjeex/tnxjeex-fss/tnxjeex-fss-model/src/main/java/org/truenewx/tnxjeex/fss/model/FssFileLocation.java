@@ -1,9 +1,5 @@
 package org.truenewx.tnxjeex.fss.model;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
@@ -34,7 +30,7 @@ public class FssFileLocation {
         } else {
             this.dir = NetUtil.standardizeUrl(dir);
         }
-        this.filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
+        this.filename = filename;
     }
 
     public static FssFileLocation of(String type, String path) {
@@ -89,7 +85,7 @@ public class FssFileLocation {
     }
 
     public String getPath() {
-        return this.dir + Strings.SLASH + URLEncoder.encode(this.filename, StandardCharsets.UTF_8);
+        return this.dir + Strings.SLASH + this.filename;
     }
 
     @Override
