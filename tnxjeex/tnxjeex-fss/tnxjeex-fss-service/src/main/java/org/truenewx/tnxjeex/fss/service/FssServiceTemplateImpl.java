@@ -88,19 +88,19 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         String extension = validateUploadLimit(uploadLimit, fileSize, originalFilename);
         String storageDir = getStorageDirForWrite(strategy, userIdentity, scope);
         // 获取存储文件名
-        String storageFilename = getStorageFilename(strategy, userIdentity, scope, originalFilename);
-        if (StringUtils.isBlank(storageFilename)) {
+        String storageFilename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
+        if (storageFilename.contains(FssServiceStrategy.PLACEHOLDER_MD5)) {
             // 用BufferedInputStream装载以确保输入流可以标记和重置位置
             if (!in.markSupported()) {
                 in = new BufferedInputStream(in);
             }
             in.mark(Integer.MAX_VALUE);
-            storageFilename = EncryptUtil.encryptByMd5(in);
+            storageFilename = storageFilename.replace(FssServiceStrategy.PLACEHOLDER_MD5, EncryptUtil.encryptByMd5(in));
             in.reset();
         }
         storageFilename += extension.toLowerCase();
         // 构建存储路径
-        String storagePath = storageDir + Strings.SLASH + storageFilename;
+        String storagePath = getStoragePath(storageDir, storageFilename);
         // 写文件
         FssStorageProvider provider = strategy.getProvider();
         FssStorageAccessor accessor = this.accessors.get(provider);
@@ -111,24 +111,19 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             authorizer.authorizePublicRead(storagePath);
         }
         // 构建定位地址
-        String locationPath = getLocationPath(strategy, userIdentity, scope, storagePath);
+        String locationPath = strategy.getLocationPath(storagePath);
         strategy.onWritten(userIdentity, locationPath);
         return FssFileLocation.toUrl(type, locationPath);
     }
 
-    private String getStorageFilename(FssServiceStrategy<I> strategy, I userIdentity, String scope,
-            String originalFilename) {
-        String filename = strategy.getStorageFilename(userIdentity, scope, originalFilename);
-        // 转换特殊字符，以免无法作为路径的一部分正常加载
-        return filename == null ? null : filename.replaceAll("[+%]", Strings.SPACE);
+    private String getStoragePath(String storageDir, String storageFilename) {
+        String storagePath = storageDir + Strings.SLASH + storageFilename;
+        return cleanIllegalChars(storagePath);
     }
 
-    private String getLocationPath(FssServiceStrategy<I> strategy, I userIdentity, String scope, String storagePath) {
-        String locationPath = strategy.getLocationPath(userIdentity, scope);
-        if (locationPath == null) {
-            locationPath = storagePath.substring(strategy.getStorageRootDir().length());
-        }
-        return locationPath;
+    // 清理非法字符，以免作为路径的一部分无法正常加载
+    private String cleanIllegalChars(String path) {
+        return path.replaceAll("[+%]", Strings.SPACE); // 因长度为关键的判断依据，故需保证长度不变
     }
 
     /**
@@ -196,9 +191,15 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
             FssStorageProvider provider = strategy.getProvider();
             FssStorageAccessor accessor = this.accessors.get(provider);
-            String storagePath = strategy.getStoragePath(location.getDir(), location.getFilename());
+            String storagePath = getStoragePath(strategy, location);
             accessor.write(in, storagePath, originalFilename);
         }
+    }
+
+    private String getStoragePath(FssServiceStrategy<I> strategy, FssFileLocation location) {
+        String storagePath = strategy.getStoragePath(location.getPath());
+        // 转换特殊字符，以免作为路径的一部分无法正常加载
+        return cleanIllegalChars(storagePath);
     }
 
     @Override
@@ -217,11 +218,11 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 return location.toString();
             } else {
                 FssStorageAuthorizer authorizer = this.authorizers.get(provider);
-                String path = strategy.getStoragePath(location.getDir(), location.getFilename());
+                String storagePath = getStoragePath(strategy, location);
                 if (thumbnail) {
-                    path = appendThumbnailParameters(strategy, path);
+                    storagePath = appendThumbnailParameters(strategy, storagePath);
                 }
-                return authorizer.getReadUrl(userIdentity, path);
+                return authorizer.getReadUrl(userIdentity, storagePath);
             }
         }
         return null;
@@ -261,7 +262,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (NetUtil.isHttpUrl(url, true)) {
             FssStorageAuthorizer authorizer = this.authorizers.get(provider);
             if (authorizer != null) {
-                String contextUrl = authorizer.getContextUrl();
+                String contextUrl = authorizer.getReadContextUrl();
                 // 外部读取地址去掉上下文根后，应以业务服务策略的存储根目录开头
                 return url.startsWith(contextUrl + strategy.getStorageRootDir() + Strings.SLASH);
             }
@@ -284,7 +285,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             if (location != null) {
                 FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
                 FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-                String storagePath = strategy.getStoragePath(location.getDir(), location.getFilename());
+                String storagePath = getStoragePath(strategy, location);
                 FssFileDetail detail = accessor.getDetail(storagePath);
                 if (detail != null) {
                     FssFileMeta meta = new FssFileMeta(locationUrl);
@@ -309,7 +310,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (location != null) {
             FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
             FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-            String storagePath = strategy.getStoragePath(location.getDir(), location.getFilename());
+            String storagePath = getStoragePath(strategy, location);
             FssFileDetail detail = accessor.getDetail(storagePath);
             if (detail != null) {
                 String downloadFilename = strategy.getDownloadFilename(userIdentity, location.getDir(),
@@ -342,7 +343,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssFileLocation location = FssFileLocation.of(locationUrl);
         if (location != null) {
             FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
-            String storagePath = strategy.getStoragePath(location.getDir(), location.getFilename());
+            String storagePath = getStoragePath(strategy, location);
             FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
             return new Binary<>(storagePath, accessor);
         }
@@ -402,12 +403,11 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssFileLocation location = FssFileLocation.of(locationUrl);
         if (location != null) {
             FssServiceStrategy<I> strategy = getStrategy(location.getType());
-            String locationDir = location.getDir();
-            if (!strategy.isDeletable(userIdentity, locationDir, location.getFilename())) {
+            if (!strategy.isDeletable(userIdentity, location.getDir(), location.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, location);
             }
             FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-            String storagePath = strategy.getStoragePath(locationDir, location.getFilename());
+            String storagePath = getStoragePath(strategy, location);
             accessor.delete(storagePath, strategy);
         }
     }
@@ -416,27 +416,28 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     public String copy(I userIdentity, String sourceLocationUrl, String targetType, String targetScope) {
         FssFileLocation sourceLocation = FssFileLocation.of(sourceLocationUrl);
         if (sourceLocation != null) {
-            FssServiceStrategy<I> sourceStrategy = getStrategy(sourceLocation.getType());
+            FssServiceStrategy<I> sourceStrategy = validateUserRead(userIdentity, sourceLocation);
             FssServiceStrategy<I> targetStrategy = getStrategy(targetType);
             // 跨文件存储服务提供商无法复制（暂时没有跨文件存储服务提供商的需要，实际上也是可行的，只是性能较差，代码复杂）
             if (sourceStrategy.getProvider() != targetStrategy.getProvider()) {
                 throw new BusinessException(FssExceptionCodes.CANNOT_COPY_BETWEEN_PROVIDERS);
             }
-            FssStorageAccessor accessor = this.accessors.get(targetStrategy.getProvider());
-            String sourceStoragePath = sourceStrategy.getStoragePath(sourceLocation.getDir(),
-                    sourceLocation.getFilename());
             // 获取目标存储目录，同时校验写权限
             String targetStorageDir = getStorageDirForWrite(targetStrategy, userIdentity, targetScope);
+
+            FssStorageAccessor accessor = this.accessors.get(targetStrategy.getProvider());
+            String sourceStoragePath = getStoragePath(sourceStrategy, sourceLocation);
             // 获取目标存储文件名
             FssFileDetail sourceDetail = accessor.getDetail(sourceStoragePath);
             String originalFilename = sourceDetail == null ? null : sourceDetail.getOriginalFilename();
-            String targetStorageFilename = getStorageFilename(targetStrategy, userIdentity, targetScope,
+            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope,
                     originalFilename);
-            if (StringUtils.isBlank(targetStorageFilename)) {
+            if (targetStorageFilename.contains(FssServiceStrategy.PLACEHOLDER_MD5)) {
                 // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用
                 try {
                     InputStream sourceInputStream = accessor.getReadStream(sourceStoragePath);
-                    targetStorageFilename = EncryptUtil.encryptByMd5(sourceInputStream);
+                    targetStorageFilename = targetStorageFilename.replace(FssServiceStrategy.PLACEHOLDER_MD5,
+                            EncryptUtil.encryptByMd5(sourceInputStream));
                     sourceInputStream.close();
                 } catch (IOException e) {
                     throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
@@ -450,9 +451,9 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             }
             targetStorageFilename += extension;
             // 构建目标存储路径
-            String targetStoragePath = targetStorageDir + Strings.SLASH + targetStorageFilename;
+            String targetStoragePath = getStoragePath(targetStorageDir, targetStorageFilename);
             // 构建目标定位路径
-            String targetLocationPath = getLocationPath(targetStrategy, userIdentity, targetScope, targetStoragePath);
+            String targetLocationPath = targetStrategy.getLocationPath(targetStoragePath);
             // 存储路径不同才有必要复制
             if (!sourceStoragePath.equals(targetStoragePath)) {
                 accessor.copy(sourceStoragePath, targetStoragePath);

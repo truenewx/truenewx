@@ -16,6 +16,11 @@ import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
 public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDeletePredicate {
 
     /**
+     * MD5占位符
+     */
+    String PLACEHOLDER_MD5 = "${md5}";
+
+    /**
      * 获取业务类型，要求在同一个系统中唯一
      *
      * @return 业务类型
@@ -51,7 +56,7 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
     String getStorageRelativeDir(I userIdentity, String scope);
 
     /**
-     * 获取指定文件存储时的最后一级文件名，不含扩展名，返回null表示交由框架生成基于内容的MD5编码文件名
+     * 获取指定文件存储时的最后一级文件名，不含扩展名，可以包含PLACEHOLDER_MD5占位表示由框架生成基于内容的MD5编码替代，默认为纯MD5编码
      *
      * @param userIdentity     用户标识。登录用户才能写文件，所以此处一定不为null，且已通过写入权限校验
      * @param scope            业务范围
@@ -59,29 +64,27 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
      * @return 指定文件存储时的最后一级文件名
      */
     default String getStorageFilename(I userIdentity, String scope, String originalFilename) {
-        return null;
+        return PLACEHOLDER_MD5;
     }
 
     /**
-     * 根据定位目录和定位文件名获取存储路径，默认形如：/[存储根目录]/[定位目录]/[定位文件名]
+     * 根据存储路径获取定位路径，定位路径不包含业务类型，默认为存储路径去掉根目录的部分
      *
-     * @param locationDir      定位目录
-     * @param locationFilename 定位文件名
-     * @return 存储路径
-     */
-    default String getStoragePath(String locationDir, String locationFilename) {
-        return getStorageRootDir() + NetUtil.standardizeUrl(locationDir) + Strings.SLASH + locationFilename;
-    }
-
-    /**
-     * 获取指定用户在指定业务范围下的文件定位路径，不包含业务类型，返回null表示默认为存储路径去掉根目录的部分
-     *
-     * @param userIdentity 存储目录
-     * @param scope        存储文件名
+     * @param storagePath 存储路径
      * @return 文件定位路径
      */
-    default String getLocationPath(I userIdentity, String scope) {
-        return null;
+    default String getLocationPath(String storagePath) {
+        return storagePath.substring(getStorageRootDir().length());
+    }
+
+    /**
+     * 根据定位路径获取存储路径，默认形如：/[存储根目录]/[定位路径]
+     *
+     * @param locationPath 定位路径
+     * @return 存储路径
+     */
+    default String getStoragePath(String locationPath) {
+        return getStorageRootDir() + NetUtil.standardizeUrl(locationPath);
     }
 
     /**

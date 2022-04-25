@@ -56,9 +56,10 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
     }
 
     @Override
-    public void authorizePublicRead(String path) {
-        path = AliyunOssUtil.standardizePath(path);
-        this.account.getOssClient().setObjectAcl(this.account.getOssBucket(), path, CannedAccessControlList.PublicRead);
+    public void authorizePublicRead(String storagePath) {
+        storagePath = AliyunOssUtil.standardizePath(storagePath);
+        this.account.getOssClient()
+                .setObjectAcl(this.account.getOssBucket(), storagePath, CannedAccessControlList.PublicRead);
     }
 
     private boolean isPublicRead(String path) {
@@ -69,7 +70,7 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
     }
 
     @Override
-    public String getContextUrl() {
+    public String getReadContextUrl() {
         return this.contextUrl;
     }
 
@@ -78,31 +79,31 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
     }
 
     @Override
-    public String getReadUrl(UserIdentity<?> userIdentity, String path) {
-        path = AliyunOssUtil.standardizePath(path);
+    public String getReadUrl(UserIdentity<?> userIdentity, String storagePath) {
+        storagePath = AliyunOssUtil.standardizePath(storagePath);
         // 拆分请求参数，确保路径不带参数
-        int index = path.indexOf(Strings.QUESTION);
+        int index = storagePath.indexOf(Strings.QUESTION);
         String parameterString = Strings.EMPTY;
         if (index >= 0) {
-            parameterString = path.substring(index + 1);
-            path = path.substring(0, index);
+            parameterString = storagePath.substring(index + 1);
+            storagePath = storagePath.substring(0, index);
         }
         try {
-            if (isPublicRead(path)) {
-                StringBuilder url = new StringBuilder(getContextUrl()).append(Strings.SLASH).append(path);
+            if (isPublicRead(storagePath)) {
+                StringBuilder url = new StringBuilder(getReadContextUrl()).append(Strings.SLASH).append(storagePath);
                 if (parameterString.length() > 0) {
                     url.append(Strings.QUESTION).append(parameterString);
                 }
                 return url.toString();
             } else if (this.readStsRoleAssumer != null) { // 非公开可读的，授予临时读取权限
-                String policyDocument = this.policyBuilder.buildReadDocument(path);
+                String policyDocument = this.policyBuilder.buildReadDocument(storagePath);
                 AssumeRoleResponse.Credentials credentials = this.readStsRoleAssumer.assumeRole(userIdentity.toString(),
                         policyDocument);
                 if (credentials != null) {
                     OSS oss = AliyunOssUtil.buildOss(this.account.getOssEndpoint(), credentials.getAccessKeyId(),
                             credentials.getAccessKeySecret(), credentials.getSecurityToken());
                     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(this.account.getOssBucket(),
-                            path);
+                            storagePath);
                     Date expiration = DateUtil.addSeconds(new Date(), this.tempReadExpiredSeconds);
                     request.setExpiration(expiration);
                     if (parameterString.length() > 0) {
@@ -115,7 +116,7 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
                         }
                     }
                     String url = oss.generatePresignedUrl(request).toString();
-                    url = replaceContextUrl(url, getContextUrl());
+                    url = replaceContextUrl(url, getReadContextUrl());
                     return url;
                 }
             }

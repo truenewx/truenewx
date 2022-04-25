@@ -17,24 +17,24 @@ public interface FssStorageAuthorizer {
     FssStorageProvider getProvider();
 
     /**
-     * 授权指定资源为公开可读
+     * 授权指定文件为公开可读
      *
-     * @param path 资源路径
+     * @param storagePath 文件存储路径
      */
-    void authorizePublicRead(String path);
+    void authorizePublicRead(String storagePath);
 
     /**
-     * @return 读取URL的通用上下文地址，包含协议、域名（或IP）、可能的端口
+     * @return 读取地址的通用上下文地址，包含协议、域名（或IP）、可能的端口
      */
-    String getContextUrl();
+    String getReadContextUrl();
 
     /**
-     * 获取指定资源读取URL
+     * 获取指定文件读取地址
      *
      * @param userIdentity 用户标识
-     * @param path         资源路径
-     * @return 资源读取URL
+     * @param storagePath  文件存储路径
+     * @return 文件读取地址
      */
-    String getReadUrl(UserIdentity<?> userIdentity, String path);
+    String getReadUrl(UserIdentity<?> userIdentity, String storagePath);
 
 }
