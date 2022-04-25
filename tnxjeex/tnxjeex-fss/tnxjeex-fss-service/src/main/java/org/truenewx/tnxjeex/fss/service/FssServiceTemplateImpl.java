@@ -371,28 +371,33 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (binate != null) {
             String storagePath = binate.getLeft();
             FssStorageAccessor accessor = binate.getRight();
+            InputStream in = null;
             try {
-                InputStream in = accessor.getReadStream(storagePath);
+                in = accessor.getReadStream(storagePath);
                 if (in != null) {
-                    try {
-                        Charset charset = accessor.getCharset(storagePath);
-                        if (charset == null) {
-                            charset = FssUtil.getCharset(in);
-                        }
-                        if (charset == null) {
-                            throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, locationUrl);
-                        }
-                        // 未指定读取限制，或文件大小未超过限制，才读取内容
-                        if (limit <= 0 || in.available() <= limit) {
-                            String encoding = charset.toString();
-                            return IOUtils.toString(in, encoding);
-                        }
-                    } finally {
-                        in.close(); // 确保关闭输入流
+                    Charset charset = accessor.getCharset(storagePath);
+                    if (charset == null) {
+                        charset = FssUtil.getCharset(in);
+                    }
+                    if (charset == null) {
+                        throw new BusinessException(FssExceptionCodes.IS_NOT_TEXT_FILE, locationUrl);
+                    }
+                    // 未指定读取限制，或文件大小未超过限制，才读取内容
+                    if (limit <= 0 || in.available() <= limit) {
+                        String encoding = charset.toString();
+                        return IOUtils.toString(in, encoding);
                     }
                 }
             } catch (IOException e) {
                 LogUtil.error(getClass(), e);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        LogUtil.error(getClass(), e);
+                    }
+                }
             }
         }
         return null;

@@ -28,10 +28,20 @@ public class FssUtil {
 
     public static Charset getCharset(File file) {
         if (file != null && file.exists()) {
+            InputStream in = null;
             try {
-                return getCharset(new FileInputStream(file));
+                in = new FileInputStream(file);
+                return getCharset(in);
             } catch (IOException e) {
                 LogUtil.error(FssUtil.class, e);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        LogUtil.error(FssUtil.class, e);
+                    }
+                }
             }
         }
         return null;
@@ -39,13 +49,16 @@ public class FssUtil {
 
     public static Charset getCharset(InputStream in) {
         try {
-            if (!in.markSupported()) {
-                in = new BufferedInputStream(in);
-            }
             if (IOUtil.isBinary(in)) {
                 return null;
             }
-            Charset charset = DETECTOR.detectCodepage(in, IOUtil.DEFAULT_BUFFER_SIZE); // 最多尝试4KB，以免耗时太长
+            if (!in.markSupported()) {
+                in = new BufferedInputStream(in);
+            }
+            int size = IOUtil.DEFAULT_BUFFER_SIZE; // 最多尝试4KB，以免耗时太长
+            in.mark(size);
+            Charset charset = DETECTOR.detectCodepage(in, size);
+            in.reset();
             if (charset instanceof UnknownCharset || charset instanceof UnsupportedCharset) {
                 return null;
             }
