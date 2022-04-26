@@ -63,7 +63,7 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
         out.close();
 
         // 然后删除原文件，修改临时文件名为原文件名
-        File file = getStorageFile(storagePath);
+        File file = getStorageFile(storagePath, false);
         if (file.exists()) {
             file.delete();
         }
@@ -99,16 +99,18 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
         file.getParentFile().mkdirs(); // 确保目录存在
     }
 
-    private File getStorageFile(String path) {
+    private File getStorageFile(String path, boolean supportsFilenameWildcard) {
         path = NetUtil.standardizeUrl(path);
-        int index = path.lastIndexOf(Strings.SLASH);
-        String filename = path.substring(index + 1);
         File file = null;
-        // 支持文件名中的通配符（不支持路径中的），此时返回找到的第一个匹配的文件，如果找不到匹配的文件，则以普通方式返回一个不存在的文件对象
-        if (filename.contains(Strings.ASTERISK)) {
-            File dir = new File(this.root, path.substring(0, index));
-            File[] files = dir.listFiles((d, name) -> StringUtil.wildcardMatch(name, filename));
-            file = ArrayUtil.get(files, 0);
+        if (supportsFilenameWildcard) {
+            // 如果支持文件名的通配符，则返回找到的第一个匹配的文件，如果找不到匹配的文件，则以普通方式返回一个不存在的文件对象
+            int index = path.lastIndexOf(Strings.SLASH);
+            String filename = path.substring(index + 1);
+            if (filename.contains(Strings.ASTERISK)) {
+                File dir = new File(this.root, path.substring(0, index));
+                File[] files = dir.listFiles((d, name) -> StringUtil.wildcardMatch(name, filename));
+                file = ArrayUtil.get(files, 0);
+            }
         }
         if (file == null) {
             file = new File(this.root, path);
@@ -119,7 +121,7 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public FssFileDetail getDetail(String storagePath) {
-        File file = getStorageFile(storagePath);
+        File file = getStorageFile(storagePath, false);
         if (file.exists()) {
             String originalFilename = this.fileStreamProvider.getOriginalFilename(file);
             if (originalFilename == null) {
@@ -132,13 +134,13 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public Charset getCharset(String storagePath) {
-        File file = getStorageFile(storagePath);
+        File file = getStorageFile(storagePath, false);
         return FssUtil.getCharset(file);
     }
 
     @Override
     public InputStream getReadStream(String storagePath) throws IOException {
-        File file = getStorageFile(storagePath);
+        File file = getStorageFile(storagePath, false);
         if (file.exists()) {
             return this.fileStreamProvider.getReadStream(file);
         }
@@ -147,7 +149,7 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public void delete(String storagePath, FssDirDeletePredicate dirDeletePredicate) {
-        File file = getStorageFile(storagePath);
+        File file = getStorageFile(storagePath, true);
         if (file.exists()) {
             file.delete();
         }
@@ -186,8 +188,8 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public void copy(String sourceStoragePath, String targetStoragePath) {
-        File sourceFile = getStorageFile(sourceStoragePath);
-        File targetFile = getStorageFile(targetStoragePath);
+        File sourceFile = getStorageFile(sourceStoragePath, false);
+        File targetFile = getStorageFile(targetStoragePath, false);
         IOUtil.copyFile(sourceFile, targetFile);
     }
 
