@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Primary;
 public class ExecutorConfiguration {
 
     @Primary
-    @Bean(name = ExecutorUtil.DEFAULT_EXECUTOR_BEAN_NAME)
+    @Bean(name = ExecutorUtil.DEFAULT_EXECUTOR_BEAN_NAME, destroyMethod = "shutdown")
     @ConditionalOnMissingBean(name = ExecutorUtil.DEFAULT_EXECUTOR_BEAN_NAME)
     public ExecutorService defaultExecutor() {
         return ExecutorUtil.buildDefaultExecutor(getCorePoolSize());
@@ -22,7 +22,7 @@ public class ExecutorConfiguration {
         return 4;
     }
 
-    @Bean(name = ExecutorUtil.SCHEDULED_EXECUTOR_BEAN_NAME)
+    @Bean(name = ExecutorUtil.SCHEDULED_EXECUTOR_BEAN_NAME, destroyMethod = "shutdown")
     @ConditionalOnMissingBean(name = ExecutorUtil.SCHEDULED_EXECUTOR_BEAN_NAME)
     public ScheduledExecutorService scheduledExecutor() {
         return ExecutorUtil.buildScheduledExecutor(getCorePoolSize());
