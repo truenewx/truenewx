@@ -14,10 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.NetUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
@@ -103,8 +100,20 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     }
 
     private File getStorageFile(String path) {
-        File file = new File(this.root, NetUtil.standardizeUrl(path));
-        ensureDirs(file);
+        path = NetUtil.standardizeUrl(path);
+        int index = path.lastIndexOf(Strings.SLASH);
+        String filename = path.substring(index + 1);
+        File file = null;
+        // 支持文件名中的通配符（不支持路径中的），此时返回找到的第一个匹配的文件，如果找不到匹配的文件，则以普通方式返回一个不存在的文件对象
+        if (filename.contains(Strings.ASTERISK)) {
+            File dir = new File(this.root, path.substring(0, index));
+            File[] files = dir.listFiles((d, name) -> StringUtil.wildcardMatch(name, filename));
+            file = ArrayUtil.get(files, 0);
+        }
+        if (file == null) {
+            file = new File(this.root, path);
+            ensureDirs(file);
+        }
         return file;
     }
 

@@ -3,6 +3,7 @@ package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
@@ -20,6 +22,7 @@ import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.DeleteObjectsRequest;
 import com.aliyun.oss.model.ListObjectsV2Result;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectMetadata;
@@ -77,7 +80,7 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         this.account.getOssClient().putObject(getBucketName(), storagePath, in, objectMetadata);
 
         if (this.delegate != null) {
-            this.executorService.submit(() -> {
+            this.executorService.execute(() -> {
                 try {
                     this.delegate.write(in, path0, originalFilename0);
                 } catch (IOException e) {
@@ -146,27 +149,46 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         String bucketName = getBucketName();
         String standardizedPath = AliyunOssUtil.standardizePath(storagePath);
         try {
-            oss.deleteObject(bucketName, standardizedPath);
+            String filename = standardizedPath.substring(standardizedPath.lastIndexOf(Strings.SLASH) + 1);
+            // 支持按文件名中的通配符（不支持路径中的）删除
+            int index = filename.indexOf(Strings.ASTERISK);
+            if (index >= 0) {
+                String prefix = standardizedPath.substring(0, index); // 路径中首个通配符之前的部分均作为前缀查找匹配对象
+                ListObjectsV2Result result = oss.listObjectsV2(bucketName, prefix);
+                List<String> deletedKeys = new ArrayList<>();
+                for (OSSObjectSummary objectSummary : result.getObjectSummaries()) {
+                    String key = objectSummary.getKey();
+                    if (StringUtil.wildcardMatch(key, standardizedPath)) {
+                        deletedKeys.add(key);
+                    }
+                }
+                if (deletedKeys.size() > 0) {
+                    DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+                    deleteObjectsRequest.setKeys(deletedKeys);
+                    oss.deleteObjects(deleteObjectsRequest);
+                }
+            } else {
+                oss.deleteObject(bucketName, standardizedPath);
+            }
         } catch (Exception e) {
             LogUtil.warn(getClass(), e);
         }
 
         if (this.delegate != null) {
-            this.executorService.submit(() -> {
+            this.executorService.execute(() -> {
                 this.delegate.delete(storagePath, dirDeletePredicate);
             });
         }
 
-        // 删除上级空目录
-        this.executorService.submit(() -> {
+        //  删除上级空目录
+        this.executorService.execute(() -> {
             int index = standardizedPath.lastIndexOf(Strings.SLASH);
             while (index > 0) {
                 String parentPath = standardizedPath.substring(0, index);
                 ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
                 List<OSSObjectSummary> summaries = result.getObjectSummaries();
                 for (OSSObjectSummary summary : summaries) {
-                    String type = summary.getType();
-                    System.out.println(type);
+                    oss.deleteDirectory(bucketName, summary.getKey());
                 }
                 index = parentPath.lastIndexOf(Strings.SLASH);
             }
@@ -184,7 +206,7 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         this.account.getOssClient().copyObject(bucketName, sourceStoragePath, bucketName, targetStoragePath);
 
         if (this.delegate != null) {
-            this.executorService.submit(() -> {
+            this.executorService.execute(() -> {
                 this.delegate.copy(originalSourcePath, originalTargetPath);
             });
         }
