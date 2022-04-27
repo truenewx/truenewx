@@ -13,7 +13,7 @@
         :show-file-list="true"
         :headers="uploadHeaders"
         :multiple="uploadOptions ? uploadOptions.number > 1 : false"
-        :accept="uploadAccept" v-if="uploadOptions">
+        :accept="uploadAccept" :disabled="disabled" v-if="uploadOptions">
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle"
                 v-if="showFileList">
@@ -40,11 +40,12 @@
         <template #trigger>
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
                 <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
-                    v-if="listType === 'text'">
+                    :disabled="disabled" v-if="listType === 'text'">
                     <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </el-button>
-                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined" v-else>
+                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
+                    :disabled="disabled" v-else>
                     <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </div>
@@ -118,6 +119,7 @@ export default {
                 return true;
             }
         },
+        disabled: Boolean,
     },
     data() {
         const tnx = window.tnx;

@@ -17,7 +17,8 @@
         :on-success="_onSuccess"
         :on-error="onError"
         :on-removed="_onRemove"
-        :handle-errors="handleErrors"/>
+        :handle-errors="handleErrors"
+        :disabled="disabled"/>
 </template>
 
 <script>
@@ -66,6 +67,7 @@ export default {
         onError: Function,
         onRemove: Function,
         handleErrors: Function,
+        disabled: Boolean,
     },
     emits: ['update:modelValue'],
     data() {
