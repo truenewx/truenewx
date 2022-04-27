@@ -104,22 +104,28 @@ export default {
         }
     },
     created() {
-        if (this.granted != null) {
-            this.disabled = !this.granted;
-        } else if (this.menu && this.path) {
-            let vm = this;
-            this.menu.loadGrantedItems(function() {
-                vm.disabled = !vm.menu.isGranted(vm.path);
-                vm.buildDropdownItems();
-            });
-        }
+        this.init();
     },
     watch: {
+        granted() {
+            this.init();
+        },
         dropdown() {
             this.buildDropdownItems();
-        }
+        },
     },
     methods: {
+        init() {
+            if (this.granted != null) {
+                this.disabled = !this.granted;
+            } else if (this.menu && this.path) {
+                let vm = this;
+                this.menu.loadGrantedItems(function() {
+                    vm.disabled = !vm.menu.isGranted(vm.path);
+                    vm.buildDropdownItems();
+                });
+            }
+        },
         buildDropdownItems() {
             let dropdownItems = [];
             if (this.dropdown) {
