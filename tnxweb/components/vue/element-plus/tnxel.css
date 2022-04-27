@@ -274,12 +274,6 @@
     line-height: 48px;
 }
 
-.el-form-item--feedback.is-success .el-input__inner,
-.el-form-item--feedback.is-error .el-input__inner {
-    padding-right: 2rem;
-    text-overflow: ellipsis;
-}
-
 .el-form-item--feedback .ignore-feedback .el-input__inner {
     border-color: var(--el-border-color);
 }
@@ -687,14 +681,6 @@ el-card {
 
 .el-input-group__append, .el-input-group__prepend {
     padding: 0 1rem;
-}
-
-.el-input__inner {
-    padding: 0 0.75rem;
-}
-
-.el-textarea__inner {
-    padding: 0.5rem 0.75rem;
 }
 
 /*
