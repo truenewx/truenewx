@@ -69,7 +69,7 @@ public class FssFileLocation {
     }
 
     public static String toUrl(String type, String path) {
-        return Strings.SLASH + type + path;
+        return PROTOCOL + type + path;
     }
 
     public String getType() {
