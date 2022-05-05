@@ -405,6 +405,12 @@ span.form-item-tip {
     margin-left: 0;
 }
 
+.el-button--text.is-disabled,
+.el-button--text.is-disabled:focus,
+.el-button--text.is-disabled:hover {
+    background-color: transparent;
+}
+
 .el-dropdown > div {
     cursor: pointer;
     width: 100%;
