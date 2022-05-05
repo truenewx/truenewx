@@ -83,7 +83,6 @@ public class CollectionUtil {
                 if (index < list.size()) {
                     return list.get(index);
                 }
-                return null;
             } else {
                 if (iterable instanceof Collection) {
                     Collection<T> collection = (Collection<T>) iterable;
@@ -97,7 +96,6 @@ public class CollectionUtil {
                         return obj;
                     }
                 }
-                return null;
             }
         }
         return null;
