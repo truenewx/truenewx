@@ -9,6 +9,7 @@ import Text from './text/Text';
 import Percent from './percent/Percent';
 import * as Vue from 'vue';
 import mitt from 'mitt';
+import './tnxvue.css';
 
 const components = {
     Div: {

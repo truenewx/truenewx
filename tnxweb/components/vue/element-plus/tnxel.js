@@ -4,8 +4,8 @@
  */
 import ElementPlus, {ElLoading, ElMessage, ElMessageBox} from 'element-plus';
 import ElementPlus_zh_CN from 'element-plus/es/locale/lang/zh-cn';
+import tnxbs from '../../bootstrap/tnxbs'; // 二次封装组件中使用了Bootstrap的基础样式
 import tnxvue from '../tnxvue.js';
-import $ from 'jquery';
 
 import Avatar from './avatar/Avatar';
 import Alert from './alert/Alert';
@@ -39,6 +39,10 @@ import TabColumn from './table-column/TableColumn';
 import Tabs from './tabs/Tabs';
 import Transfer from './transfer/Transfer';
 import Upload from './upload/Upload';
+
+import './tnxel.css';
+
+const $ = tnxbs.libs.$;
 
 const components = Object.assign({}, tnxvue.components, {
     Avatar,
@@ -78,8 +82,8 @@ const components = Object.assign({}, tnxvue.components, {
 const dialogContainerClass = 'tnxel-dialog-container';
 const drawerContainerClass = 'tnxel-drawer-container';
 
-const tnxel = Object.assign({}, tnxvue, {
-    libs: Object.assign({}, tnxvue.libs, {ElementPlus}),
+const tnxel = Object.assign({}, tnxbs, tnxvue, {
+    libs: Object.assign({}, tnxbs.libs, tnxvue.libs, {ElementPlus}),
     components,
     _dialogs: [], // 对话框堆栈
     dialog(content, title, buttons, options, contentProps) {

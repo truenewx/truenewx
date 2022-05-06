@@ -1,10 +1,13 @@
 /**
  * 基于BootStrap的扩展
  */
-import $ from 'jquery';
 import tnxjq from '../jquery/tnxjq.js';
+import 'bootstrap/dist/css/bootstrap-reboot.min.css';
+import 'bootstrap/dist/css/bootstrap-grid.min.css';
+import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 
-const tnxbs = $.extend({}, tnxjq);
+const $ = tnxjq.libs.$;
+const tnxbs = Object.assign({}, tnxjq);
 
 tnxbs.util.dom.breakPoints = {
     xxl: 1400,

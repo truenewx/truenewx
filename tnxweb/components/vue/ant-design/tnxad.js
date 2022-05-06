@@ -4,6 +4,7 @@
  */
 import tnxvue from '../tnxvue.js';
 import AntDesign from 'ant-design-vue';
+import './tnxad.css';
 
 const components = Object.assign({}, tnxvue.components, {});
 

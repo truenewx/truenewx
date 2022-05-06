@@ -7,6 +7,7 @@ import util from './tnxcore-util';
 import app from './tnxcore-app';
 import fss from './tnxcore-fss';
 import wechat from './tnxcore-wechat';
+import './tnxcore.css';
 
 const tnxcore = {
     libs: {},

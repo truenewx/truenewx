@@ -29,8 +29,8 @@ $.fn.scrollVisible = function(handler, offset) {
     $(document).ready(fn);
 }
 
-const tnxjq = $.extend({}, tnxcore, {
-    libs: $.extend({}, tnxcore.libs, {$})
+const tnxjq = Object.assign({}, tnxcore, {
+    libs: Object.assign({}, tnxcore.libs, {$})
 });
 
 Object.assign(tnxjq.util.dom, {
