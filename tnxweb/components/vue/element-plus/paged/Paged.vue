@@ -2,16 +2,23 @@
     <div class="tnxel-pagination-container"
         :class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}" v-if="model">
         <slot :paged="value" :change="change" :background="background">
-            <el-pagination layout="total, sizes, prev, pager, next" :background="background" @current-change="change"
-                v-model:page-size="model.pageSize" :page-sizes="[model.pageSize || 0]" popper-class="d-none"
-                v-model:current-page="model.pageNo" :total="model.total || 0"/>
+            <el-pagination layout="total, slot, prev, pager, next" :background="background" @current-change="change"
+                v-model:current-page="model.pageNo" :total="model.total || 0">
+                <span class="el-pagination__page-size" v-if="pageSizeItems.length <= 1">{{ model.pageSize }}条/页</span>
+                <tnxel-select class="el-pagination__page-size" v-model="model.pageSize" :items="pageSizeItems" v-else/>
+            </el-pagination>
         </slot>
     </div>
 </template>
 
 <script>
+import Select from '../select/Select';
+
 export default {
     name: 'TnxelPaged',
+    components: {
+        'tnxel-select': Select,
+    },
     props: {
         value: Object,
         change: {
@@ -22,6 +29,7 @@ export default {
             default: true,
         },
         align: String,
+        pageSizes: Array,
     },
     data() {
         return {
@@ -32,7 +40,21 @@ export default {
         value() {
             this.model = this.value;
         }
-    }
+    },
+    computed: {
+        pageSizeItems() {
+            let pageSizeItems = [];
+            if (this.pageSizes) {
+                for (let pageSize of this.pageSizes) {
+                    pageSizeItems.push({
+                        value: pageSize,
+                        text: pageSize + '条/页',
+                    });
+                }
+            }
+            return pageSizeItems;
+        }
+    },
 }
 </script>
 
@@ -46,18 +68,8 @@ export default {
     padding: 0;
 }
 
-.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-input__suffix {
-    display: none;
-}
-
-.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-select .el-input {
-    width: 66px;
-    margin: 0;
-}
-
-.tnxel-pagination-container .el-pagination .el-pagination__sizes .el-select .el-input .el-input__inner {
-    border: none;
-    cursor: default;
-    padding: 0;
+.tnxel-pagination-container .el-pagination__page-size {
+    color: var(--el-text-color-regular);
+    margin-right: 1rem;
 }
 </style>
