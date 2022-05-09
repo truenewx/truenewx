@@ -192,6 +192,8 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
         if (!this.securityProperties.isCsrfEnabled()) {
             http.csrf().disable();
         }
+        // 默认允许同源站点内嵌访问
+        http.headers().frameOptions().sameOrigin();
     }
 
     @SuppressWarnings({ "rawtypes" })
