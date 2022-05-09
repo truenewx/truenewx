@@ -18,7 +18,11 @@
         :on-error="onError"
         :on-removed="_onRemove"
         :handle-errors="handleErrors"
-        :disabled="disabled"/>
+        :disabled="disabled">
+        <template #trigger v-if="$slots.trigger">
+            <slot name="trigger"></slot>
+        </template>
+    </tnxel-upload>
 </template>
 
 <script>

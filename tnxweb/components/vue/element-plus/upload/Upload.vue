@@ -39,13 +39,17 @@
         </template>
         <template #trigger>
             <el-tooltip :content="tipContent" placement="top" :disabled="tip !== 'tooltip'">
+                <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
+                    :class="{'text-placeholder': disabled}" v-if="$slots.trigger">
+                    <slot name="trigger"></slot>
+                </div>
                 <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
-                    :disabled="disabled" v-if="listType === 'text'">
+                    :disabled="disabled" v-else-if="listType === 'text'">
                     <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </el-button>
                 <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
-                    :disabled="disabled" v-else>
+                    :class="{'text-placeholder': disabled}" v-else>
                     <tnxel-icon :value="icon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </div>
