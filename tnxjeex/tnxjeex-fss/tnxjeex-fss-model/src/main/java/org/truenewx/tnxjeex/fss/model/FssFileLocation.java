@@ -14,7 +14,7 @@ public class FssFileLocation {
 
     // 格式形如：fss://[type]/[dir]/[filename]
 
-    private static final String PROTOCOL = FssFileMeta.STORAGE_URL_PROTOCOL;
+    public static final String PROTOCOL = "fss://";
 
     private String type;
     private String dir;

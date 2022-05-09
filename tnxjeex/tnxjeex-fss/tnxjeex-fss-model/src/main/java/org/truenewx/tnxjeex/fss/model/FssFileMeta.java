@@ -10,11 +10,6 @@ import org.truenewx.tnxjee.core.util.EncryptUtil;
  */
 public class FssFileMeta {
 
-    /**
-     * 存储路径协议
-     */
-    public static final String STORAGE_URL_PROTOCOL = "fss://";
-
     private String name;
     private String locationUrl;
     private String readUrl;
