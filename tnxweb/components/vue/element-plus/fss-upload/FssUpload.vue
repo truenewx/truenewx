@@ -5,9 +5,8 @@
         :upload-options="uploadOptions"
         :file-list="fileList"
         :width="width" :height="height"
-        :icon="icon" :icon-size="iconSize"
         :center="center"
-        :trigger-text="triggerText"
+        :trigger-icon="triggerIcon" :trigger-icon-size="triggerIconSize" :trigger-text="triggerText"
         :tip="tip"
         :show-file-list="showFileList"
         :data="params"
@@ -46,8 +45,8 @@ export default {
         height: {
             type: [Number, String],
         },
-        icon: String,
-        iconSize: Number,
+        triggerIcon: String,
+        triggerIconSize: Number,
         triggerText: String,
         center: Boolean,
         tip: {

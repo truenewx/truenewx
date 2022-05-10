@@ -24,6 +24,8 @@
         <HomeFilled v-else-if="value === 'HomeFilled'"/>
         <InfoFilled v-else-if="value === 'InfoFilled'"/>
         <OfficeBuilding v-else-if="value === 'OfficeBuilding'"/>
+        <Picture v-else-if="value === 'Picture'"/>
+        <PictureFilled v-else-if="value === 'PictureFilled'"/>
         <Plus v-else-if="value === 'Plus'"/>
         <Pointer v-else-if="value === 'Pointer'"/>
         <QuestionFilled v-else-if="value === 'QuestionFilled'"/>
@@ -71,6 +73,8 @@ import {
     InfoFilled,
     Loading,
     OfficeBuilding,
+    Picture,
+    PictureFilled,
     Plus,
     Pointer,
     QuestionFilled,
@@ -116,6 +120,8 @@ const components = {
     InfoFilled,
     Loading,
     OfficeBuilding,
+    Picture,
+    PictureFilled,
     Plus,
     Pointer,
     QuestionFilled,

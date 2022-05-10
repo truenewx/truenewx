@@ -19,7 +19,7 @@
                 v-if="showFileList">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" v-if="imageable">
                 <div class="el-upload-list__item-name" v-else>
-                    <tnxel-icon value="Document"/>
+                    <tnxel-icon :value="getFileIcon(file)"/>
                     <span>{{ file.name }}</span>
                 </div>
                 <span class="el-upload-list__item-uploading" v-if="isUploading(file) && listType !== 'text'">
@@ -45,12 +45,12 @@
                 </div>
                 <el-button class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
                     :disabled="disabled" v-else-if="listType === 'text'">
-                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
+                    <tnxel-icon :value="triggerIcon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </el-button>
                 <div class="upload-trigger" :title="tip === 'title' ? tipContent : undefined"
                     :class="{'text-placeholder': disabled}" v-else>
-                    <tnxel-icon :value="icon" :size="uploadIconSize"/>
+                    <tnxel-icon :value="triggerIcon" :size="uploadIconSize"/>
                     <div class="upload-trigger-text" v-if="triggerText">{{ triggerText }}</div>
                 </div>
             </el-tooltip>
@@ -70,6 +70,15 @@
 import $ from 'jquery';
 import Alert from '../alert/Alert';
 import Icon from '../icon/Icon';
+
+function getExtension(file) {
+    return window.tnx.util.net.getExtension(file.name);
+}
+
+function isImage(file) {
+    let extension = getExtension(file);
+    return extension && window.tnx.util.file.isImage(extension);
+}
 
 export default {
     name: 'TnxelUpload',
@@ -94,11 +103,11 @@ export default {
         height: {
             type: [Number, String],
         },
-        icon: {
+        triggerIcon: {
             type: String,
             default: 'Plus',
         },
-        iconSize: Number,
+        triggerIconSize: Number,
         triggerText: String,
         beforeUpload: Function,
         /**
@@ -129,6 +138,17 @@ export default {
             }
         },
         disabled: Boolean,
+        fileIcon: {
+            type: [String, Function],
+            default() {
+                return function(file) {
+                    if (isImage(file)) {
+                        return 'Picture';
+                    }
+                    return 'Document';
+                };
+            }
+        },
     },
     data() {
         const tnx = window.tnx;
@@ -235,8 +255,8 @@ export default {
             return style;
         },
         uploadIconSize() {
-            if (this.iconSize) {
-                return this.iconSize;
+            if (this.triggerIconSize) {
+                return this.triggerIconSize;
             }
             let width = this.uploadSize.width || 0;
             let height = this.uploadSize.height || 0;
@@ -315,6 +335,12 @@ export default {
                 }
             }
             return file.id;
+        },
+        getFileIcon(file) {
+            if (typeof this.fileIcon === 'function') {
+                return this.fileIcon(file);
+            }
+            return this.fileIcon;
         },
         validate(file) {
             // 在检查首个准备上传的文件前，清空可能存在的错误消息
@@ -539,7 +565,7 @@ export default {
             }
         },
         previewFile(file) {
-            let extension = this.getExtension(file);
+            let extension = getExtension(file);
             if (extension === 'pdf') {
                 let url = this.tnx.util.net.appendParams(file.previewUrl, {
                     inline: true
@@ -578,16 +604,8 @@ export default {
             }
             return 0;
         },
-        getExtension(file) {
-            let extension = this.tnx.util.net.getExtension(file.name);
-            if (extension) {
-                return extension.toLowerCase();
-            }
-            return '';
-        },
         isPreviewable(file) {
-            let extension = this.getExtension(file);
-            return ['jpg', 'png', 'gif', 'svg', 'pdf'].contains(extension);
+            return isImage(file);
         },
     }
 }
@@ -682,6 +700,10 @@ export default {
     align-items: center;
     margin-right: 0.5rem;
     padding: 0;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-name:hover {
+    color: inherit;
 }
 
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item-name i {
