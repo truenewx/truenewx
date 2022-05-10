@@ -906,6 +906,21 @@ public class StringUtil {
         return getExtension(filename, false);
     }
 
+    /**
+     * 排除指定文件名的扩展名，返回剩余部分的纯文件名
+     *
+     * @param filename 文件名
+     * @return 排除扩展名后的纯文件名
+     */
+    public static String excludeExtension(String filename) {
+        if (filename != null) {
+            int index = filename.lastIndexOf(Strings.DOT);
+            if (index >= 0) {
+                return filename.substring(0, index);
+            }
+        }
+        return filename;
+    }
 
     /**
      * 用指定分隔符连接指定对象数组的字符串值
