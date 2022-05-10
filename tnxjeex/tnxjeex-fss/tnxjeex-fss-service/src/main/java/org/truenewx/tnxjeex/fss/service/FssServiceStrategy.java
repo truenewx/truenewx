@@ -60,7 +60,7 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
      *
      * @param userIdentity     用户标识。登录用户才能写文件，所以此处一定不为null，且已通过写入权限校验
      * @param scope            业务范围
-     * @param originalFilename 原始文件名
+     * @param originalFilename 原始文件名，不含扩展名
      * @return 指定文件存储时的最后一级文件名
      */
     default String getStorageFilename(I userIdentity, String scope, String originalFilename) {
