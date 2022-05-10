@@ -17,6 +17,7 @@
         :on-error="onError"
         :on-removed="_onRemove"
         :handle-errors="handleErrors"
+        :file-icon="fileIcon"
         :disabled="disabled">
         <template #trigger v-if="$slots.trigger">
             <slot name="trigger"></slot>
@@ -70,6 +71,7 @@ export default {
         onError: Function,
         onRemove: Function,
         handleErrors: Function,
+        fileIcon: [String, Function],
         disabled: Boolean,
     },
     emits: ['update:modelValue'],

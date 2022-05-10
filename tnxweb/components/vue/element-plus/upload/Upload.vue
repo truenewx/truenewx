@@ -137,7 +137,6 @@ export default {
                 return true;
             }
         },
-        disabled: Boolean,
         fileIcon: {
             type: [String, Function],
             default() {
@@ -149,6 +148,7 @@ export default {
                 };
             }
         },
+        disabled: Boolean,
     },
     data() {
         const tnx = window.tnx;
