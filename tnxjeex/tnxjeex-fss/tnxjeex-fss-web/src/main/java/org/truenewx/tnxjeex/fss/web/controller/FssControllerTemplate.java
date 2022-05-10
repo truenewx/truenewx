@@ -197,7 +197,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @ResponseBody
     @ConfigAnonymous
     public String resolveDownloadUrl(String locationUrl, boolean absolute) {
-        if (locationUrl.startsWith(FssFileLocation.PROTOCOL)) {
+        if (locationUrl != null && locationUrl.startsWith(FssFileLocation.PROTOCOL)) {
             // 去掉协议部分，保留/开头
             String readUrl = locationUrl.substring(FssFileLocation.PROTOCOL.length() - 1);
             return getFullReadUrl(readUrl, absolute);
