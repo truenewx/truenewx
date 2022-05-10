@@ -113,7 +113,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         // 构建定位地址
         String locationPath = strategy.getLocationPath(storagePath);
         strategy.onWritten(userIdentity, locationPath);
-        return FssFileLocation.toUrl(type, locationPath);
+        return FssFileLocation.toUrl(type, locationPath, false);
     }
 
     private String getStoragePath(String storageDir, String storageFilename) {
@@ -214,8 +214,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
             FssStorageProvider provider = strategy.getProvider();
             if (provider == FssStorageProvider.OWN) {
-                // 本地自有提供商的读取URL与定位地址保持一致，以便于读取时判断所属服务策略
-                return location.toString();
+                // 本地自有提供商的读取URL取定位相对地址
+                return location.getRelativeUrl();
             } else {
                 FssStorageAuthorizer authorizer = this.authorizers.get(provider);
                 String storagePath = getStoragePath(strategy, location);
@@ -465,7 +465,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 targetStrategy.onWritten(userIdentity, targetLocationPath);
             }
             // 返回目标定位地址
-            return FssFileLocation.toUrl(targetType, targetLocationPath);
+            return FssFileLocation.toUrl(targetType, targetLocationPath, false);
         }
         return null;
     }

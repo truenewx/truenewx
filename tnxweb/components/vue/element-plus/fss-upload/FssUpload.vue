@@ -221,6 +221,10 @@ export default {
                 file.locationUrl = result.locationUrl;
                 file.readUrl = result.readUrl;
                 file.downloadUrl = result.downloadUrl;
+                // 构建Upload组件用到的文件字段
+                file.url = result.readUrl;
+                file.previewUrl = result.thumbnailReadUrl;
+
                 this.fileList = fileList;
                 this.emitInput();
                 if (this.onSuccess) {

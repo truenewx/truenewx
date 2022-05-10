@@ -68,8 +68,15 @@ public class FssFileLocation {
         return null;
     }
 
-    public static String toUrl(String type, String path) {
-        return PROTOCOL + type + path;
+    public static String toUrl(String type, String path, boolean relative) {
+        StringBuilder url = new StringBuilder();
+        if (relative) {
+            url.append(Strings.SLASH);
+        } else {
+            url.append(PROTOCOL);
+        }
+        url.append(type).append(path);
+        return url.toString();
     }
 
     public String getType() {
@@ -88,9 +95,18 @@ public class FssFileLocation {
         return this.dir + Strings.SLASH + this.filename;
     }
 
+    /**
+     * 获取相对地址：不含协议而以/开头，包含业务类型和路径
+     *
+     * @return 相对地址
+     */
+    public String getRelativeUrl() {
+        return toUrl(this.type, getPath(), true);
+    }
+
     @Override
     public String toString() {
-        return toUrl(this.type, getPath());
+        return toUrl(this.type, getPath(), false);
     }
 
 }

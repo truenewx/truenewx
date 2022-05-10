@@ -12,7 +12,7 @@
         :file-list="fileList"
         :show-file-list="true"
         :headers="uploadHeaders"
-        :multiple="uploadOptions ? uploadOptions.number > 1 : false"
+        :multiple="uploadOptions?.number !== 1"
         :accept="uploadAccept" :disabled="disabled" v-if="uploadOptions">
         <template #file="{file}">
             <div class="el-upload-list__panel" :data-file-id="getFileId(file)" :style="itemPanelStyle"
@@ -22,18 +22,18 @@
                     <tnxel-icon value="Document"/>
                     <span>{{ file.name }}</span>
                 </div>
-                <label class="el-upload-list__item-status-label">
-                    <tnxel-icon value="CircleCheck" class="text-success" v-if="listType === 'text'"/>
-                    <tnxel-icon value="Check" v-else/>
-                </label>
-                <span class="el-upload-list__item-uploading" v-if="file.uploading">
+                <span class="el-upload-list__item-uploading" v-if="isUploading(file) && listType !== 'text'">
                     <tnxel-icon value="Loading"/>
                 </span>
+                <label class="el-upload-list__item-status-label">
+                    <el-progress type="circle" :percentage="file.percentage" :width="16" :stroke-width="3"
+                        :show-text="false" v-if="isUploading(file)"/>
+                    <tnxel-icon value="CircleCheck" class="text-success" v-else-if="listType === 'text'"/>
+                    <tnxel-icon value="Check" style="margin-top: 8px;" v-else/>
+                </label>
                 <div class="el-upload-list__item-actions">
-                    <div class="flex-center">
-                        <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="isPreviewable(file)"/>
-                        <tnxel-icon value="Delete" @click="removeFile(file)"/>
-                    </div>
+                    <tnxel-icon value="ZoomIn" @click="previewFile(file)" v-if="isPreviewable(file)"/>
+                    <tnxel-icon :value="listType === 'text' ? 'Close' : 'Delete'" @click="removeFile(file)"/>
                 </div>
             </div>
         </template>
@@ -55,19 +55,26 @@
                 </div>
             </el-tooltip>
         </template>
-        <template #tip v-if="tipContent && (typeof tip !== 'string')">
-            <div class="el-upload__tip" v-text="tipContent"></div>
+        <template #tip v-if="(tipContent && (typeof tip !== 'string')) || errors.length">
+            <tnxel-alert type="error" class="w-fit-content my-0" v-if="errors.length">
+                <div v-for="error of errors" :key="error.code">
+                    {{ error.message }}
+                </div>
+            </tnxel-alert>
+            <div class="el-upload__tip" v-text="tipContent" v-else></div>
         </template>
     </el-upload>
 </template>
 
 <script>
 import $ from 'jquery';
+import Alert from '../alert/Alert';
 import Icon from '../icon/Icon';
 
 export default {
     name: 'TnxelUpload',
     components: {
+        'tnxel-alert': Alert,
         'tnxel-icon': Icon,
     },
     props: {
@@ -105,9 +112,7 @@ export default {
         handleErrors: {
             type: Function,
             default(errors) {
-                if (errors?.length) {
-                    window.tnx.app.rpc.handleErrors(errors);
-                }
+                this.errors = errors || [];
             }
         },
         center: Boolean,
@@ -132,7 +137,7 @@ export default {
             id: 'upload-container-' + tnx.util.string.random(32),
             tipMessages: {
                 number: '一次最多上传{0}个文件',
-                capacity: '单个文件不能超过{0}',
+                capacity: '单个文件的大小不能超过{0}',
                 extensions: '只能上传{0}文件',
                 excludedExtensions: '不能上传{0}文件',
             },
@@ -140,9 +145,13 @@ export default {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             files: [], // 文件清单，包含初始文件和新增成功的文件，不包含校验失败的文件
+            errors: [],
         };
     },
     computed: {
+        fileNumExceed() {
+            return this.uploadOptions?.number && this.files.length >= this.uploadOptions.number;
+        },
         imageable() {
             let imageable = false;
             if (this.uploadOptions?.extensions) {
@@ -282,7 +291,7 @@ export default {
                 });
 
                 // 不显示文件清单，或文件数量未达到上限，则显示添加框
-                if (!vm.showFileList || vm.files.length < vm.uploadOptions.number) {
+                if (!vm.showFileList || !vm.fileNumExceed) {
                     $upload.css({
                         display: 'inline-flex'
                     });
@@ -321,12 +330,13 @@ export default {
                 return false;
             }
             // 校验数量
-            if (this.files.length >= this.uploadOptions.number) {
+            if (this.fileNumExceed) {
                 let message = this.tipMessages.number.format(this.uploadOptions.number);
                 message += '，多余的文件未加入上传队列';
                 this.handleErrors([{
                     code: 'error.upload.number',
                     message: message,
+                    file: file,
                 }]);
                 return false;
             }
@@ -335,10 +345,11 @@ export default {
                 const capacity = this.tnx.util.string.getCapacityCaption(this.uploadOptions.capacity);
                 let message = this.tipMessages.capacity.format(capacity, 2);
                 message += '，文件"' + file.name + '"大小为' + this.tnx.util.string.getCapacityCaption(file.size, 2)
-                    + '，不符合要求';
+                    + '，不符合要求，未加入上传队列';
                 this.handleErrors([{
                     code: 'error.upload.capacity',
                     message: message,
+                    file: file,
                 }]);
                 return false;
             }
@@ -352,6 +363,7 @@ export default {
                         this.handleErrors([{
                             code: 'error.upload.extension',
                             message: message,
+                            file: file,
                         }]);
                         return false;
                     }
@@ -359,10 +371,11 @@ export default {
                     if (!this.uploadOptions.extensions.containsIgnoreCase(extension)) {
                         const extensions = this.uploadOptions.extensions.join('、');
                         let message = this.tipMessages.extensions.format(extensions);
-                        message += '，文件"' + file.name + '"不符合要求';
+                        message += '，文件"' + file.name + '"不符合要求，未加入上传队列';
                         this.handleErrors([{
                             code: 'error.upload.extension',
                             message: message,
+                            file: file,
                         }]);
                         return false;
                     }
@@ -372,13 +385,18 @@ export default {
             this.files.push(file);
             return true;
         },
+        isUploading(file) {
+            return file.status === 'ready' || file.status === 'uploading';
+        },
         _beforeUpload(file) {
+            this.handleErrors([]); // 先清除可能存在的错误提示，以便于重新提示
+
             const vm = this;
             const rpc = this.tnx.app.rpc;
             return new Promise(function(resolve, reject) {
                 if (vm.validate(file)) {
                     let $upload = $('#' + vm.id + ' .el-upload');
-                    if (vm.showFileList && vm.files.length >= vm.uploadOptions.number) {
+                    if (vm.showFileList && vm.fileNumExceed) {
                         $upload.css('visibility', 'hidden');
                     }
 
@@ -425,7 +443,6 @@ export default {
             });
         },
         _onProgress(event, file, fileList) {
-            file.uploading = true;
             if (file.percentage === 0) { // 首次执行
                 this._resizeFilePanel(file, fileList);
                 if (this.onUpload) {
@@ -444,7 +461,7 @@ export default {
             const $container = $('#' + this.id);
             const $upload = $('.el-upload', $container);
             // 显示文件清单且文件数量已达上限，则隐藏添加框
-            if (this.showFileList && this.files.length >= this.uploadOptions.number) {
+            if (this.showFileList && this.fileNumExceed) {
                 // 隐藏添加框
                 $upload.css({
                     display: 'none',
@@ -456,13 +473,12 @@ export default {
             let $fileItem = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container).parent();
             let uploadStyle = $upload.attr('style');
             if (uploadStyle) {
-                // 去掉隐藏样式
-                uploadStyle = uploadStyle.replace(/display:\s*none;/, '').trim();
+                // 去掉display样式
+                uploadStyle = uploadStyle.replace(/display:.*;/, '').trim();
                 $fileItem.attr('style', uploadStyle);
             }
         },
         _onSuccess(result, file, fileList) {
-            file.uploading = false;
             if (this.onSuccess) {
                 this.onSuccess(result, file, fileList);
             }
@@ -508,7 +524,8 @@ export default {
             this.files.remove(function(f) {
                 return file.uid === f.uid;
             });
-            if (this.files.length < this.uploadOptions.number) {
+            if (!this.fileNumExceed) {
+                this.handleErrors([]); // 移除一个文件后，此时如果有错误提示则一定为数量超限，需清空错误提示
                 let container = $('#' + this.id);
                 this.$nextTick(function() {
                     // 去掉文件列表的样式，以免其占高度
@@ -602,10 +619,6 @@ export default {
     background-color: transparent;
 }
 
-.tnxel-upload-container .el-upload.el-upload--text {
-    order: -1; /* 排在提示文本前 */
-}
-
 .tnxel-upload-container:not(.center) .el-upload.el-upload--text {
     justify-content: unset;
 }
@@ -651,7 +664,17 @@ export default {
 }
 
 .tnxel-upload-container .el-upload-list--text {
-    order: -2; /* 排在添加按钮前 */
+    margin: 0;
+}
+
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item {
+    transition: none;
+    display: inline-flex;
+    align-items: center;
+    margin: 0.5rem 0.5rem 0 0;
+    border: 1px solid var(--el-border-color);
+    border-radius: .25rem;
+    width: fit-content;
 }
 
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item-name {
@@ -668,8 +691,9 @@ export default {
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item-status-label {
     display: flex;
     align-items: center;
+    justify-content: right;
     position: unset;
-    margin-left: 24px;
+    width: 3rem;
 }
 
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item-status-label i {
@@ -688,25 +712,15 @@ export default {
     justify-content: center;
 }
 
-.tnxel-upload-container .el-upload-list--text .el-upload-list__item {
-    transition: none;
-    display: flex;
-    align-items: center;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    border: 1px solid var(--el-border-color);
-    border-radius: .25rem;
-    width: fit-content;
-}
-
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:hover .el-upload-list__item-status-label,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:focus .el-upload-list__item-actions,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:active .el-upload-list__item-actions,
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item .el-upload-list__item-actions {
     display: none;
 }
 
-.tnxel-upload-container .el-upload-list--text .el-upload-list__item:focus .el-upload-list__item-actions,
-.tnxel-upload-container .el-upload-list--text .el-upload-list__item:active .el-upload-list__item-actions,
 .tnxel-upload-container .el-upload-list--text .el-upload-list__item:hover .el-upload-list__item-actions {
-    display: unset;
+    display: flex;
 }
 
 .tnxel-upload-container .el-upload-list__panel {
@@ -742,6 +756,10 @@ export default {
     min-width: 3rem;
 }
 
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item-actions {
+    justify-content: right;
+}
+
 .tnxel-upload-container .el-upload-list__item-actions i {
     cursor: pointer;
     margin-left: 0.25rem;
@@ -770,6 +788,13 @@ export default {
 
 .tnxel-upload-container.center .el-upload__tip {
     text-align: center;
+}
+
+.tnxel-upload-container .el-upload-list__item-status-label .el-progress {
+    position: unset;
+    top: unset;
+    width: unset;
+    margin: 0 0.25rem;
 }
 
 .el-dropdown-menu__item .tnxel-upload-container {
