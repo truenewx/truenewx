@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +136,12 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     @Override
     public Charset getCharset(String storagePath) {
         File file = getStorageFile(storagePath, false);
-        return FssUtil.getCharset(file);
+        Charset charset = FssUtil.getCharset(file);
+        // ASCII编码过于基础，用UTF-8替代以具有更广泛的适应性
+        if (StandardCharsets.US_ASCII.equals(charset)) {
+            charset = StandardCharsets.UTF_8;
+        }
+        return charset;
     }
 
     @Override
