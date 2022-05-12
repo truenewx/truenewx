@@ -20,7 +20,6 @@ import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.service.exception.SingleException;
 import org.truenewx.tnxjee.service.exception.message.SingleExceptionMessageResolver;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
-import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.model.ExceptionErrorBody;
 import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 
@@ -38,7 +37,7 @@ public class ResolvableExceptionMessageSaverImpl implements ResolvableExceptionM
             HandlerMethod handlerMethod, ResolvableException re) {
         List<ExceptionError> errors = buildErrors(re, request.getLocale());
         if (errors.size() > 0) {
-            if (WebUtil.isAjaxRequest(request) || SpringWebMvcUtil.isResponseBody(handlerMethod)) {
+            if (SpringWebMvcUtil.isResponseBody(handlerMethod)) {
                 try {
                     ExceptionErrorBody body = new ExceptionErrorBody(errors);
                     String json = JsonUtil.toJson(body);

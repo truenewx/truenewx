@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ArrayUtil;
@@ -72,9 +73,10 @@ public class SpringWebMvcUtil {
         if (handlerMethod == null) {
             return false;
         }
-        return handlerMethod.getMethodAnnotation(ResponseBody.class) != null
+        return handlerMethod.getReturnType().getParameterType() != ModelAndView.class
+                && (handlerMethod.getMethodAnnotation(ResponseBody.class) != null
                 || handlerMethod.getBeanType().getAnnotation(RestController.class) != null
-                || handlerMethod.getMethodAnnotation(ResponseStream.class) != null;
+                || handlerMethod.getMethodAnnotation(ResponseStream.class) != null);
     }
 
     public static String getRequestMappingUrl(HandlerMethod handlerMethod) {

@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.webmvc.view.exception.resolver;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.truenewx.tnxjee.core.util.TemporalUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.resolver.ResolvableExceptionResolver;
 import org.truenewx.tnxjee.webmvc.function.WebContextPathPredicate;
@@ -35,7 +37,8 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
             if (!WebUtil.isAjaxRequest(request) && !ResolvableExceptionResolver.supports(ex)) {
                 String path = this.pathProperties.getInternal();
                 if (this.webContextPathPredicate.test(path)) {
-                    return new ModelAndView(path);
+                    mav = new ModelAndView(path);
+                    mav.addObject("errorTime", TemporalUtil.format(LocalDateTime.now()));
                 }
             }
         }
