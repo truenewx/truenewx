@@ -490,8 +490,13 @@ el-header ul.tnxel-nav,
     right: 24px;
 }
 
+/*
+ * 渲染之前占位
+ */
 el-card {
-    display: none;
+    visibility: hidden;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 .el-card__header {
