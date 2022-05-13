@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.core.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * 文件扩展名常量集类
  */
@@ -40,5 +42,19 @@ public class FileExtensions {
 
     // 网页文件
     public static final String HTML = "html";
+
+    // 代码文件
+    public static final String[] CODES = { "java", "jsp", "js", "jsx", "ts", "sql",
+            "xml", "html", "htm", "xhtml", "rss", "atom", "xjb", "xsd", "xsl", "plist", "wxml",
+            "vue", "ftl", "vm", "asp", "aspx",
+            "properties", "yaml", "yml", "json",
+            "css", "wxss", "less", "scss",
+            "c", "h", "cc", "cpp", "cxx", "hh", "hpp", "hxx", "cs",
+            "bash", "sh", "zsh", "py", "shell",
+            "php", "swift", "kt", "go", "lua", "gradle", "groovy", "gitignore" };
+
+    public static boolean isCode(String extension) {
+        return ArrayUtils.contains(CODES, extension);
+    }
 
 }
