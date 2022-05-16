@@ -14,19 +14,21 @@ $.parseJSON = JSON.parse;
  * @param offset 提前触发的偏移量
  */
 $.fn.scrollVisible = function(handler, offset) {
-    let _this = this;
-    let fn = function() {
-        offset = offset || 0;
-        let top = _this.offset().top;
-        let clientheight = document.documentElement.clientHeight;
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-        if (clientheight + scrollTop + offset > top) {
-            handler();
-            window.removeEventListener('scroll', fn);
+    if (this.length) {
+        let _this = this;
+        let fn = function() {
+            offset = offset || 0;
+            let top = _this.offset().top;
+            let clientheight = document.documentElement.clientHeight;
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+            if (clientheight + scrollTop + offset > top) {
+                handler();
+                window.removeEventListener('scroll', fn);
+            }
         }
+        window.addEventListener('scroll', fn);
+        $(document).ready(fn);
     }
-    window.addEventListener('scroll', fn);
-    $(document).ready(fn);
 }
 
 const tnxjq = Object.assign({}, tnxcore, {
