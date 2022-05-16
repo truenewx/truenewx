@@ -347,6 +347,9 @@ export default {
     ensureGranted(authority, callback, options) {
         this.get(this.authenticationContextUrl + '/validate', authority, callback, options);
     },
+    getLoginUrl(callback, options) {
+        this.get(this.authenticationContextUrl + '/login-url', callback, options);
+    },
     _metas: {},
     getMeta(urlOrType, callback, app) {
         const metaKey = app ? (app + ':/' + urlOrType) : urlOrType;
