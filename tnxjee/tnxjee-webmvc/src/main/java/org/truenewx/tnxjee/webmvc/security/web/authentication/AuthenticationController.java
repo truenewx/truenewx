@@ -78,7 +78,8 @@ public class AuthenticationController {
     public String getLoginUrl(@RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "rank", required = false) String rank,
             @RequestParam(value = "permission", required = false) String permission) {
-        return isGranted(type, rank, permission) ? null : this.authenticationEntryPoint.getLoginFormUrl();
+        return (isAuthorized() && isGranted(type, rank, permission)) ? null
+                : this.authenticationEntryPoint.getLoginFormUrl();
     }
 
 }
