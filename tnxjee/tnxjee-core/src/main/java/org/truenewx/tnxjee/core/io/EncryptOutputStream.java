@@ -1,7 +1,8 @@
 package org.truenewx.tnxjee.core.io;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 import org.truenewx.tnxjee.core.util.MathUtil;
@@ -11,17 +12,18 @@ import org.truenewx.tnxjee.core.util.MathUtil;
  *
  * @author jianglei
  */
-public class EncryptOutputStream extends OutputStream {
+public class EncryptOutputStream extends FileOutputStream {
 
-    private OutputStream out;
+    private FileOutputStream delegate;
     private Byte salt;
 
-    public EncryptOutputStream(OutputStream out, String attachment, Byte salt) throws IOException {
-        this.out = out;
+    public EncryptOutputStream(FileOutputStream delegate, String attachment, Byte salt) throws IOException {
+        super(delegate.getFD());
+        this.delegate = delegate;
         byte[] bytes = attachment == null ? new byte[0] : attachment.getBytes(StandardCharsets.UTF_8);
         int length = bytes.length;
-        this.out.write(MathUtil.int2Bytes(length)); // 先写入4个字节的附加信息长度
-        this.out.write(bytes); // 再写入附加信息
+        this.delegate.write(MathUtil.int2Bytes(length)); // 先写入4个字节的附加信息长度
+        this.delegate.write(bytes); // 再写入附加信息
 
         this.salt = salt;
     }
@@ -31,17 +33,37 @@ public class EncryptOutputStream extends OutputStream {
         if (this.salt != null) {
             b ^= this.salt;
         }
-        this.out.write(b);
+        this.delegate.write(b);
     }
 
     @Override
-    public void flush() throws IOException {
-        this.out.flush();
+    public void write(byte[] b) throws IOException {
+        write(b, 0, b.length);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        if (this.salt != null) {
+            for (int i = off; i < off + len; i++) {
+                b[i] ^= this.salt;
+            }
+        }
+        this.delegate.write(b, off, len);
     }
 
     @Override
     public void close() throws IOException {
-        this.out.close();
+        this.delegate.close();
+    }
+
+    @Override
+    public FileChannel getChannel() {
+        return this.delegate.getChannel();
+    }
+
+    @Override
+    public void flush() throws IOException {
+        this.delegate.flush();
     }
 
 }

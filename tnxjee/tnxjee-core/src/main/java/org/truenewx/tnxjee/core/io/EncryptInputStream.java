@@ -1,7 +1,8 @@
 package org.truenewx.tnxjee.core.io;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 import org.truenewx.tnxjee.core.util.MathUtil;
@@ -11,14 +12,15 @@ import org.truenewx.tnxjee.core.util.MathUtil;
  *
  * @author jianglei
  */
-public class EncryptInputStream extends InputStream {
+public class EncryptInputStream extends FileInputStream {
 
-    private InputStream in;
+    private FileInputStream delegate;
     private boolean readAttachment;
     private Byte salt;
 
-    public EncryptInputStream(InputStream in, Byte salt) {
-        this.in = in;
+    public EncryptInputStream(FileInputStream delegate, Byte salt) throws IOException {
+        super(delegate.getFD());
+        this.delegate = delegate;
         this.salt = salt;
     }
 
@@ -30,21 +32,21 @@ public class EncryptInputStream extends InputStream {
         int length = readAttachmentLength();
         // 再读取附加信息
         byte[] bytes = new byte[length];
-        this.in.read(bytes);
+        this.delegate.read(bytes);
         this.readAttachment = true;
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private int readAttachmentLength() throws IOException {
         byte[] bytes = new byte[4];
-        this.in.read(bytes);
+        this.delegate.read(bytes);
         return MathUtil.bytes2Int(bytes, 0);
     }
 
     @Override
     public int read() throws IOException {
         skipAttachment();
-        int content = this.in.read();
+        int content = this.delegate.read();
         if (this.salt != null) {
             content ^= this.salt;
         }
@@ -53,7 +55,7 @@ public class EncryptInputStream extends InputStream {
 
     private synchronized void skipAttachment() throws IOException {
         if (!this.readAttachment) { // 如果此时还没读取头部附加信息，则跳过附加信息
-            this.in.skip(readAttachmentLength());
+            this.delegate.skip(readAttachmentLength());
             this.readAttachment = true;
         }
     }
@@ -61,25 +63,25 @@ public class EncryptInputStream extends InputStream {
     @Override
     public long skip(long n) throws IOException {
         skipAttachment();
-        return this.in.skip(n);
+        return this.delegate.skip(n);
     }
 
     @Override
     public int available() throws IOException {
         skipAttachment();
-        return this.in.available();
+        return this.delegate.available();
     }
 
     @Override
     public void close() throws IOException {
-        this.in.close();
+        this.delegate.close();
     }
 
     @Override
     public synchronized void mark(int readlimit) {
         try {
             skipAttachment();
-            this.in.mark(readlimit);
+            this.delegate.mark(readlimit);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,12 +89,27 @@ public class EncryptInputStream extends InputStream {
 
     @Override
     public synchronized void reset() throws IOException {
-        this.in.reset();
+        this.delegate.reset();
     }
 
     @Override
     public boolean markSupported() {
-        return this.in.markSupported();
+        return this.delegate.markSupported();
+    }
+
+    @Override
+    public int read(byte[] b) throws IOException {
+        return this.delegate.read(b);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return this.delegate.read(b, off, len);
+    }
+
+    @Override
+    public FileChannel getChannel() {
+        return this.delegate.getChannel();
     }
 
 }
