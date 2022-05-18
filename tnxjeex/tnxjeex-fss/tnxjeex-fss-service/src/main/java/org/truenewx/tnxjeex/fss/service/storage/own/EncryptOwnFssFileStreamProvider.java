@@ -1,6 +1,9 @@
 package org.truenewx.tnxjeex.fss.service.storage.own;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.truenewx.tnxjee.core.io.EncryptInputStream;
 import org.truenewx.tnxjee.core.io.EncryptOutputStream;
@@ -21,7 +24,7 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public OutputStream getWriteStream(File file, String originalFilename) throws IOException {
+    public FileOutputStream getWriteStream(File file, String originalFilename) throws IOException {
         return new EncryptOutputStream(new FileOutputStream(file), originalFilename, this.salt);
     }
 
@@ -39,7 +42,7 @@ public class EncryptOwnFssFileStreamProvider implements OwnFssFileStreamProvider
     }
 
     @Override
-    public InputStream getReadStream(File source) throws IOException {
+    public FileInputStream getReadStream(File source) throws IOException {
         return new EncryptInputStream(new FileInputStream(source), this.salt);
     }
 

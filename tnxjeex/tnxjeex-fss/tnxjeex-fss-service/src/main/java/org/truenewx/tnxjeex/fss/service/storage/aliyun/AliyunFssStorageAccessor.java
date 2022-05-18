@@ -64,25 +64,22 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public void write(InputStream in, String storagePath, String originalFilename) throws IOException {
-        String path0 = storagePath;
-        String originalFilename0 = originalFilename;
-
         ObjectMetadata objectMetadata = new ObjectMetadata();
         if (StringUtils.isNotBlank(originalFilename)) {
-            originalFilename = EncryptUtil.encryptByBase64(originalFilename); // 中文文件名会乱码导致签名校验失败
-            objectMetadata.getUserMetadata().put("filename", originalFilename);
+            String base64Filename = EncryptUtil.encryptByBase64(originalFilename); // 中文文件名会乱码导致签名校验失败
+            objectMetadata.getUserMetadata().put("filename", base64Filename);
         }
         Charset charset = FssUtil.getCharset(in);
         if (charset != null) {
             objectMetadata.setContentEncoding(charset.name());
         }
-        storagePath = AliyunOssUtil.standardizePath(storagePath);
-        this.account.getOssClient().putObject(getBucketName(), storagePath, in, objectMetadata);
+        String standardizedStoragePath = AliyunOssUtil.standardizePath(storagePath);
+        this.account.getOssClient().putObject(getBucketName(), standardizedStoragePath, in, objectMetadata);
 
         if (this.delegate != null) {
             this.executorService.execute(() -> {
                 try {
-                    this.delegate.write(in, path0, originalFilename0);
+                    this.delegate.write(in, storagePath, originalFilename);
                 } catch (IOException e) {
                     LogUtil.error(getClass(), e);
                 }
@@ -180,19 +177,21 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
             });
         }
 
-        //  删除上级空目录
-        this.executorService.execute(() -> {
-            int index = standardizedPath.lastIndexOf(Strings.SLASH);
-            while (index > 0) {
-                String parentPath = standardizedPath.substring(0, index);
-                ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
-                List<OSSObjectSummary> summaries = result.getObjectSummaries();
-                for (OSSObjectSummary summary : summaries) {
-                    oss.deleteDirectory(bucketName, summary.getKey());
+        if (dirDeletePredicate != null) {
+            //  删除上级空目录
+            this.executorService.execute(() -> {
+                int index = standardizedPath.lastIndexOf(Strings.SLASH);
+                while (index > 0) {
+                    String parentPath = standardizedPath.substring(0, index);
+                    ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
+                    List<OSSObjectSummary> summaries = result.getObjectSummaries();
+                    for (OSSObjectSummary summary : summaries) {
+                        oss.deleteDirectory(bucketName, summary.getKey());
+                    }
+                    index = parentPath.lastIndexOf(Strings.SLASH);
                 }
-                index = parentPath.lastIndexOf(Strings.SLASH);
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -210,6 +209,13 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
                 this.delegate.copy(originalSourcePath, originalTargetPath);
             });
         }
+    }
+
+    @Override
+    public void move(String sourceStoragePath, String targetStoragePath) {
+        sourceStoragePath = AliyunOssUtil.standardizePath(sourceStoragePath);
+        targetStoragePath = AliyunOssUtil.standardizePath(targetStoragePath);
+        this.account.getOssClient().renameObject(getBucketName(), sourceStoragePath, targetStoragePath);
     }
 
 }

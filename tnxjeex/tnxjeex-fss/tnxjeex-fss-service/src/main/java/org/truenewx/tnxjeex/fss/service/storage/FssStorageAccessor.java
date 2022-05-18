@@ -51,4 +51,7 @@ public interface FssStorageAccessor {
     void delete(String storagePath, FssDirDeletePredicate dirDeletePredicate);
 
     void copy(String sourceStoragePath, String targetStoragePath);
+
+    void move(String sourceStoragePath, String targetStoragePath);
+
 }
