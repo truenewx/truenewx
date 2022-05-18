@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -345,9 +346,13 @@ public class IOUtil {
                 createFile(target);
                 in = new FileInputStream(source);
                 FileChannel inChannel = in.getChannel();
+                FileLock readLock = inChannel.lock(0, inChannel.size(), true);
                 out = new FileOutputStream(target);
                 FileChannel outChannel = out.getChannel();
+                FileLock writeLock = outChannel.lock();
                 outChannel.transferFrom(inChannel, 0, inChannel.size());
+                writeLock.release();
+                readLock.release();
                 outChannel.close();
                 inChannel.close();
                 return true;
@@ -452,6 +457,15 @@ public class IOUtil {
     public static String toBase64Data(byte[] bytes, String extension) {
         String base64String = EncryptUtil.encryptByBase64(bytes);
         return "data:" + Mimetypes.getInstance().getMimetype(extension) + ";base64," + base64String;
+    }
+
+    public static FileLock lock(File file, boolean readOnly) throws IOException {
+        if (file.exists()) {
+            String mode = readOnly ? "r" : "rw";
+            FileChannel channel = new RandomAccessFile(file, mode).getChannel();
+            return channel.lock(0, file.length(), readOnly);
+        }
+        return null;
     }
 
 }
