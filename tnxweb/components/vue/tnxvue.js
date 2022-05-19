@@ -26,7 +26,9 @@ const components = {
 
 function getDefaultDialogButtons(type, callback, theme) {
     if (callback !== false) {
-        if (type === 'confirm') {
+        if (type === 'none') {
+            return [];
+        } else if (type === 'confirm') {
             return [{
                 text: '取消',
                 click(close) {
