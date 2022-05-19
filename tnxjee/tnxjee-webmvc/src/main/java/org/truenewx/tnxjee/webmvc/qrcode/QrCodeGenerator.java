@@ -48,8 +48,7 @@ public class QrCodeGenerator {
         this.root = root;
     }
 
-    public String generate(String value, int size, String logoUrl)
-            throws IOException, WriterException {
+    public String generate(String value, int size, String logoUrl) throws IOException, WriterException {
         String md5 = EncryptUtil.encryptByMd5(value);
         String dir = getDir(md5);
         // 产生二维码资源
@@ -57,8 +56,7 @@ public class QrCodeGenerator {
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         hints.put(EncodeHintType.CHARACTER_SET, Strings.ENCODING_UTF8);
         hints.put(EncodeHintType.MARGIN, 0);
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, size,
-                size, hints);
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, size, size, hints);
 
         bitMatrix = updateBit(bitMatrix, 0);
         // 将二维码转换为BufferedImage
