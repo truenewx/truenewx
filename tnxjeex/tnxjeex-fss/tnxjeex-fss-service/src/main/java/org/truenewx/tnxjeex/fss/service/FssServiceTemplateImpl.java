@@ -200,7 +200,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
                 @Override
                 public void afterCompletion(int status) {
-                    if (status == STATUS_ROLLED_BACK) {
+                    if (status != STATUS_COMMITTED) {
                         accessor.delete(pendingStoragePath, strategy);
                     }
                 }
