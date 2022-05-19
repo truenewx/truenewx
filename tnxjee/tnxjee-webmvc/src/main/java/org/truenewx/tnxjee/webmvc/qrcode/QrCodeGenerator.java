@@ -50,6 +50,10 @@ public class QrCodeGenerator {
 
     public String generate(String value, int size, String logoUrl) throws IOException, WriterException {
         String md5 = EncryptUtil.encryptByMd5(value);
+        File imageFile = getImageFile(md5);
+        if (imageFile.exists()) { // 已经存在的文件不再重复生成
+            return md5;
+        }
         String dir = getDir(md5);
         // 产生二维码资源
         Map<EncodeHintType, Object> hints = new HashMap<>();
@@ -90,7 +94,7 @@ public class QrCodeGenerator {
         }
 
         // 保存二维码图片
-        ImageIO.write(image, EXTENSION, getImageFile(dir, md5));
+        ImageIO.write(image, EXTENSION, imageFile);
         return md5;
     }
 
