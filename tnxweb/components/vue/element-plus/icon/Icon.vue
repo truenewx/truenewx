@@ -3,6 +3,7 @@
         <Loading v-if="value === 'Loading'"/>
         <ArrowDown v-else-if="value === 'ArrowDown'"/>
         <ArrowLeft v-else-if="value === 'ArrowLeft'"/>
+        <ArrowLeftBold v-else-if="value === 'ArrowLeftBold'"/>
         <ArrowRight v-else-if="value === 'ArrowRight'"/>
         <Bottom v-else-if="value === 'Bottom'"/>
         <CaretBottom v-else-if="value === 'CaretBottom'"/>
@@ -51,6 +52,7 @@
 import {
     ArrowDown,
     ArrowLeft,
+    ArrowLeftBold,
     ArrowRight,
     Bottom,
     CaretBottom,
@@ -98,6 +100,7 @@ import {
 const components = {
     ArrowDown,
     ArrowLeft,
+    ArrowLeftBold,
     ArrowRight,
     Bottom,
     CaretBottom,
