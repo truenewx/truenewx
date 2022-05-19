@@ -1,6 +1,7 @@
 <template>
     <div role="alert" class="el-alert" :class="[typeClass, effectClass]">
-        <tnxel-icon :value="iconType" class="el-alert__icon flex-center" :style="iconStyle" v-if="showIcon"/>
+        <tnxel-icon :value="iconValue" class="el-alert__icon flex-center" :style="iconStyle" @click="iconClick"
+            v-if="showIcon"/>
         <div class="el-alert__content" :class="contentClass">
             <div class="el-alert__title" :style="titleStyle">
                 <slot></slot>
@@ -30,10 +31,12 @@ export default {
             type: Boolean,
             default: () => true
         },
+        icon: String,
         iconSize: {
             type: [Number, String],
             default: 14,
         },
+        iconClick: Function,
         titleSize: [Number, String],
         contentClass: String,
     },
@@ -53,7 +56,10 @@ export default {
         effectClass() {
             return 'is-' + this.effect;
         },
-        iconType() {
+        iconValue() {
+            if (this.icon) {
+                return this.icon;
+            }
             switch (this.alertType) {
                 case 'error':
                     return 'CircleCloseFilled';
@@ -75,6 +81,9 @@ export default {
                 style.fontSize = size;
                 style.width = size;
             }
+            if (this.iconClick) {
+                style.cursor = 'pointer';
+            }
             return style;
         },
         titleStyle() {
@@ -88,7 +97,7 @@ export default {
             }
             return style;
         }
-    }
+    },
 }
 </script>
 
