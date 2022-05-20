@@ -359,11 +359,6 @@ div.form-item-tip {
     width: 100%;
 }
 
-div.form-item-tip + .el-form-item__error {
-    position: relative;
-    top: 0;
-}
-
 span.form-item-tip {
     margin-top: 0;
     margin-left: 1rem;
@@ -376,16 +371,28 @@ span.form-item-tip {
 
 .is-error .form-item-tip {
     visibility: hidden;
-    height: 0;
-    margin-top: 2px; /* 与.el-form-item__error的上下各间距2px组合成6px的总间距以控制总行高 */
 }
 
-.el-form--label-top .is-error .form-item-tip {
-    margin-top: 4px; /* 与.el-form-item__error的上间距2px组合成6px的总间距以控制总行高 */
+.el-form--label-top .el-form-item__error {
+    padding-top: 4px;
+}
+
+div.form-item-tip + .el-form-item__error {
+    top: calc(100% - 0.75rem);
+    margin: 0;
+    padding-top: 0;
 }
 
 .is-success .el-form-item__error {
     display: none;
+}
+
+.el-input__wrapper {
+    padding: 0 10px;
+}
+
+.el-textarea__inner {
+    padding: 4px 10px;
 }
 
 .el-button:not(.el-button--large):not(.el-button--small) {
