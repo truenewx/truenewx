@@ -14,6 +14,7 @@ import CheckIcon from './check-icon/CheckIcon';
 import Curd from './curd/Curd';
 import DatePicker from './date-picker/DatePicker';
 import DateRange from './date-range/DateRange';
+import DateTimePicker from './datetime-picker/DateTimePicker';
 import DetailForm from './detail-form/DetailForm';
 import Dialog from './dialog/Dialog';
 import Drawer from './drawer/Drawer';
@@ -52,6 +53,7 @@ const components = Object.assign({}, tnxvue.components, {
     Curd,
     DatePicker,
     DateRange,
+    DateTimePicker,
     DetailForm,
     Dialog,
     Drawer,
