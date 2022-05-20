@@ -465,6 +465,14 @@ export const StringUtil = {
 
 export const DateUtil = {
     patterns: DATE_PATTERNS,
+    toDate(value) {
+        if (value instanceof Date) {
+            return value;
+        } else if (typeof value === 'string' || typeof value === 'number') {
+            return new Date(value);
+        }
+        return undefined;
+    },
     format(date, pattern) {
         if (typeof date === 'number' || typeof date === 'string') {
             date = new Date(date);
