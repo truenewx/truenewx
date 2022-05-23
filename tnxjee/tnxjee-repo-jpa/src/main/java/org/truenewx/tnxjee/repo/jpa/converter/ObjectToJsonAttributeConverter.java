@@ -39,6 +39,8 @@ public class ObjectToJsonAttributeConverter implements AttributeConverter<Object
     public Object convertToEntityAttribute(String dbData) {
         if (StringUtils.isNotBlank(dbData)) {
             try {
+                // 原则上，设计者应该避免同一个数据库字段对应的实体类属性可能既是对象又是集合的情况；
+                // 如果确实无法避免，则至少需确保集合类型为List，否则此处无法做出正确转换，需自定义转换器
                 if (dbData.startsWith(Strings.LEFT_SQUARE_BRACKET) && dbData.endsWith(Strings.RIGHT_SQUARE_BRACKET)) {
                     return this.mapper.readValue(dbData, List.class);
                 } else {
