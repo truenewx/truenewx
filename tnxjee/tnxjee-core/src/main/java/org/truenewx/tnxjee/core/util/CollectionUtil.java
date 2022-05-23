@@ -299,6 +299,15 @@ public class CollectionUtil {
         return list;
     }
 
+    public static List<Object> toList(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        List<Object> list = new ArrayList<>();
+        Collections.addAll(list, array);
+        return list;
+    }
+
     public static <K, V> Map<K, V> clone(Map<K, V> map) {
         if (map == null) {
             return null;
