@@ -16,7 +16,8 @@
                 :default-value="defaultTimeValue"
                 :placeholder="timePlaceholder"
                 :size="size"
-                :clearable="empty"/>
+                :clearable="empty"
+                :disabled="!model"/>
         </el-col>
     </el-row>
 </template>
