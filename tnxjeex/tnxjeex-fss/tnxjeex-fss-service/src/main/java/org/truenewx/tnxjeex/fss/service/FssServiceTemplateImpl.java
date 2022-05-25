@@ -165,6 +165,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
      */
     private String getStorageDirForWrite(FssServiceStrategy<I> strategy, I userIdentity, String scope) {
         String storageDir = strategy.getStorageRelativeDir(userIdentity, scope);
+        // 定位地址尚未构建，无法在线程中根据定位地址判断权限
         if (storageDir == null) {
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
@@ -176,7 +177,12 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         return cleanIllegalChars(storagePath);
     }
 
-    // 清理非法字符，以免作为路径的一部分无法正常加载
+    /**
+     * 清理非法字符，以免作为路径的一部分无法正常加载
+     *
+     * @param path 路径
+     * @return 清理后的路径
+     */
     private String cleanIllegalChars(String path) {
         return path.replaceAll("[+%]", Strings.SPACE); // 因长度为关键的判断依据，故需保证长度不变
     }
@@ -220,7 +226,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
             validateUploadLimit(uploadLimit, fileSize, originalFilename);
 
-            if (!strategy.isWriteable(userIdentity, location.getDir(), location.getFilename())) {
+            if (!FssUtil.isWriteableInThread(locationUrl)
+                    && !strategy.isWriteable(userIdentity, location.getDir(), location.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
             }
 
@@ -305,7 +312,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
 
     private FssServiceStrategy<I> validateUserRead(I userIdentity, FssFileLocation location) {
         FssServiceStrategy<I> strategy = getStrategy(location.getType());
-        if (strategy.isReadable(userIdentity, location.getDir(), location.getFilename())) {
+        if (FssUtil.isReadableInThread(location.toString())
+                || strategy.isReadable(userIdentity, location.getDir(), location.getFilename())) {
             return strategy;
         }
         throw new BusinessException(FssExceptionCodes.NO_READ_AUTHORITY, location);
@@ -441,7 +449,8 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssFileLocation location = FssFileLocation.of(locationUrl);
         if (location != null) {
             FssServiceStrategy<I> strategy = getStrategy(location.getType());
-            if (!strategy.isDeletable(userIdentity, location.getDir(), location.getFilename())) {
+            if (!FssUtil.isWriteableInThread(locationUrl)
+                    && !strategy.isDeletable(userIdentity, location.getDir(), location.getFilename())) {
                 throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, location);
             }
             FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
