@@ -344,7 +344,7 @@
 .el-col-24 + .el-form-item__error--inline {
     position: absolute;
     top: 100%;
-    margin: 3px 0;
+    margin: 2px 0;
 }
 
 .form-item-tip {
