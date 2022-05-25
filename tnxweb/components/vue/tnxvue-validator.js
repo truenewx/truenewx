@@ -21,6 +21,9 @@ function getRuleType(metaType) {
             return 'float';
         case 'regex':
             return 'regexp';
+        case 'datetime':
+        case 'time':
+            return 'date';
     }
     return ruleTypes[0];
 }
@@ -318,12 +321,14 @@ function getRule(validationName, validationValue, fieldMeta) {
             break;
     }
     if (rule) {
+        rule.name = validationName;
         let metaType = 'text';
-        if (fieldMeta && fieldMeta.type) {
+        if (fieldMeta?.type) {
             metaType = fieldMeta.type.toLowerCase();
         }
         rule.type = rule.type || getRuleType(metaType);
-        rule.trigger = metaType === 'option' ? 'change' : 'blur';
+        let optional = metaType === 'option' || metaType === 'datetime' || metaType === 'date' || metaType === 'time';
+        rule.trigger = optional ? 'change' : 'blur';
     }
     return rule;
 }
