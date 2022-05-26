@@ -108,6 +108,7 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
         const containerSelector = '.' + dialogContainerClass + '#' + dialogId;
         options = options || {};
         const dialogVm = window.tnx.createVueInstance(componentDefinition, null, {
+            modelValue: true,
             container: containerSelector,
             title: title,
             content: content,

@@ -14,7 +14,10 @@
             <div class="tnxel-dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
                 v-if="title || options['show-close']"></div>
         </template>
-        <div :class="mergeClass()" v-html="contentValue" v-if="contentValue"></div>
+        <template v-if="$slots.default">
+            <slot></slot>
+        </template>
+        <div :class="mergeClass()" v-html="contentValue" v-else-if="contentValue"></div>
         <tnxel-dialog-content :class="mergeClass()" ref="content" v-bind="contentProps" v-else></tnxel-dialog-content>
         <template #footer v-if="buttons && buttons.length">
             <div class="tnxel-dialog-footer" :class="mergeClass()">
@@ -37,16 +40,22 @@ export default {
         'tnxel-dialog-content': null,
     },
     props: {
+        modelValue: Boolean,
         container: String,
         title: String,
         content: String,
         contentProps: Object,
         buttons: Array,
         theme: String,
+        width: {
+            type: [Number, String],
+            default: 512,
+        },
     },
+    emits: ['update:modelValue'],
     data() {
         return {
-            visible: true,
+            visible: this.modelValue,
             contentValue: this.content,
             options: {
                 modal: true, // 是否需要遮罩层
@@ -54,7 +63,7 @@ export default {
                 'close-on-press-escape': true, // 是否可以通过按下 ESC 关闭对话框
                 'show-close': true, // 是否显示关闭按钮
                 center: false, // 是否对头部和底部采用居中布局
-                width: '512px',
+                width: this.width,
                 // 以上均为element的Dialog组件配置项
                 onShown: undefined, // 对话框展示后的事件回调
                 onClosed: undefined, // 对话框关闭后的事件回调
@@ -64,7 +73,7 @@ export default {
         };
     },
     computed: {
-        top() {
+        dialogTop() {
             if (typeof this.options.top === 'function') {
                 return this.options.top();
             } else if (this.options.top) {
@@ -73,7 +82,7 @@ export default {
                 return this.middleTop;
             }
         },
-        width() {
+        dialogWidth() {
             if (typeof this.options.width === 'function') {
                 return this.options.width();
             } else if (typeof this.options.width === 'number') {
@@ -83,10 +92,26 @@ export default {
             }
         },
     },
+    watch: {
+        modelValue(newValue, oldValue) {
+            this.visible = this.modelValue;
+            if (newValue && !oldValue) { // 从隐藏到显示
+                let vm = this;
+                this.$nextTick(function() {
+                    vm.locate(true);
+                });
+            }
+        },
+        visible() {
+            this.$emit('update:modelValue', this.visible);
+        },
+    },
     mounted() {
         let vm = this;
         this.$nextTick(function() {
-            vm.locate(true);
+            if (this.visible) {
+                vm.locate(true);
+            }
 
             if (vm.$refs.content && !vm.$refs.content.close) {
                 vm.$refs.content.close = function() {
@@ -118,25 +143,26 @@ export default {
             if (!$dialog?.length) {
                 $dialog = $('.el-dialog:last');
             }
+            if ($dialog.length) {
+                const height = $dialog.height();
+                const docHeight = window.tnx.util.dom.getDocHeight();
+                // 对话框高度占文档高度的比例
+                const heightRatio = height / docHeight;
+                // 为了获得更好的视觉舒适度，根据高度比确定对话框中线位置：从33vh->50vh
+                const baseline = 33 + (50 - 33) * heightRatio;
+                const baseTop = docHeight * baseline / 100;
+                let top = (baseTop - height / 2);
+                top = Math.max(top, 8); // 至少顶部留8px空隙
+                this.middleTop = top + 'px';
+                $dialog.css({
+                    'margin-top': this.dialogTop,
+                    'width': this.dialogWidth,
+                    'max-height': 'calc(100vh - 16px)', // 最大高度时上下各留8px空隙
+                });
 
-            const height = $dialog.height();
-            const docHeight = window.tnx.util.dom.getDocHeight();
-            // 对话框高度占文档高度的比例
-            const heightRatio = height / docHeight;
-            // 为了获得更好的视觉舒适度，根据高度比确定对话框中线位置：从33vh->50vh
-            const baseline = 33 + (50 - 33) * heightRatio;
-            const baseTop = docHeight * baseline / 100;
-            let top = (baseTop - height / 2);
-            top = Math.max(top, 8); // 至少顶部留8px空隙
-            this.middleTop = top + 'px';
-            $dialog.css({
-                'margin-top': this.top,
-                'width': this.width,
-                'max-height': 'calc(100vh - 16px)', // 最大高度时上下各留8px空隙
-            });
-
-            if (observe) {
-                this.heightChangeObserver = util.dom.observeHeightChange($dialog[0], this.locate);
+                if (observe) {
+                    this.heightChangeObserver = util.dom.observeHeightChange($dialog[0], this.locate);
+                }
             }
         },
         btnClick(index) {
@@ -183,6 +209,10 @@ export default {
 </script>
 
 <style>
+tnxel-dialog {
+    display: none;
+}
+
 .el-dialog {
     display: flex;
     flex-direction: column;
