@@ -116,7 +116,7 @@ export default {
     },
     methods: {
         init() {
-            if (this.granted != null) {
+            if (this.granted !== null) {
                 this.disabled = !this.granted;
             } else if (this.menu && this.path) {
                 let vm = this;
