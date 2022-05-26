@@ -152,10 +152,11 @@ export default {
             this.clickItem(this);
         },
         clickItem(item) {
-            if (!item.disabled && this.$router) {
+            if (!item.disabled) {
                 if (typeof this.click === 'function') {
                     this.click(item.path);
-                } else if (this.click !== true && item.menuItem && item.menuItem.path) { // click属性为true时执行点击动作而不是跳转
+                } else if (this.$router && this.click !== true && item.menuItem && item.menuItem.path) {
+                    // click属性为true时执行点击动作而不是跳转
                     let vm = this;
                     this.$router.push(item.path).catch(function() {
                         // 指定路径无法跳转，则触发点击事件
