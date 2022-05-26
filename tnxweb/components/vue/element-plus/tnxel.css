@@ -729,3 +729,8 @@ i svg {
 .el-dialog__headerbtn {
     top: 0;
 }
+
+.el-message__content {
+    text-align: center;
+    line-height: 1.2;
+}
