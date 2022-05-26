@@ -24,42 +24,6 @@ const components = {
     Percent,
 };
 
-function getDefaultDialogButtons(type, callback, theme) {
-    if (callback !== false) {
-        if (type === 'none') {
-            return [];
-        } else if (type === 'confirm') {
-            return [{
-                text: '取消',
-                click(close) {
-                    if (typeof callback === 'function') {
-                        return callback.call(this, false, close);
-                    }
-                }
-            }, {
-                text: '确定',
-                type: theme || 'primary',
-                click(close) {
-                    if (typeof callback === 'function') {
-                        return callback.call(this, true, close);
-                    }
-                }
-            }];
-        } else {
-            return [{
-                text: '确定',
-                type: theme || 'primary',
-                click(close) {
-                    if (typeof callback === 'function') {
-                        return callback.call(this, close);
-                    }
-                }
-            }];
-        }
-    }
-    return [];
-}
-
 const tnxvue = Object.assign({}, tnxcore, {
     libs: Object.assign({}, tnxcore.libs, {
         Vue: Vue
@@ -122,7 +86,7 @@ const tnxvue = Object.assign({}, tnxcore, {
         }
 
         const title = component.title || options.title;
-        const buttons = options.buttons || getDefaultDialogButtons(options.type, options.click, options.theme);
+        const buttons = options.buttons || this.getDefaultDialogButtons(options.type, options.click, options.theme);
         if (options.buttonText) {
             if (!Array.isArray(options.buttonText)) {
                 options.buttonText = [options.buttonText];
@@ -142,7 +106,42 @@ const tnxvue = Object.assign({}, tnxcore, {
             return this.drawer(component, title, buttons, options, props);
         }
         return this.dialog(component, title, buttons, options, props);
-    }
+    },
+    getDefaultDialogButtons(type, callback, theme) {
+        if (callback !== false) {
+            if (type === 'none') {
+                return [];
+            } else if (type === 'confirm') {
+                return [{
+                    text: '取消',
+                    click(close) {
+                        if (typeof callback === 'function') {
+                            return callback.call(this, false, close);
+                        }
+                    }
+                }, {
+                    text: '确定',
+                    type: theme || 'primary',
+                    click(close) {
+                        if (typeof callback === 'function') {
+                            return callback.call(this, true, close);
+                        }
+                    }
+                }];
+            } else {
+                return [{
+                    text: '确定',
+                    type: theme || 'primary',
+                    click(close) {
+                        if (typeof callback === 'function') {
+                            return callback.call(this, close);
+                        }
+                    }
+                }];
+            }
+        }
+        return [];
+    },
 });
 
 Object.assign(tnxvue.util, {
