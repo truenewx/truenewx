@@ -23,7 +23,7 @@ export default {
             default: 'tnxel-tabs',
         },
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'tab-click'],
     data() {
         return {
             model: this.modelValue,
