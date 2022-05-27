@@ -410,7 +410,7 @@ export default {
                 callback(item);
             } else {
                 let _this = this;
-                this.loadEnumItems(type, function(items) {
+                this.loadEnumItems(type, subtype, function(items) {
                     let item = _this._getEnumItem(items, key);
                     if (item) {
                         callback(item);
