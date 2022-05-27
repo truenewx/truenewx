@@ -8,7 +8,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -203,11 +202,11 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
             File sourceFile = getStorageFile(sourceStoragePath, false);
             if (sourceFile.exists()) {
                 File targetFile = getStorageFile(targetStoragePath, false);
-                CopyOption[] options = { StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING };
                 if (copy) {
-                    Files.copy(sourceFile.toPath(), targetFile.toPath(), options);
+                    Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } else {
-                    Files.move(sourceFile.toPath(), targetFile.toPath(), options);
+                    Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.ATOMIC_MOVE);
                 }
             }
         } catch (IOException e) {

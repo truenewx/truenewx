@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -40,7 +41,8 @@ import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         implements FssServiceTemplate<I>, ContextInitializedBean {
 
-    private static final String PENDING_STORAGE_FILE_SUFFIX = ".pending";
+    private static final String FILE_STATE_PENDING = "pending";
+    private static final String FILE_STATE_DELETING = "deleting";
 
     private final Map<String, FssServiceStrategy<I>> strategies = new HashMap<>();
     private final Map<FssStorageProvider, FssStorageAuthorizer> authorizers = new HashMap<>();
@@ -106,7 +108,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         }
         storageFilename += extension.toLowerCase();
         // 构建存储路径
-        String storagePath = getStoragePath(storageDir, storageFilename);
+        String storagePath = getWriteStoragePath(storageDir, storageFilename);
         // 写文件
         write(strategy, storagePath, originalFilename, in);
 
@@ -172,48 +174,71 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         return strategy.getStorageRootDir() + NetUtil.standardizeUrl(storageDir);
     }
 
-    private String getStoragePath(String storageDir, String storageFilename) {
+    private String getWriteStoragePath(String storageDir, String storageFilename) {
         String storagePath = storageDir + Strings.SLASH + storageFilename;
-        return cleanIllegalChars(storagePath);
+        return cleanStoragePath(storagePath, false);
     }
 
     /**
-     * 清理非法字符，以免作为路径的一部分无法正常加载
+     * 清理存储路径，确保路径合法
      *
-     * @param path 路径
-     * @return 清理后的路径
+     * @param storagePath 存储路径
+     * @param nullable    可否为null，true-则存储路径是事务中已标记为删除中时返回null，false-一般在写入操作时，无论是否标记为删除中，仍需要返回正确的存储地址
+     * @return 清理后的存储路径
      */
-    private String cleanIllegalChars(String path) {
-        return path.replaceAll("[+%]", Strings.SPACE); // 因长度为关键的判断依据，故需保证长度不变
+    private String cleanStoragePath(String storagePath, boolean nullable) {
+        storagePath = storagePath.replaceAll("[+%]", Strings.SPACE); // 因长度为关键的判断依据，故需保证长度不变
+        if (isTransactional()) { // 如果位于事务中，则根据事务绑定状态判断存储路径是否处理中
+            String state = (String) TransactionSynchronizationManager.getResource(storagePath);
+            if (state != null) {
+                // 可以为null且正在删除中，则返回null表示不存在
+                if (nullable && FILE_STATE_DELETING.equals(state)) {
+                    return null;
+                }
+                // 正在准备中，则返回准备中的存储路径作为替代
+                if (state.endsWith(Strings.DOT + FILE_STATE_PENDING)) {
+                    return state;
+                }
+            }
+        }
+        return storagePath;
     }
 
     private void write(FssServiceStrategy<I> strategy, String storagePath, String originalFilename, InputStream in)
             throws IOException {
         FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-        Integer isolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
-        boolean transactional = isolationLevel != null && isolationLevel != TransactionDefinition.ISOLATION_READ_UNCOMMITTED;
-        // 如果位于写事务之中，则先写入临时文件，再执行提交或回滚处理，此处暂时只支持“提交读（Read_Commit）”这一种事务隔离级别
-        if (transactional) {
-            String pendingStoragePath = storagePath + PENDING_STORAGE_FILE_SUFFIX;
+        // 如果位于事务之中，则先写入临时文件，再执行提交或回滚处理，暂时只支持对文件处理的 Read_Commit 这一种事务隔离级别
+        if (isTransactional()) {
+            String pendingStoragePath = storagePath + Strings.DOT + FILE_STATE_PENDING;
             accessor.write(in, pendingStoragePath, originalFilename);
+
+            // 在当前事务中标记实际存储路径
+            TransactionSynchronizationManager.bindResource(storagePath, pendingStoragePath);
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void beforeCommit(boolean readOnly) {
-                    if (!readOnly) {
-                        accessor.move(pendingStoragePath, storagePath);
-                    }
+                    // 提交时临时文件迁移为正式文件
+                    accessor.move(pendingStoragePath, storagePath);
                 }
 
                 @Override
                 public void afterCompletion(int status) {
-                    if (status != STATUS_COMMITTED) {
+                    if (status != STATUS_COMMITTED) { // 回滚时删除临时文件
                         accessor.delete(pendingStoragePath, strategy);
                     }
+                    // 事务结束时移除文件标记
+                    TransactionSynchronizationManager.unbindResource(storagePath);
                 }
             });
         } else { // 如果不位于事务之中，则直接写入文件
             accessor.write(in, storagePath, originalFilename);
         }
+    }
+
+    private boolean isTransactional() {
+        Integer isolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+        // 默认隔离级别与数据库相关，但至少也是Read_Commit
+        return isolationLevel != null && isolationLevel != TransactionDefinition.ISOLATION_READ_UNCOMMITTED;
     }
 
     @Override
@@ -231,15 +256,17 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
             }
 
-            String storagePath = getStoragePath(strategy, location);
-            write(strategy, storagePath, originalFilename, in);
+            String storagePath = getReadStoragePath(strategy, location);
+            if (storagePath != null) {
+                write(strategy, storagePath, originalFilename, in);
+            }
         }
     }
 
-    private String getStoragePath(FssServiceStrategy<I> strategy, FssFileLocation location) {
+    @Nullable
+    private String getReadStoragePath(FssServiceStrategy<I> strategy, FssFileLocation location) {
         String storagePath = strategy.getStoragePath(location.getPath());
-        // 转换特殊字符，以免作为路径的一部分无法正常加载
-        return cleanIllegalChars(storagePath);
+        return cleanStoragePath(storagePath, true);
     }
 
     @Override
@@ -258,11 +285,13 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 return location.getRelativeUrl();
             } else {
                 FssStorageAuthorizer authorizer = this.authorizers.get(provider);
-                String storagePath = getStoragePath(strategy, location);
-                if (thumbnail) {
-                    storagePath = appendThumbnailParameters(strategy, storagePath);
+                String storagePath = getReadStoragePath(strategy, location);
+                if (storagePath != null) {
+                    if (thumbnail) {
+                        storagePath = appendThumbnailParameters(strategy, storagePath);
+                    }
+                    return authorizer.getReadUrl(userIdentity, storagePath);
                 }
-                return authorizer.getReadUrl(userIdentity, storagePath);
             }
         }
         return null;
@@ -325,20 +354,22 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             FssFileLocation location = FssFileLocation.of(locationUrl);
             if (location != null) {
                 FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
-                FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-                String storagePath = getStoragePath(strategy, location);
-                FssFileDetail detail = accessor.getDetail(storagePath);
-                if (detail != null) {
-                    FssFileMeta meta = new FssFileMeta(locationUrl);
-                    meta.setName(detail.getOriginalFilename());
-                    meta.setReadUrl(getReadUrl(userIdentity, location, false));
-                    meta.setThumbnailReadUrl(getReadUrl(userIdentity, location, true));
-                    FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
-                    if (uploadLimit.isImageable()) {
-                        meta.setImageable(true);
-                        meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+                String storagePath = getReadStoragePath(strategy, location);
+                if (storagePath != null) {
+                    FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
+                    FssFileDetail detail = accessor.getDetail(storagePath);
+                    if (detail != null) {
+                        FssFileMeta meta = new FssFileMeta(locationUrl);
+                        meta.setName(detail.getOriginalFilename());
+                        meta.setReadUrl(getReadUrl(userIdentity, location, false));
+                        meta.setThumbnailReadUrl(getReadUrl(userIdentity, location, true));
+                        FssUploadLimit uploadLimit = strategy.getUploadLimit(userIdentity);
+                        if (uploadLimit.isImageable()) {
+                            meta.setImageable(true);
+                            meta.setSize(ArrayUtil.get(uploadLimit.getSizes(), 0));
+                        }
+                        return meta;
                     }
-                    return meta;
                 }
             }
         }
@@ -350,17 +381,19 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssFileLocation location = FssFileLocation.of(locationUrl);
         if (location != null) {
             FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
-            FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-            String storagePath = getStoragePath(strategy, location);
-            FssFileDetail detail = accessor.getDetail(storagePath);
-            if (detail != null) {
-                String downloadFilename = strategy.getDownloadFilename(userIdentity, location.getDir(),
-                        location.getFilename());
-                if (StringUtils.isNotBlank(downloadFilename)) {
-                    detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
+            String storagePath = getReadStoragePath(strategy, location);
+            if (storagePath != null) {
+                FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
+                FssFileDetail detail = accessor.getDetail(storagePath);
+                if (detail != null) {
+                    String downloadFilename = strategy.getDownloadFilename(userIdentity, location.getDir(),
+                            location.getFilename());
+                    if (StringUtils.isNotBlank(downloadFilename)) {
+                        detail = new FssFileDetail(downloadFilename, detail.getLastModifiedTime(), detail.getLength());
+                    }
                 }
+                return detail;
             }
-            return detail;
         }
         return null;
     }
@@ -384,9 +417,11 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         FssFileLocation location = FssFileLocation.of(locationUrl);
         if (location != null) {
             FssServiceStrategy<I> strategy = validateUserRead(userIdentity, location);
-            String storagePath = getStoragePath(strategy, location);
-            FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-            return new Binary<>(storagePath, accessor);
+            String storagePath = getReadStoragePath(strategy, location);
+            if (storagePath != null) {
+                FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
+                return new Binary<>(storagePath, accessor);
+            }
         }
         return null;
     }
@@ -454,8 +489,28 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                 throw new BusinessException(FssExceptionCodes.NO_DELETE_AUTHORITY, location);
             }
             FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
-            String storagePath = getStoragePath(strategy, location);
-            accessor.delete(storagePath, strategy);
+            String storagePath = getReadStoragePath(strategy, location);
+            if (storagePath != null) {
+                if (isTransactional()) {
+                    // 如果位于写事务之中，则暂不实际删除，只在当前事务中标记状态为删除中，而在提交事务时删除，否则直接删除
+                    TransactionSynchronizationManager.bindResource(storagePath, FILE_STATE_DELETING);
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public void beforeCommit(boolean readOnly) {
+                            // 提交事务则执行文件删除
+                            accessor.delete(storagePath, strategy);
+                        }
+
+                        @Override
+                        public void afterCompletion(int status) {
+                            // 事务结束时移除文件标记
+                            TransactionSynchronizationManager.unbindResource(storagePath);
+                        }
+                    });
+                } else {
+                    accessor.delete(storagePath, strategy);
+                }
+            }
         }
     }
 
@@ -478,45 +533,77 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
             String targetStorageDir = getStorageDirForWrite(targetStrategy, userIdentity, targetScope);
 
             FssStorageAccessor accessor = this.accessors.get(targetStrategy.getProvider());
-            String sourceStoragePath = getStoragePath(sourceStrategy, sourceLocation);
-            // 获取目标存储文件名
-            FssFileDetail sourceDetail = accessor.getDetail(sourceStoragePath);
-            String originalFilename = sourceDetail == null ? null : sourceDetail.getOriginalFilename();
-            String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope,
-                    StringUtil.excludeExtension(originalFilename));
-            if (targetStorageFilename.contains(FssServiceStrategy.PLACEHOLDER_MD5)) {
-                // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用
-                try {
-                    InputStream sourceInputStream = accessor.getReadStream(sourceStoragePath);
-                    targetStorageFilename = targetStorageFilename.replace(FssServiceStrategy.PLACEHOLDER_MD5,
-                            EncryptUtil.encryptByMd5(sourceInputStream));
-                    sourceInputStream.close();
-                } catch (IOException e) {
-                    throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
-                            targetScope, targetType);
+            String sourceStoragePath = getReadStoragePath(sourceStrategy, sourceLocation);
+            if (sourceStoragePath != null) {
+                // 获取目标存储文件名
+                FssFileDetail sourceDetail = accessor.getDetail(sourceStoragePath);
+                String originalFilename = sourceDetail == null ? null : sourceDetail.getOriginalFilename();
+                String targetStorageFilename = targetStrategy.getStorageFilename(userIdentity, targetScope,
+                        StringUtil.excludeExtension(originalFilename));
+                if (targetStorageFilename.contains(FssServiceStrategy.PLACEHOLDER_MD5)) {
+                    // 需根据来源文件内容生成MD5形式的目标存储文件名，与write()时不同的是，来源输入流在读取后关闭，而不再继续使用
+                    try {
+                        InputStream sourceInputStream = accessor.getReadStream(sourceStoragePath);
+                        targetStorageFilename = targetStorageFilename.replace(FssServiceStrategy.PLACEHOLDER_MD5,
+                                EncryptUtil.encryptByMd5(sourceInputStream));
+                        sourceInputStream.close();
+                    } catch (IOException e) {
+                        throw new BusinessException(FssExceptionCodes.CANNOT_COPY_WITHOUT_STORAGE_FILENAME_BY_SCOPE,
+                                targetScope, targetType);
+                    }
                 }
-            }
-            // 目标文件扩展名与来源文件相同
-            String extension = StringUtil.getExtension(sourceLocation.getFilename());
-            if (StringUtils.isNotBlank(extension) && !extension.startsWith(Strings.DOT)) {
-                extension = Strings.DOT + extension;
-            }
-            targetStorageFilename += extension;
-            // 构建目标存储路径
-            String targetStoragePath = getStoragePath(targetStorageDir, targetStorageFilename);
-            // 构建目标定位路径
-            String targetLocationPath = targetStrategy.getLocationPath(targetStoragePath);
-            // 存储路径不同才有必要复制
-            if (!sourceStoragePath.equals(targetStoragePath)) {
-                if (copy) {
-                    accessor.copy(sourceStoragePath, targetStoragePath);
-                } else {
-                    accessor.move(sourceStoragePath, targetStoragePath);
+                // 目标文件扩展名与来源文件相同
+                String extension = StringUtil.getExtension(sourceLocation.getFilename());
+                if (StringUtils.isNotBlank(extension) && !extension.startsWith(Strings.DOT)) {
+                    extension = Strings.DOT + extension;
                 }
-                targetStrategy.onWritten(userIdentity, targetLocationPath);
+                targetStorageFilename += extension;
+                // 构建目标存储路径
+                String targetStoragePath = getWriteStoragePath(targetStorageDir, targetStorageFilename);
+                // 构建目标定位路径
+                String targetLocationPath = targetStrategy.getLocationPath(targetStoragePath);
+                // 存储路径不同才有必要复制
+                if (!sourceStoragePath.equals(targetStoragePath)) {
+                    if (isTransactional()) {
+                        // 如果位于事务之中，则先复制来源文件至临时目标文件
+                        String pendingTargetStoragePath = targetStoragePath + Strings.DOT + FILE_STATE_PENDING;
+                        accessor.copy(sourceStoragePath, pendingTargetStoragePath);
+                        // 在当前事务中标记目标文件实际存储路径
+                        TransactionSynchronizationManager.bindResource(targetStoragePath, pendingTargetStoragePath);
+                        if (!copy) { // 迁移操作中，在当前事务中标记来源文件为删除中状态
+                            TransactionSynchronizationManager.bindResource(sourceStoragePath, FILE_STATE_DELETING);
+                        }
+                        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                            @Override
+                            public void beforeCommit(boolean readOnly) {
+                                // 提交时临时目标文件迁移为正式目标文件
+                                accessor.move(pendingTargetStoragePath, targetStoragePath);
+                                // 迁移操作中，删除来源文件
+                                accessor.delete(sourceStoragePath, sourceStrategy);
+                            }
+
+                            @Override
+                            public void afterCompletion(int status) {
+                                if (status != STATUS_COMMITTED) { // 回滚时删除临时目标文件
+                                    accessor.delete(pendingTargetStoragePath, targetStrategy);
+                                }
+                                // 事务结束时移除文件标记
+                                TransactionSynchronizationManager.unbindResource(sourceStoragePath);
+                                TransactionSynchronizationManager.unbindResource(targetStoragePath);
+                            }
+                        });
+                    } else { // 不在事务中，则直接执行
+                        if (copy) {
+                            accessor.copy(sourceStoragePath, targetStoragePath);
+                        } else {
+                            accessor.move(sourceStoragePath, targetStoragePath);
+                        }
+                    }
+                    targetStrategy.onWritten(userIdentity, targetLocationPath);
+                }
+                // 返回目标定位地址
+                return FssFileLocation.toUrl(targetType, targetLocationPath, false);
             }
-            // 返回目标定位地址
-            return FssFileLocation.toUrl(targetType, targetLocationPath, false);
         }
         return null;
     }

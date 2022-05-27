@@ -155,12 +155,6 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param targetScope       目标业务范围
      * @return 目标文件的定位地址
      */
-    default String move(I userIdentity, String sourceLocationUrl, String targetType, String targetScope) {
-        String targetLocationUrl = copy(userIdentity, sourceLocationUrl, targetType, targetScope);
-        if (!sourceLocationUrl.equals(targetLocationUrl)) {
-            delete(userIdentity, sourceLocationUrl);
-        }
-        return targetLocationUrl;
-    }
+    String move(I userIdentity, String sourceLocationUrl, String targetType, String targetScope);
 
 }
