@@ -102,6 +102,10 @@ export default {
 </script>
 
 <style>
+tnxel-alert {
+    visibility: hidden;
+}
+
 .el-alert__title {
     text-align: left;
 }

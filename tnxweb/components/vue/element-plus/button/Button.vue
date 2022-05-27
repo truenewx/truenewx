@@ -170,3 +170,9 @@ export default {
     }
 }
 </script>
+
+<style>
+tnxel-button {
+    visibility: hidden;
+}
+</style>
