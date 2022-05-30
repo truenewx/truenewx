@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.web.context;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -108,12 +109,47 @@ public class SpringWebContext {
     /**
      * 从SESSION获取指定属性
      *
-     * @param name 属性
+     * @param name 属性名
+     * @param <T>  属性类型
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFromSession(String name) {
         return (T) getSession().getAttribute(name);
+    }
+
+    /**
+     * 从SESSION获取指定属性，如果不存在，则将指定默认值加入SESSION并返回
+     *
+     * @param name         属性名
+     * @param defaultValue 默认属性值
+     * @param <T>          属性类型
+     * @return 属性值
+     */
+    public static <T> T getFromSession(String name, T defaultValue) {
+        T value = getFromSession(name);
+        if (value == null) {
+            value = defaultValue;
+            setToSession(name, value);
+        }
+        return value;
+    }
+
+    /**
+     * 从SESSION获取指定属性，如果不存在，则执行指定默认值提供者，得到默认值加入SESSION并返回
+     *
+     * @param name                 属性名
+     * @param defaultValueSupplier 默认属性值提供者
+     * @param <T>                  属性类型
+     * @return 属性值
+     */
+    public static <T> T getFromSession(String name, Supplier<T> defaultValueSupplier) {
+        T value = getFromSession(name);
+        if (value == null) {
+            value = defaultValueSupplier.get();
+            setToSession(name, value);
+        }
+        return value;
     }
 
     /**
