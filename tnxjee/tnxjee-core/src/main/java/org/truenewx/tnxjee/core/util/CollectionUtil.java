@@ -131,9 +131,11 @@ public class CollectionUtil {
      * @return 指定集合是否包含指定元素
      */
     public static <T> boolean contains(Iterable<T> iterable, T element) {
-        for (T e : iterable) {
-            if (Objects.equals(e, element)) {
-                return true;
+        if (iterable != null) {
+            for (T e : iterable) {
+                if (Objects.equals(e, element)) {
+                    return true;
+                }
             }
         }
         return false;
