@@ -41,7 +41,7 @@ public abstract class AliyunSmsAccessor extends AliyunAcsAccessSupport {
                 return null;
             } else {
                 String errorMessage = (String) data.get("Message");
-                return buildFailures(errorMessage);
+                return buildFailures(errorMessage, cellphones);
             }
         } catch (ClientException e) {
             LogUtil.error(getClass(), e);
@@ -52,7 +52,7 @@ public abstract class AliyunSmsAccessor extends AliyunAcsAccessSupport {
     private Map<String, String> buildFailures(String errorMessage, String... cellphones) {
         Map<String, String> failures = new HashMap<>();
         for (String cellphone : cellphones) {
-            failures.put(errorMessage, cellphone);
+            failures.put(cellphone, errorMessage);
         }
         return failures;
     }

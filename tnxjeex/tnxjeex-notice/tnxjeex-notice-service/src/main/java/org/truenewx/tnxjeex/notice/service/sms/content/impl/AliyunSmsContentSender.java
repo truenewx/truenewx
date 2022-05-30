@@ -1,6 +1,7 @@
 package org.truenewx.tnxjeex.notice.service.sms.content.impl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class AliyunSmsContentSender extends AbstractSmsContentSender {
     @Override
     public SmsNotifyResult send(String signName, String content, int maxCount, String... cellphones) {
         SmsModel sms = new SmsModel();
+        sms.setContents(List.of(content));
         sms.setCellphones(cellphones);
         sms.setSendTime(new Date());
         SmsNotifyResult result = new SmsNotifyResult(sms);
