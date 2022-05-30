@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.config.AppConstants;
@@ -70,6 +72,9 @@ public class FeignRequestInterceptor implements RequestInterceptor {
             }
             template.header(WebConstants.HEADER_RPC_JWT, jwt);
         }
+        // 确保远程调用始终使用JSON格式传递数据，避免出现html结果
+        template.removeHeader(HttpHeaders.ACCEPT);
+        template.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
     }
 
     private String generateJwt(RequestTemplate template) {
