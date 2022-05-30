@@ -391,6 +391,10 @@ div.form-item-tip + .el-form-item__error {
     padding: 0 10px;
 }
 
+.el-input--large .el-input__wrapper {
+    padding: 0 12px;
+}
+
 .el-textarea__inner {
     padding: 4px 10px;
 }
