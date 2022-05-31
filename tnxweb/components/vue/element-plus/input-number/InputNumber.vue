@@ -1,9 +1,14 @@
 <template>
-    <el-col class="tnxel-input-number-group" :class="{'is-error': showRequiredError}" :span="span">
-        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-right-0': suffix}" v-model.trim="model"
-            :min="min" :max="max" controls-position="right" :placeholder="placeholder" :disabled="disabled"
-            :controls="controls" :step="step || Math.pow(10, -this.scale)" :precision="scale" step-strictly
-            @change="onChange" @blur="$emit('blur', $event)"/>
+    <el-col class="tnxel-input-number" :class="{'is-error': showRequiredError}" :span="span">
+        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-right-0': suffix}"
+            v-model="model"
+            :min="min" :max="max"
+            :controls="controls" controls-position="right"
+            :placeholder="disabled ? '未设置' : placeholder" :disabled="disabled"
+            :step="step || Math.pow(10, -this.scale)" step-strictly
+            :precision="scale"
+            @change="onChange"
+            @blur="$emit('blur', $event)"/>
         <div class="el-input-group__append" v-if="suffix">{{ suffix }}</div>
     </el-col>
 </template>
@@ -79,3 +84,17 @@ export default {
     }
 }
 </script>
+
+<style>
+.tnxel-input-number .el-input-number {
+    width: auto;
+}
+
+.tnxel-input-number .el-input-number.is-controls-right .el-input__wrapper {
+    padding-left: 12px;
+}
+
+.tnxel-input-number .el-input-number .el-input__wrapper .el-input__suffix {
+    display: none;
+}
+</style>
