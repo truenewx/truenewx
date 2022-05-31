@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.truenewx.tnxjee.model.Model;
 import org.truenewx.tnxjee.model.validation.rule.ValidationRule;
@@ -53,6 +54,16 @@ public class ValidationConfiguration {
             }
         }
         return null;
+    }
+
+    public synchronized <R extends ValidationRule> R getRule(String propertyName,
+            Class<R> ruleClass, Supplier<R> defaultRuleSupplier) {
+        R rule = getRule(propertyName, ruleClass);
+        if (rule == null) {
+            rule = defaultRuleSupplier.get();
+            addRule(propertyName, rule);
+        }
+        return rule;
     }
 
     public Set<String> getPropertyNames() {

@@ -108,9 +108,10 @@ public class JpaValidationConfigurationFactory extends DefaultValidationConfigur
             if (CharSequence.class.isAssignableFrom(propertyClass)) { // 字符串型
                 int maxLength = column.getLength();
                 if (maxLength > 0) { // 长度大于0才有效
-                    LengthRule rule = new LengthRule();
-                    rule.setMax(maxLength);
-                    configuration.addRule(propertyName, rule);
+                    LengthRule rule = configuration.getRule(propertyName, LengthRule.class, LengthRule::new);
+                    if (rule.getMax() > maxLength) {
+                        rule.setMax(maxLength);
+                    }
                 }
             } else if (propertyClass.isEnum()) { // 枚举型
                 if (!column.isNullable()) { // 不允许为null的枚举型，添加不允许为空白的约束

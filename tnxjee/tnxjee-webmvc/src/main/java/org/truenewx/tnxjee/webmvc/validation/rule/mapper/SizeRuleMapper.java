@@ -5,26 +5,26 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.model.validation.rule.LengthRule;
+import org.truenewx.tnxjee.model.validation.rule.SizeRule;
 
 /**
- * 字符串长度范围的校验映射集生成器
+ * 字符串长度和集合大小范围的校验映射集生成器
  *
  * @author jianglei
  */
 @Component
-public class LengRuleMapper implements ValidationRuleMapper<LengthRule> {
+public class SizeRuleMapper implements ValidationRuleMapper<SizeRule> {
 
     @Override
-    public Map<String, Object> toMap(LengthRule rule, Locale locale) {
+    public Map<String, Object> toMap(SizeRule rule, Locale locale) {
         Map<String, Object> result = new HashMap<>();
         Integer min = rule.getMin();
         if (min != null && min > 0) {
-            result.put("minLength", min);
+            result.put("minSize", min);
         }
         Integer max = rule.getMax();
         if (max != null && max < Integer.MAX_VALUE) {
-            result.put("maxLength", max);
+            result.put("maxSize", max);
         }
         return result;
     }

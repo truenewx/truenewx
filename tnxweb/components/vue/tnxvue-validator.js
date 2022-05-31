@@ -74,6 +74,23 @@ function getRule(validationName, validationValue, fieldMeta) {
                 }
             }
             break;
+        case 'minLength':
+            rule = {
+                validator(r, fieldValue, callback, source, options) {
+                    if (typeof validationValue === 'number' && typeof fieldValue === 'string') {
+                        // 回车符计入长度
+                        let enterLength = fieldValue.indexOf('\n') < 0 ? 0 : fieldValue.match(/\n/g).length;
+                        let fieldLength = fieldValue.length + enterLength;
+                        if (fieldLength < validationValue) {
+                            let message = validator.getErrorMessage(validationName, fieldCaption,
+                                validationValue, validationValue - fieldLength);
+                            return callback(new Error(message));
+                        }
+                    }
+                    return callback();
+                }
+            };
+            break;
         case 'maxLength':
             rule = {
                 validator(r, fieldValue, callback, source, options) {
