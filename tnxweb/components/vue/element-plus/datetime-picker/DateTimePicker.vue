@@ -7,7 +7,8 @@
                 :default-value="defaultValue"
                 :placeholder="datePlaceholder"
                 :size="size"
-                :clearable="empty"/>
+                :clearable="empty"
+                :disabled="disabled"/>
         </el-col>
         <el-col :span="12">
             <el-time-picker ref="timePicker"
@@ -17,7 +18,7 @@
                 :placeholder="timePlaceholder"
                 :size="size"
                 :clearable="empty"
-                :disabled="!model"/>
+                :disabled="disabled || !model"/>
         </el-col>
     </el-row>
 </template>
@@ -54,6 +55,7 @@ export default {
         },
         defaultValue: [String, Number, Date],
         valueFormat: String,
+        disabled: Boolean,
     },
     emits: ['update:modelValue'],
     data() {
