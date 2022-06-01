@@ -8,6 +8,7 @@
                 :placeholder="datePlaceholder"
                 :size="size"
                 :clearable="empty"
+                :disabled-date="isDisabledDate"
                 :disabled="disabled"/>
         </el-col>
         <el-col :span="12">
@@ -56,6 +57,8 @@ export default {
         defaultValue: [String, Number, Date],
         valueFormat: String,
         disabled: Boolean,
+        minDate: [String, Number, Date],
+        maxDate: [String, Number, Date],
     },
     emits: ['update:modelValue'],
     data() {
@@ -74,10 +77,7 @@ export default {
             }
             // 必须创建新的日期对象，以免改动影响原始modelValue
             let time = this.modelValue ? new Date(this.modelValue) : new Date();
-            time.setHours(0);
-            time.setMinutes(0);
-            time.setSeconds(0);
-            time.setMilliseconds(0);
+            time.applyTime(0, 0, 0, 0);
             return time;
         },
     },
@@ -87,6 +87,25 @@ export default {
         },
         model() {
             this.$emit('update:modelValue', this.model);
+        },
+    },
+    methods: {
+        isDisabledDate(date) {
+            let minDate = window.tnx.util.date.toDate(this.minDate);
+            if (minDate) {
+                minDate.applyTime(0, 0, 0, 0);
+                if (minDate.getTime() > date.getTime()) {
+                    return true;
+                }
+            }
+            let maxDate = window.tnx.util.date.toDate(this.maxDate);
+            if (maxDate) {
+                maxDate.applyTime(0, 0, 0, 0);
+                if (maxDate.getTime() < date.getTime()) {
+                    return true;
+                }
+            }
+            return false;
         },
     },
 }

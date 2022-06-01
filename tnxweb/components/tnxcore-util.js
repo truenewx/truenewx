@@ -152,7 +152,13 @@ Object.assign(Date.prototype, {
         let date = new Date(this);
         date.setFullYear(this.getFullYear() + years);
         return date;
-    }
+    },
+    applyTime(hours, minutes, seconds, milliseconds) {
+        this.setHours(hours);
+        this.setMinutes(minutes);
+        this.setSeconds(seconds);
+        this.setMilliseconds(milliseconds);
+    },
 });
 
 Object.assign(Array.prototype, {
