@@ -26,7 +26,7 @@ public abstract class JpaUnityRepoxSupport<T extends Unity<K>, K extends Seriali
         double stepValue = step.doubleValue();
         if (stepValue != 0) { // 增量不为0时才处理
             Map<String, Object> params = new HashMap<>();
-            StringBuffer ql = buildIncreaseQl(id, propertyName, step, params);
+            StringBuilder ql = buildIncreaseQl(id, propertyName, step, params);
 
             if (doIncreaseNumber(ql, params, propertyName, stepValue > 0, limit)) {
                 // 正确更新字段后需刷新实体
@@ -44,10 +44,10 @@ public abstract class JpaUnityRepoxSupport<T extends Unity<K>, K extends Seriali
         return null;
     }
 
-    protected <N extends Number> StringBuffer buildIncreaseQl(K id, String propertyName, N step,
+    protected <N extends Number> StringBuilder buildIncreaseQl(K id, String propertyName, N step,
             Map<String, Object> params) {
         String entityName = getEntityName();
-        StringBuffer ql = new StringBuffer("update ").append(entityName).append(" set ").append(propertyName)
+        StringBuilder ql = new StringBuilder("update ").append(entityName).append(" set ").append(propertyName)
                 .append(Strings.EQUAL).append(propertyName).append("+:step where id=:id");
         params.put("id", id);
         params.put("step", step);

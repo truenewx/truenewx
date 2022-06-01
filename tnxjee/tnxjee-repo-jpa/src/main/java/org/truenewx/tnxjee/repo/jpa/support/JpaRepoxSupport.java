@@ -68,13 +68,15 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         } else {
             String orderString = OqlUtil.buildOrderString(orders);
             if (StringUtils.isNotBlank(orderString)) {
-                if (recordQl instanceof StringBuffer) {
+                if (recordQl instanceof StringBuilder) {
+                    ((StringBuilder) recordQl).append(orderString);
+                } else if (recordQl instanceof StringBuffer) {
                     ((StringBuffer) recordQl).append(orderString);
                 } else {
                     recordQl = recordQl + orderString;
                 }
             }
-            
+
             // 分页查询但未指定取数语句，未取总数，则多查询一条记录，以判断是否还有更多数据
             if (pageSize > 0 && totalQl == null) {
                 records = getAccessTemplate().listWithOneMore(recordQl, params, pageSize, pageNo);
@@ -209,7 +211,7 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return maxValue;
     }
 
-    protected final boolean doIncreaseNumber(StringBuffer ql, Map<String, Object> params, String propertyName,
+    protected final boolean doIncreaseNumber(StringBuilder ql, Map<String, Object> params, String propertyName,
             boolean positive, Number limit) {
         if (positive) { // 增量为正时需限定最大值
             Number maxValue = limit == null ? getNumberPropertyMaxValue(propertyName) : limit;

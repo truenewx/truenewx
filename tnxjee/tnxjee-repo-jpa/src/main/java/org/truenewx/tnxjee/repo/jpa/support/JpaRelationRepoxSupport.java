@@ -29,15 +29,15 @@ public abstract class JpaRelationRepoxSupport<T extends Relation<L, R>, L extend
     public T find(L leftId, R rightId) {
         if (leftId != null && rightId != null) {
             Map<String, Object> params = new HashMap<>();
-            StringBuffer ql = buildQlById(params, leftId, rightId);
+            StringBuilder ql = buildQlById(params, leftId, rightId);
             return getAccessTemplate().first(ql, params);
         }
         return null;
     }
 
-    private StringBuffer buildQlById(Map<String, Object> params, L leftId, R rightId) {
+    private StringBuilder buildQlById(Map<String, Object> params, L leftId, R rightId) {
         Binate<String, String> idProperty = getIdProperty();
-        StringBuffer ql = new StringBuffer("from ").append(getEntityName()).append(" r where r.")
+        StringBuilder ql = new StringBuilder("from ").append(getEntityName()).append(" r where r.")
                 .append(idProperty.getLeft()).append("=:leftId and r.")
                 .append(idProperty.getRight()).append("=:rightId");
         params.put("leftId", leftId);
@@ -49,7 +49,7 @@ public abstract class JpaRelationRepoxSupport<T extends Relation<L, R>, L extend
     public boolean exists(L leftId, R rightId) {
         if (leftId != null && rightId != null) {
             Map<String, Object> params = new HashMap<>();
-            StringBuffer ql = buildQlById(params, leftId, rightId);
+            StringBuilder ql = buildQlById(params, leftId, rightId);
             ql.insert(0, "select count(*) ");
             return getAccessTemplate().count(ql, params) > 0;
         }
@@ -60,7 +60,7 @@ public abstract class JpaRelationRepoxSupport<T extends Relation<L, R>, L extend
     public void delete(L leftId, R rightId) {
         if (leftId != null && rightId != null) {
             Map<String, Object> params = new HashMap<>();
-            StringBuffer ql = buildQlById(params, leftId, rightId);
+            StringBuilder ql = buildQlById(params, leftId, rightId);
             ql.insert(0, "delete ");
             getAccessTemplate().update(ql, params);
         }
@@ -71,7 +71,7 @@ public abstract class JpaRelationRepoxSupport<T extends Relation<L, R>, L extend
         double stepValue = step.doubleValue();
         if (stepValue != 0) { // 增量不为0时才处理
             Binate<String, String> idProperty = getIdProperty();
-            StringBuffer hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
+            StringBuilder hql = new StringBuilder("update ").append(getEntityName()).append(" set ")
                     .append(propertyName).append(Strings.EQUAL).append(propertyName)
                     .append("+:step where ").append(idProperty.getLeft()).append(Strings.EQUAL)
                     .append("=:leftId and ").append(idProperty.getRight()).append("=:rightId");

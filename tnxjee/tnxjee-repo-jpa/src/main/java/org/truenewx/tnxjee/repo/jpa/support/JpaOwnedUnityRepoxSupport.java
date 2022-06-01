@@ -33,7 +33,7 @@ public abstract class JpaOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K ex
         if (ownerProperty == null) {
             throw new UnsupportedOperationException();
         }
-        StringBuffer ql = new StringBuffer("select count(*) from ").append(getEntityName())
+        StringBuilder ql = new StringBuilder("select count(*) from ").append(getEntityName())
                 .append(" e where e.").append(ownerProperty).append("=:owner");
         return getAccessTemplate().count(ql.toString(), "owner", owner);
     }
@@ -51,7 +51,7 @@ public abstract class JpaOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K ex
             }
             return null;
         }
-        StringBuffer ql = new StringBuffer("from ").append(getEntityName()).append(" e where e.")
+        StringBuilder ql = new StringBuilder("from ").append(getEntityName()).append(" e where e.")
                 .append(ownerProperty).append("=:owner and e.id=:id");
         Map<String, Object> params = new HashMap<>();
         params.put("owner", owner);
@@ -64,7 +64,7 @@ public abstract class JpaOwnedUnityRepoxSupport<T extends OwnedUnity<K, O>, K ex
         double stepValue = step.doubleValue();
         if (stepValue != 0) { // 增量不为0时才处理
             Map<String, Object> params = new HashMap<>();
-            StringBuffer ql = buildIncreaseQl(id, propertyName, step, params);
+            StringBuilder ql = buildIncreaseQl(id, propertyName, step, params);
 
             String ownerProperty = getOwnerProperty();
             if (owner != null && ownerProperty != null) {
