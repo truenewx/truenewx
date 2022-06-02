@@ -7,10 +7,10 @@
                 :width="util.string.getPixelString(actionWidth)" v-if="updatable || removable">
                 <template #default="scope">
                     <slot name="actionPrepend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>
-                    <el-button type="text" @click="toUpdate(scope.$index)" v-if="updatable">
+                    <el-button type="primary" link @click="toUpdate(scope.$index)" v-if="updatable">
                         {{ updateText }}
                     </el-button>
-                    <el-button type="text" @click="toRemove(scope.$index)" v-if="removable">
+                    <el-button type="primary" link @click="toRemove(scope.$index)" v-if="removable">
                         {{ removeText }}
                     </el-button>
                     <slot name="actionAppend" :$index="scope.$index" :row="scope.row" :column="scope.column"></slot>

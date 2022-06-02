@@ -29,7 +29,7 @@ module.exports = {
             }
             if (lib.map) {
                 copyPluginPatterns.push({
-                    from: './node_modules/' + from + '.map',
+                    from: './node_modules/' + lib.path + lib.map,
                     to: './libs/js/',
                 });
             }

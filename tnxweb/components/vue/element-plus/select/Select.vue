@@ -12,7 +12,7 @@
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
-            <el-button type="text" :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
+            <el-button link :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
             </el-button>
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme"
@@ -29,11 +29,12 @@
     </div>
     <div class="tnxel-text-button-group d-flex flex-wrap" v-else-if="selector === 'text' || selector === 'texts'">
         <template v-if="items">
-            <el-button type="text" :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
+            <el-button link :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
             </el-button>
-            <el-button v-for="item in items" :key="item[valueName]" :type="isSelected(item[valueName]) ? '' : 'text'"
-                :size="size" :data-value="item[valueName]" plain @click="select(item[valueName], $event)">
+            <el-button v-for="item in items" :key="item[valueName]"
+                :link="!isSelected(item[valueName])" :plain="isSelected(item[valueName])"
+                :size="size" :data-value="item[valueName]" @click="select(item[valueName], $event)">
                 <i :class="item[iconName]" v-if="item[iconName]"></i>
                 <span>{{ item[textName] }}</span>
             </el-button>
@@ -348,19 +349,23 @@ export default {
     margin-right: unset;
 }
 
-.tnxel-tag-group .el-button--text,
-.tnxel-text-button-group .el-button--text {
+.tnxel-tag-group .el-button.is-link,
+.tnxel-text-button-group .el-button.is-link {
     color: unset;
 }
 
-.tnxel-tag-group .el-button--text:hover,
-.tnxel-text-button-group .el-button--text:hover {
+.tnxel-tag-group .el-button.is-link:hover,
+.tnxel-text-button-group .el-button.is-link:hover {
     color: var(--el-color-primary);
     border-color: transparent;
 }
 
-.tnxel-text-button-group .el-button:not(.el-button--text) {
+.tnxel-text-button-group .el-button.is-plain {
     border-color: var(--el-color-primary);
     color: var(--el-color-primary);
+}
+
+.tnxel-text-button-group .el-button + .el-button {
+    margin-left: 0;
 }
 </style>

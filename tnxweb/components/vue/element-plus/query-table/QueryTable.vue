@@ -31,10 +31,11 @@
                 <tnxel-button class="py-0 px-1 mx-2 border-0" icon="Top" tooltip="回到顶部" plain
                     @click="scrollToTop"/>
                 <tnxel-icon class="text-secondary" value="Loading" :size="18" v-if="querying"/>
-                <el-button type="text" class="m-0" @click="onPagedChange(paged.pageNo + 1)" v-else-if="paged.morePage">
+                <el-button type="primary" link class="m-0" @click="onPagedChange(paged.pageNo + 1)"
+                    v-else-if="paged.morePage">
                     加载更多
                 </el-button>
-                <el-button type="text" class="text-secondary" v-else>已没有更多</el-button>
+                <el-button type="info" link v-else>已没有更多</el-button>
                 <tnxel-button class="py-0 px-1 mx-2 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
             </template>
         </el-table>

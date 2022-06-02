@@ -7,6 +7,7 @@
             :placeholder="disabled ? '未设置' : placeholder" :disabled="disabled"
             :step="step || Math.pow(10, -this.scale)" step-strictly
             :precision="scale"
+            :value-on-clear="null"
             @change="onChange"
             @blur="$emit('blur', $event)"/>
         <div class="el-input-group__append" v-if="suffix">{{ suffix }}</div>

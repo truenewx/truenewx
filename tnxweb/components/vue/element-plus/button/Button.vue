@@ -19,7 +19,8 @@
             </template>
         </el-dropdown>
         <el-button :type="type" :class="className" :disabled="disabled" :title="title" @click="clickButton" :size="size"
-            :loading="loading" :plain="plain" :autofocus="autofocus" :round="round" :circle="circle" v-else>
+            :loading="loading" :plain="plain" :link="link" :text="text" :bg="bg" :autofocus="autofocus" :round="round"
+            :circle="circle" v-else>
             <tnxel-icon :value="icon" v-if="icon"/>
             <span v-if="!hiddenCaption && ($slots.default || menuItem)">
                 <slot>{{ menuItem ? menuItem.caption : '' }}</slot>
@@ -52,6 +53,9 @@ export default {
         size: String,
         loading: Boolean,
         plain: Boolean,
+        link: Boolean,
+        text: Boolean,
+        bg: Boolean,
         autofocus: Boolean,
         round: Boolean,
         circle: Boolean,

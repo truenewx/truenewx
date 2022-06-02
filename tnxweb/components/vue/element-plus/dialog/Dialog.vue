@@ -10,7 +10,7 @@
         :center="options.center"
         :before-close="beforeClose"
         @closed="onClosed">
-        <template #title>
+        <template #header>
             <div class="tnxel-dialog-title" :class="mergeClass({'border-bottom': title})" v-html="title"
                 v-if="title || options['show-close']"></div>
         </template>
