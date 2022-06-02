@@ -1,7 +1,25 @@
 // tnxvue-cli.js
+const UglifyPlugin = require('uglifyjs-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 module.exports = {
-    buildCopyPluginPatterns(config, dependencies, libs) {
-        let copyPluginPatterns = [];
+    uglify(config, options) {
+        Object.assign(config, {
+            optimization: {
+                minimizer: [new UglifyPlugin({
+                    uglifyOptions: Object.assign({
+                        warnings: false,
+                        compress: {
+                            drop_console: false,
+                            drop_debugger: true,
+                        }
+                    }, options)
+                })]
+            }
+        });
+    },
+    copy(config, dependencies, libs, patterns) {
+        let pluginPatterns = [];
         for (let lib of libs) {
             let from = lib.path;
             let to = 'libs/js/' + lib.name;
@@ -19,7 +37,7 @@ module.exports = {
             if (!to.endsWith('/')) {
                 to += '.js';
             }
-            copyPluginPatterns.push({
+            pluginPatterns.push({
                 from: './node_modules/' + from,
                 to: './' + to,
             });
@@ -28,12 +46,15 @@ module.exports = {
                 process.env['VUE_APP_LIBS_' + globalVarName] = process.env.VUE_APP_VIEW_BASE_URL + to;
             }
             if (lib.map) {
-                copyPluginPatterns.push({
+                pluginPatterns.push({
                     from: './node_modules/' + lib.path + lib.map,
                     to: './libs/js/',
                 });
             }
         }
-        return copyPluginPatterns;
-    }
+        if (patterns?.length) {
+            pluginPatterns = pluginPatterns.concat(patterns);
+        }
+        config.plugins.push(new CopyWebpackPlugin(pluginPatterns));
+    },
 }
