@@ -224,7 +224,8 @@ tnxel-dialog {
 }
 
 .el-dialog__header .el-dialog__headerbtn {
-    margin-top: -0.5rem;
+    width: 48px;
+    height: 48px;
 }
 
 .tnxel-dialog-title {
