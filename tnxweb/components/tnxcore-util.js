@@ -1040,8 +1040,8 @@ export const BomUtil = {
     /**
      * 唯一地打开指定地址的窗口
      * @param url 地址
-     * @param reload 函数或布尔值。<br/>
-     *               为函数时，参数为(win, url)，返回结果：win和url是否匹配，返回true时仅简单激活win，返回false时用新窗口打开url；<br/>
+     * @param reload 函数或布尔值。<br>
+     *               为函数时，参数为(win, url)，返回结果：win和url是否匹配，返回true时仅简单激活win，返回false时用新窗口打开url；<br>
      *               为布尔值时，指定激活匹配窗口后是否重新加载页面；
      */
     openUniquely(url, reload) {
