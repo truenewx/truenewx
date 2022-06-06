@@ -22,6 +22,7 @@ public class ArrayUtil {
      *
      * @param array     数组
      * @param predicate 断言，为null时忽略
+     * @param <T>       记录类型
      * @return 第一条记录
      */
     public static <T> T getFirst(T[] array, Predicate<T> predicate) {
@@ -44,9 +45,9 @@ public class ArrayUtil {
      *
      * @param array     数组
      * @param predicate 断言条件，为null时忽略
+     * @param <T>       元素类型
      * @return 满足条件的最后一个元素
      */
-
     public static <T> T getLast(T[] array, Predicate<T> predicate) {
         T result = null;
         if (array != null) {
@@ -70,6 +71,7 @@ public class ArrayUtil {
      *
      * @param array 对象数组
      * @param index 索引下标
+     * @param <T>   对象类型
      * @return 指定索引下标处的对象
      */
     public static <T> T get(T[] array, int index) {

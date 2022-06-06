@@ -112,7 +112,6 @@ public abstract class WechatMpAccessor extends WechatPublicAppAccessSupport {
      * @param openId               用户OpenId（用户需在近两小时访问过当前公众号/小程序）
      * @param text                 文本内容
      * @param fieldCaptionSupplier 字段名称供应者
-     * @ 如果非法
      */
     public void validateTextLegality(String openId, String text, Supplier<String> fieldCaptionSupplier) {
         if (StringUtils.isNotBlank(text)) {
@@ -149,8 +148,8 @@ public abstract class WechatMpAccessor extends WechatPublicAppAccessSupport {
      * 校验指定图片的合法性
      *
      * @param in                   图片输入流
+     * @param mimeType             mime类型
      * @param fieldCaptionSupplier 字段名称供应者
-     * @ 如果非法
      */
     public void validateImageLegality(InputStream in, String mimeType, Supplier<String> fieldCaptionSupplier) {
         String url = "/wxa/img_sec_check?access_token=" + getAccessToken();

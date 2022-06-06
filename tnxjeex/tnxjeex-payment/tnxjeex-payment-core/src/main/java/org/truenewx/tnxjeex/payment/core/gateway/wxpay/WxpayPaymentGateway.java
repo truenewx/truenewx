@@ -21,15 +21,15 @@ import org.truenewx.tnxjeex.payment.core.gateway.PaymentChannel;
  */
 public class WxpayPaymentGateway extends AbstractPaymentGateway {
 
-    private WXPay wxpay;
+    private WxPay wxpay;
     private String tradeType;
 
     public WxpayPaymentGateway(SimpleWxpayConfig config, boolean useSandbox) throws Exception {
-        WXPay wxpay = new WXPay(config, false, useSandbox);
+        WxPay wxpay = new WxPay(config, false, useSandbox);
         if (useSandbox) {
             SimpleWxpayConfig sandboxConfig = config.clone();
             sandboxConfig.setApiKey(getSandboxSignKey(wxpay));
-            wxpay = new WXPay(sandboxConfig, false, true);
+            wxpay = new WxPay(sandboxConfig, false, true);
         }
         this.wxpay = wxpay;
     }
@@ -43,14 +43,14 @@ public class WxpayPaymentGateway extends AbstractPaymentGateway {
         this.tradeType = tradeType;
     }
 
-    private static String getSandboxSignKey(WXPay wxpay) throws Exception {
-        WXPayConfig config = wxpay.getConfig();
+    private static String getSandboxSignKey(WxPay wxpay) throws Exception {
+        WxPayConfig config = wxpay.getConfig();
         Map<String, String> reqData = new HashMap<>();
         reqData.put("mch_id", config.getMerchantId());
-        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
-        reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getApiKey(), wxpay.getSignType()));
+        reqData.put("nonce_str", WxPayUtil.generateNonceStr());
+        reqData.put("sign", WxPayUtil.generateSignature(reqData, config.getApiKey(), wxpay.getSignType()));
         String response = wxpay.requestWithoutCert("/sandboxnew/pay/getsignkey", reqData, 3000, 3000);
-        Map<String, String> result = WXPayUtil.xmlToMap(response);
+        Map<String, String> result = WxPayUtil.xmlToMap(response);
         return result.get("sandbox_signkey");
     }
 
@@ -78,17 +78,17 @@ public class WxpayPaymentGateway extends AbstractPaymentGateway {
 
         try {
             Map<String, String> responseData = this.wxpay.unifiedOrder(requestData);
-            if (!WXPayConstants.SUCCESS.equals(responseData.get("return_code"))) {
+            if (!WxPayConstants.SUCCESS.equals(responseData.get("return_code"))) {
                 throw new RuntimeException(responseData.get("return_msg"));
             }
             Map<String, String> params = new LinkedHashMap<>();
-            WXPayConfig config = this.wxpay.getConfig();
+            WxPayConfig config = this.wxpay.getConfig();
             params.put("appId", config.getAppId());
-            params.put("timeStamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
-            params.put("nonceStr", WXPayUtil.generateNonceStr());
+            params.put("timeStamp", String.valueOf(WxPayUtil.getCurrentTimestamp()));
+            params.put("nonceStr", WxPayUtil.generateNonceStr());
             params.put("package", "prepay_id=" + responseData.get("prepay_id"));
             params.put("signType", this.wxpay.getSignTypeValue());
-            params.put("paySign", WXPayUtil.generateSignature(params, config.getApiKey(), this.wxpay.getSignType()));
+            params.put("paySign", WxPayUtil.generateSignature(params, config.getApiKey(), this.wxpay.getSignType()));
             // 该场景下JS客户端由JSAPI库执行提交，不需要服务端指定提交地址和提交方式
             return new PaymentRequestParameter(params);
         } catch (Exception e) {
@@ -103,17 +103,17 @@ public class WxpayPaymentGateway extends AbstractPaymentGateway {
     @Override
     public PaymentResult getResult(boolean confirmed, Terminal terminal, Map<String, String> params)
             throws BusinessException {
-        if (confirmed && WXPayConstants.SUCCESS.equals(params.get("return_code"))) {
+        if (confirmed && WxPayConstants.SUCCESS.equals(params.get("return_code"))) {
             try {
-                if (WXPayUtil.isSignatureValid(params, this.wxpay.getConfig().getApiKey(), this.wxpay.getSignType())) {
+                if (WxPayUtil.isSignatureValid(params, this.wxpay.getConfig().getApiKey(), this.wxpay.getSignType())) {
                     String gatewayPaymentNo = params.get("transaction_id");
                     BigDecimal amount = new BigDecimal(params.get("total_fee")).divide(new BigDecimal(100), 2,
                             RoundingMode.HALF_UP);
                     String orderNo = params.get("out_trade_no");
                     Map<String, String> responseData = new LinkedHashMap<>();
-                    responseData.put("return_code", WXPayConstants.SUCCESS);
+                    responseData.put("return_code", WxPayConstants.SUCCESS);
                     responseData.put("return_msg", "OK");
-                    String response = WXPayUtil.mapToXml(responseData);
+                    String response = WxPayUtil.mapToXml(responseData);
                     return new PaymentResult(gatewayPaymentNo, amount, terminal, orderNo, response);
                 }
             } catch (Exception e) {

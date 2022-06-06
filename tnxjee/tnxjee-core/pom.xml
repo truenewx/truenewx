@@ -58,5 +58,9 @@
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
         </dependency>
+        <dependency><!-- 解决找不到javax.annotation.meta.When的错误 -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
     </dependencies>
 </project>

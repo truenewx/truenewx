@@ -5,7 +5,7 @@ import org.apache.http.client.HttpClient;
 /**
  * 微信支付常量
  */
-class WXPayConstants {
+class WxPayConstants {
 
     public enum SignType {
         MD5, HMACSHA256

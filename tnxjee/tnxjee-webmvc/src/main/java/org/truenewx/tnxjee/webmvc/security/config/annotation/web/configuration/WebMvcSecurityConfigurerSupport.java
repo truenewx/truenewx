@@ -61,41 +61,31 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
         this.urlProvider = urlProvider;
     }
 
-    /**
-     * 获取访问资源需要具备的权限
-     */
+    // 获取访问资源需要具备的权限
     @Bean
     public WebFilterInvocationSecurityMetadataSource securityMetadataSource() {
         return new WebFilterInvocationSecurityMetadataSource();
     }
 
-    /**
-     * 匿名用户试图访问登录用户才能访问的资源后的错误处理
-     */
+    // 匿名用户试图访问登录用户才能访问的资源后的错误处理
     @Bean
     public WebAuthenticationEntryPoint authenticationEntryPoint() {
         return new WebAuthenticationEntryPoint(this.urlProvider);
     }
 
-    /**
-     * 登录用户访问资源的权限判断
-     */
+    // 登录用户访问资源的权限判断
     @Bean
     public UserAuthorityAccessDecisionManager accessDecisionManager() {
         return new UserAuthorityAccessDecisionManager();
     }
 
-    /**
-     * 登录用户越权访问资源后的错误处理
-     */
+    // 登录用户越权访问资源后的错误处理
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedBusinessExceptionHandler();
     }
 
-    /**
-     * 登出成功后的处理
-     */
+    // 登出成功后的处理
     @Bean
     public LogoutSuccessHandler logoutSuccessHandler() {
         SimpleUrlLogoutSuccessHandler successHandler = new SimpleUrlLogoutSuccessHandler();

@@ -33,7 +33,7 @@ public class ToHtmlTag extends SimpleTagSupport {
             value = this.notNull ? Strings.SPACE : Strings.EMPTY;
         }
         value = value.replaceAll(Strings.SPACE, "&nbsp;");
-        value = value.replaceAll("\n", "<br/>");
+        value = value.replaceAll("\n", "<br>");
         getJspContext().getOut().print(value);
     }
 

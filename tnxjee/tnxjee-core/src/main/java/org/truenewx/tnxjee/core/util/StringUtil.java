@@ -1194,6 +1194,7 @@ public class StringUtil {
      *
      * @param s        字符串
      * @param function 转换函数
+     * @param <R>      结果类型
      * @return 处理后的结果，指定字符串为空时返回null
      */
     public static <R> R ifNotBlank(String s, Function<String, R> function) {
@@ -1206,6 +1207,7 @@ public class StringUtil {
      * @param s             字符串
      * @param function      转换函数
      * @param defaultResult 指定字符串为空时的默认返回结果
+     * @param <R>           结果类型
      * @return 处理后的结果
      */
     public static <R> R ifNotBlankElse(String s, Function<String, R> function, R defaultResult) {
@@ -1221,6 +1223,7 @@ public class StringUtil {
      * @param s           被插入的字符串
      * @param insertChars 插入的字符串
      * @param justified   字符串两端是否也都插入
+     * @return 结果字符串
      */
     public static String insertEach(String s, String insertChars, boolean justified) {
         if (s == null) {

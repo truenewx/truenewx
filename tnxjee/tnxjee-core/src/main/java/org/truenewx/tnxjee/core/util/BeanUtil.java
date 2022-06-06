@@ -51,6 +51,7 @@ public class BeanUtil {
      *
      * @param bean         bean对象
      * @param propertyName 属性名称
+     * @param <T>          属性类型
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
@@ -312,7 +313,9 @@ public class BeanUtil {
      * @param map          Map
      * @param clazz        bean类型
      * @param excludedKeys 排除的关键字
+     * @param <T>          bean类型
      * @return bean对象
+     * @throws ReflectiveOperationException bean类型没有无参构造函数
      */
     public static <T> T toBean(Map<String, Object> map, Class<T> clazz, String... excludedKeys)
             throws ReflectiveOperationException {

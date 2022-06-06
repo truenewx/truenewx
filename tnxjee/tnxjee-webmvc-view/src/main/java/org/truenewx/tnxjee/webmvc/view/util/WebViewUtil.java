@@ -34,7 +34,9 @@ public class WebViewUtil {
     /**
      * 直接重定向至指定URL。请求将被重置，POST请求参数将丢失，浏览器地址栏显示的URL将更改为指定URL。 URL如果为绝对路径，则必须以http://或https://开头
      *
-     * @param url URL
+     * @param request  请求
+     * @param response 响应
+     * @param url      URL
      * @throws IOException 如果重定向时出现IO错误
      */
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String url)

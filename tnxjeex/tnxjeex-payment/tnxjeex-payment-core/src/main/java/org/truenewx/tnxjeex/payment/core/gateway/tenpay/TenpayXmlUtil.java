@@ -11,28 +11,20 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.truenewx.tnxjee.core.Strings;
 
 /**
- * xml工具类
+ * 财付通xml工具类
  */
 public class TenpayXmlUtil {
 
-    /**
-     * 解析xml,返回第一级元素键值对。如果第一级元素有子节点，则此节点的值是子节点的xml数据。
-     *
-     * @param strxml
-     * @return
-     * @throws JDOMException
-     * @throws IOException
-     */
-    public static Map<String, String> doXmlParse(String strxml) throws JDOMException, IOException {
-        if (null == strxml || "".equals(strxml)) {
+    // 解析xml,返回第一级元素键值对。如果第一级元素有子节点，则此节点的值是子节点的xml数据
+    public static Map<String, String> doXmlParse(String xml) throws JDOMException, IOException {
+        if (null == xml || "".equals(xml)) {
             return null;
         }
 
         Map<String, String> m = new HashMap<>();
-        InputStream in = HttpClientUtil.String2Inputstream(strxml);
+        InputStream in = HttpClientUtil.String2Inputstream(xml);
         SAXBuilder builder = new SAXBuilder();
         Document doc = builder.build(in);
         Element root = doc.getRootElement();
@@ -58,12 +50,7 @@ public class TenpayXmlUtil {
         return m;
     }
 
-    /**
-     * 获取子结点的xml
-     *
-     * @param children
-     * @return String
-     */
+    // 获取子结点的xml
     public static String getChildrenText(List<?> children) {
         StringBuffer sb = new StringBuffer();
         if (!children.isEmpty()) {
@@ -85,42 +72,29 @@ public class TenpayXmlUtil {
         return sb.toString();
     }
 
-    /**
-     * 获取xml编码字符集
-     *
-     * @param strxml
-     * @return
-     * @throws IOException
-     * @throws JDOMException
-     */
-    public static String getXmlEncoding(String strxml) throws JDOMException, IOException {
-        InputStream in = HttpClientUtil.String2Inputstream(strxml);
+    // 获取xml编码字符集
+    public static String getXmlEncoding(String xml) throws JDOMException, IOException {
+        InputStream in = HttpClientUtil.String2Inputstream(xml);
         SAXBuilder builder = new SAXBuilder();
         Document doc = builder.build(in);
         in.close();
         return (String) doc.getProperty("encoding");
     }
 
-    /**
-     * 获取xml格式字符串
-     *
-     * @param xmlMap
-     * @return
-     * @author liuzhiyi
-     */
+    // 获取xml格式字符串
     public static String parseXmlString(Map<?, ?> xmlMap) {
         if (xmlMap != null && !xmlMap.isEmpty()) {
-            StringBuffer strxml = new StringBuffer("<xml>");
+            StringBuilder xml = new StringBuilder("<xml>");
             for (Object key : xmlMap.keySet()) {
                 Object value = xmlMap.get(key);
-                strxml.append("<" + key.toString() + ">");
-                strxml.append(value.toString());
-                strxml.append("</" + key.toString() + ">");
+                xml.append("<").append(key.toString()).append(">");
+                xml.append(value.toString());
+                xml.append("</").append(key.toString()).append(">");
             }
-            strxml.append("</xml>");
-            return strxml.toString();
+            xml.append("</xml>");
+            return xml.toString();
         }
-        return Strings.EMPTY;
+        return "";
     }
 
 }

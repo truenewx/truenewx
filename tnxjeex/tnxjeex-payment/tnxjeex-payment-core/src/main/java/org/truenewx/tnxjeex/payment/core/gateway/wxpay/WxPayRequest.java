@@ -1,7 +1,5 @@
 package org.truenewx.tnxjeex.payment.core.gateway.wxpay;
 
-import static org.truenewx.tnxjeex.payment.core.gateway.wxpay.WXPayConstants.USER_AGENT;
-
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -27,10 +25,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
-class WXPayRequest {
-    private WXPayConfig config;
+import static org.truenewx.tnxjeex.payment.core.gateway.wxpay.WxPayConstants.USER_AGENT;
 
-    public WXPayRequest(WXPayConfig config) throws Exception {
+class WxPayRequest {
+    private WxPayConfig config;
+
+    public WxPayRequest(WxPayConfig config) throws Exception {
 
         this.config = config;
     }
@@ -67,7 +67,7 @@ class WXPayRequest {
             sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
 
             SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext,
-                    new String[] { "TLSv1" }, null, new DefaultHostnameVerifier());
+                    new String[]{ "TLSv1" }, null, new DefaultHostnameVerifier());
 
             connManager = new BasicHttpClientConnectionManager(RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("http", PlainConnectionSocketFactory.getSocketFactory())
@@ -104,51 +104,51 @@ class WXPayRequest {
             boolean useCert, boolean autoReport) throws Exception {
         Exception exception = null;
         long elapsedTimeMillis = 0;
-        long startTimestampMs = WXPayUtil.getCurrentTimestampMs();
+        long startTimestampMs = WxPayUtil.getCurrentTimestampMs();
         boolean firstHasDnsErr = false;
         boolean firstHasConnectTimeout = false;
         boolean firstHasReadTimeout = false;
-        IWXPayDomain.DomainInfo domainInfo = this.config.getWXPayDomain().getDomain(this.config);
+        WxPayDomain.DomainInfo domainInfo = this.config.getWXPayDomain().getDomain(this.config);
         if (domainInfo == null) {
             throw new Exception("WXPayConfig.getWXPayDomain().getDomain() is empty or null");
         }
         try {
             String result = requestOnce(domainInfo.domain, urlSuffix, uuid, data, connectTimeoutMs, readTimeoutMs,
                     useCert);
-            elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
+            elapsedTimeMillis = WxPayUtil.getCurrentTimestampMs() - startTimestampMs;
             this.config.getWXPayDomain().report(domainInfo.domain, elapsedTimeMillis, null);
-            WXPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
+            WxPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
                     domainInfo.primaryDomain, connectTimeoutMs, readTimeoutMs, firstHasDnsErr, firstHasConnectTimeout,
                     firstHasReadTimeout);
             return result;
         } catch (UnknownHostException ex) { // dns 解析错误，或域名不存在
             exception = ex;
             firstHasDnsErr = true;
-            elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
-            WXPayUtil.getLogger().warn("UnknownHostException for domainInfo {}", domainInfo);
-            WXPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
+            elapsedTimeMillis = WxPayUtil.getCurrentTimestampMs() - startTimestampMs;
+            WxPayUtil.getLogger().warn("UnknownHostException for domainInfo {}", domainInfo);
+            WxPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
                     domainInfo.primaryDomain, connectTimeoutMs, readTimeoutMs, firstHasDnsErr, firstHasConnectTimeout,
                     firstHasReadTimeout);
         } catch (ConnectTimeoutException ex) {
             exception = ex;
             firstHasConnectTimeout = true;
-            elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
-            WXPayUtil.getLogger().warn("connect timeout happened for domainInfo {}", domainInfo);
-            WXPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
+            elapsedTimeMillis = WxPayUtil.getCurrentTimestampMs() - startTimestampMs;
+            WxPayUtil.getLogger().warn("connect timeout happened for domainInfo {}", domainInfo);
+            WxPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
                     domainInfo.primaryDomain, connectTimeoutMs, readTimeoutMs, firstHasDnsErr, firstHasConnectTimeout,
                     firstHasReadTimeout);
         } catch (SocketTimeoutException ex) {
             exception = ex;
             firstHasReadTimeout = true;
-            elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
-            WXPayUtil.getLogger().warn("timeout happened for domainInfo {}", domainInfo);
-            WXPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
+            elapsedTimeMillis = WxPayUtil.getCurrentTimestampMs() - startTimestampMs;
+            WxPayUtil.getLogger().warn("timeout happened for domainInfo {}", domainInfo);
+            WxPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
                     domainInfo.primaryDomain, connectTimeoutMs, readTimeoutMs, firstHasDnsErr, firstHasConnectTimeout,
                     firstHasReadTimeout);
         } catch (Exception ex) {
             exception = ex;
-            elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
-            WXPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
+            elapsedTimeMillis = WxPayUtil.getCurrentTimestampMs() - startTimestampMs;
+            WxPayReport.getInstance(this.config).report(uuid, elapsedTimeMillis, domainInfo.domain,
                     domainInfo.primaryDomain, connectTimeoutMs, readTimeoutMs, firstHasDnsErr, firstHasConnectTimeout,
                     firstHasReadTimeout);
         }

@@ -114,6 +114,7 @@ public class JsonUtil {
      *
      * @param json      JSON标准形式的字符串
      * @param beanClass 要转换的目标类型
+     * @param <T>       目标类型
      * @return 转换形成的对象
      */
     public static <T> T json2Bean(String json, Class<T> beanClass) {
@@ -168,6 +169,7 @@ public class JsonUtil {
      *
      * @param json          JSON标准形式的字符串
      * @param componentType 元素类型
+     * @param <T>           目标元素类型
      * @return 转换形成的对象List
      */
     public static <T> List<T> json2List(String json, Class<T> componentType) {
@@ -205,6 +207,7 @@ public class JsonUtil {
      *
      * @param json          JSON标准形式的字符串
      * @param componentType 元素类型
+     * @param <T>           目标元素类型
      * @return 转换形成的数组
      */
     @SuppressWarnings("unchecked")

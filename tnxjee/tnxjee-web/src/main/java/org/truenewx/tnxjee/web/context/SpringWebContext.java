@@ -72,6 +72,7 @@ public class SpringWebContext {
      * 获取request的属性值
      *
      * @param name 属性名
+     * @param <T>  属性类型
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
@@ -83,6 +84,7 @@ public class SpringWebContext {
      * 移除request的属性
      *
      * @param name 属性名
+     * @param <T>  属性类型
      * @return 被移除的属性值，没有该属性则返回null
      */
     @SuppressWarnings("unchecked")
@@ -109,6 +111,7 @@ public class SpringWebContext {
      * 从SESSION获取指定属性
      *
      * @param name 属性名
+     * @param <T>  属性类型
      * @param <T>  属性类型
      * @return 属性值
      */
@@ -155,6 +158,7 @@ public class SpringWebContext {
      * 移除SESSION中的指定属性
      *
      * @param name 属性名
+     * @param <T>  属性类型
      * @return 被移除的属性值，没有该属性则返回null
      */
     @SuppressWarnings("unchecked")

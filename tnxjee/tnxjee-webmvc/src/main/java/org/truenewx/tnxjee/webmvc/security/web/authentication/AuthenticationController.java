@@ -41,6 +41,9 @@ public class AuthenticationController {
     /**
      * 判断当前是否具有指定授权，匿名即可访问
      *
+     * @param type       类型
+     * @param rank       级别
+     * @param permission 许可
      * @return 是否具有指定授权
      */
     @GetMapping("/granted")
@@ -57,6 +60,11 @@ public class AuthenticationController {
 
     /**
      * 校验登录用户访问权限，匿名用户由框架抛出异常
+     *
+     * @param type       类型
+     * @param rank       级别
+     * @param permission 许可
+     * @param response   响应
      */
     @GetMapping("/validate")
     @ConfigAuthority
@@ -71,6 +79,9 @@ public class AuthenticationController {
     /**
      * 获取登录地址，已登录则返回null，未登录才返回登录地址
      *
+     * @param type       类型
+     * @param rank       级别
+     * @param permission 许可
      * @return 登录地址
      */
     @GetMapping("/login-url")

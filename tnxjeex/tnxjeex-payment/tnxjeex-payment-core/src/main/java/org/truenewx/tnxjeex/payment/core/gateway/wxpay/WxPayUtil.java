@@ -5,11 +5,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,11 +18,11 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.truenewx.tnxjeex.payment.core.gateway.wxpay.WXPayConstants.SignType;
+import org.truenewx.tnxjeex.payment.core.gateway.wxpay.WxPayConstants.SignType;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-class WXPayUtil {
+class WxPayUtil {
 
     private static String SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -42,7 +38,7 @@ class WXPayUtil {
     public static Map<String, String> xmlToMap(String strXML) throws Exception {
         try {
             Map<String, String> data = new HashMap<>();
-            DocumentBuilder documentBuilder = WXPayXmlUtil.newDocumentBuilder();
+            DocumentBuilder documentBuilder = WxPayXmlUtil.newDocumentBuilder();
             InputStream stream = new ByteArrayInputStream(strXML.getBytes("UTF-8"));
             org.w3c.dom.Document doc = documentBuilder.parse(stream);
             doc.getDocumentElement().normalize();
@@ -61,7 +57,7 @@ class WXPayUtil {
             }
             return data;
         } catch (Exception ex) {
-            WXPayUtil.getLogger().warn("Invalid XML, can not convert to map. Error message: {}. XML content: {}",
+            WxPayUtil.getLogger().warn("Invalid XML, can not convert to map. Error message: {}. XML content: {}",
                     ex.getMessage(), strXML);
             throw ex;
         }
@@ -76,7 +72,7 @@ class WXPayUtil {
      * @throws Exception
      */
     public static String mapToXml(Map<String, String> data) throws Exception {
-        org.w3c.dom.Document document = WXPayXmlUtil.newDocument();
+        org.w3c.dom.Document document = WxPayXmlUtil.newDocument();
         org.w3c.dom.Element root = document.createElement("xml");
         document.appendChild(root);
         for (String key : data.keySet()) {
@@ -127,7 +123,7 @@ class WXPayUtil {
     public static String generateSignedXml(Map<String, String> data, String key, SignType signType)
             throws Exception {
         String sign = generateSignature(data, key, signType);
-        data.put(WXPayConstants.FIELD_SIGN, sign);
+        data.put(WxPayConstants.FIELD_SIGN, sign);
         return mapToXml(data);
     }
 
@@ -141,10 +137,10 @@ class WXPayUtil {
      */
     public static boolean isSignatureValid(String xmlStr, String key) throws Exception {
         Map<String, String> data = xmlToMap(xmlStr);
-        if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
+        if (!data.containsKey(WxPayConstants.FIELD_SIGN)) {
             return false;
         }
-        String sign = data.get(WXPayConstants.FIELD_SIGN);
+        String sign = data.get(WxPayConstants.FIELD_SIGN);
         return generateSignature(data, key).equals(sign);
     }
 
@@ -170,10 +166,10 @@ class WXPayUtil {
      * @throws Exception
      */
     public static boolean isSignatureValid(Map<String, String> data, String key, SignType signType) throws Exception {
-        if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
+        if (!data.containsKey(WxPayConstants.FIELD_SIGN)) {
             return false;
         }
-        String sign = data.get(WXPayConstants.FIELD_SIGN);
+        String sign = data.get(WxPayConstants.FIELD_SIGN);
         return generateSignature(data, key, signType).equals(sign);
     }
 
@@ -203,7 +199,7 @@ class WXPayUtil {
         Arrays.sort(keyArray);
         StringBuilder sb = new StringBuilder();
         for (String k : keyArray) {
-            if (k.equals(WXPayConstants.FIELD_SIGN)) {
+            if (k.equals(WxPayConstants.FIELD_SIGN)) {
                 continue;
             }
             if (data.get(k).trim().length() > 0) {

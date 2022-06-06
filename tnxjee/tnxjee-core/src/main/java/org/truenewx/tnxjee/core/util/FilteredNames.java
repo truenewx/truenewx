@@ -28,14 +28,13 @@ public class FilteredNames {
      *
      * @param names 包含的名称集
      */
-    public FilteredNames addIncluded(String... names) {
+    public void addIncluded(String... names) {
         if (this.includes == null) {
             this.includes = new HashSet<>();
         }
         for (String property : names) {
             this.includes.add(property);
         }
-        return this;
     }
 
     /**
@@ -43,14 +42,13 @@ public class FilteredNames {
      *
      * @param names 排除的名称集
      */
-    public FilteredNames addExcluded(String... names) {
+    public void addExcluded(String... names) {
         if (this.excludes == null) {
             this.excludes = new HashSet<>();
         }
         for (String property : names) {
             this.excludes.add(property);
         }
-        return this;
     }
 
     /**

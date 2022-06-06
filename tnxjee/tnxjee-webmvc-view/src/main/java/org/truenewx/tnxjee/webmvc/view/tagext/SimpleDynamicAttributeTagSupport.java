@@ -75,6 +75,7 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      * 从Spring上下文容器中获取指定类型的bean对象
      *
      * @param beanClass bean类型
+     * @param <T>       bean类型
      * @return bean对象
      */
     protected final <T> T getBeanFromApplicationContext(Class<T> beanClass) {

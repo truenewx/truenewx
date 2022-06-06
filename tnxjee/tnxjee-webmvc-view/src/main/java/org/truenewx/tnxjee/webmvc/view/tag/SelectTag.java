@@ -33,13 +33,13 @@ public class SelectTag extends ItemTagSupport {
     /**
      * 在生成第一个条目之前调用，子类覆写可用于生成额外的条目
      */
-    protected void beforeFirstItem() throws IOException {
+    protected void beforeFirstItem() {
     }
 
     /**
      * 在生成最后一条目之后调用，子类覆写可用于生成额外的条目
      */
-    protected void afterLastItem() throws IOException {
+    protected void afterLastItem() {
     }
 
 }

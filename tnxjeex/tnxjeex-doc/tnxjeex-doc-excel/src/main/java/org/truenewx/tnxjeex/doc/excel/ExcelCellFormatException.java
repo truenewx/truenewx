@@ -20,6 +20,8 @@ public class ExcelCellFormatException extends ExcelCellException {
 
     /**
      * 构建无法读取的异常
+     *
+     * @param address 单元格地址
      */
     public ExcelCellFormatException(CellAddress address) {
         super(address, "error.tnxjeex.doc.excel.cell.unreadable");
@@ -27,6 +29,11 @@ public class ExcelCellFormatException extends ExcelCellException {
 
     /**
      * 构建格式错误的异常
+     *
+     * @param address      单元格地址
+     * @param expectedType 期望类型
+     * @param originalText 初始文本
+     * @param args         格式化参数
      */
     public ExcelCellFormatException(CellAddress address, String expectedType, String originalText, Object... args) {
         super(address, "error.tnxjeex.doc.excel.cell.format_error_" + expectedType, args);

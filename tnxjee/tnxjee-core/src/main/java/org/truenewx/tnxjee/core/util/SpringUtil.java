@@ -38,6 +38,7 @@ public class SpringUtil {
      *
      * @param context  Spring容器上下文
      * @param beanName bean名称
+     * @param <T>      bean类型
      * @return bean对象，如果找不到则返回null
      */
     @SuppressWarnings("unchecked")
@@ -54,6 +55,7 @@ public class SpringUtil {
      *
      * @param context   Spring容器上下文
      * @param beanClass bean类型
+     * @param <T>       bean类型
      * @return Spring容器上下文中指定类型的bean
      */
     public static <T> T getBeanByDefaultName(ApplicationContext context, Class<T> beanClass) {
@@ -72,6 +74,7 @@ public class SpringUtil {
      * @param context          Spring容器上下文
      * @param beanClass        bean类型
      * @param exclusiveClasses 排除的类型。该类型（一般为指定bean类型的子类）的bean不作为有效结果对象返回
+     * @param <T>              bean类型
      * @return Spring容器上下文中获取指定类型的第一个bean
      */
     public static <T> T getFirstBeanByClass(ApplicationContext context, Class<T> beanClass,

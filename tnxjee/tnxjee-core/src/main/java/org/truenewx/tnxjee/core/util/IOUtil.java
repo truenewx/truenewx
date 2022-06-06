@@ -96,6 +96,7 @@ public class IOUtil {
      * 执行指定命令行指令，如果等待毫秒数大于0，则当前线程等待指定毫秒数之后返回，
      *
      * @param command 命令行指令
+     * @return 执行结果
      */
     public static String executeCommand(String command) {
         String result = "";
@@ -384,7 +385,7 @@ public class IOUtil {
      * @param in     输入流
      * @param out    输出流
      * @param offset 偏移量
-     * @param length 期望复制长度，<0时表示复制剩余全部
+     * @param length 期望复制长度，小于0时表示复制剩余全部
      * @return 实际已复制的长度，无论复制过程中是否出现错误而中止
      */
     public static long copyAsPossible(InputStream in, OutputStream out, long offset, long length) {

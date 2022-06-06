@@ -44,7 +44,7 @@ public class UserGrantedAuthority implements GrantedAuthority {
      * 构建具有指定用户类型和级别所有权限的获权对象
      *
      * @param type 用户类型
-     * @param rank
+     * @param rank 用户级别
      * @return 具有指定用户类型和级别所有权限的获权对象
      */
     public static UserGrantedAuthority ofAll(String type, String rank) {

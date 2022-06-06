@@ -151,9 +151,7 @@ public class ExcelImportHelper {
         }
     }
 
-    /**
-     * 获取指定行指定列的单元格的值，如果出现读取错误，则将错误消息加入行数据模型中的字段错误集中
-     */
+    // 获取指定行指定列的单元格的值，如果出现读取错误，则将错误消息加入行数据模型中的字段错误集中
     @SuppressWarnings("unchecked")
     public <V> V getCellValue(ImportingExcelRowModel rowModel, ExcelRow row, int columnIndex, String fieldName,
             Locale locale) {
