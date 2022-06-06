@@ -111,7 +111,7 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @param locationUrl    定位地址
      * @param out            输出流
      * @param offset         输入流偏移量
-     * @param expectedLength 期望读取长度，<0表示读取整个文件
+     * @param expectedLength 期望读取长度，小于0表示读取整个文件
      * @return 实际读取的数据长度
      */
     long read(I userIdentity, String locationUrl, OutputStream out, long offset, long expectedLength);
@@ -121,7 +121,7 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      *
      * @param userIdentity 用户标识
      * @param locationUrl  定位地址
-     * @param limit        文件大小限制，如果>0，则文件大小超出该限制时不读取内容
+     * @param limit        文件大小限制，如果大于0，则文件大小超出该限制时不读取内容
      * @return 文件内容文本
      * @throws BusinessException 如果指定文件不是文本文件
      */

@@ -106,30 +106,22 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         getEntityManager().refresh(entity);
     }
 
-    /**
-     * 非分页查询
-     */
+    // 非分页查询
     public <T> List<T> list(CharSequence ql, String paramName, Object paramValue) {
         return list(ql, paramName, paramValue, 0, 0);
     }
 
-    /**
-     * 非分页查询
-     */
+    // 非分页查询
     public <T> List<T> list(CharSequence ql, Map<String, ?> params) {
         return list(ql, params, 0, 0);
     }
 
-    /**
-     * 非分页查询
-     */
+    // 非分页查询
     public <T> List<T> list(CharSequence ql, List<?> params) {
         return list(ql, params, 0, 0);
     }
 
-    /**
-     * 非分页查询
-     */
+    // 非分页查询
     public <T> List<T> list(CharSequence ql) {
         return list(ql, (Map<String, ?>) null);
     }
@@ -220,9 +212,7 @@ public class JpaAccessTemplate implements DataAccessTemplate {
         return query.getResultList();
     }
 
-    /**
-     * 分页查询
-     */
+    // 分页查询
     public <T> List<T> list(CharSequence ql, int pageSize, int pageNo) {
         return list(ql, (Map<String, ?>) null, pageSize, pageNo);
     }
@@ -257,6 +247,7 @@ public class JpaAccessTemplate implements DataAccessTemplate {
      * @param ql       查询语句
      * @param pageSize 页大小
      * @param pageNo   页码
+     * @param <T>      记录类型
      * @return 查询结果
      */
     public <T> List<T> listWithOneMore(CharSequence ql, int pageSize, int pageNo) {

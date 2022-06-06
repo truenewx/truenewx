@@ -40,6 +40,7 @@ public class ClassUtil {
      * @param clazz           类
      * @param propertyName    属性名，可以是父类中的属性
      * @param annotationClass 注解类型
+     * @param <A>             注解类型
      * @return 注解对象
      */
     public static <A extends Annotation> A findAnnotation(Class<?> clazz, String propertyName,
@@ -106,6 +107,7 @@ public class ClassUtil {
      *
      * @param clazz 指定了父类实际泛型的类
      * @param index 要取的泛型位置索引
+     * @param <T>   实际泛型类型
      * @return 实际泛型类型
      */
     public static <T> Class<T> getActualGenericType(Class<?> clazz, int index) {
@@ -182,6 +184,7 @@ public class ClassUtil {
      * @param clazz          指定了指定接口实际泛型的类
      * @param interfaceClass 接口类型
      * @param index          要取的泛型位置索引
+     * @param <T>            实际泛型类型
      * @return 实际泛型类型
      */
     public static <T> Class<T> getActualGenericType(Class<?> clazz, Class<?> interfaceClass, int index) {
@@ -220,6 +223,7 @@ public class ClassUtil {
      *
      * @param clazz           类
      * @param annotationClass 注解类
+     * @param <T>             注解value()值的类型
      * @return 注解的value()值
      */
     @SuppressWarnings("unchecked")
@@ -234,6 +238,7 @@ public class ClassUtil {
      * @param clazz           类
      * @param propertyName    属性名
      * @param annotationClass 注解类型
+     * @param <T>             注解value()值的类型
      * @return 注解的value()值
      */
     @SuppressWarnings("unchecked")

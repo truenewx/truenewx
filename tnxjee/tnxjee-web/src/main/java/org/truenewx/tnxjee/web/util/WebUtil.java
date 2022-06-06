@@ -382,9 +382,9 @@ public class WebUtil {
     }
 
     /**
-     * 根据名字获取cookie
+     * 根据名字从请求中获取cookie
      *
-     * @param request
+     * @param request 请求
      * @param name    cookie名称
      * @return cookie对象
      */
@@ -409,6 +409,9 @@ public class WebUtil {
 
     /**
      * 获取Map形式的Cookie集
+     *
+     * @param request 请求
+     * @return Map形式的Cookie集
      */
     public static Map<String, Cookie> getCookieMap(HttpServletRequest request) {
         Map<String, Cookie> cookieMap = new HashMap<>();
@@ -528,6 +531,9 @@ public class WebUtil {
     /**
      * 获取访问者ip地址<br>
      * 如果使用了nginx，则nginx配置中需添加：proxy_set_header X-Real-IP $remote_addr;
+     *
+     * @param request 请求
+     * @return 访问者ip地址
      */
     public static String getRemoteAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-Real-IP");

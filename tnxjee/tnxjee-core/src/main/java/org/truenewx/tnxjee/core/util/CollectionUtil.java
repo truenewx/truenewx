@@ -23,6 +23,7 @@ public class CollectionUtil {
      *
      * @param iterable  集合
      * @param predicate 断言，为null时忽略
+     * @param <T>       记录类型
      * @return 第一条记录
      */
     public static <T> T getFirst(Iterable<T> iterable, Predicate<T> predicate) {
@@ -48,9 +49,9 @@ public class CollectionUtil {
      *
      * @param iterable  可迭代集合
      * @param predicate 断言条件，为null时忽略
+     * @param <T>       元素类型
      * @return 满足条件的最后一个元素
      */
-
     public static <T> T getLast(Iterable<T> iterable, Predicate<T> predicate) {
         T result = null;
         if (iterable != null) {
@@ -74,6 +75,7 @@ public class CollectionUtil {
      *
      * @param iterable 指定可迭代对象，可为null
      * @param index    索引下标，可超出可迭代对象中的元素个数，超出时返回null
+     * @param <T>      元素类型
      * @return 元素
      */
     public static <T> T get(Iterable<T> iterable, int index) {
@@ -128,6 +130,7 @@ public class CollectionUtil {
      *
      * @param iterable 集合
      * @param element  元素
+     * @param <T>      元素类型
      * @return 指定集合是否包含指定元素
      */
     public static <T> boolean contains(Iterable<T> iterable, T element) {
@@ -146,6 +149,7 @@ public class CollectionUtil {
      *
      * @param iterable1 集合1
      * @param iterable2 集合2
+     * @param <T>       元素类型
      * @return 指定的两个集合中的元素是否有一个包含在另一个集合中
      */
     public static <T> boolean containsOneOf(Iterable<T> iterable1, Iterable<T> iterable2) {
@@ -184,6 +188,7 @@ public class CollectionUtil {
      *
      * @param collection 集合
      * @param array      数组
+     * @param <T>        元素类型
      */
     public static <T> void addAll(Collection<T> collection, @Nullable T[] array) {
         if (array != null) {
@@ -192,7 +197,11 @@ public class CollectionUtil {
     }
 
     /**
-     * 将Key为String的map转为Key为Integer的map
+     * 将Key为字符串的映射集转为Key为整型的映射集
+     *
+     * @param map    Key为字符串的映射
+     * @param minKey 转换目标整型Key的最小值
+     * @return Key为整型的映射集
      */
     public static Map<Integer, String> toIntegerKeyMap(Map<String, String> map, int minKey) {
         Map<Integer, String> newMap = new HashMap<>();
@@ -253,6 +262,7 @@ public class CollectionUtil {
      * 将指定枚举集合转换为key为枚举名称，value为枚举常量的映射集
      *
      * @param collection 枚举集合
+     * @param <T>        枚举类型
      * @return 枚举映射集
      */
     public static <T extends Enum<T>> Map<String, T> toMap(Collection<T> collection) {
@@ -343,6 +353,7 @@ public class CollectionUtil {
      *
      * @param iterator  迭代器
      * @param predicate 移除断言
+     * @param <T>       元素类型
      */
     public static <T> void remove(Iterator<T> iterator, Predicate<T> predicate) {
         while (iterator.hasNext()) {
@@ -357,6 +368,7 @@ public class CollectionUtil {
      *
      * @param iterator  迭代器
      * @param predicate 移除断言
+     * @param <T>       元素类型
      */
     public static <T> void remove(Iterator<T> iterator, BiPredicate<T, Integer> predicate) {
         int i = 0;
@@ -372,6 +384,7 @@ public class CollectionUtil {
      *
      * @param iterable  迭代集合
      * @param predicate 移除断言
+     * @param <T>       元素类型
      */
     public static <T> void remove(Iterable<T> iterable, Predicate<T> predicate) {
         Iterator<T> iterator = iterable.iterator();
@@ -383,6 +396,7 @@ public class CollectionUtil {
      *
      * @param iterable  迭代集合
      * @param predicate 移除断言
+     * @param <T>       元素类型
      */
     public static <T> void remove(Iterable<T> iterable, BiPredicate<T, Integer> predicate) {
         Iterator<T> iterator = iterable.iterator();
@@ -411,6 +425,8 @@ public class CollectionUtil {
      * 将指定映射集转换为按值排序的映射集返回，指定映射集没有变化
      *
      * @param map 映射集
+     * @param <K> 键类型
+     * @param <V> 值类型
      * @return 按值排序的映射集
      */
     public static <K, V extends Comparable<V>> Map<K, V> sortedByValueMap(Map<K, V> map) {
@@ -431,6 +447,8 @@ public class CollectionUtil {
      *
      * @param map        映射集
      * @param comparator 排序比较器
+     * @param <K>        键类型
+     * @param <V>        值类型
      * @return 按值排序的映射集
      */
     public static <K, V> Map<K, V> sortedByValueMap(Map<K, V> map, Comparator<V> comparator) {

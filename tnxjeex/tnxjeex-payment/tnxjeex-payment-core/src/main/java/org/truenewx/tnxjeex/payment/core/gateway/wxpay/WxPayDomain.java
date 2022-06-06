@@ -3,7 +3,7 @@ package org.truenewx.tnxjeex.payment.core.gateway.wxpay;
 /**
  * 域名管理，实现主备域名自动切换
  */
-interface IWXPayDomain {
+interface WxPayDomain {
     /**
      * 上报域名网络状况
      *
@@ -20,7 +20,7 @@ interface IWXPayDomain {
      * @param config 配置
      * @return 域名
      */
-    DomainInfo getDomain(WXPayConfig config);
+    DomainInfo getDomain(WxPayConfig config);
 
     class DomainInfo {
         public String domain; // 域名

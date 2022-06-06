@@ -380,6 +380,7 @@ public class MathUtil {
      * 获取指定数值类型的最大值
      *
      * @param type 数值类型
+     * @param <T>  数值类型
      * @return 最大值
      */
     @SuppressWarnings("unchecked")

@@ -29,6 +29,7 @@ public interface RelationRepox<T extends Relation<L, R>, L extends Serializable,
      * @param propertyName 数值属性名
      * @param step         递增的值，为负值即表示递减
      * @param limit        增减后允许的最大/最小值，设定以避免数值超限
+     * @param <N>          数值类型
      * @return 关系
      */
     <N extends Number> T increaseNumber(L leftId, R rightId, String propertyName, N step, N limit);

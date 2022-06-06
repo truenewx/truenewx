@@ -10,7 +10,7 @@ import org.springframework.core.io.Resource;
  *
  * @author jianglei
  */
-public class SimpleWxpayConfig implements WXPayConfig, Cloneable {
+public class SimpleWxpayConfig implements WxPayConfig, Cloneable {
 
     private String appId;
     private String merchantId;
@@ -58,8 +58,8 @@ public class SimpleWxpayConfig implements WXPayConfig, Cloneable {
     }
 
     @Override
-    public IWXPayDomain getWXPayDomain() {
-        return new IWXPayDomain() {
+    public WxPayDomain getWXPayDomain() {
+        return new WxPayDomain() {
 
             @Override
             public void report(String domain, long elapsedTimeMillis, Exception ex) {
@@ -67,8 +67,8 @@ public class SimpleWxpayConfig implements WXPayConfig, Cloneable {
             }
 
             @Override
-            public DomainInfo getDomain(WXPayConfig config) {
-                return new DomainInfo(WXPayConstants.DOMAIN_API, true);
+            public DomainInfo getDomain(WxPayConfig config) {
+                return new DomainInfo(WxPayConstants.DOMAIN_API, true);
             }
 
         };

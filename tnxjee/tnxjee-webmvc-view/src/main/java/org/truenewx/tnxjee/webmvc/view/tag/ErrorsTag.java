@@ -20,7 +20,7 @@ public class ErrorsTag extends ErrorTagSupport {
 
     private static final long serialVersionUID = -8236304660577964951L;
 
-    private String delimiter = "<br/>";
+    private String delimiter = "<br>";
 
     public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;

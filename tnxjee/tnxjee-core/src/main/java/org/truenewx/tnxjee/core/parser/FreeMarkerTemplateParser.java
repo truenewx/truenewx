@@ -20,43 +20,27 @@ import freemarker.template.TemplateException;
  * 通过FreeMarker实现的模板解析器
  *
  * @author jianglei
- * 
  */
 public class FreeMarkerTemplateParser implements TemplateParser {
 
     private Configuration config = FreeMarkerHelper.getDefaultConfiguration();
 
-    /**
-     * @see freemarker.core.Configurable#setNumberFormat(java.lang.String)
-     */
     public void setNumberFormat(String numberFormat) {
         this.config.setNumberFormat(numberFormat);
     }
 
-    /**
-     * @see freemarker.core.Configurable#setTimeFormat(java.lang.String)
-     */
     public void setTimeFormat(String timeFormat) {
         this.config.setTimeFormat(timeFormat);
     }
 
-    /**
-     * @see freemarker.core.Configurable#setDateFormat(java.lang.String)
-     */
     public void setDateFormat(String dateFormat) {
         this.config.setDateFormat(dateFormat);
     }
 
-    /**
-     * @see freemarker.core.Configurable#setDateTimeFormat(java.lang.String)
-     */
     public void setDateTimeFormat(String dateTimeFormat) {
         this.config.setDateTimeFormat(dateTimeFormat);
     }
 
-    /**
-     * @see freemarker.template.Configuration#setDefaultEncoding(java.lang.String)
-     */
     public void setDefaultEncoding(String encoding) {
         this.config.setDefaultEncoding(encoding);
     }

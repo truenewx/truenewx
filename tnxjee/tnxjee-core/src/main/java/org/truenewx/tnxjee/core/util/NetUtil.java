@@ -326,8 +326,9 @@ public class NetUtil {
     /**
      * 从后台向指定URL地址发送GET方式请求，获取响应结果
      *
-     * @param url    URL地址
-     * @param params 请求参数
+     * @param url      URL地址
+     * @param params   请求参数
+     * @param encoding 参数值的字符集编码
      * @return 响应结果
      */
     public static String requestByGet(String url, Map<String, Object> params, String encoding) {

@@ -383,6 +383,7 @@ public class ExcelCell {
     /**
      * 获取转换为可表达永久的日期的值，如果无法转换则返回null
      *
+     * @param permanentDateTextSupplier 永久日期文本提供者
      * @return 可表达永久的日期值
      */
     public PermanentableDate getValueAsPermanentableDate(Supplier<String> permanentDateTextSupplier) {

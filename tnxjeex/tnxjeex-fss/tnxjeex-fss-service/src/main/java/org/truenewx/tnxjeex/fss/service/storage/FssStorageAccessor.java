@@ -39,6 +39,7 @@ public interface FssStorageAccessor {
      *
      * @param storagePath 文件存储路径
      * @return 读取输入流
+     * @throws IOException 如果获取过程中出现IO错误
      */
     InputStream getReadStream(String storagePath) throws IOException;
 

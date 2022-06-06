@@ -19,7 +19,7 @@ public interface WechatAppAccessor {
     WechatUser getUser(String loginCode);
 
     /**
-     * 根据登录编码加载微信用户信息<br/>
+     * 根据登录编码加载微信用户信息<br>
      * 注意：一个登录编码通过本方法加载一次后将失效，这意味着本方法不是幂等的
      *
      * @param loginCode 登录编码

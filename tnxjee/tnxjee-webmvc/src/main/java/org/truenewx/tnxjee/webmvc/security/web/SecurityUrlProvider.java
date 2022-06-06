@@ -21,6 +21,7 @@ public interface SecurityUrlProvider {
     /**
      * 根据请求获取登录表单地址
      *
+     * @param request 请求
      * @return 登录表单地址
      */
     default String getLoginFormUrl(HttpServletRequest request) {

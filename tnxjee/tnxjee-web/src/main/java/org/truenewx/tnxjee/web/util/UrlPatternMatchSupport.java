@@ -19,14 +19,14 @@ public class UrlPatternMatchSupport {
     private String[] excludeUrlPatterns;
 
     /**
-     * 不可匿名访问的URL模板集
+     * @param includeUrlPatterns 不可匿名访问的URL模板集
      */
     public void setIncludeUrlPatterns(String[] includeUrlPatterns) {
         this.includeUrlPatterns = includeUrlPatterns;
     }
 
     /**
-     * 可匿名访问的URL模板集
+     * @param excludeUrlPatterns 可匿名访问的URL模板集
      */
     public void setExcludeUrlPatterns(String[] excludeUrlPatterns) {
         this.excludeUrlPatterns = excludeUrlPatterns;
