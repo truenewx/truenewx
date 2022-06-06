@@ -28,9 +28,9 @@ public class TestUtil {
             StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
             for (StackTraceElement stackTrace : stackTraces) {
                 String stackString = stackTrace.toString();
-                if (stackString.indexOf("junit.runners") >= 0) {
+                if (stackString.contains("junit.runners")) {
                     TESTING = true;
-                    return TESTING;
+                    return true;
                 }
             }
             TESTING = false;

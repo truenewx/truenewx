@@ -6,6 +6,8 @@ import org.truenewx.tnxjee.model.entity.Entity;
 
 /**
  * 数据提供者
+ *
+ * @author jianglei
  */
 public interface DataProvider<T extends Entity> {
 

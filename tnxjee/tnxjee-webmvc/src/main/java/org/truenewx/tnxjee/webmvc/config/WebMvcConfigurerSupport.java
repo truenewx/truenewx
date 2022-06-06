@@ -5,10 +5,8 @@ import java.util.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -25,7 +23,6 @@ import org.truenewx.tnxjee.webmvc.cors.IgnoreNullConfigCorsProcessor;
 import org.truenewx.tnxjee.webmvc.cors.SingleCorsConfigurationSource;
 import org.truenewx.tnxjee.webmvc.jwt.DefaultInternalJwtResolver;
 import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
-import org.truenewx.tnxjee.webmvc.servlet.filter.SessionIdSameSiteFilter;
 
 /**
  * WEB MVC配置器支持，可选的控制层配置均在此配置支持体系中
@@ -110,15 +107,6 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
         CorsFilter corsFilter = new CorsFilter(this.corsConfigurationSource);
         corsFilter.setCorsProcessor(this.ignoreNullConfigCorsProcessor);
         return corsFilter;
-    }
-
-    @Bean
-    public FilterRegistrationBean<SessionIdSameSiteFilter> sameSiteCookieFilter() {
-        FilterRegistrationBean<SessionIdSameSiteFilter> frb = new FilterRegistrationBean<>();
-        frb.setFilter(new SessionIdSameSiteFilter());
-        frb.addUrlPatterns("/*");
-        frb.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return frb;
     }
 
     @Bean

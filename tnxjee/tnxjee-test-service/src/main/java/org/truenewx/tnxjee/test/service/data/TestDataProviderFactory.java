@@ -17,16 +17,19 @@ import org.truenewx.tnxjee.repo.support.RepoFactory;
 
 /**
  * 单元测试数据提供者工厂
+ *
+ * @author jianglei
  */
 @Component
 public class TestDataProviderFactory implements DataProviderFactory, ContextInitializedBean {
+
     @Autowired
-    private RepoFactory repositoryFacotory;
+    private RepoFactory repositoryFactory;
     private Map<Class<?>, DataProvider<?>> providers = new HashMap<>();
 
     @Override
-    public void afterInitialized(ApplicationContext context) throws Exception {
-        @SuppressWarnings("rawtypes")
+    @SuppressWarnings("rawtypes")
+    public void afterInitialized(ApplicationContext context) {
         Map<String, DataProvider> beans = context.getBeansOfType(DataProvider.class);
         beans.values().forEach(provider -> {
             Class<?> entityClass = ClassUtil.getActualGenericType(provider.getClass(), DataProvider.class, 0);
@@ -51,13 +54,13 @@ public class TestDataProviderFactory implements DataProviderFactory, ContextInit
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Entity> List<T> getDataList(Class<T> entityClass) {
-        @SuppressWarnings("unchecked")
         DataProvider<T> provider = (DataProvider<T>) this.providers.get(entityClass);
         if (provider != null) {
             return provider.getDataList(this);
         } else {
-            CrudRepository<T, ?> repo = this.repositoryFacotory.getRepository(entityClass);
+            CrudRepository<T, ?> repo = this.repositoryFactory.getRepository(entityClass);
             if (repo != null) {
                 return CollectionUtil.toList(repo.findAll());
             }
@@ -68,9 +71,7 @@ public class TestDataProviderFactory implements DataProviderFactory, ContextInit
     @Override
     public void clear(Class<?>... entityClasses) {
         if (ArrayUtils.isEmpty(entityClasses)) {
-            this.providers.values().forEach(provider -> {
-                provider.clear();
-            });
+            this.providers.values().forEach(DataProvider::clear);
         } else {
             for (Class<?> entityClass : entityClasses) {
                 DataProvider<?> provider = this.providers.get(entityClass);

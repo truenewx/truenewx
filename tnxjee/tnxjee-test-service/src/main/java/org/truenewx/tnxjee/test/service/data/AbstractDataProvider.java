@@ -15,6 +15,7 @@ import org.truenewx.tnxjee.repo.support.RepoFactory;
  * @author jianglei
  */
 public abstract class AbstractDataProvider<T extends Entity> implements DataProvider<T> {
+
     @Autowired
     private RepoFactory repoFactory;
 

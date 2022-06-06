@@ -5,7 +5,8 @@ import java.util.List;
 import org.truenewx.tnxjee.model.entity.Entity;
 
 /**
- * 
+ * 数据池
+ *
  * @author jianglei
  */
 public interface DataPool {

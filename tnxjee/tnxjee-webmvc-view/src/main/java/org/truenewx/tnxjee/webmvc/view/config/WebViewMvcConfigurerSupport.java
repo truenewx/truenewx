@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sitemesh.builder.SiteMeshFilterBuilder;
 import org.sitemesh.config.ConfigurableSiteMeshFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ResourceProperties;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
     @Autowired
     private WebMvcProperties mvcProperties;
     @Autowired
-    private ResourceProperties resourceProperties;
+    private WebProperties webProperties;
     @Autowired
     private ViewErrorPathProperties pathProperties;
     @Autowired
@@ -81,7 +81,7 @@ public abstract class WebViewMvcConfigurerSupport extends WebMvcConfigurerSuppor
         String staticPathPattern = this.mvcProperties.getStaticPathPattern();
         if (StringUtils.isNotBlank(staticPathPattern)) {
             String[] staticPathPatterns = StringUtil.splitAndTrim(staticPathPattern, Strings.COMMA);
-            String[] staticLocations = this.resourceProperties.getStaticLocations();
+            String[] staticLocations = this.webProperties.getResources().getStaticLocations();
             for (String pattern : staticPathPatterns) {
                 if (!pattern.startsWith(Strings.SLASH)) { // 确保样式以/开头，否则判断一定不匹配
                     pattern = Strings.SLASH + pattern;

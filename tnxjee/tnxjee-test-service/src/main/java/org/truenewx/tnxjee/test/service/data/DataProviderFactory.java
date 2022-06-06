@@ -8,4 +8,5 @@ public interface DataProviderFactory extends DataPool {
     void init(Class<?>... entityClasses);
 
     void clear(Class<?>... entityClasses);
+
 }

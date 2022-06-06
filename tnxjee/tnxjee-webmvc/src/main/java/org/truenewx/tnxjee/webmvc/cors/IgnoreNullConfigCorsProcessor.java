@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.DefaultCorsProcessor;
@@ -20,8 +21,13 @@ import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 @Component
 public class IgnoreNullConfigCorsProcessor extends DefaultCorsProcessor {
 
-    @Autowired
     private HandlerMethodMapping handlerMethodMapping;
+
+    @Autowired
+    @Lazy // 避免循环依赖
+    public void setHandlerMethodMapping(HandlerMethodMapping handlerMethodMapping) {
+        this.handlerMethodMapping = handlerMethodMapping;
+    }
 
     @Override
     public boolean processRequest(CorsConfiguration config, HttpServletRequest request, HttpServletResponse response)

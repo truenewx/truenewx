@@ -1,30 +1,27 @@
 package org.truenewx.tnxjee.test.service.support;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import org.springframework.transaction.annotation.Transactional;
-import org.truenewx.tnxjee.model.entity.Entity;
-import org.truenewx.tnxjee.test.service.data.DataProviderFactory;
-import org.truenewx.tnxjee.test.service.junit.rules.ExpectedBusinessException;
-import org.truenewx.tnxjee.test.support.SpringTestSupport;
-
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.function.Executable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+import org.truenewx.tnxjee.model.entity.Entity;
+import org.truenewx.tnxjee.service.exception.BusinessException;
+import org.truenewx.tnxjee.test.service.data.DataProviderFactory;
+import org.truenewx.tnxjee.test.support.SpringTestSupport;
+
 /**
- * Service的JUnit4+Spring环境测试
+ * 服务层的Spring上下文环境测试支持
  *
  * @author jianglei
  */
-@TestExecutionListeners(TransactionalTestExecutionListener.class)
-@Transactional
+@Transactional(rollbackFor = Throwable.class)
+@Rollback
 public abstract class ServiceSpringTestSupport extends SpringTestSupport {
-
-    @Rule
-    public ExpectedBusinessException expectedBusinessException = ExpectedBusinessException.INSTANCE;
 
     @Autowired
     private DataProviderFactory dataProviderFactory;
@@ -42,18 +39,29 @@ public abstract class ServiceSpringTestSupport extends SpringTestSupport {
         return getData(entityClass, 0);
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         this.dataProviderFactory.init(getEntityClasses());
     }
 
-    @After
+    @AfterEach
     public void after() {
         this.dataProviderFactory.clear(getEntityClasses());
     }
 
     protected Class<?>[] getEntityClasses() {
         return null;
+    }
+
+    /**
+     * 断言业务异常
+     *
+     * @param executable 执行方法
+     * @param errorCode  业务异常错误码
+     */
+    protected final void assertBusinessException(Executable executable, String errorCode) {
+        BusinessException be = Assertions.assertThrows(BusinessException.class, executable);
+        Assertions.assertEquals(errorCode, be.getCode());
     }
 
 }

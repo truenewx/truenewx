@@ -1,22 +1,25 @@
 package org.truenewx.tnxjee.test.support;
 
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.truenewx.tnxjee.test.junit.rules.LogCaption;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * JUnit4+Spring环境测试
+ * Spring上下文环境测试支持
  *
  * @author jianglei
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
-public abstract class SpringTestSupport extends AbstractJUnit4SpringContextTests {
+public abstract class SpringTestSupport implements ApplicationContextAware {
 
-    @Rule
-    public LogCaption logCaption = LogCaption.DEFAULT;
+    protected ApplicationContext applicationContext;
+
+    @Override
+    public final void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
 }

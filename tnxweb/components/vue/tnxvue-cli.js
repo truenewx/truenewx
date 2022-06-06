@@ -43,7 +43,11 @@ module.exports = {
             });
             let globalVarName = config.externals[lib.name];
             if (globalVarName) {
-                process.env['VUE_APP_LIBS_' + globalVarName] = process.env.VUE_APP_VIEW_BASE_URL + to;
+                let baseUrl = process.env.VUE_APP_VIEW_BASE_URL;
+                if (!baseUrl.endsWith('/')) {
+                    baseUrl += '/';
+                }
+                process.env['VUE_APP_LIBS_' + globalVarName] = baseUrl + to;
             }
             if (lib.map) {
                 pluginPatterns.push({
