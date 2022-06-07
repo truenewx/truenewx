@@ -8,5 +8,5 @@ import ${entityClassName};
 /**
  * @author tnxjee-code-generator
  */
-public interface ${repoClassSimpleName} extends UnityRepox<${entityClassSimpleName}, ${keyClassSimpleName}>{
+public interface ${repoClassSimpleName} extends UnityRepox<${entityClassSimpleName}, ${keyClassSimpleName}> {
 }

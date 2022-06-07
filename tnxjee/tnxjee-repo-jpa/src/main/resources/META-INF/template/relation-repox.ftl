@@ -9,5 +9,5 @@ import ${entityClassName};
 /**
  * @author tnxjee-code-generator
  */
-public interface ${repoClassSimpleName} extends RelationRepox<${entityClassSimpleName}, ${leftKeyClassSimpleName}, ${rightKeyClassSimpleName}>{
+public interface ${repoClassSimpleName} extends RelationRepox<${entityClassSimpleName}, ${leftKeyClassSimpleName}, ${rightKeyClassSimpleName}> {
 }
