@@ -11,7 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  *
  * @author jianglei
  */
-@ExtendWith(SpringExtension.class)
+@ExtendWith({ SpringExtension.class, TestExtension.class })
 @SpringBootTest
 public abstract class SpringTestSupport implements ApplicationContextAware {
 
