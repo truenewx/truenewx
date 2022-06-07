@@ -69,8 +69,7 @@ public class CasTicketManagerImpl implements CasTicketManager {
         this.ticketGrantingTicketRepo.save(ticketGrantingTicket);
 
         // 按照CAS规范将TGT写入Cookie
-        int cookieMaxAge = (int) timeout.toSeconds();
-        WebUtil.addCookie(request, response, CasCookieNames.TGT, ticketGrantingTicketId, cookieMaxAge);
+        WebUtil.setSessionCookie(request, response, CasCookieNames.TGT, ticketGrantingTicketId);
 
         // Cookie中的TGT需要到下一个请求时才能获取，缓存TGT到当前会话，以便当前请求的后续处理获取TGT
         session.setAttribute(CasCookieNames.TGT, ticketGrantingTicketId);

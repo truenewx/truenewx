@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.webmvc.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.truenewx.tnxjee.web.util.WebConstants;
 
 /**
@@ -17,7 +18,7 @@ public class WebMvcUtil {
         if (internalJwt != null) {
             return true;
         }
-        String userAgent = request.getHeader(WebConstants.HEADER_USER_AGENT);
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         return userAgent == null || userAgent.toLowerCase().startsWith("java");
     }
 

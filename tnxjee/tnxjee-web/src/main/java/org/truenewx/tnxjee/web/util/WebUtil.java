@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.multipart.MultipartFile;
@@ -429,12 +430,12 @@ public class WebUtil {
      *
      * @param name     名称
      * @param value    值
+     * @param path     路径
      * @param maxAge   有效时间，单位：秒
      * @param httpOnly 是否禁止客户端javascript访问
-     * @param path     路径
      * @return Cookie对象
      */
-    public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly, String path) {
+    public static Cookie createCookie(String name, String value, String path, int maxAge, boolean httpOnly) {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(httpOnly);
@@ -445,16 +446,16 @@ public class WebUtil {
     /**
      * 创建Cookie对象
      *
+     * @param request  请求
      * @param name     名称
      * @param value    值
      * @param maxAge   有效时间，单位：秒
      * @param httpOnly 是否禁止客户端javascript访问
-     * @param request  请求
      * @return Cookie对象
      */
-    public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly,
-            HttpServletRequest request) {
-        return createCookie(name, value, maxAge, httpOnly, getCookieDefaultPath(request));
+    public static Cookie createCookie(HttpServletRequest request, String name, String value, int maxAge,
+            boolean httpOnly) {
+        return createCookie(name, value, getCookieDefaultPath(request), maxAge, httpOnly);
     }
 
     private static String getCookieDefaultPath(HttpServletRequest request) {
@@ -466,33 +467,85 @@ public class WebUtil {
     }
 
     /**
-     * 添加cookie
+     * 添加Cookie
      *
-     * @param request     请求
-     * @param response    响应
-     * @param cookieName  cookie名称
-     * @param cookieValue cookie值
-     * @param maxAge      有效时间，单位：秒
-     * @author jianglei
+     * @param request  请求
+     * @param response 响应
+     * @param name     名称
+     * @param value    值
+     * @param maxAge   有效时间，单位：秒
      */
-    public static void addCookie(HttpServletRequest request, HttpServletResponse response, String cookieName,
-            String cookieValue, int maxAge) {
-        Cookie cookie = createCookie(cookieName, cookieValue, maxAge, false, request);
+    public static void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value,
+            int maxAge) {
+        Cookie cookie = createCookie(request, name, value, maxAge, true);
         response.addCookie(cookie);
     }
 
     /**
-     * 添加有效期最大的cookie
+     * 添加长期有效的Cookie
      *
-     * @param request     请求
-     * @param response    响应
-     * @param cookieName  cookie名称
-     * @param cookieValue cookie值
-     * @author jianglei
+     * @param request  请求
+     * @param response 响应
+     * @param name     名称
+     * @param value    值
      */
-    public static void addCookie(HttpServletRequest request, HttpServletResponse response, String cookieName,
-            String cookieValue) {
-        addCookie(request, response, cookieName, cookieValue, Integer.MAX_VALUE);
+    public static void addLongTermCookie(HttpServletRequest request, HttpServletResponse response, String name,
+            String value) {
+        addCookie(request, response, name, value, Integer.MAX_VALUE);
+    }
+
+    /**
+     * 设置Cookie，该方法只能设置一个Cookie，响应内已设置的Cookie将被覆盖，但可设置同源策略
+     *
+     * @param response 响应
+     * @param name     名称
+     * @param value    值
+     * @param path     路径
+     * @param maxAge   有效时间，单位：秒
+     * @param httpOnly 是否禁止客户端javascript访问
+     * @param sameSite 同源策略
+     */
+    public static void setCookie(HttpServletResponse response, String name, String value, String path,
+            int maxAge, boolean httpOnly, org.springframework.boot.web.server.Cookie.SameSite sameSite) {
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .path(path)
+                .maxAge(maxAge)
+                .httpOnly(httpOnly)
+                .sameSite(sameSite.name())
+                .build();
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    public static void setCookie(HttpServletRequest request, HttpServletResponse response, String name, String value,
+            int maxAge) {
+        setCookie(response, name, value, getCookieDefaultPath(request), maxAge, true,
+                org.springframework.boot.web.server.Cookie.SameSite.LAX);
+    }
+
+    /**
+     * 设置长期有效的Cookie
+     *
+     * @param request  请求
+     * @param response 响应
+     * @param name     名称
+     * @param value    值
+     */
+    public static void setLongTermCookie(HttpServletRequest request, HttpServletResponse response, String name,
+            String value) {
+        setCookie(request, response, name, value, Integer.MAX_VALUE);
+    }
+
+    /**
+     * 设置会话内有效的Cookie
+     *
+     * @param request  请求
+     * @param response 响应
+     * @param name     名称
+     * @param value    值
+     */
+    public static void setSessionCookie(HttpServletRequest request, HttpServletResponse response, String name,
+            String value) {
+        setCookie(request, response, name, value, -1);
     }
 
     /**
@@ -583,7 +636,7 @@ public class WebUtil {
      * @return 请求是否来自微软IE浏览器
      */
     public static boolean isRequestFromMsie(HttpServletRequest request) {
-        String userAgent = request.getHeader(WebConstants.HEADER_USER_AGENT);
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         if (userAgent != null) {
             userAgent = userAgent.toUpperCase();
             return userAgent.contains("MSIE") || userAgent.contains("TRIDENT");
@@ -598,7 +651,7 @@ public class WebUtil {
      * @return 请求是否来自微信内嵌浏览器
      */
     public static boolean isRequestFromWechat(HttpServletRequest request) {
-        String userAgent = request.getHeader(WebConstants.HEADER_USER_AGENT);
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         if (userAgent != null) {
             userAgent = userAgent.toUpperCase();
             return userAgent.contains("MICROMESSENGER");
@@ -621,7 +674,7 @@ public class WebUtil {
         Device device = Device.PC;
         Program program = Program.WEB;
         OS os = null;
-        String userAgent = request.getHeader(WebConstants.HEADER_USER_AGENT);
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         if (StringUtils.isNotBlank(userAgent)) {
             userAgent = userAgent.toLowerCase();
             if (!userAgent.contains("webkit") && !userAgent.contains("firefox") && !userAgent.contains("opera")
