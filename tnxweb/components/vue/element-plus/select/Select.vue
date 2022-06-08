@@ -135,15 +135,12 @@ export default {
             type: String,
             default: 'icon',
         },
-        defaultValue: String,
+        defaultValue: [String, Number, Boolean, Array],
         empty: {
             type: [Boolean, String],
             default: false,
         },
-        emptyValue: {
-            type: [String, Boolean, Number],
-            default: () => null,
-        },
+        emptyValue: [String, Number, Boolean, Array],
         emptyClass: String,
         placeholder: String,
         disabled: Boolean,
@@ -186,7 +183,7 @@ export default {
                 });
             }
         },
-        modelValue(value) {
+        modelValue() {
             this.model = this.getModel(this.items);
         },
         items(items) {
@@ -234,27 +231,33 @@ export default {
             return item ? item[this.textName] : undefined;
         },
         getModel(items) {
-            let model = this.modelValue || this.defaultValue;
+            const util = window.tnx.util;
+            let model = this.modelValue;
+            if (util.object.isNull(model)) {
+                model = this.defaultValue;
+            }
             if (this.isMulti()) { // 多选时需确保值为数组
-                if (model !== undefined && model !== null) {
-                    if (!Array.isArray(model)) {
-                        model = [model];
-                    }
-                } else {
-                    model = [];
+                if (util.object.isNull(model)) {
+                    return [];
+                }
+                if (!Array.isArray(model)) {
+                    model = [model];
                 }
                 return model;
             }
-            if (items && items.length) {
-                let item = this.getItem(this.modelValue);
+            if (util.object.isNull(model)) {
+                return null;
+            }
+            if (items?.length) {
+                let item = this.getItem(model);
                 if (item) {
                     return item[this.valueName];
                 } else { // 如果当前值找不到匹配的选项，则需要考虑是设置为空还是默认选项
                     if (!this.empty) { // 如果不能为空，则默认选中第一个选项
                         let firstItem = items[0];
-                        return firstItem ? firstItem[this.valueName] : null;
-                    } else { // 否则设置为空
-                        return null;
+                        if (firstItem[this.valueName]) {
+                            return firstItem[this.valueName];
+                        }
                     }
                 }
             }
