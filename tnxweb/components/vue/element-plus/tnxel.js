@@ -229,10 +229,9 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
         }
         options = Object.assign({
             dangerouslyUseHTMLString: true,
-        }, options, {
             type: 'warning',
             confirmButtonText: '确定',
-        });
+        }, options);
         this._closeMessage();
         ElMessageBox.alert(message, title, options).then(callback);
         this._handleZIndex('.el-message-box__wrapper:last');
