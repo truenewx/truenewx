@@ -2,20 +2,24 @@
     <el-form :id="id" :inline="inline" :model="params" :class="theme ? ('theme-' + theme) : null">
         <slot></slot>
         <el-form-item v-if="queryText || clearText">
-            <el-button :type="theme || 'primary'" icon="el-icon-search" @click="toQuery" :plain="plain"
+            <tnxel-button :type="theme || 'primary'" icon="Search" @click="toQuery" :plain="plain"
                 v-if="queryText">
                 {{ queryText }}
-            </el-button>
-            <el-button @click="toClear" :plain="plain" v-if="clearText">{{ clearText }}</el-button>
+            </tnxel-button>
+            <el-button @click="toClear" :plain="plain" title="清空查询条件" v-if="clearText">{{ clearText }}</el-button>
         </el-form-item>
     </el-form>
 </template>
 
 <script>
-import {ObjectUtil} from "../../../tnxcore-util";
+import {ObjectUtil} from '../../../tnxcore-util';
+import Button from '../button/Button';
 
 export default {
     name: 'TnxelQueryForm',
+    components: {
+        'tnxel-button': Button,
+    },
     props: {
         id: String,
         modelValue: {
@@ -28,24 +32,24 @@ export default {
         query: Function,
         queryText: {
             type: String,
-            default: () => '查询',
+            default: '查询',
         },
         clearText: {
             type: String,
-            default: () => '清空',
+            default: '清空',
         },
         clear: Function,
         plain: {
             type: Boolean,
-            default: () => true,
+            default: true,
         },
         init: { // 是否初始化执行查询
             type: Boolean,
-            default: () => false,
+            default: false,
         },
         inline: {
             type: Boolean,
-            default: () => true,
+            default: true,
         }
     },
     emits: ['update:modelValue'],
@@ -110,13 +114,17 @@ export default {
         },
         toClear() {
             if (Object.keys(this.params).length) {
-                ObjectUtil.clear(this.params);
-                this.$emit('update:modelValue', this.params);
                 if (this.clear) {
-                    if (this.clear() === false) {
+                    if (this.clear(this.params) === false) {
                         return;
                     }
+                } else {
+                    ObjectUtil.clear(this.params, ['pageSize', 'pageNo', 'ignoring']);
+                    if (ObjectUtil.isNotNull(this.params.pageNo)) {
+                        this.params.pageNo = 1;
+                    }
                 }
+                this.$emit('update:modelValue', this.params);
                 let parameters = window.tnx.util.net.getParameters();
                 if (Object.keys(parameters).length) {
                     this.$router.replace(this.$route.path);
