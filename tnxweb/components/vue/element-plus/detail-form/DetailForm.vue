@@ -24,19 +24,19 @@ export default {
         },
         updateText: {
             type: String,
-            default: () => '修改'
+            default: '修改',
         },
         back: {
             type: [String, Function, Boolean],
-            default: () => true
+            default: true,
         },
         backText: {
             type: String,
-            default: () => '返回'
+            default: '返回',
         },
         vertical: {
             type: Boolean,
-            default: () => false
+            default: false,
         },
         columns: {
             type: Number,
