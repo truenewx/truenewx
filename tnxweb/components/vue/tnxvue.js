@@ -72,17 +72,12 @@ const tnxvue = Object.assign({}, tnxcore, {
     open(component, props, options) {
         options = options || {};
 
-        // 目标组件中同时提供的dialog和drawer方法，则以options.mode为准，默认为dialog
         let mode = options.mode;
-        if (component.methods.dialog && !component.methods.drawer) {
-            mode = 'dialog';
-        } else if (!component.methods.dialog && component.methods.drawer) {
-            mode = 'drawer';
-        }
-        if (mode === 'drawer') {
-            options = Object.assign({}, component.methods.drawer(props), options);
-        } else {
+        if (component.methods?.dialog) {
             options = Object.assign({}, component.methods.dialog(props), options);
+        } else if (component.methods?.drawer) {
+            options = Object.assign({}, component.methods.drawer(props), options);
+            mode = 'drawer';
         }
 
         const title = component.title || options.title;
@@ -151,7 +146,7 @@ Object.assign(tnxvue.util, {
      * @returns {boolean} 是否组件实例
      */
     isComponent: function(obj) {
-        return (typeof obj === 'object') && (typeof obj.data === 'function') && (typeof obj.render === 'function');
+        return (typeof obj === 'object') && (typeof obj.render === 'function');
     }
 });
 
