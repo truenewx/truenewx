@@ -1,6 +1,6 @@
 <template>
     <el-row class="tnxel-datetime-picker" :gutter="8">
-        <el-col :span="12">
+        <el-col :span="dateColSpan">
             <el-date-picker ref="datePicker"
                 v-model="model"
                 :format="convertedDateFormat"
@@ -11,7 +11,7 @@
                 :disabled-date="isDisabledDate"
                 :disabled="disabled"/>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="timeColSpan">
             <el-time-picker ref="timePicker"
                 v-model="model"
                 :format="timeFormat"
@@ -26,7 +26,7 @@
 
 <script>
 export default {
-    name: "TnxelDateTimePicker",
+    name: 'TnxelDateTimePicker',
     props: {
         modelValue: [String, Number, Date],
         dateFormat: {
@@ -67,6 +67,18 @@ export default {
         }
     },
     computed: {
+        dateColSpan() {
+            if (this.timeFormat.length > 5) {
+                return 13;
+            }
+            return 14;
+        },
+        timeColSpan() {
+            if (this.timeFormat.length > 5) {
+                return 11;
+            }
+            return 10;
+        },
         convertedDateFormat() {
             let format = this.dateFormat.replaceAll('y', 'Y');
             return format.replaceAll('d', 'D');
