@@ -287,20 +287,32 @@ export const ObjectUtil = {
         }
         return obj;
     },
-    clear(obj) {
+    clear(obj, excludedKeys) {
         if (typeof obj === 'object') {
+            excludedKeys = excludedKeys || [];
             let keys = Object.keys(obj);
             for (let key of keys) {
-                delete obj[key];
+                if (!excludedKeys.contains(key)) {
+                    delete obj[key];
+                }
             }
         }
     },
+    isNull(value) {
+        return value === null || value === undefined;
+    },
+    isNotNull(value) {
+        return value !== null && value !== undefined;
+    },
     isEmpty(value) {
-        if (value === null || value === undefined) {
+        if (this.isNull(value)) {
             return true;
         }
         if (value instanceof String || Array.isArray(value)) {
             return value.length === 0;
+        }
+        if (typeof value === 'object') {
+            return Object.keys(value).length === 0;
         }
         return false;
     },
