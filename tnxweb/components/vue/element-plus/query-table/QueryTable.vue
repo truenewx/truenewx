@@ -59,10 +59,11 @@ export default {
     },
     name: 'TnxelQueryTable',
     props: {
-        app: String,
-        url: String,
-        data: Object, // QueryResult对象
-        modelValue: Object,
+        url: {
+            type: String,
+            required: true,
+        },
+        modelValue: Object, // 查询参数
         size: String,
         border: {
             type: Boolean,
@@ -105,9 +106,9 @@ export default {
         return {
             id: window.tnx.util.string.random(16),
             params: this.getParams(this.modelValue),
-            records: this.data ? this.data.records : null,
+            records: null,
+            paged: null,
             querying: false,
-            paged: this.data ? this.data.paged : null,
             pageSelectedIndexes: [], // 当前页已选择记录的索引
             allSelectedRecords: this.selected || [], // 所有已选择的记录
             containerHeight: 0,
@@ -228,9 +229,6 @@ export default {
         getParams(modelValue) {
             return Object.assign({}, modelValue); // 避免改动传入的参数对象
         },
-        getContainerElement() {
-
-        },
         onPagedChange(pageNo) {
             if (this.pagedChange && this.pagedChange(pageNo) === false) {
                 return;
@@ -280,8 +278,6 @@ export default {
                     if (vm.success) {
                         vm.success(vm.records, vm.paged);
                     }
-                }, {
-                    app: this.app
                 });
             }
         },
@@ -359,10 +355,6 @@ export default {
                     }
                 }
             }
-        },
-        clearSelection() {
-            this.pageSelectedIndexes = [];
-            this.allSelectedRecords = [];
         },
         scrollToTop() {
             if (this.tableMaxHeight) {
