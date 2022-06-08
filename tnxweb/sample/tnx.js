@@ -1,5 +1,5 @@
 // tnx.js
-import tnxel from '../components/vue/element-plus/tnxel';
+import tnxel from '../src/vue/element-plus/tnxel';
 
 export const tnx = tnxel;
 export const util = tnx.util;

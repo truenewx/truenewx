@@ -1,10 +1,10 @@
-import '../components/tnxcore.css';
+import '../src/tnxcore.css';
 import 'bootstrap/dist/css/bootstrap-reboot.min.css';
 import 'bootstrap/dist/css/bootstrap-grid.min.css';
 import 'bootstrap/dist/css/bootstrap-utilities.min.css';
-import '../components/vue/tnxvue.css';
+import '../src/vue/tnxvue.css';
 import 'element-plus/dist/index.css';
-import '../components/vue/element-plus/tnxel.css';
+import '../src/vue/element-plus/tnxel.css';
 import tnx from './tnx';
 import App from './App.vue';
 
