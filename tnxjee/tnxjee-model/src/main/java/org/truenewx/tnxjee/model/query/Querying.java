@@ -90,6 +90,9 @@ public class Querying extends Pagination implements QueryModel, Paging {
             Set<String> fieldNames = new HashSet<>();
             for (FieldOrder order : orders) {
                 String fieldName = order.getName();
+                if (fieldName.contains("--")) { // 字段名不能包含--，这是sql的注释语法，可能造成sql注入漏洞
+                    throw new IllegalArgumentException("Order field name cannot contain --");
+                }
                 if (fieldNames.add(fieldName)) { // 忽略重复的字段
                     orderBy.append(Strings.COMMA).append(order);
                 } else { // 重复的字段输出警告日志
