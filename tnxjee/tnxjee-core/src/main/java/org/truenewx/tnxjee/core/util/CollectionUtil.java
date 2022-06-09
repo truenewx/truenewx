@@ -289,7 +289,7 @@ public class CollectionUtil {
         }
     }
 
-    public static List<Integer> toList(int[] array) {
+    public static List<Integer> toList(int... array) {
         if (array == null) {
             return null;
         }
@@ -300,7 +300,7 @@ public class CollectionUtil {
         return list;
     }
 
-    public static List<Long> toList(long[] array) {
+    public static List<Long> toList(long... array) {
         if (array == null) {
             return null;
         }
@@ -311,7 +311,7 @@ public class CollectionUtil {
         return list;
     }
 
-    public static List<Object> toList(Object[] array) {
+    public static List<Object> toList(Object... array) {
         if (array == null) {
             return null;
         }
