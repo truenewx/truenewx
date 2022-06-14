@@ -738,3 +738,11 @@ i svg {
     text-align: center;
     line-height: 1.2;
 }
+
+.el-button-group .el-button--primary:not(:first-child).is-plain {
+    border-left-color: var(--el-button-border-color);
+}
+
+.el-button-group .el-button--primary:not(:last-child).is-plain {
+    border-right-color: var(--el-button-border-color);
+}
