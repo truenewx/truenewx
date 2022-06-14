@@ -434,6 +434,22 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
         }
     }
 
+    @Override
+    @ResponseBody
+    @ConfigAuthority // 登录用户才可复制文件，服务策略可能还有更多限定
+    public String copy(String sourceLocationUrl, String targetType, String targetScope) {
+        I userIdentity = getUserIdentity();
+        return this.service.copy(userIdentity, sourceLocationUrl, targetType, targetScope);
+    }
+
+    @Override
+    @ResponseBody
+    @ConfigAuthority // 登录用户才可复制文件，服务策略可能还有更多限定
+    public String move(String sourceLocationUrl, String targetType, String targetScope) {
+        I userIdentity = getUserIdentity();
+        return this.service.move(userIdentity, sourceLocationUrl, targetType, targetScope);
+    }
+
     protected I getUserIdentity() {
         return SecurityUtil.getAuthorizedUserIdentity();
     }

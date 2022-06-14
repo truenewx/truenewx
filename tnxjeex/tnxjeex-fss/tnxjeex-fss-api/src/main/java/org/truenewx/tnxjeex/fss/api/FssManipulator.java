@@ -44,4 +44,10 @@ public interface FssManipulator {
     @PostMapping("/delete-multi")
     void delete(@RequestParam("locationUrls") String[] locationUrls);
 
+    @PostMapping("/copy")
+    String copy(String sourceLocationUrl, String targetType, String targetScope);
+
+    @PostMapping("/move")
+    String move(String sourceLocationUrl, String targetType, String targetScope);
+
 }
