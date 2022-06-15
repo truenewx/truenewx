@@ -578,8 +578,9 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
                             public void beforeCommit(boolean readOnly) {
                                 // 提交时临时目标文件迁移为正式目标文件
                                 accessor.move(pendingTargetStoragePath, targetStoragePath);
-                                // 迁移操作中，删除来源文件
-                                accessor.delete(sourceStoragePath, sourceStrategy);
+                                if (!copy) { // 迁移操作中，删除来源文件
+                                    accessor.delete(sourceStoragePath, sourceStrategy);
+                                }
                             }
 
                             @Override
