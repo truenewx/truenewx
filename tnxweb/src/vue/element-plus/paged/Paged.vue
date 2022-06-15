@@ -3,7 +3,7 @@
         :class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}" v-if="model">
         <slot :paged="value" :change="change" :background="background">
             <el-pagination layout="total, slot, prev, pager, next" :background="background" @current-change="change"
-                v-model:current-page="model.pageNo" :total="model.total || 0">
+                v-model:page-size="model.pageSize" v-model:current-page="model.pageNo" :total="model.total || 0">
                 <span class="el-pagination__page-size" v-if="pageSizeItems.length <= 1">{{ model.pageSize }}条/页</span>
                 <tnxel-select class="el-pagination__page-size" v-model="model.pageSize" :items="pageSizeItems" v-else/>
             </el-pagination>
