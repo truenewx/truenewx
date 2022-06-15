@@ -325,6 +325,10 @@ export const ObjectUtil = {
         }
         return true;
     },
+    isSimple(value) {
+        return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+            || value instanceof Date;
+    },
 }
 
 export const FunctionUtil = {
