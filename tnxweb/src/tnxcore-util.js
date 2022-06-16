@@ -386,6 +386,7 @@ export const MathUtil = {
 export const StringUtil = {
     toJson: JSON.stringify,
     parseJson: JSON.parse,
+    md5: md5,
     uuid32() {
         let objectUrl = URL.createObjectURL(new Blob()).toString();
         URL.revokeObjectURL(objectUrl);
@@ -1131,7 +1132,6 @@ export const FileUtil = {
 }
 
 export const util = {
-    md5: md5,
     base64: base64,
     object: ObjectUtil,
     function: FunctionUtil,

@@ -327,10 +327,10 @@ export default {
         getFileId(file) {
             if (!file.id) {
                 if (file.url) { // 有URL的文件通过URL即可唯一确定
-                    file.id = this.tnx.util.md5(file.url);
+                    file.id = this.tnx.util.string.md5(file.url);
                 } else {
                     // 没有URL的文件，通过文件类型+文件名+文件大小+最后修改时间，几乎可以唯一区分一个文件，重复的概率极低，即使重复也不破坏业务一致性和完整性
-                    file.id = this.tnx.util.md5(
+                    file.id = this.tnx.util.string.md5(
                         file.type + '-' + file.name + '-' + file.size + '-' + file.lastModified);
                 }
             }
