@@ -21,13 +21,13 @@ import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjeex.cas.core.constant.CasCookieNames;
 import org.truenewx.tnxjeex.cas.core.validation.SimpleAssertion;
+import org.truenewx.tnxjeex.cas.server.authentication.CasServerScopeResolver;
 import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
 import org.truenewx.tnxjeex.cas.server.entity.TicketGrantingTicket;
 import org.truenewx.tnxjeex.cas.server.repo.AppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryAppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryTicketGrantingTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.TicketGrantingTicketRepo;
-import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeResolver;
 
 /**
  * CAS票据管理器实现

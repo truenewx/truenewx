@@ -93,16 +93,12 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     public LogoutSuccessHandler logoutSuccessHandler() {
         SimpleUrlLogoutSuccessHandler handler = new SimpleUrlLogoutSuccessHandler();
         handler.setRedirectStrategy(this.redirectStrategy);
-        handler.setTargetUrlParameter(getRedirectTargetUrlParameter());
         String logoutSuccessUrl = this.urlProvider.getLogoutSuccessUrl();
         if (logoutSuccessUrl != null) {
             handler.setDefaultTargetUrl(logoutSuccessUrl);
         }
+        handler.setTargetUrlParameter(this.apiMetaProperties.getRedirectTargetUrlParameter());
         return handler;
-    }
-
-    protected final String getRedirectTargetUrlParameter() {
-        return this.apiMetaProperties.getRedirectTargetUrlParameter();
     }
 
     @Override

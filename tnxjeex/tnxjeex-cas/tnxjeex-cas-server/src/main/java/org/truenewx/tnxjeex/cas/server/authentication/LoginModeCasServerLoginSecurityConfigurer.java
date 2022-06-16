@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.cas.server.security.authentication;
+package org.truenewx.tnxjeex.cas.server.authentication;
 
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.webmvc.security.web.authentication.LoginModeAuthenticationFilter;

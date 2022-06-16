@@ -16,8 +16,8 @@ import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjee.webmvc.security.web.AjaxRedirectStrategy;
-import org.truenewx.tnxjeex.cas.server.security.authentication.CasServerScopeResolver;
-import org.truenewx.tnxjeex.cas.server.security.authentication.logout.CasServerLogoutHandler;
+import org.truenewx.tnxjeex.cas.server.authentication.CasServerScopeResolver;
+import org.truenewx.tnxjeex.cas.server.authentication.logout.CasServerLogoutHandler;
 
 /**
  * CAS服务端业务范围控制器支持。由实现子类指定访问路径，以更符合具体业务场景

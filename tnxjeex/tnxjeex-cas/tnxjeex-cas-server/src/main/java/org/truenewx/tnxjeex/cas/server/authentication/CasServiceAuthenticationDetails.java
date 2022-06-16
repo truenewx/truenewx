@@ -1,4 +1,4 @@
-package org.truenewx.tnxjeex.cas.server.security.authentication;
+package org.truenewx.tnxjeex.cas.server.authentication;
 
 import java.io.Serializable;
 
