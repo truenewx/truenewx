@@ -46,7 +46,7 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
         String queryString = request.getQueryString();
         if (StringUtils.isNotBlank(queryString)) {
             String nextUrl = request.getRequestURI() + Strings.QUESTION + queryString;
-            String redirectParameter = this.apiMetaProperties.getLoginSuccessRedirectParameter();
+            String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
             loginFormUrl += Strings.AND + redirectParameter + Strings.EQUAL
                     + URLEncoder.encode(nextUrl, StandardCharsets.UTF_8);
         }

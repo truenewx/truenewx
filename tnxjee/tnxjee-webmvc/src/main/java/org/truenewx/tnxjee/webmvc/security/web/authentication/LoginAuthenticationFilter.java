@@ -19,7 +19,7 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         if (successHandler instanceof AbstractAuthenticationTargetUrlRequestHandler) {
             ApiMetaProperties apiMetaProperties = SpringUtil.getFirstBeanByClass(context, ApiMetaProperties.class);
             if (apiMetaProperties != null) {
-                String successTargetUrlParameter = apiMetaProperties.getLoginSuccessRedirectParameter();
+                String successTargetUrlParameter = apiMetaProperties.getRedirectTargetUrlParameter();
                 if (StringUtils.isNotBlank(successTargetUrlParameter)) {
                     ((AbstractAuthenticationTargetUrlRequestHandler) successHandler)
                             .setTargetUrlParameter(successTargetUrlParameter);

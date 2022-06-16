@@ -83,7 +83,7 @@ public class CasServiceManagerImpl implements CasServiceManager {
             loginUrl += Strings.AND;
         }
         loginUrl += this.artifactParameter + Strings.EQUAL + this.ticketManager.getAppTicketId(request, appName, scope);
-        String redirectParameter = this.apiMetaProperties.getLoginSuccessRedirectParameter();
+        String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (StringUtils.isBlank(request.getParameter(redirectParameter))) {
             String contextUri = app.getContextUri(false);
             if (service.length() > contextUri.length()) {

@@ -54,7 +54,7 @@ public class ApiMetaController {
     public ApiContext context() {
         ApiContext context = new ApiContext();
         context.setBaseApp(this.baseApp);
-        context.setLoginSuccessRedirectParameter(this.apiMetaProperties.getLoginSuccessRedirectParameter());
+        context.setLoginSuccessRedirectParameter(this.apiMetaProperties.getRedirectTargetUrlParameter());
         Set<String> appNames = ArrayUtil.toSet(this.apiMetaProperties.getAppNames());
         if (CollectionUtils.isEmpty(appNames)) {
             appNames = new HashSet<>(this.commonProperties.getApps().keySet());

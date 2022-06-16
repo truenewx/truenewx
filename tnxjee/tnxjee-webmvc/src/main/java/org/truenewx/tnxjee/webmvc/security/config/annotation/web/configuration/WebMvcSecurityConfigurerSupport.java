@@ -29,6 +29,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.web.security.WebSecurityProperties;
 import org.truenewx.tnxjee.web.util.SwaggerUtil;
 import org.truenewx.tnxjee.webmvc.api.meta.ApiMetaController;
+import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
 import org.truenewx.tnxjee.webmvc.security.access.UserAuthorityAccessDecisionManager;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
@@ -51,6 +52,8 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     private RedirectStrategy redirectStrategy;
     @Autowired
     private WebSecurityProperties securityProperties;
+    @Autowired
+    private ApiMetaProperties apiMetaProperties;
 
     protected SecurityUrlProvider urlProvider = new SecurityUrlProvider() {
         // 所有方法都有默认实现，默认实例无需提供
@@ -88,13 +91,18 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     // 登出成功后的处理
     @Bean
     public LogoutSuccessHandler logoutSuccessHandler() {
-        SimpleUrlLogoutSuccessHandler successHandler = new SimpleUrlLogoutSuccessHandler();
-        successHandler.setRedirectStrategy(this.redirectStrategy);
+        SimpleUrlLogoutSuccessHandler handler = new SimpleUrlLogoutSuccessHandler();
+        handler.setRedirectStrategy(this.redirectStrategy);
+        handler.setTargetUrlParameter(getRedirectTargetUrlParameter());
         String logoutSuccessUrl = this.urlProvider.getLogoutSuccessUrl();
         if (logoutSuccessUrl != null) {
-            successHandler.setDefaultTargetUrl(logoutSuccessUrl);
+            handler.setDefaultTargetUrl(logoutSuccessUrl);
         }
-        return successHandler;
+        return handler;
+    }
+
+    protected final String getRedirectTargetUrlParameter() {
+        return this.apiMetaProperties.getRedirectTargetUrlParameter();
     }
 
     @Override

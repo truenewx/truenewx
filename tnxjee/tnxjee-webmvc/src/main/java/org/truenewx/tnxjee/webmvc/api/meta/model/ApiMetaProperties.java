@@ -12,7 +12,7 @@ import org.truenewx.tnxjee.web.util.WebConstants;
 public class ApiMetaProperties {
 
     private String[] appNames;
-    private String loginSuccessRedirectParameter = WebConstants.DEFAULT_LOGIN_SUCCESS_REDIRECT_PARAMETER;
+    private String redirectTargetUrlParameter = WebConstants.DEFAULT_REDIRECT_TARGET_URL_PARAMETER;
 
     public String[] getAppNames() {
         return this.appNames;
@@ -25,12 +25,12 @@ public class ApiMetaProperties {
         this.appNames = appNames;
     }
 
-    public String getLoginSuccessRedirectParameter() {
-        return this.loginSuccessRedirectParameter;
+    public String getRedirectTargetUrlParameter() {
+        return this.redirectTargetUrlParameter;
     }
 
-    public void setLoginSuccessRedirectParameter(String loginSuccessRedirectParameter) {
-        this.loginSuccessRedirectParameter = loginSuccessRedirectParameter;
+    public void setRedirectTargetUrlParameter(String redirectTargetUrlParameter) {
+        this.redirectTargetUrlParameter = redirectTargetUrlParameter;
     }
 
 }

@@ -55,7 +55,7 @@ public abstract class CasServerLoginControllerSupport {
             // 写入请求属性中，便于后续获取
             request.setAttribute(CasParameterNames.SERVICE, service);
         }
-        String redirectParameter = this.apiMetaProperties.getLoginSuccessRedirectParameter();
+        String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (WebUtil.isAjaxRequest(request)) {
             String originalRequest = request.getHeader(WebConstants.HEADER_ORIGINAL_REQUEST);
             if (originalRequest != null) {

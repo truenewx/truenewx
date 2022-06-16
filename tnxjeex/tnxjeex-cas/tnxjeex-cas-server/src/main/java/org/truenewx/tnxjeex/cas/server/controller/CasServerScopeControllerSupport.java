@@ -42,7 +42,7 @@ public abstract class CasServerScopeControllerSupport {
     @RequestMapping("/scope/put")
     @ConfigAuthority
     public void putScope(@RequestParam(value = "scope", required = false) String scope,
-            @RequestParam(value = WebConstants.DEFAULT_LOGIN_SUCCESS_REDIRECT_PARAMETER, required = false) String next,
+            @RequestParam(value = WebConstants.DEFAULT_REDIRECT_TARGET_URL_PARAMETER, required = false) String next,
             HttpServletRequest request, HttpServletResponse response) {
         UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
         if (this.scopeResolver.applyScope(userDetails, scope)) {

@@ -35,7 +35,7 @@ public class CasClientLoginSecurityConfigurer
         filter.setApplicationEventPublisher(getApplicationContext());
         filter.setRedirectStrategy(this.redirectStrategy);
         filter.acceptSuccessHandler(handler -> {
-            handler.setTargetUrlParameter(this.apiMetaProperties.getLoginSuccessRedirectParameter());
+            handler.setTargetUrlParameter(this.apiMetaProperties.getRedirectTargetUrlParameter());
         });
         filter.setAuthenticationFailureHandler(this.authenticationFailureHandler);
         http.addFilterAt(filter, CasAuthenticationFilter.class);
