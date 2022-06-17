@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.LogUtil;
 
 import freemarker.cache.StringTemplateLoader;
@@ -46,7 +46,7 @@ public class FreeMarkerTemplateParser implements TemplateParser {
     }
 
     @Override
-    public String parse(String templateContent, Map<String, ?> params, Locale locale) {
+    public String parse(String templateContent, Map<String, Object> params, Locale locale) {
         Configuration config = (Configuration) this.config.clone();
         if (locale != null) {
             config.setLocale(locale);
@@ -70,7 +70,7 @@ public class FreeMarkerTemplateParser implements TemplateParser {
     }
 
     @Override
-    public String parse(File templateFile, Map<String, ?> params, Locale locale)
+    public String parse(File templateFile, Map<String, Object> params, Locale locale)
             throws IOException {
         Configuration config = (Configuration) this.config.clone();
         if (locale != null) {
@@ -85,7 +85,7 @@ public class FreeMarkerTemplateParser implements TemplateParser {
         } catch (TemplateException e) {
             LogUtil.error(getClass(), e);
             // 模板格式错误，返回模板内容
-            return IOUtils.toString(new FileInputStream(templateFile), Strings.ENCODING_UTF8);
+            return IOUtils.toString(new FileInputStream(templateFile), StandardCharsets.UTF_8);
         }
     }
 }

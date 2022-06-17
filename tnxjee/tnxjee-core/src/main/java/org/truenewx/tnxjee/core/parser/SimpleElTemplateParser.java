@@ -25,7 +25,7 @@ public class SimpleElTemplateParser implements TemplateParser {
     private static final String REPLACE_KEY_SUFFIX = "}";
 
     @Override
-    public String parse(String templateContent, Map<String, ? extends Object> params,
+    public String parse(String templateContent, Map<String, Object> params,
             Locale locale) {
         if (StringUtils.isEmpty(templateContent)) {
             return templateContent;
@@ -68,7 +68,7 @@ public class SimpleElTemplateParser implements TemplateParser {
     }
 
     @Override
-    public String parse(File templateFile, Map<String, ?> params, Locale locale)
+    public String parse(File templateFile, Map<String, Object> params, Locale locale)
             throws IOException {
         String templateContent = IOUtils.toString(new FileInputStream(templateFile),
                 Strings.ENCODING_UTF8);

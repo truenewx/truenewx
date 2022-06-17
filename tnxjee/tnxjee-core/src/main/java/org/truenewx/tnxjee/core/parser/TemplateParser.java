@@ -19,9 +19,8 @@ public interface TemplateParser {
      * @param params          参数集
      * @param locale          区域
      * @return 解析后的内容
-     * @author jianglei
      */
-    String parse(String templateContent, Map<String, ?> params, Locale locale);
+    String parse(String templateContent, Map<String, Object> params, Locale locale);
 
     /**
      * 用指定参数集解析指定模板文件的内容
@@ -32,6 +31,6 @@ public interface TemplateParser {
      * @return 解析后的内容
      * @throws IOException 如果读取文件内容出现错误
      */
-    String parse(File templateFile, Map<String, ?> params, Locale locale) throws IOException;
+    String parse(File templateFile, Map<String, Object> params, Locale locale) throws IOException;
 
 }
