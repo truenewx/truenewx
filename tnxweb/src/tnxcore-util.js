@@ -332,15 +332,27 @@ export const ObjectUtil = {
 }
 
 export const FunctionUtil = {
+    before(before, target) {
+        return function() {
+            before.apply(this, arguments);
+            return target.apply(this, arguments);
+        };
+    },
     around(target, around) {
-        const _this = this;
         return function() {
             const args = [target];
             for (let i = 0; i < arguments.length; i++) {
                 args.push(arguments[i]);
             }
-            return around.apply(_this, args);
+            return around.apply(this, args);
         }
+    },
+    after(target, after) {
+        return function() {
+            let result = target.apply(this, arguments);
+            after.apply(this, arguments);
+            return result;
+        };
     },
     /**
      * 最少超时回调
