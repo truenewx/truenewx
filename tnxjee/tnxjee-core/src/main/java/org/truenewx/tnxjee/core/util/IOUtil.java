@@ -50,7 +50,6 @@ public class IOUtil {
         out.write(data.getBytes(encoding));
         out.flush();
         out.close();
-        out = null;
     }
 
     /**
@@ -389,7 +388,8 @@ public class IOUtil {
      * @return 实际已复制的长度，无论复制过程中是否出现错误而中止
      */
     public static long copyAsPossible(InputStream in, OutputStream out, long offset, long length) {
-        // 改编自IOUtils.copyLarge(InputStream input, OutputStream output, long inputOffset, long length, byte[] buffer)
+        // 改编自IOUtils.copyLarge(InputStream input, OutputStream output, long inputOffset, long length,
+        // byte[] buffer)
         long totalRead = 0; // 已读总量
         try {
             if (offset > 0) {
@@ -463,8 +463,11 @@ public class IOUtil {
     public static FileLock lock(File file, boolean readOnly) throws IOException {
         if (file.exists()) {
             String mode = readOnly ? "r" : "rw";
-            FileChannel channel = new RandomAccessFile(file, mode).getChannel();
-            return channel.lock(0, file.length(), readOnly);
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, mode);
+            FileChannel channel = randomAccessFile.getChannel();
+            FileLock lock = channel.lock(0, file.length(), readOnly);
+            randomAccessFile.close();
+            return lock;
         }
         return null;
     }

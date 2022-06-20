@@ -2,7 +2,11 @@ package org.truenewx.tnxjee.webmvc.security.config.annotation.web.configuration;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +106,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void init(WebSecurity web) throws Exception {
         HttpSecurity http = getHttp();
 
@@ -114,6 +119,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
             }
             interceptor.setSecurityMetadataSource(metadataSource);
             interceptor.setAccessDecisionManager(accessDecisionManager());
+            // 当前spring-security版本中的父类仍然是这样调用，未来根据父类情况调整
             web.securityInterceptor(interceptor);
         });
 
@@ -242,7 +248,7 @@ public abstract class WebMvcSecurityConfigurerSupport extends WebSecurityConfigu
     }
 
     protected String[] getLogoutClearCookies() {
-        return new String[]{ "JSESSIONID", "SESSION" };
+        return new String[] { "JSESSIONID", "SESSION" };
     }
 
 }

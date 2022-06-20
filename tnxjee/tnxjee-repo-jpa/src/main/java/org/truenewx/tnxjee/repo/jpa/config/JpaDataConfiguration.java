@@ -11,11 +11,11 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.ApplicationContext;
@@ -53,9 +53,9 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
     /**
      * 在多数据源场景下，可创建子类，构造函数中指定DataSourceProperties和DataSource的beanName
      */
-    public JpaDataConfiguration(ApplicationContext context,
-            DataSourceProperties dataSourceProperties, DataSource dataSource,
-            JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager) {
+    public JpaDataConfiguration(ApplicationContext context, SqlInitializationProperties dataSourceProperties,
+            DataSource dataSource, JpaProperties properties,
+            ObjectProvider<JtaTransactionManager> jtaTransactionManager) {
         super(dataSource, properties, jtaTransactionManager);
         this.context = context;
         // 当前配置会在数据源对象构建完之后，在数据源初始化之前加载，接下来spring-data-jpa框架会检查数据库表结构，
@@ -65,14 +65,14 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
         initDataSource(dataSourceProperties);
     }
 
-    private void initDataSource(DataSourceProperties properties) {
+    private void initDataSource(SqlInitializationProperties properties) {
         List<String> locations = new ArrayList<>();
-        List<String> schema = properties.getSchema();
+        List<String> schema = properties.getSchemaLocations();
         if (schema != null) {
             locations.addAll(schema);
             schema.clear(); // 清除以避免框架再次执行
         }
-        List<String> data = properties.getData();
+        List<String> data = properties.getDataLocations();
         if (data != null) {
             locations.addAll(data);
             data.clear(); // 清除以避免框架再次执行
@@ -88,8 +88,8 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
             initializer.afterPropertiesSet();
         }
         // 先执行静态配置的sql脚本，再执行智能判断的sql脚本
-        SmartDataSourceInitializer smartDataSourceInitializer = SpringUtil
-                .getFirstBeanByClass(this.context, SmartDataSourceInitializer.class);
+        SmartDataSourceInitializer smartDataSourceInitializer = SpringUtil.getFirstBeanByClass(this.context,
+                SmartDataSourceInitializer.class);
         if (smartDataSourceInitializer != null && !smartDataSourceInitializer.isDisabled()) {
             smartDataSourceInitializer.execute(getDataSource());
         }
@@ -106,8 +106,8 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties() {
-        return this.hibernateProperties.determineHibernateProperties(
-                getProperties().getProperties(), new HibernateSettings());
+        return this.hibernateProperties.determineHibernateProperties(getProperties().getProperties(),
+                new HibernateSettings());
     }
 
     protected void addMappingResources(List<String> mappingResources) {
@@ -141,18 +141,15 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
 
     @Override
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            EntityManagerFactoryBuilder factoryBuilder) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
         addMappingResources(getProperties().getMappingResources());
-        LocalContainerEntityManagerFactoryBean factoryBean = super.entityManagerFactory(
-                factoryBuilder);
+        LocalContainerEntityManagerFactoryBean factoryBean = super.entityManagerFactory(factoryBuilder);
         factoryBean.setPersistenceProvider(persistenceProvider());
         return factoryBean;
     }
 
     @Bean
-    public JpaAccessTemplate jpaAccessTemplate(EntityManagerFactory factory,
-            MetadataProvider metadataProvider) {
+    public JpaAccessTemplate jpaAccessTemplate(EntityManagerFactory factory, MetadataProvider metadataProvider) {
         String schema = getSchema();
         if (schema == null) {
             return new JpaAccessTemplate(factory, metadataProvider);
