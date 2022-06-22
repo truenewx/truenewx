@@ -52,7 +52,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
             if (!owner.equals(unity.getOwner())) {
                 LogUtil.warn(getClass(), MESSAGE_OWNER_NOT_EQUAL);
             }
-            save(unity);
+            unity = save(unity);
             afterSave(unity);
         }
     }
@@ -73,7 +73,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
             if (!owner.equals(unity.getOwner())) {
                 LogUtil.warn(getClass(), MESSAGE_OWNER_NOT_EQUAL);
             }
-            save(unity);
+            unity = save(unity);
             afterSave(unity);
         }
     }

@@ -43,13 +43,15 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
 
     private void doAdd(T unity) {
         if (unity != null) {
-            save(unity);
+            unity = save(unity);
             afterSave(unity);
         }
     }
 
-    protected void save(T unity) {
-        getRepository().save(unity);
+    protected T save(T unity) {
+        // 没有id的单体保存后需取保存结果才能获得id
+        unity = getRepository().save(unity);
+        return unity;
     }
 
     @Override
@@ -65,7 +67,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     private void doUpdate(K id, T unity) {
         if (unity != null) {
             Assert.isTrue(id.equals(unity.getId()), MESSAGE_ID_NOT_EQUAL);
-            save(unity);
+            unity = save(unity);
             afterSave(unity);
         }
     }
