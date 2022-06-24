@@ -116,7 +116,10 @@ export default {
     },
     props: {
         id: [Number, String],
-        modelValue: [String, Number, Boolean, Array],
+        modelValue: {
+            type: [String, Number, Boolean, Array],
+            default: null,
+        },
         selector: String,
         items: Array,
         valueName: {
@@ -135,12 +138,18 @@ export default {
             type: String,
             default: 'icon',
         },
-        defaultValue: [String, Number, Boolean, Array],
+        defaultValue: {
+            type: [String, Number, Boolean, Array],
+            default: null,
+        },
         empty: {
             type: [Boolean, String],
             default: false,
         },
-        emptyValue: [String, Number, Boolean, Array],
+        emptyValue: {
+            type: [String, Number, Boolean, Array],
+            default: null,
+        },
         emptyClass: String,
         placeholder: String,
         disabled: Boolean,
