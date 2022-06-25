@@ -52,9 +52,10 @@ public class JacksonUtil {
         //处理LocalTime
         DateTimeFormatter timeFormatter = TemporalUtil.formatter(DateUtil.TIME_PATTERN);
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter));
-        DateTimeFormatter timeToMinuteFormatter = TemporalUtil.formatter(DateUtil.TIME_PATTERN_TO_MINUTE);
-        javaTimeModule.addDeserializer(LocalTime.class,
-                new CompositeLocalTimeDeserializer(timeFormatter, timeToMinuteFormatter));
+        javaTimeModule.addDeserializer(LocalTime.class, new CompositeLocalTimeDeserializer(timeFormatter,
+                TemporalUtil.formatter(DateUtil.TIME_PATTERN_TO_MINUTE),
+                TemporalUtil.formatter(DateUtil.TIME_PATTERN_12HOURS_TO_MINUTE),
+                TemporalUtil.formatter(DateUtil.TIME_PATTERN_12HOURS)));
         //注册时间模块
         DEFAULT_MAPPER.registerModule(javaTimeModule);
 
