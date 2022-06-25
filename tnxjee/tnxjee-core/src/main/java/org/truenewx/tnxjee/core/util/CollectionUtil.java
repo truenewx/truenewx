@@ -45,6 +45,17 @@ public class CollectionUtil {
     }
 
     /**
+     * 取指定集合的第一条记录
+     *
+     * @param iterable 集合
+     * @param <T>      记录类型
+     * @return 第一条记录
+     */
+    public static <T> T getFirst(Iterable<T> iterable) {
+        return getFirst(iterable, null);
+    }
+
+    /**
      * 获取指定可迭代集合中，满足指定断言条件的最后一个元素
      *
      * @param iterable  可迭代集合

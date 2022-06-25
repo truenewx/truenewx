@@ -129,6 +129,18 @@ public class ArrayUtil {
         return intArray;
     }
 
+    public static int[] toIntArray(Integer[] integerArray) {
+        if (integerArray == null) {
+            return null;
+        }
+        int length = integerArray.length;
+        int[] intArray = new int[length];
+        for (int i = 0; i < length; i++) {
+            intArray[i] = integerArray[i];
+        }
+        return intArray;
+    }
+
     public static Integer[] toIntegerArray(int[] intArray) {
         if (intArray == null) {
             return null;
@@ -147,6 +159,18 @@ public class ArrayUtil {
         }
         int length = longArray.length;
         Long[] result = new Long[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = longArray[i];
+        }
+        return result;
+    }
+
+    public static long[] toLongValueArray(Long[] longArray) {
+        if (longArray == null) {
+            return null;
+        }
+        int length = longArray.length;
+        long[] result = new long[length];
         for (int i = 0; i < length; i++) {
             result[i] = longArray[i];
         }

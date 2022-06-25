@@ -151,7 +151,15 @@ public class Querying extends Pagination implements QueryModel, Paging {
                                     }
                                 }
                             }
-                            collection.addAll(decodedList);
+                            if (decodedList.size() > 0) {
+                                try {
+                                    collection.addAll(decodedList);
+                                } catch (UnsupportedOperationException e) {
+                                    collection = new HashSet<>(collection);
+                                    collection.addAll(decodedList);
+                                    BeanUtil.setFieldValue(this, field, collection);
+                                }
+                            }
                         }
                     }
                 }

@@ -9,6 +9,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -805,4 +806,18 @@ public class ClassUtil {
         });
         return classes;
     }
+
+    public static Map<String, Class<?>> getPropertyTypes(Class<?> clazz, String... excludedProperties) {
+        Map<String, Class<?>> types = new HashMap<>();
+        loopPropertyDescriptors(clazz, pd -> {
+            if (pd.getReadMethod() != null) {
+                String propertyName = pd.getName();
+                if (!ArrayUtils.contains(excludedProperties, propertyName)) {
+                    types.put(propertyName, pd.getPropertyType());
+                }
+            }
+        });
+        return types;
+    }
+
 }

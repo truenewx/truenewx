@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.aop.framework.Advised;
@@ -243,28 +244,29 @@ public class BeanUtil {
     }
 
     /**
-     * 将指定bean对象中的属性转换到指定Map中
+     * 遍历指定bean的所有属性
      *
-     * @param map                Map
-     * @param bean               bean
+     * @param bean               Bean对象
+     * @param consumer           遍历消费者
      * @param excludedProperties 排除的属性集
      */
-    public static void fromBean(Map<String, Object> map, Object bean, String... excludedProperties) {
-        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(bean.getClass());
-        for (PropertyDescriptor pd : pds) {
-            try {
-                String name = pd.getName();
-                if (!"class".equals(name) && !ArrayUtils.contains(excludedProperties, name)) {
-                    Method readMethod = pd.getReadMethod();
-                    if (readMethod != null) {
-                        Object value = readMethod.invoke(bean);
-                        if (value != null) {
-                            map.put(name, value);
+    public static void loopProperties(Object bean, BiConsumer<String, Object> consumer, String... excludedProperties) {
+        if (bean != null) {
+            ClassUtil.loopPropertyDescriptors(bean.getClass(), pd -> {
+                try {
+                    String propertyName = pd.getName();
+                    if (!"class".equals(propertyName) && !ArrayUtils.contains(excludedProperties, propertyName)) {
+                        Method readMethod = pd.getReadMethod();
+                        if (readMethod != null) {
+                            Object propertyValue = readMethod.invoke(bean);
+                            if (propertyValue != null) {
+                                consumer.accept(propertyName, propertyValue);
+                            }
                         }
                     }
+                } catch (Exception e) { // 出现任何异常不做任何处理
                 }
-            } catch (Exception e) { // 出现任何异常不做任何处理
-            }
+            });
         }
     }
 
@@ -277,7 +279,7 @@ public class BeanUtil {
      */
     public static Map<String, Object> toMap(Object bean, String... excludedProperties) {
         Map<String, Object> map = new HashMap<>();
-        fromBean(map, bean, excludedProperties);
+        loopProperties(bean, map::put, excludedProperties);
         return map;
     }
 

@@ -14,6 +14,7 @@
         <module>tnxjee-model</module>
         <module>tnxjee-repo</module>
         <module>tnxjee-repo-jpa</module>
+        <module>tnxjee-repo-lucene</module>
         <module>tnxjee-repo-mongo</module>
         <module>tnxjee-service</module>
         <module>tnxjee-service-impl</module>
@@ -91,6 +92,11 @@
             <dependency>
                 <groupId>org.truenewx.tnxjee</groupId>
                 <artifactId>tnxjee-repo-jpa</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjee</groupId>
+                <artifactId>tnxjee-repo-lucene</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
