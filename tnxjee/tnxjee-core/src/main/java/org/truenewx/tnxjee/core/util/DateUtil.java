@@ -16,11 +16,6 @@ import org.truenewx.tnxjee.core.Strings;
  * @author jianglei
  */
 public class DateUtil {
-
-    /**
-     * 最未来的时间
-     */
-    public static final Date MOST_FUTURE_TIME = new Date(Long.MAX_VALUE);
     /**
      * 短日期格式
      */
@@ -30,9 +25,17 @@ public class DateUtil {
      */
     public static final String TIME_PATTERN = "HH:mm:ss";
     /**
+     * 时间格式（12小时制）
+     */
+    public static final String TIME_PATTERN_12HOURS = "ahh:mm:ss";
+    /**
      * 精确到分钟的时间格式
      */
     public static final String TIME_PATTERN_TO_MINUTE = "HH:mm";
+    /**
+     * 精确到分钟的时间格式（12小时制）
+     */
+    public static final String TIME_PATTERN_12HOURS_TO_MINUTE = "ahh:mm";
     /**
      * 长日期格式
      */
