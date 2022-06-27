@@ -389,8 +389,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
             long total = 0;
             IndexSearcher searcher = getSearcher();
             if (searcher != null) {
+                ScoreDoc afterDoc = getAfterDoc(query, pageSize, pageNo, sort);
                 int n = pageSize > 0 ? pageSize : Integer.MAX_VALUE;
-                TopDocs topDocs = searcher.search(query, n, sort);
+                TopDocs topDocs = searcher.searchAfter(afterDoc, query, n, sort);
                 total = topDocs.totalHits.value;
                 for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                     Document document = searcher.doc(scoreDoc.doc, ArrayUtil.toSet(fieldsToLoad));
@@ -401,6 +402,16 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private ScoreDoc getAfterDoc(Query query, int pageSize, int pageNo, Sort sort) throws IOException {
+        int n = pageSize * (pageNo - 1);
+        if (n > 0) {
+            TopDocs topDocs = this.searcher.search(query, n, sort);
+            ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+            return scoreDocs[scoreDocs.length - 1];
+        }
+        return null;
     }
 
     /**
