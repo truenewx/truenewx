@@ -22,16 +22,19 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.BytesRef;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.ArrayUtil;
+import org.truenewx.tnxjee.core.util.BeanUtil;
+import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.query.FieldOrder;
 import org.truenewx.tnxjee.model.query.Paged;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
+import org.truenewx.tnxjee.repo.lucene.document.NotTokenizedStringField;
 import org.truenewx.tnxjee.repo.lucene.document.TemporalField;
 import org.truenewx.tnxjee.repo.lucene.index.IndexWriterFactory;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultQueryBuilder;
@@ -148,8 +151,8 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         BeanUtil.loopProperties(object, (name, value) -> {
             if (value != null) {
                 if (name.equals(getKeyPropertyName())) {
-                    document.add(getField(name, value, true, false));
-                    document.add(getField(name, value, false, false));
+                    document.add(getField(name, value, true, false, false));
+                    document.add(getField(name, value, false, false, false));
                 } else {
                     getFields(name, value).forEach(document::add);
                 }
@@ -173,31 +176,30 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
                 int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
                     Object element = Array.get(value, i);
-                    addFields(fields, name, element, feature);
+                    IndexableField field = getField(name, element, feature.isStored(), feature.isTokenized(),
+                            feature.isSorted());
+                    if (field != null) {
+                        fields.add(field);
+                    }
                 }
             } else if (value instanceof Collection) {
                 Collection<?> collection = (Collection<?>) value;
                 for (Object element : collection) {
-                    addFields(fields, name, element, feature);
+                    IndexableField field = getField(name, element, feature.isStored(), feature.isTokenized(),
+                            feature.isSorted());
+                    if (field != null) {
+                        fields.add(field);
+                    }
                 }
             } else {
-                addFields(fields, name, value, feature);
+                IndexableField field = getField(name, value, feature.isStored(), feature.isTokenized(),
+                        feature.isSorted());
+                if (field != null) {
+                    fields.add(field);
+                }
             }
         }
         return fields;
-    }
-
-    private void addFields(Collection<IndexableField> fields, String name, Object value, IndexFieldFeature feature) {
-        IndexableField field = getField(name, value, feature.isStored(), feature.isTokenized());
-        if (field != null) {
-            fields.add(field);
-        }
-        if (feature.isSorted()) {
-            field = getSortedField(name, value);
-            if (field != null) {
-                fields.add(field);
-            }
-        }
     }
 
     /**
@@ -222,60 +224,72 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      * @param value     索引字段值
      * @param stored    是否存储
      * @param tokenized 是否分词，仅对字符串索引的字段有效
+     * @param sorted    是否参与排序
      * @return 索引字段信息，返回null表示指定属性没有对应的索引字段
      */
-    protected IndexableField getField(String name, Object value, boolean stored, boolean tokenized) {
+    protected IndexableField getField(String name, Object value, boolean stored, boolean tokenized, boolean sorted) {
         if (value == null || ClassUtil.isComplex(value.getClass())) {
             return null;
         }
-        if (value instanceof Long) {
-            if (stored) {
-                return new StoredField(name, (Long) value);
-            } else {
-                return new LongPoint(name, (Long) value);
+        if (value instanceof Number) {
+            if (value instanceof Long) {
+                if (sorted) {
+                    return new NumericDocValuesField(name, (Long) value);
+                } else if (stored) {
+                    return new StoredField(name, (Long) value);
+                } else {
+                    return new LongPoint(name, (Long) value);
+                }
+            }
+            if (value instanceof Integer) {
+                if (sorted) {
+                    return new NumericDocValuesField(name, (Integer) value);
+                } else if (stored) {
+                    return new StoredField(name, (Integer) value);
+                } else {
+                    return new IntPoint(name, (Integer) value);
+                }
+            }
+            if (value instanceof BigDecimal) {
+                double doubleValue = ((BigDecimal) value).doubleValue();
+                if (sorted) {
+                    return new DoubleDocValuesField(name, doubleValue);
+                } else if (stored) {
+                    return new StoredField(name, doubleValue);
+                } else {
+                    return new DoublePoint(name, doubleValue);
+                }
+            }
+            if (value instanceof Double) {
+                if (sorted) {
+                    return new DoubleDocValuesField(name, (Double) value);
+                } else if (stored) {
+                    return new StoredField(name, (Double) value);
+                } else {
+                    return new DoublePoint(name, (Double) value);
+                }
+            }
+            if (value instanceof Float) {
+                if (sorted) {
+                    return new FloatDocValuesField(name, (Float) value);
+                } else if (stored) {
+                    return new StoredField(name, (Float) value);
+                } else {
+                    return new FloatPoint(name, (Float) value);
+                }
             }
         }
-        if (value instanceof Integer) {
-            if (stored) {
-                return new StoredField(name, (Integer) value);
-            } else {
-                return new IntPoint(name, (Integer) value);
-            }
-        }
-        if (value instanceof BigDecimal) {
-            double doubleValue = ((BigDecimal) value).doubleValue();
-            if (stored) {
-                return new StoredField(name, doubleValue);
-            } else {
-                return new DoublePoint(name, doubleValue);
-            }
-        }
-        if (value instanceof Double) {
-            if (stored) {
-                return new StoredField(name, (Double) value);
-            } else {
-                return new DoublePoint(name, (Double) value);
-            }
-        }
-        if (value instanceof Float) {
-            if (stored) {
-                return new StoredField(name, (Float) value);
-            } else {
-                return new FloatPoint(name, (Float) value);
-            }
-        }
-        Field.Store store = stored ? Field.Store.YES : Field.Store.NO;
         if (value instanceof Temporal) {
-            return new TemporalField(name, (Temporal) value, store);
+            return new TemporalField(name, (Temporal) value, stored, sorted);
         }
         // 除以上类型外，字符串和枚举类型的字段不可分词
         if (value instanceof Boolean || value instanceof Enum) {
             tokenized = false;
         }
         if (tokenized) {
-            return new TextField(name, value.toString(), store);
+            return new TextField(name, value.toString(), stored ? Field.Store.YES : Field.Store.NO);
         }
-        return new StringField(name, value.toString(), store);
+        return new NotTokenizedStringField(name, value.toString(), stored, sorted);
     }
 
     /**
@@ -287,32 +301,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      * @return 索引字段信息，返回null表示指定属性没有对应的索引字段
      */
     protected IndexableField getField(String name, Object value) {
-        return getField(name, value, false, false);
-    }
-
-    protected IndexableField getSortedField(String name, Object value) {
-        if (value == null || ClassUtil.isComplex(value.getClass())) {
-            return null;
-        }
-        if (value instanceof Long) {
-            return new NumericDocValuesField(name, (Long) value);
-        }
-        if (value instanceof Integer) {
-            return new NumericDocValuesField(name, ((Integer) value).longValue());
-        }
-        if (value instanceof BigDecimal) {
-            return new DoubleDocValuesField(name, ((BigDecimal) value).doubleValue());
-        }
-        if (value instanceof Double) {
-            return new DoubleDocValuesField(name, (Double) value);
-        }
-        if (value instanceof Float) {
-            return new FloatDocValuesField(name, (Float) value);
-        }
-        if (value instanceof Temporal) {
-            value = TemporalUtil.format((Temporal) value);
-        }
-        return new SortedDocValuesField(name, new BytesRef(value.toString()));
+        // 数字、时间、枚举类型默认参与排序
+        boolean sorted = value instanceof Number || value instanceof Temporal || value instanceof Enum;
+        return getField(name, value, false, false, sorted);
     }
 
     @Override
@@ -359,6 +350,8 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 Object value = entry.getValue();
                 if (value != null) {
+                    // 去掉参数值中的空格，避免条件字段错误
+                    value = value.toString().replaceAll(Strings.SPACE, Strings.EMPTY);
                     String name = entry.getKey();
                     String key = Strings.COLON + name;
                     for (String follow : follows) {
