@@ -133,6 +133,15 @@ export default {
                 return util.net.toParameterString(params);
             };
         }
+        if (config.data) {
+            let keys = Object.keys(config.data);
+            for (let key of keys) {
+                let value = config.data[key];
+                if (value instanceof Date) {
+                    config.data[key] = value.formatDateTime();
+                }
+            }
+        }
         if (typeof options.onUploadProgress === 'function') {
             config.onUploadProgress = function(event) {
                 const ratio = (event.loaded / event.total) || 0;

@@ -763,7 +763,9 @@ export const NetUtil = {
                                 v = v();
                                 break;
                             case 'object':
-                                if (typeof v.toString === 'function') {
+                                if (v instanceof Date) {
+                                    v = v.formatDateTime();
+                                } else if (typeof v.toString === 'function') {
                                     v = v.toString();
                                 } else {
                                     v = null;
