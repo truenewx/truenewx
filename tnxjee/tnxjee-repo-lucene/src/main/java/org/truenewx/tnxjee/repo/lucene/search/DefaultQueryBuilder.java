@@ -28,7 +28,9 @@ public class DefaultQueryBuilder {
     }
 
     public DefaultQueryBuilder add(Query query, BooleanClause.Occur occur) {
-        this.delegate.add(query, occur);
+        if (query != null) {
+            this.delegate.add(query, occur);
+        }
         return this;
     }
 

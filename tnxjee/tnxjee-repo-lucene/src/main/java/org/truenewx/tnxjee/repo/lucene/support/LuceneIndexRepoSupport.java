@@ -22,20 +22,16 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.BytesRef;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.ArrayUtil;
-import org.truenewx.tnxjee.core.util.BeanUtil;
-import org.truenewx.tnxjee.core.util.ClassUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.query.FieldOrder;
 import org.truenewx.tnxjee.model.query.Paged;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
-import org.truenewx.tnxjee.repo.lucene.document.NotTokenizedStringField;
-import org.truenewx.tnxjee.repo.lucene.document.TemporalField;
 import org.truenewx.tnxjee.repo.lucene.index.IndexWriterFactory;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultQueryBuilder;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultSortBuilder;
@@ -47,6 +43,11 @@ import org.truenewx.tnxjee.repo.lucene.search.DefaultSortBuilder;
  * @author jianglei
  */
 public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, DisposableBean {
+
+    /**
+     * 分词字段名后缀
+     */
+    protected static final String TOKENIZED_FIELD_NAME_SUFFIX = "_text";
 
     private IndexWriterFactory writerFactory;
     private IndexWriter writer;
@@ -151,8 +152,8 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         BeanUtil.loopProperties(object, (name, value) -> {
             if (value != null) {
                 if (name.equals(getKeyPropertyName())) {
-                    document.add(getField(name, value, true, false, false));
-                    document.add(getField(name, value, false, false, false));
+                    document.add(getGeneralField(name, value, true));
+                    document.add(getGeneralField(name, value, false));
                 } else {
                     getFields(name, value).forEach(document::add);
                 }
@@ -176,27 +177,15 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
                 int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
                     Object element = Array.get(value, i);
-                    IndexableField field = getField(name, element, feature.isStored(), feature.isTokenized(),
-                            feature.isSorted());
-                    if (field != null) {
-                        fields.add(field);
-                    }
+                    addFields(fields, name, element, feature);
                 }
             } else if (value instanceof Collection) {
                 Collection<?> collection = (Collection<?>) value;
                 for (Object element : collection) {
-                    IndexableField field = getField(name, element, feature.isStored(), feature.isTokenized(),
-                            feature.isSorted());
-                    if (field != null) {
-                        fields.add(field);
-                    }
+                    addFields(fields, name, element, feature);
                 }
             } else {
-                IndexableField field = getField(name, value, feature.isStored(), feature.isTokenized(),
-                        feature.isSorted());
-                if (field != null) {
-                    fields.add(field);
-                }
+                addFields(fields, name, value, feature);
             }
         }
         return fields;
@@ -216,35 +205,89 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         return new IndexFieldFeature();
     }
 
-    /**
-     * 获取指定属性的唯一索引字段信息<br>
-     * 如果一个属性对应多个索引字段，请子类覆写 {@link #getFields(String, Object)}
-     *
-     * @param name      索引字段名，不含标识属性
-     * @param value     索引字段值
-     * @param stored    是否存储
-     * @param tokenized 是否分词，仅对字符串索引的字段有效
-     * @param sorted    是否参与排序
-     * @return 索引字段信息，返回null表示指定属性没有对应的索引字段
-     */
-    protected IndexableField getField(String name, Object value, boolean stored, boolean tokenized, boolean sorted) {
+    protected void addFields(Collection<IndexableField> fields, String name, Object value, IndexFieldFeature feature) {
+        if (feature.isSorted()) {
+            IndexableField sortedField = getSortedField(name, value);
+            if (sortedField != null) {
+                fields.add(sortedField);
+            }
+        }
+        // 直接字符串才可分词，其它类型转换为字符串的也不可分词
+        boolean tokenized = feature.isTokenized() && value instanceof CharSequence;
+        if (tokenized) {
+            // 默认情况下，分词字段额外添加字段名+Text的分词索引字段，以支持分词查询
+            IndexableField tokenizedField = getTokenizedField(name + TOKENIZED_FIELD_NAME_SUFFIX, value);
+            if (tokenizedField != null) {
+                fields.add(tokenizedField);
+            }
+        }
+        IndexableField generalField = getGeneralField(name, value, feature.isStored());
+        if (generalField != null) {
+            fields.add(generalField);
+        }
+    }
+
+    protected IndexableField getSortedField(String name, Object value) {
         if (value == null || ClassUtil.isComplex(value.getClass())) {
             return null;
         }
         if (value instanceof Number) {
             if (value instanceof Long) {
-                if (sorted) {
-                    return new NumericDocValuesField(name, (Long) value);
-                } else if (stored) {
+                return new NumericDocValuesField(name, (Long) value);
+            }
+            if (value instanceof Integer) {
+                return new NumericDocValuesField(name, (Integer) value);
+            }
+            if (value instanceof BigDecimal) {
+                return new DoubleDocValuesField(name, ((BigDecimal) value).doubleValue());
+            }
+            if (value instanceof Double) {
+                return new DoubleDocValuesField(name, (Double) value);
+            }
+            if (value instanceof Float) {
+                return new FloatDocValuesField(name, (Float) value);
+            }
+        }
+        if (value instanceof Temporal) {
+            value = TemporalUtil.format((Temporal) value);
+        }
+        return new SortedDocValuesField(name, new BytesRef(value.toString()));
+    }
+
+    /**
+     * 获取指定属性的分词索引字段信息
+     *
+     * @param name  索引字段名
+     * @param value 索引字段值
+     * @return 索引字段信息，返回null表示不索引
+     */
+    protected IndexableField getTokenizedField(String name, Object value) {
+        return new TextField(name, value.toString(), Field.Store.NO);
+    }
+
+    /**
+     * 获取指定属性的一般性索引字段信息<br>
+     * 如果一个属性对应多个一般性索引字段，请子类覆写 {@link #getFields(String, Object)}
+     *
+     * @param name   索引字段名
+     * @param value  索引字段值
+     * @param stored 是否存储
+     * @return 索引字段信息，返回null表示不索引
+     */
+    protected IndexableField getGeneralField(String name, Object value, boolean stored) {
+        if (value == null || ClassUtil.isComplex(value.getClass())) {
+            return null;
+        }
+        if (value instanceof Number) {
+            if (value instanceof Long) {
+                if (stored) {
                     return new StoredField(name, (Long) value);
                 } else {
                     return new LongPoint(name, (Long) value);
                 }
             }
             if (value instanceof Integer) {
-                if (sorted) {
-                    return new NumericDocValuesField(name, (Integer) value);
-                } else if (stored) {
+                if (stored) {
                     return new StoredField(name, (Integer) value);
                 } else {
                     return new IntPoint(name, (Integer) value);
@@ -252,27 +295,21 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
             }
             if (value instanceof BigDecimal) {
                 double doubleValue = ((BigDecimal) value).doubleValue();
-                if (sorted) {
-                    return new DoubleDocValuesField(name, doubleValue);
-                } else if (stored) {
+                if (stored) {
                     return new StoredField(name, doubleValue);
                 } else {
                     return new DoublePoint(name, doubleValue);
                 }
             }
             if (value instanceof Double) {
-                if (sorted) {
-                    return new DoubleDocValuesField(name, (Double) value);
-                } else if (stored) {
+                if (stored) {
                     return new StoredField(name, (Double) value);
                 } else {
                     return new DoublePoint(name, (Double) value);
                 }
             }
             if (value instanceof Float) {
-                if (sorted) {
-                    return new FloatDocValuesField(name, (Float) value);
-                } else if (stored) {
+                if (stored) {
                     return new StoredField(name, (Float) value);
                 } else {
                     return new FloatPoint(name, (Float) value);
@@ -280,30 +317,21 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
             }
         }
         if (value instanceof Temporal) {
-            return new TemporalField(name, (Temporal) value, stored, sorted);
+            value = TemporalUtil.format((Temporal) value);
         }
-        // 除以上类型外，字符串和枚举类型的字段不可分词
-        if (value instanceof Boolean || value instanceof Enum) {
-            tokenized = false;
-        }
-        if (tokenized) {
-            return new TextField(name, value.toString(), stored ? Field.Store.YES : Field.Store.NO);
-        }
-        return new NotTokenizedStringField(name, value.toString(), stored, sorted);
+        return new StringField(name, value.toString(), stored ? Field.Store.YES : Field.Store.NO);
     }
 
     /**
-     * 获取指定属性的不存储的唯一索引字段信息<br>
-     * 如果一个属性对应多个索引字段，请子类覆写 {@link #getFields(String, Object)}
+     * 获取指定属性的不存储的一般性索引字段信息<br>
+     * 如果一个属性对应多个一般性索引字段，请子类覆写 {@link #getFields(String, Object)}
      *
-     * @param name  索引字段名，不含标识属性
+     * @param name  索引字段名
      * @param value 索引字段值
-     * @return 索引字段信息，返回null表示指定属性没有对应的索引字段
+     * @return 索引字段信息，返回null表示不索引
      */
-    protected IndexableField getField(String name, Object value) {
-        // 数字、时间、枚举类型默认参与排序
-        boolean sorted = value instanceof Number || value instanceof Temporal || value instanceof Enum;
-        return getField(name, value, false, false, sorted);
+    protected IndexableField getGeneralField(String name, Object value) {
+        return getGeneralField(name, value, false);
     }
 
     @Override
@@ -331,6 +359,39 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
             LogUtil.error(getClass(), e);
             return false;
         }
+    }
+
+    /**
+     * 构建分词查询条件
+     *
+     * @param name     索引字段名
+     * @param keywords 查询关键字集
+     * @return 分词查询条件
+     */
+    protected Query buildTokenizedQuery(String name, String[] keywords) {
+        if (keywords.length == 1) {
+            String keyword = keywords[0].trim();
+            return buildTokenizedQuery(name, keyword);
+        } else if (keywords.length > 1) {
+            DefaultQueryBuilder builder = new DefaultQueryBuilder();
+            for (String keyword : keywords) {
+                keyword = keyword.trim();
+                // 空格分隔的多个关键字之间为and条件关系
+                builder.must(buildTokenizedQuery(name, keyword));
+            }
+            return builder.build();
+        }
+        return null;
+    }
+
+    protected Query buildTokenizedQuery(String name, String keyword) {
+        // 单个关键字条件形如：[name]:[keyword] OR [name]_text:[keyword]
+        // 其中分词索引字段使用查询语句解析构建，以获得分词查询能力
+        keyword = keyword.replaceAll(Strings.SLASH, "\\\\/");
+        return new DefaultQueryBuilder()
+                .should(parse(name + ":/.*" + keyword + ".*/"))
+                .should(parse(name + TOKENIZED_FIELD_NAME_SUFFIX + ":" + keyword))
+                .build();
     }
 
     protected final Query parse(String ql) {
