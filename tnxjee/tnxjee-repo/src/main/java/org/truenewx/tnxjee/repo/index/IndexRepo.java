@@ -12,10 +12,4 @@ public interface IndexRepo<T> {
 
     void delete(T object);
 
-    boolean isQueryable();
-
-    void commit();
-
-    void rollback();
-
 }

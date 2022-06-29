@@ -34,7 +34,7 @@ public class LuceneConfig {
 
     @Bean
     @ConditionalOnMissingBean(IndexFactory.class)
-    public IndexFactory indexWriterFactory(DirectoryFactory directoryFactory, Analyzer analyzer) {
+    public IndexFactory indexFactory(DirectoryFactory directoryFactory, Analyzer analyzer) {
         return new IndexFactory(directoryFactory, analyzer);
     }
 

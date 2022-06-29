@@ -2,16 +2,19 @@ package org.truenewx.tnxjee.repo.lucene.search;
 
 import java.math.BigDecimal;
 import java.time.temporal.Temporal;
+import java.util.Map;
 
 import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.document.FloatPoint;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
 
 /**
@@ -35,7 +38,7 @@ public class DefaultQueryBuilder {
     }
 
     public DefaultQueryBuilder add(String name, Object value, BooleanClause.Occur occur) {
-        return add(create(name, value), occur);
+        return add(build(name, value), occur);
     }
 
     /**
@@ -56,7 +59,7 @@ public class DefaultQueryBuilder {
      * @return 当前构建器
      */
     public DefaultQueryBuilder must(String name, Object value) {
-        return must(create(name, value));
+        return must(build(name, value));
     }
 
     /**
@@ -77,7 +80,7 @@ public class DefaultQueryBuilder {
      * @return 当前构建器
      */
     public DefaultQueryBuilder mustNot(String name, Object value) {
-        return mustNot(create(name, value));
+        return mustNot(build(name, value));
     }
 
     /**
@@ -98,7 +101,7 @@ public class DefaultQueryBuilder {
      * @return 当前构建器
      */
     public DefaultQueryBuilder should(String name, Object value) {
-        return should(create(name, value));
+        return should(build(name, value));
     }
 
     public BooleanQuery build() {
@@ -113,7 +116,7 @@ public class DefaultQueryBuilder {
      * @param value 条件字段值
      * @return 默认查询条件
      */
-    public static Query create(String name, Object value) {
+    public static Query build(String name, Object value) {
         if (value instanceof Long) {
             return LongPoint.newExactQuery(name, (Long) value);
         }
@@ -133,6 +136,39 @@ public class DefaultQueryBuilder {
             value = TemporalUtil.format((Temporal) value);
         }
         return new TermQuery(new Term(name, value.toString()));
+    }
+
+    public static Query parse(QueryParser queryParser, String ql) {
+        try {
+            // 逻辑运算符大写化，以符合Lucene查询语句规范
+            ql = ql.replaceAll(" and ", " AND ").replaceAll(" or ", " OR ");
+            return queryParser.parse(ql);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Query parse(QueryParser queryParser, CharSequence ql, Map<String, Object> params) {
+        String s = ql.toString();
+        if (params != null && params.size() > 0) {
+            String[] follows = { Strings.SPACE, Strings.SINGLE_QUOTES, Strings.DOUBLE_QUOTES, "\\)" };
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                Object value = entry.getValue();
+                if (value != null) {
+                    // 去掉参数值中的空格，避免条件字段错误
+                    value = value.toString().replaceAll(Strings.SPACE, Strings.EMPTY);
+                    String name = entry.getKey();
+                    String key = Strings.COLON + name;
+                    for (String follow : follows) {
+                        s = s.replaceAll(key + follow, value + follow);
+                    }
+                    if (s.endsWith(key)) {
+                        s = s.substring(0, s.length() - key.length()) + value;
+                    }
+                }
+            }
+        }
+        return parse(queryParser, s);
     }
 
 }

@@ -12,6 +12,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
+import org.springframework.beans.factory.DisposableBean;
 import org.truenewx.tnxjee.repo.lucene.store.DirectoryFactory;
 
 /**
@@ -19,7 +20,7 @@ import org.truenewx.tnxjee.repo.lucene.store.DirectoryFactory;
  *
  * @author jianglei
  */
-public class IndexFactory {
+public class IndexFactory implements DisposableBean {
 
     private DirectoryFactory directoryFactory;
     private Analyzer analyzer;
@@ -73,15 +74,17 @@ public class IndexFactory {
         return searcher;
     }
 
-    public void close(String path) throws IOException {
-        IndexSearcher searcher = this.searchers.remove(path);
-        if (searcher != null) {
+    @Override
+    public void destroy() throws Exception {
+        for (IndexSearcher searcher : this.searchers.values()) {
             searcher.getIndexReader().close();
         }
-        IndexWriter writer = this.writers.remove(path);
-        if (writer != null) {
+        this.searchers.clear();
+        this.queryParsers.clear();
+        for (IndexWriter writer : this.writers.values()) {
             writer.close();
         }
+        this.writers.clear();
     }
 
 }

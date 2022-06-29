@@ -13,72 +13,43 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.document.*;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.util.BytesRef;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.ArrayUtil;
+import org.truenewx.tnxjee.core.util.BeanUtil;
+import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.TemporalUtil;
 import org.truenewx.tnxjee.model.query.FieldOrder;
 import org.truenewx.tnxjee.model.query.Paged;
+import org.truenewx.tnxjee.model.query.Paging;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
-import org.truenewx.tnxjee.repo.lucene.index.IndexFactory;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultQueryBuilder;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultSortBuilder;
 
 /**
  * 基于Lucene的索引数据仓库支持
  *
- * @param <T> 被索引对象类型
- * @author jianglei
+ * @param <T> 索引对象类型
  */
-public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, DisposableBean {
-
+public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
     /**
      * 分词字段名后缀
      */
     protected static final String TOKENIZED_FIELD_NAME_SUFFIX = "_text";
 
-    private IndexFactory indexFactory;
-    private Map<String, Class<?>> propertyTypes;
+    private Map<String, Class<?>> propertyTypes = ClassUtil.getPropertyTypes(getIndexType());
 
-    @Autowired
-    public void setIndexFactory(IndexFactory indexFactory) throws IOException {
-        this.indexFactory = indexFactory;
-        this.propertyTypes = ClassUtil.getPropertyTypes(getIndexedClass());
-    }
-
-    protected Class<T> getIndexedClass() {
+    protected Class<T> getIndexType() {
         return ClassUtil.getActualGenericType(getClass(), IndexRepo.class, 0);
     }
 
-    protected abstract String getDirectoryPath();
-
-    protected final IndexWriter getWriter() throws IOException {
-        return this.indexFactory.getWriter(getDirectoryPath());
-    }
-
-    protected final QueryParser getQueryParser() throws IOException {
-        return this.indexFactory.getQueryParser(getDirectoryPath(), getDefaultPropertyName());
-    }
-
-    protected final IndexSearcher getSearcher() throws IOException {
-        return this.indexFactory.getSearcher(getDirectoryPath());
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        this.indexFactory.close(getDirectoryPath());
-    }
-
     /**
-     * 获取标识属性名
+     * 获取标识属性名。被索引对象必须具有标识属性，否则无法定位单个对象进行删除
      *
      * @return 标识属性名
      */
@@ -90,18 +61,6 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      * @return 默认的索引属性名称
      */
     protected abstract String getDefaultPropertyName();
-
-    @Override
-    public void save(T object) {
-        Document document = toDocument(object);
-        try {
-            if (document != null && document.iterator().hasNext()) {
-                getWriter().addDocument(document);
-            }
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
 
     /**
      * 被索引对象转换为索引文档。<br>
@@ -298,32 +257,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         return getGeneralField(name, value, false);
     }
 
-    @Override
-    public void delete(T object) {
-        String propertyName = getKeyPropertyName();
-        Object propertyValue = BeanUtil.getPropertyValue(object, propertyName);
-        Query query = DefaultQueryBuilder.create(propertyName, propertyValue);
-        try {
-            getWriter().deleteDocuments(query);
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
-    /**
-     * 判断当前索引可否查询
-     *
-     * @return 当前索引可否查询
-     */
-    @Override
-    public boolean isQueryable() {
-        try {
-            return DirectoryReader.indexExists(getWriter().getDirectory());
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-            return false;
-        }
-    }
+    ////// 以上为索引部分，以下为检索部分 //////
 
     /**
      * 构建分词查询条件
@@ -332,85 +266,53 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      * @param keywords 查询关键字集
      * @return 分词查询条件
      */
-    protected Query buildTokenizedQuery(String name, String[] keywords) {
+    protected Query buildTokenizedQuery(QueryParser queryParser, String name, String[] keywords) {
         if (keywords.length == 1) {
             String keyword = keywords[0].trim();
-            return buildTokenizedQuery(name, keyword);
+            return buildTokenizedQuery(queryParser, name, keyword);
         } else if (keywords.length > 1) {
             DefaultQueryBuilder builder = new DefaultQueryBuilder();
             for (String keyword : keywords) {
                 keyword = keyword.trim();
                 // 空格分隔的多个关键字之间为and条件关系
-                builder.must(buildTokenizedQuery(name, keyword));
+                builder.must(buildTokenizedQuery(queryParser, name, keyword));
             }
             return builder.build();
         }
         return null;
     }
 
-    protected Query buildTokenizedQuery(String name, String keyword) {
+    protected Query buildTokenizedQuery(QueryParser queryParser, String name, String keyword) {
         // 单个关键字条件形如：[name]:[keyword] OR [name]_text:[keyword]
         // 其中分词索引字段使用查询语句解析构建，以获得分词查询能力
         keyword = keyword.replaceAll(Strings.SLASH, "\\\\/");
         DefaultQueryBuilder builder = new DefaultQueryBuilder();
         if (!name.equals(getDefaultPropertyName())) {
-            builder.should(parse(name + ":/.*" + keyword + ".*/"));
+            builder.should(DefaultQueryBuilder.parse(queryParser, name + ":/.*" + keyword + ".*/"));
         }
         return builder
-                .should(parse(name + TOKENIZED_FIELD_NAME_SUFFIX + ":" + keyword))
+                .should(DefaultQueryBuilder.parse(queryParser, name + TOKENIZED_FIELD_NAME_SUFFIX + ":" + keyword))
                 .build();
     }
 
-    protected final Query parse(String ql) {
-        try {
-            // 逻辑运算符大写化，以符合Lucene查询语句规范
-            ql = ql.replaceAll(" and ", " AND ").replaceAll(" or ", " OR ");
-            return getQueryParser().parse(ql);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected final Query parse(CharSequence ql, Map<String, Object> params) {
-        String s = ql.toString();
-        if (params != null && params.size() > 0) {
-            String[] follows = { Strings.SPACE, Strings.SINGLE_QUOTES, Strings.DOUBLE_QUOTES, "\\)" };
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
-                Object value = entry.getValue();
-                if (value != null) {
-                    // 去掉参数值中的空格，避免条件字段错误
-                    value = value.toString().replaceAll(Strings.SPACE, Strings.EMPTY);
-                    String name = entry.getKey();
-                    String key = Strings.COLON + name;
-                    for (String follow : follows) {
-                        s = s.replaceAll(key + follow, value + follow);
-                    }
-                    if (s.endsWith(key)) {
-                        s = s.substring(0, s.length() - key.length()) + value;
-                    }
-                }
-            }
-        }
-        return parse(s);
-    }
-
     /**
-     * 分页查询
+     * 检索
      *
+     * @param searcher     索引检索器
      * @param query        查询条件
      * @param pageSize     分页大小
      * @param pageNo       页码
      * @param sort         排序
      * @param fieldsToLoad 查询结果要加载的字段集，为空时不加载任何字段
-     * @return 索引文档分页查询结果
+     * @return 检索结果
      */
-    protected QueryResult<Document> query(Query query, int pageSize, int pageNo, Sort sort, String... fieldsToLoad) {
+    protected final QueryResult<Document> search(IndexSearcher searcher, Query query, int pageSize, int pageNo,
+            Sort sort, String... fieldsToLoad) {
         try {
             List<Document> documents = new ArrayList<>();
             long total = 0;
-            IndexSearcher searcher = getSearcher();
             if (searcher != null) {
-                ScoreDoc afterDoc = getAfterDoc(query, pageSize, pageNo, sort);
+                ScoreDoc afterDoc = getAfterDoc(searcher, query, pageSize, pageNo, sort);
                 int n = pageSize > 0 ? pageSize : Integer.MAX_VALUE;
                 TopDocs topDocs = searcher.searchAfter(afterDoc, query, n, sort);
                 total = topDocs.totalHits.value;
@@ -425,14 +327,30 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         }
     }
 
-    private ScoreDoc getAfterDoc(Query query, int pageSize, int pageNo, Sort sort) throws IOException {
+    private ScoreDoc getAfterDoc(IndexSearcher searcher, Query query, int pageSize, int pageNo, Sort sort)
+            throws IOException {
         int n = pageSize * (pageNo - 1);
         if (n > 0) {
-            TopDocs topDocs = getSearcher().search(query, n, sort);
+            TopDocs topDocs = searcher.search(query, n, sort);
             ScoreDoc[] scoreDocs = topDocs.scoreDocs;
             return scoreDocs[scoreDocs.length - 1];
         }
         return null;
+    }
+
+    /**
+     * 检索
+     *
+     * @param searcher     索引检索器
+     * @param query        查询条件
+     * @param paging       分页信息
+     * @param fieldsToLoad 查询结果要加载的字段集，为空时不加载任何字段
+     * @return 检索结果
+     */
+    protected final QueryResult<Document> search(IndexSearcher searcher, Query query, Paging paging,
+            String... fieldsToLoad) {
+        Sort sort = buildSort(paging.getOrders());
+        return search(searcher, query, paging.getPageSize(), paging.getPageNo(), sort, fieldsToLoad);
     }
 
     /**
@@ -502,25 +420,4 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         // 不参与排序则使用文档顺序
         return SortField.Type.DOC;
     }
-
-    @Override
-    public void commit() {
-        try {
-            IndexWriter writer = getWriter();
-            writer.forceMergeDeletes();
-            writer.commit();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
-    @Override
-    public void rollback() {
-        try {
-            getWriter().rollback();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
 }
