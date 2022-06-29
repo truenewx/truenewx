@@ -12,16 +12,12 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +28,7 @@ import org.truenewx.tnxjee.model.query.Paged;
 import org.truenewx.tnxjee.model.query.QueryResult;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
-import org.truenewx.tnxjee.repo.lucene.index.IndexWriterFactory;
+import org.truenewx.tnxjee.repo.lucene.index.IndexFactory;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultQueryBuilder;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultSortBuilder;
 
@@ -49,65 +45,36 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      */
     protected static final String TOKENIZED_FIELD_NAME_SUFFIX = "_text";
 
-    private IndexWriterFactory writerFactory;
-    private IndexWriter writer;
-    private QueryParser queryParser;
-    private IndexSearcher searcher;
+    private IndexFactory indexFactory;
     private Map<String, Class<?>> propertyTypes;
 
     @Autowired
-    public void setWriterFactory(IndexWriterFactory writerFactory) throws IOException {
-        this.writerFactory = writerFactory;
-        applyWriter();
-        applyQueryParser();
+    public void setIndexFactory(IndexFactory indexFactory) throws IOException {
+        this.indexFactory = indexFactory;
         this.propertyTypes = ClassUtil.getPropertyTypes(getIndexedClass());
-    }
-
-    protected void applyWriter() throws IOException {
-        Class<T> indexedClass = getIndexedClass();
-        this.writer = this.writerFactory.getIndexWriter(indexedClass);
-    }
-
-    protected void applyQueryParser() {
-        this.queryParser = new QueryParser(getDefaultPropertyName(), getAnalyzer());
-        this.queryParser.setDefaultOperator(QueryParser.Operator.AND);
-    }
-
-    /**
-     * 获取索引检索器
-     *
-     * @return 索引检索器，如果当前索引不可检索，则返回null
-     */
-    protected final IndexSearcher getSearcher() {
-        if (this.searcher == null) {
-            try {
-                // 必须用索引目录对象创建读取器，否则无法查到数据
-                Directory directory = this.writer.getDirectory();
-                if (DirectoryReader.indexExists(directory)) {
-                    IndexReader reader = DirectoryReader.open(directory);
-                    this.searcher = new IndexSearcher(reader);
-                }
-            } catch (IOException e) {
-                LogUtil.error(getClass(), e);
-            }
-        }
-        return this.searcher;
     }
 
     protected Class<T> getIndexedClass() {
         return ClassUtil.getActualGenericType(getClass(), IndexRepo.class, 0);
     }
 
-    protected final Analyzer getAnalyzer() {
-        return this.writer.getAnalyzer();
+    protected abstract String getDirectoryPath();
+
+    protected final IndexWriter getWriter() throws IOException {
+        return this.indexFactory.getWriter(getDirectoryPath());
+    }
+
+    protected final QueryParser getQueryParser() throws IOException {
+        return this.indexFactory.getQueryParser(getDirectoryPath(), getDefaultPropertyName());
+    }
+
+    protected final IndexSearcher getSearcher() throws IOException {
+        return this.indexFactory.getSearcher(getDirectoryPath());
     }
 
     @Override
     public void destroy() throws Exception {
-        if (this.searcher != null) {
-            this.searcher.getIndexReader().close();
-        }
-        this.writer.close();
+        this.indexFactory.close(getDirectoryPath());
     }
 
     /**
@@ -129,7 +96,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         Document document = toDocument(object);
         try {
             if (document != null && document.iterator().hasNext()) {
-                this.writer.addDocument(document);
+                getWriter().addDocument(document);
             }
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
@@ -337,7 +304,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         Object propertyValue = BeanUtil.getPropertyValue(object, propertyName);
         Query query = DefaultQueryBuilder.create(propertyName, propertyValue);
         try {
-            this.writer.deleteDocuments(query);
+            getWriter().deleteDocuments(query);
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
@@ -351,7 +318,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     @Override
     public boolean isQueryable() {
         try {
-            return DirectoryReader.indexExists(this.writer.getDirectory());
+            return DirectoryReader.indexExists(getWriter().getDirectory());
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
             return false;
@@ -398,8 +365,8 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         try {
             // 逻辑运算符大写化，以符合Lucene查询语句规范
             ql = ql.replaceAll(" and ", " AND ").replaceAll(" or ", " OR ");
-            return this.queryParser.parse(ql);
-        } catch (ParseException e) {
+            return getQueryParser().parse(ql);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -461,7 +428,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     private ScoreDoc getAfterDoc(Query query, int pageSize, int pageNo, Sort sort) throws IOException {
         int n = pageSize * (pageNo - 1);
         if (n > 0) {
-            TopDocs topDocs = this.searcher.search(query, n, sort);
+            TopDocs topDocs = getSearcher().search(query, n, sort);
             ScoreDoc[] scoreDocs = topDocs.scoreDocs;
             return scoreDocs[scoreDocs.length - 1];
         }
@@ -539,8 +506,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     @Override
     public void commit() {
         try {
-            this.writer.forceMergeDeletes();
-            this.writer.commit();
+            IndexWriter writer = getWriter();
+            writer.forceMergeDeletes();
+            writer.commit();
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
@@ -549,9 +517,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     @Override
     public void rollback() {
         try {
-            this.writer.rollback();
-            // 回滚后writer会关闭，需重新创建
-            applyWriter();
+            getWriter().rollback();
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }

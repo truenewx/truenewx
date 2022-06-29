@@ -11,6 +11,6 @@ import org.apache.lucene.store.Directory;
  */
 public interface DirectoryFactory {
 
-    Directory getDirectory(Class<?> indexedClass) throws IOException;
+    Directory getDirectory(String path) throws IOException;
 
 }

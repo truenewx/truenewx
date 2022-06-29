@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.truenewx.tnxjee.repo.lucene.index.IndexWriterFactory;
+import org.truenewx.tnxjee.repo.lucene.index.IndexFactory;
 import org.truenewx.tnxjee.repo.lucene.store.DirectoryFactory;
 import org.truenewx.tnxjee.repo.lucene.store.FsDirectoryFactory;
 import org.truenewx.tnxjee.repo.lucene.store.RamDirectoryFactory;
@@ -33,9 +33,9 @@ public class LuceneConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(IndexWriterFactory.class)
-    public IndexWriterFactory indexWriterFactory(DirectoryFactory directoryFactory, Analyzer analyzer) {
-        return new IndexWriterFactory(directoryFactory, analyzer);
+    @ConditionalOnMissingBean(IndexFactory.class)
+    public IndexFactory indexWriterFactory(DirectoryFactory directoryFactory, Analyzer analyzer) {
+        return new IndexFactory(directoryFactory, analyzer);
     }
 
 }

@@ -1,6 +1,8 @@
 package org.truenewx.tnxjee.repo.lucene.store;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
@@ -12,9 +14,16 @@ import org.apache.lucene.store.Directory;
  */
 public class RamDirectoryFactory implements DirectoryFactory {
 
+    private Map<String, Directory> mapping = new HashMap<>();
+
     @Override
-    public Directory getDirectory(Class<?> indexedClass) throws IOException {
-        return new ByteBuffersDirectory();
+    public Directory getDirectory(String path) throws IOException {
+        Directory directory = this.mapping.get(path);
+        if (directory == null) {
+            directory = new ByteBuffersDirectory();
+            this.mapping.put(path, directory);
+        }
+        return directory;
     }
 
 }
