@@ -118,7 +118,7 @@ export default {
         id: [Number, String],
         modelValue: {
             type: [String, Number, Boolean, Array],
-            default: '',
+            default: null,
         },
         selector: String,
         items: Array,
@@ -140,7 +140,7 @@ export default {
         },
         defaultValue: {
             type: [String, Number, Boolean, Array],
-            default: '',
+            default: null,
         },
         empty: {
             type: [Boolean, String],
@@ -148,7 +148,7 @@ export default {
         },
         emptyValue: {
             type: [String, Number, Boolean, Array],
-            default: '',
+            default: null,
         },
         emptyClass: String,
         placeholder: String,
