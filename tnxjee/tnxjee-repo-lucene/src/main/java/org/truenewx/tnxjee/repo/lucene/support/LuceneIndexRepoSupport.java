@@ -113,11 +113,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     /**
      * 获取标识属性名
      *
-     * @return 标识属性名，默认为"id"
+     * @return 标识属性名
      */
-    protected String getKeyPropertyName() {
-        return "id";
-    }
+    protected abstract String getKeyPropertyName();
 
     /**
      * 获取默认的索引属性名称。被索引对象必然有至少一个索引属性，否则整个对象都无需索引
@@ -150,13 +148,11 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
     protected Document toDocument(T object, String... excludedProperties) {
         Document document = new Document();
         BeanUtil.loopProperties(object, (name, value) -> {
-            if (value != null) {
-                if (name.equals(getKeyPropertyName())) {
-                    document.add(getGeneralField(name, value, true));
-                    document.add(getGeneralField(name, value, false));
-                } else {
-                    getFields(name, value).forEach(document::add);
-                }
+            if (name.equals(getKeyPropertyName())) {
+                document.add(getGeneralField(name, value, true));
+                document.add(getGeneralField(name, value, false));
+            } else {
+                getFields(name, value).forEach(document::add);
             }
         }, excludedProperties);
         return document;
@@ -171,22 +167,20 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      */
     protected Collection<IndexableField> getFields(String name, Object value) {
         Collection<IndexableField> fields = new ArrayList<>();
-        if (value != null) {
-            IndexFieldFeature feature = getFieldFeature(name);
-            if (value.getClass().isArray()) {
-                int length = Array.getLength(value);
-                for (int i = 0; i < length; i++) {
-                    Object element = Array.get(value, i);
-                    addFields(fields, name, element, feature);
-                }
-            } else if (value instanceof Collection) {
-                Collection<?> collection = (Collection<?>) value;
-                for (Object element : collection) {
-                    addFields(fields, name, element, feature);
-                }
-            } else {
-                addFields(fields, name, value, feature);
+        IndexFieldFeature feature = getFieldFeature(name);
+        if (value != null && value.getClass().isArray()) {
+            int length = Array.getLength(value);
+            for (int i = 0; i < length; i++) {
+                Object element = Array.get(value, i);
+                addFields(fields, name, element, feature);
             }
+        } else if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            for (Object element : collection) {
+                addFields(fields, name, element, feature);
+            }
+        } else {
+            addFields(fields, name, value, feature);
         }
         return fields;
     }
@@ -212,18 +206,19 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
                 fields.add(sortedField);
             }
         }
-        // 直接字符串才可分词，其它类型转换为字符串的也不可分词
-        boolean tokenized = feature.isTokenized() && value instanceof CharSequence;
+        boolean tokenized = feature.isTokenized();
         if (tokenized) {
-            // 默认情况下，分词字段额外添加字段名+Text的分词索引字段，以支持分词查询
-            IndexableField tokenizedField = getTokenizedField(name + TOKENIZED_FIELD_NAME_SUFFIX, value);
+            IndexableField tokenizedField = getTokenizedField(name, value);
             if (tokenizedField != null) {
                 fields.add(tokenizedField);
             }
         }
-        IndexableField generalField = getGeneralField(name, value, feature.isStored());
-        if (generalField != null) {
-            fields.add(generalField);
+        // 非默认字段添加一般性索引字段，默认字段一般都过长，超出索引字段长度限制
+        if (!name.equals(getDefaultPropertyName())) {
+            IndexableField generalField = getGeneralField(name, value, feature.isStored());
+            if (generalField != null) {
+                fields.add(generalField);
+            }
         }
     }
 
@@ -262,7 +257,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
      * @return 索引字段信息，返回null表示不索引
      */
     protected IndexableField getTokenizedField(String name, Object value) {
-        return new TextField(name, value.toString(), Field.Store.NO);
+        String text = value == null ? Strings.EMPTY : value.toString();
+        // 默认情况下，分词字段附加分词字段后缀作为索引字段名，以便区分普通查询和分词查询
+        return new TextField(name + TOKENIZED_FIELD_NAME_SUFFIX, text, Field.Store.NO);
     }
 
     /**
@@ -388,8 +385,11 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T>, Disposa
         // 单个关键字条件形如：[name]:[keyword] OR [name]_text:[keyword]
         // 其中分词索引字段使用查询语句解析构建，以获得分词查询能力
         keyword = keyword.replaceAll(Strings.SLASH, "\\\\/");
-        return new DefaultQueryBuilder()
-                .should(parse(name + ":/.*" + keyword + ".*/"))
+        DefaultQueryBuilder builder = new DefaultQueryBuilder();
+        if (!name.equals(getDefaultPropertyName())) {
+            builder.should(parse(name + ":/.*" + keyword + ".*/"));
+        }
+        return builder
                 .should(parse(name + TOKENIZED_FIELD_NAME_SUFFIX + ":" + keyword))
                 .build();
     }

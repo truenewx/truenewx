@@ -15,7 +15,7 @@ public abstract class LuceneIndexedUnityRepoSupport<T extends IndexedUnity<K>, K
 
     @Override
     protected final String getKeyPropertyName() {
-        return super.getKeyPropertyName();
+        return "id";
     }
 
     @Override
