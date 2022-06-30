@@ -772,7 +772,7 @@ export const NetUtil = {
                                 }
                                 break;
                         }
-                        if (v !== undefined && v !== null) {
+                        if (v !== undefined && v !== null && v !== '') {
                             return '&' + k + '=' + encodeURIComponent(v);
                         }
                         return '';
