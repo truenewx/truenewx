@@ -72,6 +72,16 @@ public abstract class LuceneOwnedIndexRepoSupport<T extends Owned<O>, O extends 
     }
 
     @Override
+    protected Document toDocument(T object, String... excludedProperties) {
+        String[] properties = new String[excludedProperties.length + 1];
+        if (excludedProperties.length > 0) {
+            System.arraycopy(excludedProperties, 0, properties, 0, excludedProperties.length);
+        }
+        properties[properties.length - 1] = "owner";
+        return super.toDocument(object, properties);
+    }
+
+    @Override
     public void delete(T object) {
         String propertyName = getKeyPropertyName();
         Object propertyValue = BeanUtil.getPropertyValue(object, propertyName);

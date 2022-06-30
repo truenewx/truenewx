@@ -22,10 +22,7 @@ import org.truenewx.tnxjee.core.util.ArrayUtil;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
-import org.truenewx.tnxjee.model.query.FieldOrder;
-import org.truenewx.tnxjee.model.query.Paged;
-import org.truenewx.tnxjee.model.query.Paging;
-import org.truenewx.tnxjee.model.query.QueryResult;
+import org.truenewx.tnxjee.model.query.*;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
 import org.truenewx.tnxjee.repo.lucene.search.DefaultQueryBuilder;
@@ -303,25 +300,46 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
      * @param pageSize     分页大小
      * @param pageNo       页码
      * @param sort         排序
+     * @param ignoring     查询忽略项
      * @param fieldsToLoad 查询结果要加载的字段集，为空时不加载任何字段
      * @return 检索结果
      */
     protected final QueryResult<Document> search(IndexSearcher searcher, Query query, int pageSize, int pageNo,
-            Sort sort, String... fieldsToLoad) {
+            Sort sort, QueryIgnoring ignoring, String... fieldsToLoad) {
         try {
-            List<Document> documents = new ArrayList<>();
-            long total = 0;
-            if (searcher != null) {
-                ScoreDoc afterDoc = getAfterDoc(searcher, query, pageSize, pageNo, sort);
-                int n = pageSize > 0 ? pageSize : Integer.MAX_VALUE;
-                TopDocs topDocs = searcher.searchAfter(afterDoc, query, n, sort);
-                total = topDocs.totalHits.value;
-                for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            List<Document> records = null;
+            Long total = null;
+            ScoreDoc afterDoc = null;
+            if (ignoring != QueryIgnoring.RECORD) {
+                afterDoc = getAfterDoc(searcher, query, pageSize, pageNo, sort);
+            }
+            // 期望的最大数量，指定页大小小<=0时，不限制数量
+            int expectedSize = pageSize > 0 ? pageSize : Integer.MAX_VALUE;
+            // 查询的最大数量，实际多查一条记录，以便于判断是否还有更多记录
+            int querySize = pageSize > 0 ? (expectedSize + 1) : Integer.MAX_VALUE;
+            TopDocs topDocs = searcher.searchAfter(afterDoc, query, querySize, sort);
+            if (ignoring != QueryIgnoring.TOTAL) {
+                // 总数 = 之前的记录总数 + 当前命中的总数
+                total = (long) pageSize * (pageNo - 1) + topDocs.totalHits.value;
+            }
+            if (ignoring != QueryIgnoring.RECORD) {
+                records = new ArrayList<>();
+                // 因为多查了一条记录，所以当前页记录数可能超过expectedSize，二者之间的最小值为实际结果记录数量
+                int actualSize = Math.min(topDocs.scoreDocs.length, expectedSize);
+                for (int i = 0; i < actualSize; i++) {
+                    ScoreDoc scoreDoc = topDocs.scoreDocs[i];
                     Document document = searcher.doc(scoreDoc.doc, ArrayUtil.toSet(fieldsToLoad));
-                    documents.add(document);
+                    records.add(document);
                 }
             }
-            return new QueryResult<>(documents, new Paged(pageSize, pageNo, total));
+            Paged paged;
+            if (total == null) {
+                // 多查一条的结果记录数量如果大于期望数量，说明还有更多记录
+                paged = new Paged(pageSize, pageNo, topDocs.scoreDocs.length > expectedSize);
+            } else {
+                paged = new Paged(pageSize, pageNo, total);
+            }
+            return new QueryResult<>(records, paged);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -350,7 +368,8 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
     protected final QueryResult<Document> search(IndexSearcher searcher, Query query, Paging paging,
             String... fieldsToLoad) {
         Sort sort = buildSort(paging.getOrders());
-        return search(searcher, query, paging.getPageSize(), paging.getPageNo(), sort, fieldsToLoad);
+        return search(searcher, query, paging.getPageSize(), paging.getPageNo(), sort, paging.getIgnoring(),
+                fieldsToLoad);
     }
 
     /**
