@@ -268,7 +268,10 @@ export default {
                         let records = vm.format(result.records);
                         if (result.paged.pageNo > 1 && vm.appendMore) { // 追加记录
                             vm.records = vm.records || [];
-                            vm.records = vm.records.concat(records);
+                            // 结果页码大于当前页码才追加记录
+                            if (result.paged.pageNo > vm.paged.pageNo) {
+                                vm.records = vm.records.concat(records);
+                            }
                         } else { // 替代记录
                             vm.records = records;
                         }
