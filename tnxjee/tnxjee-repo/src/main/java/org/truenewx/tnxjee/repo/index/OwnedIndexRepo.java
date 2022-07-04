@@ -12,6 +12,8 @@ import org.truenewx.tnxjee.core.spec.Owned;
  */
 public interface OwnedIndexRepo<T extends Owned<O>, O extends Serializable> extends IndexRepo<T> {
 
+    long getSpaceSize(O owner);
+
     boolean isSearchable(O owner);
 
     void commit(O owner);

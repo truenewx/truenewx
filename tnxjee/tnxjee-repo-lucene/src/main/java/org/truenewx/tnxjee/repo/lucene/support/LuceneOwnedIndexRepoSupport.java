@@ -35,6 +35,11 @@ public abstract class LuceneOwnedIndexRepoSupport<T extends Owned<O>, O extends 
      */
     protected abstract String getDirectoryPath(O owner);
 
+    @Override
+    public long getSpaceSize(O owner) {
+        return this.indexFactory.getSpaceSize(getDirectoryPath(owner));
+    }
+
     protected IndexWriter getWriter(O owner) {
         try {
             return this.indexFactory.getWriter(getDirectoryPath(owner));

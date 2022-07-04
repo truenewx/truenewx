@@ -26,4 +26,21 @@ public class RamDirectoryFactory implements DirectoryFactory {
         return directory;
     }
 
+    @Override
+    public long getSpaceSize(String path) {
+        long size = 0;
+        Directory directory = this.mapping.get(path);
+        if (directory != null) {
+            try {
+                String[] names = directory.listAll();
+                for (String name : names) {
+                    size += directory.fileLength(name);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return size;
+    }
+
 }

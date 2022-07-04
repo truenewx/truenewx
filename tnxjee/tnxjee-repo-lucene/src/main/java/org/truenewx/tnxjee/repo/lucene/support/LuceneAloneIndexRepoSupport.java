@@ -31,6 +31,11 @@ public abstract class LuceneAloneIndexRepoSupport<T> extends LuceneIndexRepoSupp
      */
     protected abstract String getDirectoryPath();
 
+    @Override
+    public long getSpaceSize() {
+        return this.indexFactory.getSpaceSize(getDirectoryPath());
+    }
+
     protected IndexWriter getWriter() {
         try {
             return this.indexFactory.getWriter(getDirectoryPath());

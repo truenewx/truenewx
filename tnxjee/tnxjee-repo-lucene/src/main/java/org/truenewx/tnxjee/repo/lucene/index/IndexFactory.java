@@ -33,6 +33,10 @@ public class IndexFactory implements DisposableBean {
         this.analyzer = analyzer;
     }
 
+    public long getSpaceSize(String path) {
+        return this.directoryFactory.getSpaceSize(path);
+    }
+
     public IndexWriter getWriter(String path) throws IOException {
         IndexWriter writer = this.writers.get(path);
         if (writer == null || !writer.isOpen()) {

@@ -7,6 +7,8 @@ package org.truenewx.tnxjee.repo.index;
  */
 public interface AloneIndexRepo<T> extends IndexRepo<T> {
 
+    long getSpaceSize();
+
     boolean isSearchable();
 
     void commit();
