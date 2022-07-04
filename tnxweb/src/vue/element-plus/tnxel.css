@@ -174,7 +174,12 @@
 }
 
 .el-dropdown-menu__item .el-icon {
+    text-align: center;
     margin-right: 0.25rem;
+}
+
+.el-dropdown-menu__item .el-icon:before {
+    width: calc(100vw); /* 尽可能撑开，以与高度保持一致 */
 }
 
 .el-alert {
