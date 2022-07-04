@@ -1107,6 +1107,7 @@ export const BomUtil = {
         }
         win = window.open(url);
         this._opened[url] = win;
+        return win;
     },
     closeWindow() {
         return new Promise((resolve, reject) => {
