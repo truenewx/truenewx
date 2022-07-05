@@ -35,6 +35,11 @@ public class FileExtensions {
     public static final String PPT = "ppt";
     public static final String PPTX = "pptx";
 
+    /**
+     * 可读取文本的二进制文件扩展名集
+     */
+    public static final String[] TEXT_READABLE_BINARY = { PDF, XLS, XLSX, DOC, DOCX, PPT, PPTX };
+
     // 配置文件
     public static final String PROPERTIES = "properties";
     public static final String YAML = "yaml";
