@@ -283,9 +283,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
         // 其中分词索引字段使用查询语句解析构建，以获得分词查询能力
         keyword = keyword.replaceAll(Strings.SLASH, "\\\\/");
         DefaultQueryBuilder builder = new DefaultQueryBuilder();
-        if (!name.equals(getDefaultPropertyName())) {
-            builder.should(DefaultQueryBuilder.parse(queryParser, name + ":/.*" + keyword + ".*/"));
-        }
+        builder.should(DefaultQueryBuilder.parse(queryParser, name + ":/.*" + keyword + ".*/"));
         return builder
                 .should(DefaultQueryBuilder.parse(queryParser, name + TOKENIZED_FIELD_NAME_SUFFIX + ":" + keyword))
                 .build();
