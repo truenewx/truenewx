@@ -236,7 +236,7 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
             value = TemporalUtil.format((Temporal) value);
         }
         String s = value.toString();
-        // 转换为二进制后不能超过32766 bytes
+        // 转换为二进制后不能超过32766 bytes，最长耗时约1.5s
         s = StringUtil.cutForBytes(s, 32766);
         return new StringField(name, s, stored ? Field.Store.YES : Field.Store.NO);
     }
