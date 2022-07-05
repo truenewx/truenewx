@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -136,14 +138,6 @@ public class ExcelDoc {
         this.origin.removeSheetAt(index);
     }
 
-    public void close() {
-        try {
-            this.origin.close();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
     public void write(OutputStream stream) throws IOException {
         this.origin.write(stream);
     }
@@ -262,6 +256,25 @@ public class ExcelDoc {
             this.defaultDisplayStyle = displayStyle;
         }
         return this.defaultDisplayStyle;
+    }
+
+    public String getText() {
+        if (this.origin instanceof HSSFWorkbook) {
+            ExcelExtractor extractor = new ExcelExtractor((HSSFWorkbook) this.origin);
+            return extractor.getText();
+        } else if (this.origin instanceof XSSFWorkbook) {
+            XSSFExcelExtractor extractor = new XSSFExcelExtractor((XSSFWorkbook) this.origin);
+            return extractor.getText();
+        }
+        return null;
+    }
+
+    public void close() {
+        try {
+            this.origin.close();
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
     }
 
 }
