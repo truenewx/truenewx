@@ -491,6 +491,20 @@ public class StringUtil {
         }
     }
 
+    public static String cutForBytes(String s, int maxBytes) {
+        // 极限情况下，字符串的每个字符占一个字节，可从最大字节数的长度开始截取
+        if (s.length() > maxBytes) {
+            s = s.substring(0, maxBytes);
+        }
+        // 每次减少一个字符，检查字节长度是否符合要求，耗时约为10次/ms
+        byte[] b = s.getBytes();
+        while (b.length > maxBytes) {
+            s = s.substring(0, s.length() - 1);
+            b = s.getBytes();
+        }
+        return s;
+    }
+
     /**
      * 判断是否数字字符
      *
