@@ -14,6 +14,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.IOUtil;
@@ -47,14 +48,6 @@ public class WordDoc {
         return this.origin;
     }
 
-    public void close() {
-        try {
-            this.origin.close();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
     public String convertToHtml(String encoding) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         convertToHtml(out);
@@ -81,6 +74,19 @@ public class WordDoc {
             serializer.setOutputProperty(OutputKeys.METHOD, FileExtensions.HTML);
             serializer.transform(domSource, streamResult);
         } catch (Exception e) {
+            LogUtil.error(getClass(), e);
+        }
+    }
+
+    public String getText() {
+        WordExtractor extractor = new WordExtractor(this.origin);
+        return extractor.getText();
+    }
+
+    public void close() {
+        try {
+            this.origin.close();
+        } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
     }

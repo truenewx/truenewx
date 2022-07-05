@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.FileExtensions;
@@ -39,14 +40,6 @@ public class WordDocx {
         return this.origin;
     }
 
-    public void close() {
-        try {
-            this.origin.close();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
-
     public String convertToHtml(String encoding) throws IOException {
         XHTMLOptions options = XHTMLOptions.create().indent(4).setImageManager(new Base64EmbedImgManager());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -63,6 +56,19 @@ public class WordDocx {
         try {
             String html = convertToHtml(Strings.ENCODING_UTF8);
             IOUtils.write(html, out, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
+    }
+
+    public String getText() {
+        XWPFWordExtractor extractor = new XWPFWordExtractor(this.origin);
+        return extractor.getText();
+    }
+
+    public void close() {
+        try {
+            this.origin.close();
         } catch (IOException e) {
             LogUtil.error(getClass(), e);
         }
