@@ -18,6 +18,7 @@ import org.apache.poi.hslf.record.StyleTextPropAtom;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.hslf.usermodel.HSLFTextShape;
 import org.apache.poi.sl.draw.Drawable;
+import org.apache.poi.sl.extractor.SlideShowExtractor;
 import org.apache.poi.sl.usermodel.Shape;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.xslf.usermodel.*;
@@ -293,6 +294,11 @@ public class PptDoc {
             }
         }
         return shape.getClass() == XSLFGraphicFrame.class;
+    }
+
+    public String getText() {
+        SlideShowExtractor<?, ?> extractor = new SlideShowExtractor<>(this.origin);
+        return extractor.getText();
     }
 
     public void close() {
