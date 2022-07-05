@@ -15,4 +15,6 @@ public interface AloneIndexRepo<T> extends IndexRepo<T> {
 
     void rollback();
 
+    void clear();
+
 }

@@ -140,4 +140,10 @@ public abstract class LuceneOwnedIndexRepoSupport<T extends Owned<O>, O extends 
             LogUtil.error(getClass(), e);
         }
     }
+
+    @Override
+    public void clear(O owner) {
+        clear(getWriter(owner));
+    }
+
 }

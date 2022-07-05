@@ -20,4 +20,6 @@ public interface OwnedIndexRepo<T extends Owned<O>, O extends Serializable> exte
 
     void rollback(O owner);
 
+    void clear(O owner);
+
 }

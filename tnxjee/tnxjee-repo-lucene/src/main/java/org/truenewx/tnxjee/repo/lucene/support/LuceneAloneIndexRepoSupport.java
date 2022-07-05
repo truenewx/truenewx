@@ -127,4 +127,9 @@ public abstract class LuceneAloneIndexRepoSupport<T> extends LuceneIndexRepoSupp
         }
     }
 
+    @Override
+    public void clear() {
+        clear(getWriter());
+    }
+
 }

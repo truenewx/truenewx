@@ -13,15 +13,14 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.ArrayUtil;
-import org.truenewx.tnxjee.core.util.BeanUtil;
-import org.truenewx.tnxjee.core.util.ClassUtil;
-import org.truenewx.tnxjee.core.util.TemporalUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.query.*;
 import org.truenewx.tnxjee.repo.index.IndexRepo;
 import org.truenewx.tnxjee.repo.lucene.document.IndexFieldFeature;
@@ -439,4 +438,18 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
         // 不参与排序则使用文档顺序
         return SortField.Type.DOC;
     }
+
+    protected final void clear(IndexWriter writer) {
+        Directory directory = writer.getDirectory();
+        try {
+            String[] names = directory.listAll();
+            for (String name : names) {
+                directory.deleteFile(name);
+            }
+            writer.close();
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
+    }
+
 }
