@@ -135,12 +135,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
                 fields.add(tokenizedField);
             }
         }
-        // 非默认字段添加一般性索引字段，默认字段一般都过长，超出索引字段长度限制
-        if (!name.equals(getDefaultPropertyName())) {
-            IndexableField generalField = getGeneralField(name, value, feature.isStored());
-            if (generalField != null) {
-                fields.add(generalField);
-            }
+        IndexableField generalField = getGeneralField(name, value, feature.isStored());
+        if (generalField != null) {
+            fields.add(generalField);
         }
     }
 
@@ -238,7 +235,10 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
         if (value instanceof Temporal) {
             value = TemporalUtil.format((Temporal) value);
         }
-        return new StringField(name, value.toString(), stored ? Field.Store.YES : Field.Store.NO);
+        String s = value.toString();
+        // 转换为二进制后不能超过32766 bytes
+        s = StringUtil.cutForBytes(s, 32766);
+        return new StringField(name, s, stored ? Field.Store.YES : Field.Store.NO);
     }
 
     /**
