@@ -13,6 +13,7 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPa
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.service.exception.BusinessException;
@@ -104,6 +105,15 @@ public class PdfDoc {
             LogUtil.error(getClass(), e);
             throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.PDF.toUpperCase());
         }
+    }
+
+    public String getText() {
+        try {
+            return new PDFTextStripper().getText(this.origin);
+        } catch (IOException e) {
+            LogUtil.error(getClass(), e);
+        }
+        return null;
     }
 
     public void close() {
