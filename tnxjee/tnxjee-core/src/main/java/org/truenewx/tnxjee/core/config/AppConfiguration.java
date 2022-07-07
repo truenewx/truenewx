@@ -14,6 +14,7 @@ public class AppConfiguration {
 
     private String caption;
     private String business;
+    private boolean gatewayDisabled;
     private String gatewayUri;
     private String directUri;
     private String contextPath = Strings.EMPTY;
@@ -36,6 +37,14 @@ public class AppConfiguration {
 
     public void setBusiness(String business) {
         this.business = business;
+    }
+
+    public boolean isGatewayDisabled() {
+        return this.gatewayDisabled;
+    }
+
+    public void setGatewayDisabled(boolean gatewayDisabled) {
+        this.gatewayDisabled = gatewayDisabled;
     }
 
     public String getGatewayUri() {
@@ -117,8 +126,8 @@ public class AppConfiguration {
      */
     public String getContextUri(boolean direct) {
         String uri = getGatewayUri();
-        // 默认为网关地址，指定需要直连地址或网关地址为空，则使用直连地址
-        if (direct || StringUtils.isBlank(uri)) {
+        // 默认为网关地址，指定需要直连地址/网关地址为空/禁用网关，则使用直连地址
+        if (direct || StringUtils.isBlank(uri) || this.gatewayDisabled) {
             uri = getDirectUri();
         }
         // 添加上下文根

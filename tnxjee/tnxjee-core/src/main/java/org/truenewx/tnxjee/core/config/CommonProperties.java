@@ -83,8 +83,8 @@ public class CommonProperties implements InitializingBean {
             for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
                 AppConfiguration configuration = entry.getValue();
                 String contextUri = configuration.getContextUri(direct);
-                if (url.equals(contextUri) || url.startsWith(contextUri + Strings.SLASH) || url
-                        .startsWith(contextUri + Strings.WELL) || url.startsWith(contextUri + Strings.QUESTION)) {
+                if (url.equals(contextUri) || url.startsWith(contextUri + Strings.SLASH)
+                        || url.startsWith(contextUri + Strings.WELL) || url.startsWith(contextUri + Strings.QUESTION)) {
                     return entry.getKey();
                 }
             }
