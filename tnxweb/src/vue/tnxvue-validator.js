@@ -257,32 +257,9 @@ function getRule(validationName, validationValue, fieldMeta) {
                 }
             }
             break;
+        case 'cellphone':
         case 'idCardNo':
-            rule = {
-                validator(r, fieldValue, callback, source, options) {
-                    if (validationValue) {
-                        let message = validator.validateRegExp(validationName, fieldValue, fieldCaption);
-                        if (message) {
-                            return callback(new Error(message));
-                        }
-                    }
-                    return callback();
-                }
-            };
-            break;
         case 'url':
-            rule = {
-                validator(r, fieldValue, callback, source, options) {
-                    if (validationValue) {
-                        let message = validator.validateRegExp(validationName, fieldValue, fieldCaption);
-                        if (message) {
-                            return callback(new Error(message));
-                        }
-                    }
-                    return callback();
-                }
-            };
-            break;
         case 'opposableUrl':
             rule = {
                 validator(r, fieldValue, callback, source, options) {
