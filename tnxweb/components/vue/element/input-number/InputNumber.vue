@@ -12,7 +12,7 @@
 export default {
     name: 'TnxelInputNumber',
     props: {
-        value: Number,
+        value: [Number, String],
         span: Number,
         min: Number,
         max: Number,
@@ -35,7 +35,7 @@ export default {
     },
     data() {
         return {
-            model: this.value,
+            model: typeof this.value === 'string' ? Number(this.value) : this.value,
             showRequiredError: false,
         }
     },
@@ -55,8 +55,8 @@ export default {
             this.$emit('input', value);
         },
         value(value) {
-            this.model = value;
-        }
+            this.model = typeof value === 'string' ? Number(value) : value;
+        },
     },
     methods: {
         validateRequired(focusError) {
