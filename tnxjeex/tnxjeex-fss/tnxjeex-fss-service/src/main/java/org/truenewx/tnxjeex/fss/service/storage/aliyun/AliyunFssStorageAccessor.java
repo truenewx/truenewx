@@ -176,22 +176,6 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
                 this.delegate.delete(storagePath, dirDeletePredicate);
             });
         }
-
-        if (dirDeletePredicate != null) {
-            //  删除上级空目录
-            this.executorService.submit(() -> {
-                int index = standardizedPath.lastIndexOf(Strings.SLASH);
-                while (index > 0) {
-                    String parentPath = standardizedPath.substring(0, index);
-                    ListObjectsV2Result result = oss.listObjectsV2(bucketName, parentPath + Strings.SLASH);
-                    List<OSSObjectSummary> summaries = result.getObjectSummaries();
-                    for (OSSObjectSummary summary : summaries) {
-                        oss.deleteDirectory(bucketName, summary.getKey());
-                    }
-                    index = parentPath.lastIndexOf(Strings.SLASH);
-                }
-            });
-        }
     }
 
     @Override
