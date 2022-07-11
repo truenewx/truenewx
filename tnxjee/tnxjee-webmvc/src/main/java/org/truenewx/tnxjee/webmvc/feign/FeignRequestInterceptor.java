@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.config.AppConstants;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
 import org.truenewx.tnxjee.model.spec.user.security.DefaultUserSpecificDetails;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
@@ -47,18 +48,22 @@ public class FeignRequestInterceptor implements RequestInterceptor {
             Enumeration<String> headerNames = request.getHeaderNames();
             if (headerNames != null) {
                 while (headerNames.hasMoreElements()) {
-                    String headerName = headerNames.nextElement();
-                    // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动
-                    if (!feignHeaders.containsKey(headerName)) {
-                        Enumeration<String> requestHeaders = request.getHeaders(headerName);
-                        Collection<String> headerValues = new ArrayList<>();
-                        while (requestHeaders.hasMoreElements()) {
-                            headerValues.add(requestHeaders.nextElement());
+                    try {
+                        String headerName = headerNames.nextElement(); // 此处可能莫名地出现空指针异常
+                        // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动
+                        if (!feignHeaders.containsKey(headerName)) {
+                            Enumeration<String> requestHeaders = request.getHeaders(headerName);
+                            Collection<String> headerValues = new ArrayList<>();
+                            while (requestHeaders.hasMoreElements()) {
+                                headerValues.add(requestHeaders.nextElement());
+                            }
+                            template.header(headerName, headerValues);
+                            if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
+                                noJwt = false;
+                            }
                         }
-                        template.header(headerName, headerValues);
-                        if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
-                            noJwt = false;
-                        }
+                    } catch (Exception e) {
+                        LogUtil.error(getClass(), e);
                     }
                 }
             }
