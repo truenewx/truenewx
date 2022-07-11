@@ -59,4 +59,14 @@ public abstract class ImportingExcelRowModel {
         return this.fieldWrongs.containsKey(errorKey);
     }
 
+    public TextWrong getFieldWrong(String fieldName, Integer index) {
+        String errorKey = getFieldErrorKey(fieldName, index);
+        return this.fieldWrongs.get(errorKey);
+    }
+
+    public TextWrong removeFieldWrong(String fieldName, Integer index) {
+        String errorKey = getFieldErrorKey(fieldName, index);
+        return this.fieldWrongs.remove(errorKey);
+    }
+
 }
