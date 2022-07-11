@@ -199,7 +199,10 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
     public void move(String sourceStoragePath, String targetStoragePath) {
         sourceStoragePath = AliyunOssUtil.standardizePath(sourceStoragePath);
         targetStoragePath = AliyunOssUtil.standardizePath(targetStoragePath);
-        this.account.getOssClient().renameObject(getBucketName(), sourceStoragePath, targetStoragePath);
+        OSS client = this.account.getOssClient();
+        String bucketName = getBucketName();
+        client.copyObject(bucketName, sourceStoragePath, bucketName, targetStoragePath);
+        client.deleteObject(bucketName, sourceStoragePath);
     }
 
 }
