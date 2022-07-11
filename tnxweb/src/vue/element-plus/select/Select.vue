@@ -1,14 +1,17 @@
 <template>
     <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
-        <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]"
-            :data-value="item[valueName]">
-            <i :class="item[iconName]" v-if="item[iconName]"></i>
-            <span>{{ item[textName] }}</span>
-        </el-checkbox>
-        <template v-if="items.length === 0">
-            <slot name="empty" v-if="$slots.empty"></slot>
-            <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+        <template v-if="items">
+            <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]"
+                :data-value="item[valueName]">
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
+            </el-checkbox>
+            <template v-if="items.length === 0">
+                <slot name="empty" v-if="$slots.empty"></slot>
+                <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+            </template>
         </template>
+        <tnxel-icon value="Loading" v-else/>
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
@@ -25,7 +28,7 @@
                 <slot name="empty"></slot>
             </template>
         </template>
-        <i class="el-icon-loading" v-else/>
+        <tnxel-icon value="Loading" v-else/>
     </div>
     <div class="tnxel-text-button-group d-flex flex-wrap" v-else-if="selector === 'text' || selector === 'texts'">
         <template v-if="items">
@@ -42,7 +45,7 @@
                 <slot name="empty"></slot>
             </template>
         </template>
-        <i class="el-icon-loading" v-else/>
+        <tnxel-icon value="Loading" v-else/>
     </div>
     <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
         v-else-if="selector === 'radio'">
