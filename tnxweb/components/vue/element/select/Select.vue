@@ -1,13 +1,16 @@
 <template>
     <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
-        <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
-            <i :class="item[iconName]" v-if="item[iconName]"></i>
-            <span>{{ item[textName] }}</span>
-        </el-checkbox>
-        <template v-if="items.length === 0">
-            <slot name="empty" v-if="$slots.empty"></slot>
-            <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+        <template v-if="items">
+            <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]">
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
+            </el-checkbox>
+            <template v-if="items.length === 0">
+                <slot name="empty" v-if="$slots.empty"></slot>
+                <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+            </template>
         </template>
+        <i class="el-icon-loading" v-else/>
     </el-checkbox-group>
     <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
@@ -89,6 +92,9 @@ export default {
         items: {
             type: Array,
             required: true,
+            default() {
+                return [];
+            },
         },
         valueName: {
             type: String,
