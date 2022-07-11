@@ -77,7 +77,7 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         this.account.getOssClient().putObject(getBucketName(), standardizedStoragePath, in, objectMetadata);
 
         if (this.delegate != null) {
-            this.executorService.execute(() -> {
+            this.executorService.submit(() -> {
                 try {
                     this.delegate.write(in, storagePath, originalFilename);
                 } catch (IOException e) {
@@ -172,14 +172,14 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         }
 
         if (this.delegate != null) {
-            this.executorService.execute(() -> {
+            this.executorService.submit(() -> {
                 this.delegate.delete(storagePath, dirDeletePredicate);
             });
         }
 
         if (dirDeletePredicate != null) {
             //  删除上级空目录
-            this.executorService.execute(() -> {
+            this.executorService.submit(() -> {
                 int index = standardizedPath.lastIndexOf(Strings.SLASH);
                 while (index > 0) {
                     String parentPath = standardizedPath.substring(0, index);
@@ -205,7 +205,7 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         this.account.getOssClient().copyObject(bucketName, sourceStoragePath, bucketName, targetStoragePath);
 
         if (this.delegate != null) {
-            this.executorService.execute(() -> {
+            this.executorService.submit(() -> {
                 this.delegate.copy(originalSourcePath, originalTargetPath);
             });
         }

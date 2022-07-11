@@ -1,11 +1,7 @@
 package org.truenewx.tnxjeex.openapi.client.service.wechat;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +21,7 @@ import org.truenewx.tnxjeex.openapi.client.service.NoSuchMessageHandlerException
 public class WechatMessageListenerImpl implements WechatMessageListener, ContextInitializedBean {
 
     @Autowired
-    private Executor executor;
+    private ExecutorService executorService;
     private Map<WechatMessageType, List<WechatMessageHandler>> handlerMapping = new HashMap<>();
 
     @Override
@@ -56,12 +52,7 @@ public class WechatMessageListenerImpl implements WechatMessageListener, Context
                     }
                 } else if (handler instanceof WechatMessageAsynHandler) { // 异步处理
                     WechatMessageAsynHandler asynHandler = (WechatMessageAsynHandler) handler;
-                    this.executor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            asynHandler.handleMessage(message);
-                        }
-                    });
+                    this.executorService.submit(() -> asynHandler.handleMessage(message));
                 }
             }
         }

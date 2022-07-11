@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +35,7 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
     @Value(AppConstants.EL_SPRING_APP_NAME)
     private String appName;
     @Autowired
-    private Executor executor;
+    private ExecutorService executorService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -45,7 +45,7 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
             for (AppTicket appTicket : appTickets) {
                 // 排除当前CAS服务端应用，之所以需要在此排除是考虑到一个应用同时作为CAS服务端和客户端的场景
                 if (!appTicket.getApp().equals(this.appName)) {
-                    this.executor.execute(() -> {
+                    this.executorService.submit(() -> {
                         noticeAppLogout(appTicket, logoutService);
                     });
                 }

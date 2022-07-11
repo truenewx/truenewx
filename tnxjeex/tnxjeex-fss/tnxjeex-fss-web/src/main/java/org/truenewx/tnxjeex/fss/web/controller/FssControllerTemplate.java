@@ -8,7 +8,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 import javax.servlet.ServletOutputStream;
@@ -64,7 +64,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
     @Autowired(required = false)
     protected FssServiceTemplate<I> service;
     @Autowired
-    private Executor executor;
+    private ExecutorService executorService;
     /**
      * 下载地址前缀，应用可根据实际情况赋值
      */
@@ -224,7 +224,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
                     FssUploadedFileMeta meta = write(targetType, command.getTargetScope(), fileId, tempFile.length(),
                             sourceFilename, new FileInputStream(tempFile), true);
                     // 在独立线程中删除临时文件，以免影响正常流程
-                    this.executor.execute(tempFile::delete);
+                    this.executorService.submit(tempFile::delete);
                     return meta.getLocationUrl();
                 } catch (IOException e) {
                     LogUtil.error(getClass(), e);

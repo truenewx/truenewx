@@ -2,7 +2,7 @@ package org.truenewx.tnxjeex.notice.service.sms;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class SmsNotifierImpl implements SmsNotifier, ContextInitializedBean {
     @Autowired
     private MessageSource messageSource;
     @Autowired
-    private Executor executor;
+    private ExecutorService executorService;
     @Value("${tnxjeex.notice.sms.disabled}")
     private boolean disabled;
 
@@ -162,7 +162,7 @@ public class SmsNotifierImpl implements SmsNotifier, ContextInitializedBean {
     @Override
     public void notify(String type, Map<String, Object> params, Locale locale, String[] cellphones,
             Consumer<SmsNotifyResult> callback) {
-        this.executor.execute(() -> {
+        this.executorService.submit(() -> {
             SmsNotifyResult result = notify(type, params, locale, cellphones);
             callback.accept(result);
         });

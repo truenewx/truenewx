@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,10 +18,10 @@ import org.truenewx.tnxjee.core.util.LogUtil;
 @EnableScheduling
 public class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializable> {
 
-    private Executor executor;
+    private ExecutorService executor;
     private Map<K, P> progresses = new Hashtable<>();
 
-    public ProgressTaskExecutor(Executor executor) {
+    public ProgressTaskExecutor(ExecutorService executor) {
         this.executor = executor;
     }
 
@@ -29,7 +29,7 @@ public class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializa
         P progress = task.getProgress();
         K progressId = progress.getId();
         this.progresses.put(progressId, progress);
-        this.executor.execute(task);
+        this.executor.submit(task);
         return progressId;
     }
 

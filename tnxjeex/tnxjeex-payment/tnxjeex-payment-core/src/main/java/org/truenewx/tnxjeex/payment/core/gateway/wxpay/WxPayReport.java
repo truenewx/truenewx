@@ -3,7 +3,6 @@ package org.truenewx.tnxjeex.payment.core.gateway.wxpay;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -115,48 +114,42 @@ class WxPayReport {
         this.reportMsgQueue = new LinkedBlockingQueue<>(config.getReportQueueMaxSize());
 
         // 添加处理线程
-        this.executorService = Executors.newFixedThreadPool(config.getReportWorkerNum(), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = Executors.defaultThreadFactory().newThread(r);
-                t.setDaemon(true);
-                return t;
-            }
+        this.executorService = Executors.newFixedThreadPool(config.getReportWorkerNum(), runnable -> {
+            Thread t = Executors.defaultThreadFactory().newThread(runnable);
+            t.setDaemon(true);
+            return t;
         });
 
         if (config.shouldAutoReport()) {
             WxPayUtil.getLogger().info("report worker num: {}", config.getReportWorkerNum());
             for (int i = 0; i < config.getReportWorkerNum(); ++i) {
-                this.executorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            // 先用 take 获取数据
-                            try {
-                                StringBuffer sb = new StringBuffer();
-                                String firstMsg = WxPayReport.this.reportMsgQueue.take();
-                                WxPayUtil.getLogger().info("get first report msg: {}", firstMsg);
-                                String msg = null;
-                                sb.append(firstMsg); // 会阻塞至有消息
-                                int remainNum = config.getReportBatchSize() - 1;
-                                for (int j = 0; j < remainNum; ++j) {
-                                    WxPayUtil.getLogger().info("try get remain report msg");
-                                    // msg = reportMsgQueue.poll(); // 不阻塞了
-                                    msg = WxPayReport.this.reportMsgQueue.take();
-                                    WxPayUtil.getLogger().info("get remain report msg: {}", msg);
-                                    if (msg == null) {
-                                        break;
-                                    } else {
-                                        sb.append("\n");
-                                        sb.append(msg);
-                                    }
+                this.executorService.submit(() -> {
+                    while (true) {
+                        // 先用 take 获取数据
+                        try {
+                            StringBuffer sb = new StringBuffer();
+                            String firstMsg = WxPayReport.this.reportMsgQueue.take();
+                            WxPayUtil.getLogger().info("get first report msg: {}", firstMsg);
+                            String msg = null;
+                            sb.append(firstMsg); // 会阻塞至有消息
+                            int remainNum = config.getReportBatchSize() - 1;
+                            for (int j = 0; j < remainNum; ++j) {
+                                WxPayUtil.getLogger().info("try get remain report msg");
+                                // msg = reportMsgQueue.poll(); // 不阻塞了
+                                msg = WxPayReport.this.reportMsgQueue.take();
+                                WxPayUtil.getLogger().info("get remain report msg: {}", msg);
+                                if (msg == null) {
+                                    break;
+                                } else {
+                                    sb.append("\n");
+                                    sb.append(msg);
                                 }
-                                // 上报
-                                WxPayReport.httpRequest(sb.toString(), DEFAULT_CONNECT_TIMEOUT_MS,
-                                        DEFAULT_READ_TIMEOUT_MS);
-                            } catch (Exception ex) {
-                                WxPayUtil.getLogger().warn("report fail. reason: {}", ex.getMessage());
                             }
+                            // 上报
+                            WxPayReport.httpRequest(sb.toString(), DEFAULT_CONNECT_TIMEOUT_MS,
+                                    DEFAULT_READ_TIMEOUT_MS);
+                        } catch (Exception ex) {
+                            WxPayUtil.getLogger().warn("report fail. reason: {}", ex.getMessage());
                         }
                     }
                 });
@@ -196,34 +189,6 @@ class WxPayReport {
         }
     }
 
-//    @Deprecated
-//    private void reportSync(String data) throws Exception {
-//        httpRequest(data, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
-//    }
-//
-//    @Deprecated
-//    private void reportAsync(String data) throws Exception {
-//        new Thread(new Runnable() {
-//            public void run() {
-//                try {
-//                    httpRequest(data, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
-//                }
-//                catch (Exception ex) {
-//                    WXPayUtil.getLogger().warn("report fail. reason: {}", ex.getMessage());
-//                }
-//            }
-//        }).start();
-//    }
-
-    /**
-     * http 请求
-     *
-     * @param data
-     * @param connectTimeoutMs
-     * @param readTimeoutMs
-     * @return
-     * @throws Exception
-     */
     private static String httpRequest(String data, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         BasicHttpClientConnectionManager connManager;
         connManager = new BasicHttpClientConnectionManager(RegistryBuilder.<ConnectionSocketFactory>create()
