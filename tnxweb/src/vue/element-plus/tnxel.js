@@ -265,21 +265,36 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
             title = '确认';
         }
         options = Object.assign({
-            dangerouslyUseHTMLString: true,
-        }, options, {
-            type: 'info',
+            type: 'question',
             confirmButtonText: '确定',
             cancelButtonText: '取消',
+        }, options, {
+            dangerouslyUseHTMLString: true,
+            distinguishCancelAndClose: true,
         });
-        this._closeMessage();
-        const promise = ElMessageBox.confirm(message, title, options);
-        if (typeof callback === 'function') {
-            promise.then(function() {
-                callback(true);
-            }).catch(function() {
-                callback(false);
-            });
+        if (options.type === 'question') {
+            options.type = 'info';
+            options.icon = Icon.components.QuestionFilled;
         }
+        if (options.reverse) {
+            options.customClass = 'reverse';
+            let buttonText = options.confirmButtonText;
+            options.confirmButtonText = options.cancelButtonText;
+            options.cancelButtonText = buttonText;
+        }
+        if (typeof callback === 'function') {
+            options.callback = function(action) {
+                let yes = undefined;
+                if (action === 'confirm') {
+                    yes = options.reverse ? false : true;
+                } else if (action === 'cancel') {
+                    yes = options.reverse ? true : false;
+                }
+                callback(yes);
+            }
+        }
+        this._closeMessage();
+        ElMessageBox.confirm(message, title, options);
         this._handleZIndex('.el-message-box__wrapper:last');
     },
     toast(message, timeout, callback, options) {
