@@ -27,6 +27,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.message.MessageResolver;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
@@ -43,6 +44,7 @@ import org.truenewx.tnxjee.repo.jpa.converter.*;
 import org.truenewx.tnxjee.repo.jpa.converter.spec.DefaultUserIdentityAttributeConverter;
 import org.truenewx.tnxjee.repo.jpa.converter.spec.EthnicityConverter;
 import org.truenewx.tnxjee.repo.jpa.converter.spec.HttpRequestMethodConverter;
+import org.truenewx.tnxjee.repo.jpa.converter.spec.PermanentableDateConverter;
 
 /**
  * JPA实体映射文件生成器实现
@@ -308,7 +310,7 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
         String converter = null;
         boolean basic = BeanUtils.isSimpleValueType(fieldType);
         // 不是基础类型或者是枚举类型/Instant，则尝试获取转换器，可取得转换器，则说明也是基础类型
-        if (!basic || fieldType.isEnum() || fieldType == Instant.class) {
+        if (!basic || fieldType.isEnum() || fieldType == Instant.class || fieldType == PermanentableDate.class) {
             converter = getConverter(fieldType, column);
             if (converter != null) {
                 basic = true;
@@ -322,6 +324,9 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
             if (column == null || "char".equals(column.getDefinition())) {
                 return InstantZonedMillisSecondStringAttributeConverter.class.getName();
             }
+        }
+        if (fieldType == PermanentableDate.class) {
+            return PermanentableDateConverter.class.getName();
         }
         if (fieldType == Ethnicity.class) {
             return EthnicityConverter.class.getName();
