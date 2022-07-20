@@ -35,12 +35,24 @@
     background-color: var(--el-bg-color) !important;
 }
 
-.border,
-.border-top,
-.border-bottom,
-.border-start,
+.border {
+    border: 1px solid var(--el-border-color) !important;
+}
+
+.border-top {
+    border-top: 1px solid var(--el-border-color) !important;
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--el-border-color) !important;
+}
+
+.border-start {
+    border-left: 1px solid var(--el-border-color) !important;
+}
+
 .border-end {
-    border-color: var(--el-border-color) !important;
+    border-right: 1px solid var(--el-border-color) !important;
 }
 
 .text-placeholder {
