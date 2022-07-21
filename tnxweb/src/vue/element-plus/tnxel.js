@@ -447,7 +447,15 @@ tnxel.date = {
             cellValue = cellValue[column];
         }
         return tnxvue.util.date.formatPermanentableDate(cellValue);
-    }
+    },
+    /**
+     * 将Java标准的日期格式转换为Day.js的日期格式
+     * @param format Java标准的日期格式
+     * @returns {String} Day.js的日期格式
+     */
+    toDayJsDateFormat(format) {
+        return format.replaceAll('y', 'Y').replaceAll('d', 'D');
+    },
 };
 
 tnxel.number = {

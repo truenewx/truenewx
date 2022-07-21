@@ -80,8 +80,7 @@ export default {
             return 10;
         },
         convertedDateFormat() {
-            let format = this.dateFormat.replaceAll('y', 'Y');
-            return format.replaceAll('d', 'D');
+            return window.tnx.date.toDayJsDateFormat(this.dateFormat);
         },
         defaultTimeValue() {
             if (this.defaultValue) {

@@ -82,10 +82,13 @@ export default {
     },
     computed: {
         format() {
+            let format;
             if (this.valueFormat) {
-                return this.valueFormat;
+                format = this.valueFormat;
+            } else {
+                format = this.type === 'datetime' ? util.date.patterns.dateTime : util.date.patterns.date;
             }
-            return this.type === 'datetime' ? util.date.patterns.dateTime : util.date.patterns.date;
+            return window.tnx.date.toDayJsDateFormat(format);
         },
         defaultDate() {
             if (this.defaultValue) {
