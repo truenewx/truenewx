@@ -532,7 +532,7 @@ export const DateUtil = {
     formatDateMinute(date) {
         return this.format(date, DATE_PATTERNS.dateMinute);
     },
-    PERMANENT_DATE_TEXT: '长期',
+    PERMANENT_DATE_TEXT: '永久',
     formatPermanentableDate(date) {
         if (date) {
             if (date.permanent) {
