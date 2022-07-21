@@ -2,7 +2,7 @@
     <div class="d-flex" v-if="permanentable">
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
             :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate"
-            :picker-options="pickerOptions" :disabled="disabled || model.permanent"
+            :disabled-date="disabledDate" :disabled="disabled || model.permanent"
             :class="{'flex-grow-1': !pickerWidth}" :style="{width: pickerWidth}"
             @change="emitModelValue"/>
         <el-checkbox style="margin-left: 1rem; margin-right: 0.75rem;" v-model="model.permanent"
@@ -10,7 +10,7 @@
         </el-checkbox>
     </div>
     <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
-        :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate" :picker-options="pickerOptions"
+        :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate" :disabled-date="disabledDate"
         :disabled="disabled" :style="{width: pickerWidth}" v-else/>
 </template>
 
@@ -58,26 +58,24 @@ export default {
         return {
             permanentText: util.date.PERMANENT_DATE_TEXT,
             model: model,
-            pickerOptions: {
-                disabledDate(date) {
-                    if (vm.earliest || vm.latest) {
-                        date = new Date(date);
-                        if (vm.earliest) {
-                            let earliest = new Date(vm.earliest);
-                            if (date.getTime() < earliest.getTime()) {
-                                return true;
-                            }
-                        }
-                        if (vm.latest) {
-                            let latest = new Date(vm.latest);
-                            if (date.getTime() > latest.getTime()) {
-                                return true;
-                            }
+            disabledDate(date) {
+                if (vm.earliest || vm.latest) {
+                    date = new Date(date);
+                    if (vm.earliest) {
+                        let earliest = new Date(vm.earliest);
+                        if (date.getTime() < earliest.getTime()) {
+                            return true;
                         }
                     }
-                    return false;
+                    if (vm.latest) {
+                        let latest = new Date(vm.latest);
+                        if (date.getTime() > latest.getTime()) {
+                            return true;
+                        }
+                    }
                 }
-            }
+                return false;
+            },
         };
     },
     computed: {
