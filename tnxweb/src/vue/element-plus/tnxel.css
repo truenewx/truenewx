@@ -348,6 +348,11 @@
     line-height: 2rem;
 }
 
+.content-flex-column .el-form-item__content {
+    flex-direction: column;
+    align-items: start;
+}
+
 /*
  * 水平表单的字段错误
  */
@@ -772,4 +777,8 @@ i svg {
     order: -1;
     margin-right: 0;
     margin-left: 0.5rem;
+}
+
+.el-popper.is-dark .el-popover__title {
+    color: var(--el-bg-color);
 }
