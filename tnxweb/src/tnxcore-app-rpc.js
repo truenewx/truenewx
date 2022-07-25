@@ -247,6 +247,13 @@ export default {
                         break;
                     }
                     case 403: {
+                        if (response.data === '') {
+                            response.data = {
+                                errors: [{
+                                    message: '没有权限访问 ' + url,
+                                }]
+                            };
+                        }
                         if (_this.handleErrors(response.data.errors, options)) {
                             return;
                         }
