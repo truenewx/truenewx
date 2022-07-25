@@ -2,7 +2,7 @@
     <el-tooltip :content="tooltipContent" :placement="tooltipPlacement" :disabled="disabled || !tooltipContent"
         v-if="disabled === false || disabledTip !== false">
         <el-dropdown split-button :type="type" :class="className" :disabled="disabled" :title="title" :size="size"
-            @click="clickButton" @command="clickItem" v-if="dropdownItems.length">
+            :style="$attrs.style" @click="clickButton" @command="clickItem" v-if="dropdownItems.length">
             <i :class="icon" style="margin-right: 0.5rem;" v-if="icon"></i>
             <template v-if="!hiddenCaption">
                 <slot v-if="$slots.default"></slot>
@@ -20,7 +20,7 @@
         </el-dropdown>
         <el-button :type="type" :class="className" :disabled="disabled" :title="title" @click="clickButton" :size="size"
             :loading="loading" :plain="plain" :link="link" :text="text" :bg="bg" :autofocus="autofocus" :round="round"
-            :circle="circle" v-else>
+            :circle="circle" :style="$attrs.style" v-else>
             <tnxel-icon :value="icon" v-if="icon"/>
             <span v-if="!hiddenCaption && ($slots.default || menuItem)">
                 <slot>{{ menuItem ? menuItem.caption : '' }}</slot>
