@@ -210,10 +210,6 @@
     margin-bottom: 20px;
 }
 
-.el-form:not(.el-form--inline) .el-form-item:last-child {
-    margin-bottom: 0;
-}
-
 .el-form-item__label,
 .el-form-item__label .el-checkbox__label {
     font-weight: 600;
@@ -303,6 +299,7 @@
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+    height: fit-content;
 }
 
 .el-form--label-top .el-form-item__content {
