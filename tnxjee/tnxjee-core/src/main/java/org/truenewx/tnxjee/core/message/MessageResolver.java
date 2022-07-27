@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.core.message;
 
+import java.time.temporal.Temporal;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
+import org.truenewx.tnxjee.core.util.TemporalUtil;
 
 /**
  * 消息解决器
@@ -60,6 +63,16 @@ public class MessageResolver {
             Object arg = args[i];
             if (arg instanceof Enum<?>) {
                 result[i] = this.enumDictResolver.getText((Enum<?>) arg, locale);
+            } else if (arg instanceof Temporal) {
+                result[i] = TemporalUtil.format((Temporal) arg);
+            } else if (arg instanceof PermanentableDate) {
+                PermanentableDate permanentableDate = (PermanentableDate) arg;
+                if (permanentableDate.isPermanent()) {
+                    result[i] = this.messageSource.getMessage("tnxjee.core.spec.permanentable_date.permanent", null,
+                            locale);
+                } else {
+                    result[i] = TemporalUtil.format(permanentableDate.getValue());
+                }
             } else if (arg instanceof String) {
                 String argString = (String) arg;
                 if (argString.startsWith(Strings.PLACEHOLDER_PREFIX) && argString.endsWith(
