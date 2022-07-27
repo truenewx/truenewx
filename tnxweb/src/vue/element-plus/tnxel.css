@@ -299,7 +299,6 @@
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    height: fit-content;
 }
 
 .el-form--label-top .el-form-item__content {
