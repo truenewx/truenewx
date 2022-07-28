@@ -157,13 +157,28 @@ tnxvue.app.isProduction = function() {
     return true;
 };
 
-tnxvue.app.toDevUrl = function(url, portIndex, target) {
+tnxvue.app.toDevUrl = function(url, portIndex, replacement) {
     if (!this.isProduction()) {
         let localhost = 'http://localhost:';
         if (url.startsWith(localhost)) {
-            portIndex = portIndex || 2;
-            target = target || '0';
-            url = url.substr(0, localhost.length + portIndex - 1) + target + url.substr(localhost.length + portIndex);
+            portIndex = portIndex || 1; // 开发环境端口与正式环境端口不同点的位置，如：8080之于8880，则portIndex为1
+            replacement = replacement || '0'; // 开发环境端口在不同于正式环境端口位置要替代的值，如8080之于8880，则replacement为'0'
+
+            let path = ''; // 路由路径
+            let wellIndex = url.indexOf('#');
+            if (wellIndex > 0) { // 如果有路由路径，则将url拆成两部分，以便于后续处理
+                path = url.substr(wellIndex);
+                url = url.substr(0, wellIndex);
+            }
+            // 开发环境路径不包含contextPath，去掉url中的contenxtPath
+            let replaceEndIndex = localhost.length + portIndex + 1;
+            let slashLength = undefined;
+            let slashIndex = url.indexOf('/', localhost.length);
+            if (slashIndex > 0) {
+                slashLength = slashIndex - replaceEndIndex + 1;
+            }
+            url = url.substr(0, localhost.length + portIndex) + replacement
+                + url.substr(replaceEndIndex, slashLength) + path;
         }
     }
     return url;
