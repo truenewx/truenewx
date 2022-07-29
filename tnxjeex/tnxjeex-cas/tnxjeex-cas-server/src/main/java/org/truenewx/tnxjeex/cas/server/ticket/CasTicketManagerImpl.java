@@ -201,7 +201,7 @@ public class CasTicketManagerImpl implements CasTicketManager {
         assertion.setUserDetails(userDetails);
         assertion.setValidFromDate(appTicket.getCreateTime());
         assertion.setValidUntilDate(appTicket.getExpiredTime());
-        assertion.setAuthenticationDate(appTicket.getCreateTime());
+        assertion.setAuthenticationDate(new Date());
         return assertion;
     }
 

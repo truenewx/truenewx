@@ -20,8 +20,6 @@ import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
-import org.truenewx.tnxjee.webmvc.security.web.authentication.LoginViewResultResolver;
-import org.truenewx.tnxjee.webmvc.security.web.authentication.ResolvableExceptionAuthenticationFailureHandler;
 import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
 import org.truenewx.tnxjeex.cas.server.service.CasServiceManager;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
@@ -32,8 +30,6 @@ import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
 @RequestMapping("/login")
 public abstract class CasServerLoginControllerSupport {
 
-    @Autowired
-    private ResolvableExceptionAuthenticationFailureHandler authenticationFailureHandler;
     @Autowired
     protected CasServiceManager serviceManager;
     @Autowired
@@ -88,8 +84,7 @@ public abstract class CasServerLoginControllerSupport {
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
-            LoginViewResultResolver resultResolver = this.authenticationFailureHandler.getLoginViewResultResolver();
-            String result = resultResolver == null ? null : resultResolver.resolveLoginViewResult(request);
+            String result = getLoginViewName(request);
             if (result == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return null;
@@ -113,6 +108,10 @@ public abstract class CasServerLoginControllerSupport {
 
     protected String getDefaultAppName() {
         return null;
+    }
+
+    protected String getLoginViewName(HttpServletRequest request) {
+        return "/login";
     }
 
 }
