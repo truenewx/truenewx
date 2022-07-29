@@ -3,16 +3,11 @@ package org.truenewx.tnxjee.webmvc.feign;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjee.service.exception.FormatException;
-import org.truenewx.tnxjee.service.exception.MultiException;
-import org.truenewx.tnxjee.service.exception.SingleException;
-import org.truenewx.tnxjee.service.exception.model.ExceptionError;
-import org.truenewx.tnxjee.webmvc.exception.model.ExceptionErrorBody;
+import org.truenewx.tnxjee.webmvc.exception.parser.ResolvableExceptionParser;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -25,41 +20,21 @@ import feign.codec.ErrorDecoder;
 @Component
 public class FeignErrorDecoder extends ErrorDecoder.Default {
 
+    @Autowired
+    private ResolvableExceptionParser exceptionParser;
+
     @Override
     public Exception decode(String methodKey, Response response) {
         try {
             int status = response.status();
             if (status == HttpStatus.FORBIDDEN.value() || status == HttpStatus.BAD_REQUEST.value()) {
                 String json = IOUtils.toString(response.body().asReader(StandardCharsets.UTF_8));
-                ExceptionErrorBody body = JsonUtil.json2Bean(json, ExceptionErrorBody.class);
-                ExceptionError[] errors = body.getErrors();
-                if (errors != null) {
-                    if (errors.length == 1) {
-                        return buildException(errors[0]);
-                    } else if (errors.length > 1) {
-                        SingleException[] exceptions = new SingleException[errors.length];
-                        for (int i = 0; i < errors.length; i++) {
-                            exceptions[i] = buildException(errors[i]);
-                        }
-                        return new MultiException(exceptions);
-                    }
-                }
+                return this.exceptionParser.parse(json);
             }
         } catch (Exception e) {
             LogUtil.error(getClass(), e);
         }
         return super.decode(methodKey, response);
-    }
-
-    private SingleException buildException(ExceptionError error) throws ClassNotFoundException {
-        String type = error.getType();
-        Class<?> clazz = Class.forName(type);
-        if (BusinessException.class.isAssignableFrom(clazz)) {
-            return new BusinessException(error);
-        } else if (clazz == FormatException.class) {
-            return new FormatException(error);
-        }
-        return null;
     }
 
 }
