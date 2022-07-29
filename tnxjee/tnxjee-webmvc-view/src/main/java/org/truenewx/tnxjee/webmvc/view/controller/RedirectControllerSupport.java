@@ -36,7 +36,7 @@ public abstract class RedirectControllerSupport {
 
     @GetMapping("/to/**")
     public void to(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        to("//", request, response);
+        to(Strings.DOUBLE_SLASH, request, response);
     }
 
     @GetMapping("/http/**")

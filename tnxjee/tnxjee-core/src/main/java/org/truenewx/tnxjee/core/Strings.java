@@ -89,6 +89,10 @@ public class Strings {
      */
     public static final String SLASH = "/";
     /**
+     * 双斜杠
+     */
+    public static final String DOUBLE_SLASH = "//";
+    /**
      * 反斜杠
      */
     public static final String BACKSLASH = "\\";

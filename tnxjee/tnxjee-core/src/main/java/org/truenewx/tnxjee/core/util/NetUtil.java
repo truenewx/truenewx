@@ -397,7 +397,7 @@ public class NetUtil {
     }
 
     public static boolean isRelativeUrl(String url) {
-        return url.startsWith(Strings.SLASH) && !url.startsWith("//");
+        return url.startsWith(Strings.SLASH) && !url.startsWith(Strings.DOUBLE_SLASH);
     }
 
     /**
@@ -431,7 +431,7 @@ public class NetUtil {
      */
     public static String standardizeUrlWithProtocol(String url, String defaultProtocol) {
         if (!url.contains("://")) {
-            if (url.startsWith("//")) {
+            if (url.startsWith(Strings.DOUBLE_SLASH)) {
                 url = defaultProtocol + Strings.COLON + url;
             } else if (!url.startsWith(Strings.SLASH)) {
                 url = defaultProtocol + "://" + url;
@@ -486,7 +486,7 @@ public class NetUtil {
         int index = url.indexOf("://");
         if (index >= 0) {
             url = url.substring(index + 3);
-        } else if (url.startsWith("//")) { // 以//开头是不包含协议但包含主机地址的链接
+        } else if (url.startsWith(Strings.DOUBLE_SLASH)) { // 以//开头是不包含协议但包含主机地址的链接
             url = url.substring(2);
         } else { // 其它情况下URL中不包含主机地址
             return null;

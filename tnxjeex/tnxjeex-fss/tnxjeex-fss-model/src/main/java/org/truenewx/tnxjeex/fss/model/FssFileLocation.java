@@ -52,7 +52,7 @@ public class FssFileLocation {
             s = NetUtil.standardizeUrl(s);
             if (s.startsWith(PROTOCOL)) {
                 s = s.substring(PROTOCOL.length() - 1);
-            } else if (s.startsWith("//")) {
+            } else if (s.startsWith(Strings.DOUBLE_SLASH)) {
                 s = s.substring(1);
             }
             // 预处理后不以/开头的地址不支持，典型的如：http://

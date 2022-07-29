@@ -33,7 +33,7 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
         this.account = account;
         this.policyBuilder = new AliyunPolicyBuilder(account);
         // 默认的上下文地址以//开头，不包含具体访问协议，与访问者当前使用协议相同
-        this.contextUrl = "//" + this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
+        this.contextUrl = Strings.DOUBLE_SLASH + this.account.getOssBucket() + Strings.DOT + this.account.getOssEndpoint();
     }
 
     /**

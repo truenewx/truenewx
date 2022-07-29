@@ -167,7 +167,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
 
     private String getFullReadUrl(String readUrl, boolean absolute) {
         // 读取地址以/开头但不以//开头，则视为相对地址，相对地址需考虑添加下载路径前缀、上下文根和主机地址
-        if (readUrl != null && readUrl.startsWith(Strings.SLASH) && !readUrl.startsWith("//")) {
+        if (readUrl != null && readUrl.startsWith(Strings.SLASH) && !readUrl.startsWith(Strings.DOUBLE_SLASH)) {
             // 加上下载路径前缀
             readUrl = getDownloadUrlPrefix() + readUrl;
             // 加上上下文根路径
@@ -184,7 +184,7 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
             return app.getContextUri(false);
         } else { // 否则取当前请求的上下文根路径
             HttpServletRequest request = Objects.requireNonNull(SpringWebContext.getRequest());
-            String contextUrl = "//" + WebUtil.getHost(request, true);
+            String contextUrl = Strings.DOUBLE_SLASH + WebUtil.getHost(request, true);
             String contextPath = request.getContextPath();
             if (!contextPath.equals(Strings.SLASH)) {
                 contextUrl += contextPath;
