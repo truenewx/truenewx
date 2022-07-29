@@ -12,7 +12,9 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSaver;
@@ -23,25 +25,12 @@ import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSa
 @Component
 public class ResolvableExceptionAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private boolean useForward = true;
-    private LoginViewResultResolver loginViewResultResolver = new DefaultLoginViewResultResolver();
+    @Autowired(required = false)
+    private AuthenticationFailureViewResolver viewResolver = new DefaultAuthenticationFailureViewResolver();
     @Autowired
     private ResolvableExceptionMessageSaver resolvableExceptionMessageSaver;
     @Autowired
     private WebMvcProperties webMvcProperties;
-
-    public void setUseForward(boolean useForward) {
-        this.useForward = useForward;
-    }
-
-    @Autowired(required = false)
-    public void setLoginViewResultResolver(LoginViewResultResolver loginViewResultResolver) {
-        this.loginViewResultResolver = loginViewResultResolver;
-    }
-
-    public LoginViewResultResolver getLoginViewResultResolver() {
-        return this.loginViewResultResolver;
-    }
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -52,14 +41,24 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
         if (WebUtil.isAjaxRequest(request)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
-            String targetUrl = this.loginViewResultResolver.resolveLoginViewResult(request);
-            if (StringUtils.isBlank(targetUrl)) { // 登录认证失败后的跳转地址未设置，也报401错误
+            String targetView = this.viewResolver.resolveFailureView(request);
+            if (StringUtils.isBlank(targetView)) { // 登录认证失败后的目标地址未设置，则报401错误
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             } else { // 跳转到目标地址
-                if (this.useForward) {
+                boolean useForward = true;
+                String targetUrl = targetView;
+                if (targetUrl.startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)) {
+                    targetUrl = targetUrl.substring(UrlBasedViewResolver.REDIRECT_URL_PREFIX.length());
+                    useForward = false;
+                }
+                // 不是http地址又不是相对地址，则前面加/以视为相对地址
+                if (!NetUtil.isHttpUrl(targetUrl, true) && !NetUtil.isRelativeUrl(targetUrl)) {
+                    targetUrl = Strings.SLASH + targetUrl;
+                }
+                if (useForward) {
                     WebMvcProperties.View view = this.webMvcProperties.getView();
                     targetUrl = view.getPrefix() + targetUrl + view.getSuffix();
-                    targetUrl = targetUrl.replaceAll("//", Strings.SLASH);
+                    targetUrl = targetUrl.replaceAll(Strings.DOUBLE_SLASH, Strings.SLASH);
                     request.getRequestDispatcher(targetUrl).forward(request, response);
                 } else {
                     response.sendRedirect(targetUrl);
@@ -71,6 +70,10 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
     protected void saveException(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) {
         Throwable cause = exception.getCause();
+        // 最多支持两层异常原因
+        if (!(cause instanceof ResolvableException)) {
+            cause = cause.getCause();
+        }
         if (cause instanceof ResolvableException) {
             ResolvableException re = (ResolvableException) cause;
             this.resolvableExceptionMessageSaver.saveMessage(request, response, null, re);
