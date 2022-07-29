@@ -3,7 +3,10 @@ package org.truenewx.tnxjee.core.util;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -67,7 +70,14 @@ public class HttpClientUtil {
         if (response != null) {
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
-                String content = EntityUtils.toString(response.getEntity(), encoding);
+                String content;
+                // 301和302重定向状态码，将重定向目标地址作为内容返回
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    Header header = response.getFirstHeader(HttpHeaders.LOCATION);
+                    content = header.getValue();
+                } else {
+                    content = EntityUtils.toString(response.getEntity(), encoding);
+                }
                 return new Binary<>(statusCode, content);
             } finally {
                 // 确保关闭请求连接
