@@ -287,6 +287,10 @@
     line-height: 48px;
 }
 
+.el-form-item__content .el-input__inner {
+    --el-input-inner-height: var(--el-input-height, 32px);
+}
+
 .el-form-item--feedback .ignore-feedback .el-input__inner {
     border-color: var(--el-border-color);
 }
@@ -392,7 +396,7 @@ span.form-item-tip {
 }
 
 .el-form--label-top .el-form-item__error {
-    padding-top: 4px;
+    padding-top: 3px; /* 确保表单栏后紧跟按钮时，与按钮之间的间距均衡 */
 }
 
 div.form-item-tip + .el-form-item__error {
