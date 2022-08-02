@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.core.authentication.logout.CasLogoutSuccessHandler;
-import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
 
 /**
  * CAS服务端登出成功处理器
@@ -23,7 +23,11 @@ public class CasServerLogoutSuccessHandler extends CasLogoutSuccessHandler {
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
         String targetUrl = request.getParameter(getTargetUrlParameter());
         if (StringUtils.isBlank(targetUrl)) {
-            targetUrl = request.getParameter(CasParameterNames.SERVICE);
+            String service = request.getParameter(CasConstants.PARAMETER_SERVICE);
+            if (service != null) {
+                targetUrl = CasConstants.URL_LOGIN + Strings.QUESTION + CasConstants.PARAMETER_SERVICE + Strings.EQUAL
+                        + service;
+            }
         }
         if (StringUtils.isBlank(targetUrl)) {
             targetUrl = getDefaultTargetUrl();
