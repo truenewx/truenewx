@@ -2,7 +2,7 @@
     <el-form ref="form" :id="id" label-width="auto" :label-position="vertical ? 'top' : 'right'"
         :model="model" :rules="validationRules" :validate-on-rule-change="false"
         :inline="inline" :inline-message="!vertical" :disabled="disabled"
-        :class="theme ? ('theme-' + theme) : null" :size="size" status-icon>
+        :class="theme ? ('theme-' + theme) : null" :size="size" :status-icon="statusIcon">
         <slot></slot>
         <el-form-item class="w-100 mb-0" :label-width="labelWidth" v-if="submit !== undefined && submit !== null">
             <el-button :type="theme || 'primary'" @click="toSubmit" v-if="submit !== false">
@@ -62,6 +62,10 @@ export default {
         },
         labelWidth: [String, Number],
         size: String,
+        statusIcon: {
+            type: Boolean,
+            default: true,
+        },
     },
     emits: ['rules-loaded', 'meta'],
     data() {
