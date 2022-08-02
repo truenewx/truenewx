@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.core.message;
 
+import java.time.temporal.Temporal;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
+import org.truenewx.tnxjee.core.format.PermanentableDateFormatter;
+import org.truenewx.tnxjee.core.spec.PermanentableDate;
+import org.truenewx.tnxjee.core.util.TemporalUtil;
 
 /**
  * 消息解决器
@@ -20,6 +24,8 @@ public class MessageResolver {
     private MessageSource messageSource;
     @Autowired
     private EnumDictResolver enumDictResolver;
+    @Autowired
+    private PermanentableDateFormatter permanentableDateFormatter;
 
     /**
      * 将消息码转换为占位符形式，以便于作为占位符形式的消息参数
@@ -60,6 +66,11 @@ public class MessageResolver {
             Object arg = args[i];
             if (arg instanceof Enum<?>) {
                 result[i] = this.enumDictResolver.getText((Enum<?>) arg, locale);
+            } else if (arg instanceof Temporal) {
+                result[i] = TemporalUtil.format((Temporal) arg);
+            } else if (arg instanceof PermanentableDate) {
+                PermanentableDate permanentableDate = (PermanentableDate) arg;
+                result[i] = this.permanentableDateFormatter.format(permanentableDate, locale);
             } else if (arg instanceof String) {
                 String argString = (String) arg;
                 if (argString.startsWith(Strings.PLACEHOLDER_PREFIX) && argString.endsWith(
