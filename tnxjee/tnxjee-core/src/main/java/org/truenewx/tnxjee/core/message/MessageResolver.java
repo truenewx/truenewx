@@ -8,6 +8,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
+import org.truenewx.tnxjee.core.format.PermanentableDateFormatter;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
 
@@ -23,6 +24,8 @@ public class MessageResolver {
     private MessageSource messageSource;
     @Autowired
     private EnumDictResolver enumDictResolver;
+    @Autowired
+    private PermanentableDateFormatter permanentableDateFormatter;
 
     /**
      * 将消息码转换为占位符形式，以便于作为占位符形式的消息参数
@@ -67,12 +70,7 @@ public class MessageResolver {
                 result[i] = TemporalUtil.format((Temporal) arg);
             } else if (arg instanceof PermanentableDate) {
                 PermanentableDate permanentableDate = (PermanentableDate) arg;
-                if (permanentableDate.isPermanent()) {
-                    result[i] = this.messageSource.getMessage("tnxjee.core.spec.permanentable_date.permanent", null,
-                            locale);
-                } else {
-                    result[i] = TemporalUtil.format(permanentableDate.getValue());
-                }
+                result[i] = this.permanentableDateFormatter.format(permanentableDate, locale);
             } else if (arg instanceof String) {
                 String argString = (String) arg;
                 if (argString.startsWith(Strings.PLACEHOLDER_PREFIX) && argString.endsWith(
