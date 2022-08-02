@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
-import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
 import org.truenewx.tnxjeex.cas.server.service.CasServiceManager;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
@@ -41,7 +41,7 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Collection<AppTicket> appTickets = this.ticketManager.deleteTicketGrantingTicket(request, response);
         if (appTickets.size() > 0) {
-            String logoutService = WebUtil.getParameterOrAttribute(request, CasParameterNames.SERVICE);
+            String logoutService = WebUtil.getParameterOrAttribute(request, CasConstants.PARAMETER_SERVICE);
             for (AppTicket appTicket : appTickets) {
                 // 排除当前CAS服务端应用，之所以需要在此排除是考虑到一个应用同时作为CAS服务端和客户端的场景
                 if (!appTicket.getApp().equals(this.appName)) {

@@ -13,7 +13,7 @@ import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
-import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
 
 /**
@@ -33,7 +33,7 @@ public class CasServiceManagerImpl implements CasServiceManager {
     @Autowired
     private ApiMetaProperties apiMetaProperties;
 
-    private String artifactParameter = CasParameterNames.ARTIFACT;
+    private String artifactParameter = CasConstants.PARAMETER_ARTIFACT;
 
     public void setArtifactParameter(String artifactParameter) {
         this.artifactParameter = artifactParameter;

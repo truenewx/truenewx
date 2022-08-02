@@ -19,7 +19,7 @@ import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
-import org.truenewx.tnxjeex.cas.core.constant.CasCookieNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.core.validation.SimpleAssertion;
 import org.truenewx.tnxjeex.cas.server.authentication.CasServerScopeResolver;
 import org.truenewx.tnxjeex.cas.server.entity.AppTicket;
@@ -69,10 +69,10 @@ public class CasTicketManagerImpl implements CasTicketManager {
         this.ticketGrantingTicketRepo.save(ticketGrantingTicket);
 
         // 按照CAS规范将TGT写入Cookie
-        WebUtil.setSessionCookie(request, response, CasCookieNames.TGT, ticketGrantingTicketId);
+        WebUtil.setSessionCookie(request, response, CasConstants.COOKIE_TGT, ticketGrantingTicketId);
 
         // Cookie中的TGT需要到下一个请求时才能获取，缓存TGT到当前会话，以便当前请求的后续处理获取TGT
-        session.setAttribute(CasCookieNames.TGT, ticketGrantingTicketId);
+        session.setAttribute(CasConstants.COOKIE_TGT, ticketGrantingTicketId);
     }
 
     /**
@@ -83,9 +83,9 @@ public class CasTicketManagerImpl implements CasTicketManager {
      */
     private String readTicketGrantingTicketId(HttpServletRequest request) {
         // 优先从当前会话缓存中获取TGT
-        String ticketGrantingTicketId = (String) request.getSession().getAttribute(CasCookieNames.TGT);
+        String ticketGrantingTicketId = (String) request.getSession().getAttribute(CasConstants.COOKIE_TGT);
         if (ticketGrantingTicketId == null) {
-            ticketGrantingTicketId = WebUtil.getCookieValue(request, CasCookieNames.TGT);
+            ticketGrantingTicketId = WebUtil.getCookieValue(request, CasConstants.COOKIE_TGT);
         }
         return ticketGrantingTicketId;
     }
@@ -177,7 +177,7 @@ public class CasTicketManagerImpl implements CasTicketManager {
                     ticketGrantingTicket.getId(), null);
             this.ticketGrantingTicketRepo.delete(ticketGrantingTicket);
             // 按照CAS规范将TGT从Cookie移除
-            WebUtil.removeCookie(request, response, CasCookieNames.TGT);
+            WebUtil.removeCookie(request, response, CasConstants.COOKIE_TGT);
             return appTickets;
         }
         return Collections.emptyList();

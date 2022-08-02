@@ -20,14 +20,14 @@ import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.api.meta.model.ApiMetaProperties;
-import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.server.service.CasServiceManager;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
 
 /**
  * Cas服务端登录控制器
  */
-@RequestMapping("/login")
+@RequestMapping(CasConstants.URL_LOGIN)
 public abstract class CasServerLoginControllerSupport {
 
     @Autowired
@@ -49,7 +49,7 @@ public abstract class CasServerLoginControllerSupport {
                 return toBadServiceView(response);
             }
             // 写入请求属性中，便于后续获取
-            request.setAttribute(CasParameterNames.SERVICE, service);
+            request.setAttribute(CasConstants.PARAMETER_SERVICE, service);
         }
         String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (WebUtil.isAjaxRequest(request)) {
@@ -84,12 +84,7 @@ public abstract class CasServerLoginControllerSupport {
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
-            String result = getLoginViewName(request);
-            if (result == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return null;
-            }
-            return new ModelAndView(result);
+            return new ModelAndView(CasConstants.URL_LOGIN);
         }
     }
 
@@ -108,10 +103,6 @@ public abstract class CasServerLoginControllerSupport {
 
     protected String getDefaultAppName() {
         return null;
-    }
-
-    protected String getLoginViewName(HttpServletRequest request) {
-        return "/login";
     }
 
 }

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.web.util.WebUtil;
-import org.truenewx.tnxjeex.cas.core.constant.CasCookieNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 
 /**
  * Cas客户端安全上下文准备过滤器
@@ -19,10 +19,10 @@ public class CasClientSecurityContextPrepareFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
             throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
-        String cookieTgt = WebUtil.getCookieValue(request, CasCookieNames.TGT);
+        String cookieTgt = WebUtil.getCookieValue(request, CasConstants.COOKIE_TGT);
         if (cookieTgt != null) {
             HttpSession session = request.getSession();
-            String attributeName = getClass().getName() + Strings.WELL + CasCookieNames.TGT;
+            String attributeName = getClass().getName() + Strings.WELL + CasConstants.COOKIE_TGT;
             String sessionTgt = (String) session.getAttribute(attributeName);
             if (sessionTgt == null) {
                 session.setAttribute(attributeName, cookieTgt);

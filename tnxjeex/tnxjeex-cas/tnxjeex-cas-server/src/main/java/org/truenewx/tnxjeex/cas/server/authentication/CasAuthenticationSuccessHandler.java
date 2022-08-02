@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.view.util.WebViewUtil;
-import org.truenewx.tnxjeex.cas.core.constant.CasParameterNames;
+import org.truenewx.tnxjeex.cas.core.CasConstants;
 import org.truenewx.tnxjeex.cas.server.service.CasServiceManager;
 import org.truenewx.tnxjeex.cas.server.ticket.CasTicketManager;
 
@@ -37,7 +37,7 @@ public class CasAuthenticationSuccessHandler implements AuthenticationSuccessHan
         String scope = token.getScope();
         String targetUrl = this.serviceManager.getLoginProcessUrl(request, service, scope);
         Map<String, Object> parameters = WebUtil.getRequestParameterMap(request, "username",
-                "password", CasParameterNames.SERVICE, CasParameterNames.SCOPE);
+                "password", CasConstants.PARAMETER_SERVICE, CasConstants.PARAMETER_SCOPE);
         targetUrl = NetUtil.mergeParams(targetUrl, parameters, StandardCharsets.UTF_8.name());
         // 此处一定是表单提交鉴权成功，无需AjaxRedirectStrategy
         WebViewUtil.redirect(request, response, targetUrl);
