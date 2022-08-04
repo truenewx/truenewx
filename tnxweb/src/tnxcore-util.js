@@ -1105,6 +1105,15 @@ export const BomUtil = {
             }
         });
     },
+    copyToClipboard(text, callback) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(callback).catch(error => {
+                console.error(error);
+            });
+        } else {
+            console.error('当前浏览器不支持 navigator.clipboard');
+        }
+    },
 }
 
 export const FileUtil = {
