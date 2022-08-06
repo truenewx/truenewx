@@ -219,9 +219,23 @@ public class TemporalUtil {
      */
     public static Instant setTime(Instant instant, int hour, int minute, int second, int nanoOfSecond) {
         LocalDateTime dateTime = toLocalDateTime(instant);
-        dateTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(), hour,
-                minute, second, nanoOfSecond);
+        dateTime = setTime(dateTime, hour, minute, second, nanoOfSecond);
         return toInstant(dateTime);
+    }
+
+    /**
+     * 为指定时间点设置时分秒纳秒，返回新日期
+     *
+     * @param dateTime     原时间
+     * @param hour         时
+     * @param minute       分
+     * @param second       秒
+     * @param nanoOfSecond 纳秒
+     * @return 新时间
+     */
+    public static LocalDateTime setTime(LocalDateTime dateTime, int hour, int minute, int second, int nanoOfSecond) {
+        return LocalDateTime.of(dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(),
+                hour, minute, second, nanoOfSecond);
     }
 
     public static Instant parseInstant(String s) {
