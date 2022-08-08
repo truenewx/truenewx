@@ -300,8 +300,6 @@
 }
 
 .el-form-item__content {
-    display: flex;
-    align-items: center;
     flex-wrap: nowrap;
 }
 
@@ -391,8 +389,12 @@ span.form-item-tip {
     margin-bottom: 1rem;
 }
 
-.is-error .form-item-tip {
+.is-error div.form-item-tip {
     visibility: hidden;
+}
+
+.is-error span.form-item-tip {
+    display: none;
 }
 
 .el-form--label-top .el-form-item__error {
