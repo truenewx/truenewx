@@ -26,52 +26,58 @@ import fr.opensagres.poi.xwpf.converter.xhtml.XHTMLOptions;
  */
 public class WordDocx {
 
-    private XWPFDocument origin;
+	private XWPFDocument origin;
 
-    public WordDocx(InputStream in) {
-        try {
-            this.origin = new XWPFDocument(in);
-        } catch (IOException e) {
-            throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.DOCX);
-        }
-    }
+	public WordDocx(InputStream in) {
+		try {
+			this.origin = new XWPFDocument(in);
+		} catch (IOException e) {
+			throw new BusinessException(DocExceptionCodes.CAN_NOT_LOAD, FileExtensions.DOCX);
+		}
+	}
 
-    public XWPFDocument getOrigin() {
-        return this.origin;
-    }
+	public XWPFDocument getOrigin() {
+		return this.origin;
+	}
 
-    public String convertToHtml(String encoding) throws IOException {
-        XHTMLOptions options = XHTMLOptions.create().indent(4).setImageManager(new Base64EmbedImgManager());
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        XHTMLConverter.getInstance().convert(this.origin, out, options);
-        String html = out.toString(encoding);
-        html = html.replaceAll("white-space:pre-wrap;", Strings.EMPTY);
-        html = html.replaceAll("\\n\\s*</span>", "</span>");
-        html = html.replaceAll("</span>\\n\\s*<span ", "</span><span ");
-        html = html.replaceAll("</span>\\n\\s*<span>", "</span><span>");
-        return html;
-    }
+	public String convertToHtml(String encoding) throws IOException {
+		XHTMLOptions options = XHTMLOptions.create().indent(4).setImageManager(new Base64EmbedImgManager());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		XHTMLConverter.getInstance().convert(this.origin, out, options);
+		String html = out.toString(encoding);
+		html = html.replaceAll("white-space:pre-wrap;", Strings.EMPTY);
+		html = html.replaceAll("\\n\\s*</span>", "</span>");
+		html = html.replaceAll("</span>\\n\\s*<span ", "</span><span ");
+		html = html.replaceAll("</span>\\n\\s*<span>", "</span><span>");
+		return html;
+	}
 
-    public void convertToHtml(OutputStream out) {
-        try {
-            String html = convertToHtml(Strings.ENCODING_UTF8);
-            IOUtils.write(html, out, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
+	public void convertToHtml(OutputStream out) {
+		try {
+			String html = convertToHtml(Strings.ENCODING_UTF8);
+			IOUtils.write(html, out, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			LogUtil.error(getClass(), e);
+		}
+	}
 
-    public String getText() {
-        XWPFWordExtractor extractor = new XWPFWordExtractor(this.origin);
-        return extractor.getText();
-    }
+	public String getText() {
+		XWPFWordExtractor extractor = new XWPFWordExtractor(this.origin);
+		String text = extractor.getText();
+		try {
+			extractor.close();
+		} catch (IOException e) {
+			LogUtil.error(getClass(), e);
+		}
+		return text;
+	}
 
-    public void close() {
-        try {
-            this.origin.close();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
-        }
-    }
+	public void close() {
+		try {
+			this.origin.close();
+		} catch (IOException e) {
+			LogUtil.error(getClass(), e);
+		}
+	}
 
 }
