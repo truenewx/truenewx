@@ -81,4 +81,8 @@ export default {
 .tnxel-detail-form .el-form-item {
     margin-bottom: 0.75rem;
 }
+
+.tnxel-detail-form .el-form-item__content {
+    align-items: normal;
+}
 </style>

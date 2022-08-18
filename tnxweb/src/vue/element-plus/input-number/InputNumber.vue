@@ -1,5 +1,5 @@
 <template>
-    <el-col class="tnxel-input-number" :class="{'is-error': showRequiredError}" :span="span">
+    <div class="tnxel-input-number" :class="containerClassObject">
         <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-right-0': suffix}"
             v-model="model"
             :min="min" :max="max"
@@ -11,7 +11,7 @@
             @change="onChange"
             @blur="$emit('blur', $event)"/>
         <div class="el-input-group__append" v-if="suffix">{{ suffix }}</div>
-    </el-col>
+    </div>
 </template>
 
 <script>
@@ -47,6 +47,16 @@ export default {
         }
     },
     computed: {
+        containerClassObject() {
+            let classObject = {
+                'is-error': this.showRequiredError,
+            };
+            if (this.span) {
+                classObject['el-col'] = true;
+                classObject['el-col-' + this.span] = true;
+            }
+            return classObject;
+        },
         suffix() {
             if (this.append) {
                 return this.append;
@@ -87,6 +97,10 @@ export default {
 </script>
 
 <style>
+.tnxel-input-number {
+    display: flex;
+}
+
 .tnxel-input-number .el-input-number {
     width: auto;
 }
