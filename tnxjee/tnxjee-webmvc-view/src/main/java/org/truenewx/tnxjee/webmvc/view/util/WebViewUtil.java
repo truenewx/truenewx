@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.SpringUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
@@ -42,7 +43,7 @@ public class WebViewUtil {
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String url)
             throws IOException {
         String location = url;
-        if (!location.toLowerCase().startsWith("http://") && !location.toLowerCase().startsWith("https://")) {
+        if (!NetUtil.isHttpUrl(location, true)) {
             if (!location.startsWith(Strings.SLASH)) {
                 location = Strings.SLASH + location;
             }

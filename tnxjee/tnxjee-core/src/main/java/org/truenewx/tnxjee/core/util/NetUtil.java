@@ -18,6 +18,8 @@ public class NetUtil {
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String LOCAL_IP_V4 = "127.0.0.1";
     public static final String LOCAL_IP_V6 = "0:0:0:0:0:0:0:1";
+    public static final String PROTOCOL_HTTP = "http://";
+    public static final String PROTOCOL_HTTPS = "https://";
 
     private NetUtil() {
     }
@@ -529,10 +531,10 @@ public class NetUtil {
     }
 
     public static boolean isHttpUrl(String url, boolean acceptHttps) {
-        if (url.startsWith("http://")) {
+        if (url.startsWith(PROTOCOL_HTTP)) {
             return true;
         }
-        if (acceptHttps && url.startsWith("https://")) {
+        if (acceptHttps && url.startsWith(PROTOCOL_HTTPS)) {
             return true;
         }
         return false;
