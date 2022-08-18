@@ -29,6 +29,9 @@ public class Terminal {
      */
     private OS os;
 
+    public Terminal() {
+    }
+
     public Terminal(Program program, Device device, OS os) {
         this.program = program;
         this.device = device;
@@ -57,6 +60,13 @@ public class Terminal {
     }
 
     /**
+     * @param program 程序类型
+     */
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    /**
      * @return 设备类型
      */
     public Device getDevice() {
@@ -64,10 +74,24 @@ public class Terminal {
     }
 
     /**
+     * @param device 设备类型
+     */
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
+    /**
      * @return 操作系统
      */
     public OS getOs() {
         return this.os;
+    }
+
+    /**
+     * @param os 操作系统
+     */
+    public void setOs(OS os) {
+        this.os = os;
     }
 
     public boolean supports(Terminal terminal) {
