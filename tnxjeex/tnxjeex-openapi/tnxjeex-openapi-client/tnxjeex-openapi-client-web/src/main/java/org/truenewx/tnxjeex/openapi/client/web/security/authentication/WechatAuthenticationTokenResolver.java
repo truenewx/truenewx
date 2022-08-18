@@ -53,15 +53,18 @@ public abstract class WechatAuthenticationTokenResolver
     protected final String getParam(HttpServletRequest request, String paramName) {
         String paramValue = request.getParameter(paramName);
         if (StringUtils.isBlank(paramValue)) { // 从请求参数里取不到就到body里取
-            Map<String, String> body = getRequestBody(request);
-            paramValue = body.get(paramName);
+            Map<String, Object> body = getRequestBody(request);
+            Object value = body.get(paramName);
+            if (value != null) {
+                paramValue = value.toString();
+            }
         }
         return paramValue;
     }
 
     @SuppressWarnings("unchecked")
-    protected final Map<String, String> getRequestBody(HttpServletRequest request) {
-        Map<String, String> map = (Map<String, String>) request.getAttribute(BODY_CACHE_KEY);
+    protected final Map<String, Object> getRequestBody(HttpServletRequest request) {
+        Map<String, Object> map = (Map<String, Object>) request.getAttribute(BODY_CACHE_KEY);
         if (map == null) {
             map = WebUtil.getRequestBodyMap(request);
             request.setAttribute(BODY_CACHE_KEY, map);

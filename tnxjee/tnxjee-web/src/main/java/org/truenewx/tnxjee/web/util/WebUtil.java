@@ -82,16 +82,13 @@ public class WebUtil {
         }
     }
 
-    public static Map<String, String> getRequestBodyMap(ServletRequest request, String... excludedParameterNames) {
-        Map<String, String> body = new HashMap<>();
+    public static Map<String, Object> getRequestBodyMap(ServletRequest request, String... excludedParameterNames) {
+        Map<String, Object> body;
         String json = getRequestBodyString(request);
         if (StringUtils.isNotBlank(json)) {
-            Map<String, Object> map = JsonUtil.json2Map(json);
-            map.forEach((key, value) -> {
-                if (value != null) {
-                    body.put(key, value.toString());
-                }
-            });
+            body = JsonUtil.json2Map(json);
+        } else {
+            body = new HashMap<>();
         }
         if (body.size() > 0 && excludedParameterNames.length > 0) {
             for (String excludedParameterName : excludedParameterNames) {
