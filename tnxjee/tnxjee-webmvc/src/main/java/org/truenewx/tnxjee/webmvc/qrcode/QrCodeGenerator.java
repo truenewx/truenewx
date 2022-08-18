@@ -40,7 +40,7 @@ public class QrCodeGenerator {
     /**
      * 二维码图片扩展名
      */
-    private static String EXTENSION = FileExtensions.PNG;
+    private static final String EXTENSION = FileExtensions.PNG;
 
     private String root;
 

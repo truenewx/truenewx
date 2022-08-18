@@ -40,9 +40,8 @@ public class QrCodeController {
         try {
             return this.qrCodeGenerator.generate(value, size, logoUrl);
         } catch (Exception e) {
-            LogUtil.error(getClass(), e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @GetMapping("/{md5}")
