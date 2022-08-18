@@ -38,14 +38,15 @@ public abstract class JumpControllerSupport {
     @ConfigAnonymous
     public void to(HttpServletRequest request, HttpServletResponse response,
             @RequestBody(required = false) Map<String, Object> body) throws Exception {
-        String targetUrl = getTargetUrl(Strings.DOUBLE_SLASH, request);
+        String protocol = WebUtil.getProtocol(request) + Strings.COLON + Strings.DOUBLE_SLASH;
+        String targetUrl = getTargetUrl(protocol, request);
         jump(request, response, targetUrl, body);
     }
 
     protected String getTargetUrl(String protocol, HttpServletRequest request) {
-        String action = WebUtil.getRelativeRequestAction(request);
-        int index = StringUtils.ordinalIndexOf(action, Strings.SLASH, 3);
-        String path = action.substring(index + 1);
+        String url = WebUtil.getRelativeRequestUrl(request);
+        int index = StringUtils.ordinalIndexOf(url, Strings.SLASH, 3);
+        String path = url.substring(index + 1);
         String queryString = request.getQueryString();
         if (StringUtils.isNotBlank(queryString)) {
             path += Strings.QUESTION + queryString;
