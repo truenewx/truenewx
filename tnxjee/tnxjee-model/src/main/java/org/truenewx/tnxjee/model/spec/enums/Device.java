@@ -15,10 +15,10 @@ public enum Device {
     PC,
 
     @Caption("手机")
-    @EnumValue("M")
+    @EnumValue("H")
     PHONE,
 
     @Caption("平板")
-    @EnumValue("P")
-    PAD;
+    @EnumValue("D")
+    PAD,
 }

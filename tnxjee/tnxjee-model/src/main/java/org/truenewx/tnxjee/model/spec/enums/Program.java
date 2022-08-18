@@ -20,6 +20,10 @@ public enum Program {
 
     @Caption("小程序")
     @EnumValue("M")
-    MP;
+    MINI,
+
+    @Caption("原生内嵌网页")
+    @EnumValue("H")
+    HYBRID,
 
 }
