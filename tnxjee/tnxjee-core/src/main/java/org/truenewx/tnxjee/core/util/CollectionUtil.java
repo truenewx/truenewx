@@ -491,4 +491,10 @@ public class CollectionUtil {
         return null;
     }
 
+    public static Map<String, String> toStringMap(Map<String, Object> map) {
+        Map<String, String> result = new HashMap<>();
+        map.forEach((key, value) -> result.put(key, value.toString()));
+        return result;
+    }
+
 }
