@@ -38,7 +38,7 @@ public class RequestLogFilter implements Filter {
                 this.logger.info("{} {}", request.getMethod(), url);
                 this.logger.info("headers: {}", JsonUtil.toJson(WebUtil.getHeaders(request)));
                 this.logger.info("parameters: {}", JsonUtil.toJson(WebUtil.getRequestParameterMap(request)));
-                this.logger.info("body: {}", JsonUtil.toJson(WebUtil.getRequestBodyMap(request)));
+                this.logger.info("body: {}", WebUtil.getRequestBodyString(request));
                 req = request;
             }
         }
