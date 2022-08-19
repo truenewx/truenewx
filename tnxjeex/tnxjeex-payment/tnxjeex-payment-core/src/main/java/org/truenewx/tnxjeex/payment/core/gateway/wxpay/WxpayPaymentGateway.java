@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.truenewx.tnxjee.model.spec.Terminal;
+import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
+import org.truenewx.tnxjee.core.util.CollectionUtil;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjeex.payment.core.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.core.PaymentRequestParameter;
@@ -56,7 +57,7 @@ public class WxpayPaymentGateway extends AbstractPaymentGateway {
 
     @Override
     public PaymentChannel getChannel() {
-        return PaymentChannel.WEIXIN;
+        return PaymentChannel.WECHAT;
     }
 
     @Override
@@ -101,20 +102,21 @@ public class WxpayPaymentGateway extends AbstractPaymentGateway {
     }
 
     @Override
-    public PaymentResult getResult(boolean confirmed, Terminal terminal, Map<String, String> params)
+    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider)
             throws BusinessException {
-        if (confirmed && WxPayConstants.SUCCESS.equals(params.get("return_code"))) {
+        if (WxPayConstants.SUCCESS.equals(notifyDataProvider.getParameter("return_code"))) {
             try {
+                Map<String, String> params = CollectionUtil.toStringMap(notifyDataProvider.getParameters());
                 if (WxPayUtil.isSignatureValid(params, this.wxpay.getConfig().getApiKey(), this.wxpay.getSignType())) {
-                    String gatewayPaymentNo = params.get("transaction_id");
-                    BigDecimal amount = new BigDecimal(params.get("total_fee")).divide(new BigDecimal(100), 2,
-                            RoundingMode.HALF_UP);
-                    String orderNo = params.get("out_trade_no");
+                    String gatewayPaymentNo = notifyDataProvider.getParameter("transaction_id");
+                    BigDecimal amount = new BigDecimal(notifyDataProvider.getParameter("total_fee"))
+                            .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+                    String orderNo = notifyDataProvider.getParameter("out_trade_no");
                     Map<String, String> responseData = new LinkedHashMap<>();
                     responseData.put("return_code", WxPayConstants.SUCCESS);
                     responseData.put("return_msg", "OK");
                     String response = WxPayUtil.mapToXml(responseData);
-                    return new PaymentResult(gatewayPaymentNo, amount, terminal, orderNo, response);
+                    return new PaymentResult(gatewayPaymentNo, orderNo, amount, response);
                 }
             } catch (Exception e) {
                 this.logger.error(e.getMessage(), e);

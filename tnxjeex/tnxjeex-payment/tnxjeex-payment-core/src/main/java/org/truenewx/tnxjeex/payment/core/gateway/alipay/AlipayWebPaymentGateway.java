@@ -31,13 +31,13 @@ public class AlipayWebPaymentGateway extends AlipayPaymentGateway {
 
     @Override
     protected void sign(SortedMap<String, String> params) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Set<Entry<String, String>> entrySet = params.entrySet();
         for (Entry<String, String> entry : entrySet) {
             String k = entry.getKey();
             String v = entry.getValue();
             if (StringUtils.isNotBlank(v) && !"sign".equals(k) && !"key".equals(k) && !"sign_type".equals(k)) {
-                sb.append(k + "=" + v + "&");
+                sb.append(k).append("=").append(v).append("&");
             }
         }
         String sign = EncryptUtil.encryptByMd5(sb.substring(0, sb.lastIndexOf("&")) + this.privateKey);
@@ -46,18 +46,19 @@ public class AlipayWebPaymentGateway extends AlipayPaymentGateway {
     }
 
     @Override
-    protected void validateSign(Map<String, String> params) throws BusinessException {
-        StringBuffer sb = new StringBuffer();
-        Set<Entry<String, String>> entrySet = params.entrySet();
-        for (Entry<String, String> entry : entrySet) {
+    protected void validateSign(Map<String, Object> params) throws BusinessException {
+        StringBuilder sb = new StringBuilder();
+        Set<Entry<String, Object>> entrySet = params.entrySet();
+        for (Entry<String, Object> entry : entrySet) {
             String k = entry.getKey();
-            String v = entry.getValue();
+            String v = entry.getValue().toString();
             if (StringUtils.isNotBlank(v) && !"sign".equals(k) && !"key".equals(k) && !"sign_type".equals(k)) {
-                sb.append(k + "=" + v + "&");
+                sb.append(k).append("=").append(v).append("&");
             }
         }
-        String sign = EncryptUtil.encryptByMd5(sb.substring(0, sb.lastIndexOf("&")) + this.privateKey);
-        if (!sign.equals(params.get("sign").toLowerCase())) {
+        String encryptedSign = EncryptUtil.encryptByMd5(sb.substring(0, sb.lastIndexOf("&")) + this.privateKey);
+        String sign = (String) params.get("sign");
+        if (sign != null && !encryptedSign.equals(sign.toLowerCase())) {
             throw new BusinessException(PaymentExceptionCodes.SIGN_FAIL);
         }
     }

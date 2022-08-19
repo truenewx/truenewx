@@ -1,14 +1,9 @@
 package org.truenewx.tnxjeex.payment.core.gateway.alipay;
 
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
@@ -68,13 +63,13 @@ public class AlipayAppPaymentGateway extends AlipayPaymentGateway {
 
     @Override
     protected void sign(SortedMap<String, String> params) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Set<Entry<String, String>> entrySet = params.entrySet();
         for (Entry<String, String> entry : entrySet) {
             String k = entry.getKey();
             String v = entry.getValue();
             if (StringUtils.isNotBlank(v) && !"sign".equals(k) && !"key".equals(k) && !"sign_type".equals(k)) {
-                sb.append(k + "=\"" + v + "\"&");
+                sb.append(k).append("=\"").append(v).append("\"&");
             }
         }
         try {
@@ -82,26 +77,25 @@ public class AlipayAppPaymentGateway extends AlipayPaymentGateway {
             params.put("sign", sign);
             params.put("sign_type", "RSA");
             params.put("request_content", sb.substring(0, sb.lastIndexOf("&")) + "&sign=\""
-                    + URLEncoder.encode(sign, Strings.ENCODING_UTF8) + "\"" + "&sign_type=\"RSA\"");
+                    + URLEncoder.encode(sign, StandardCharsets.UTF_8) + "\"" + "&sign_type=\"RSA\"");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void validateSign(Map<String, String> params) {
-        StringBuffer sb = new StringBuffer();
+    protected void validateSign(Map<String, Object> params) {
+        StringBuilder sb = new StringBuilder();
         List<String> keys = new ArrayList<>(params.keySet());
         Collections.sort(keys);
-        for (int i = 0; i < keys.size(); i++) {
-            String k = keys.get(i);
-            String v = params.get(k);
+        for (String k : keys) {
+            String v = params.get(k).toString();
             if (StringUtils.isNotBlank(v) && !"sign".equals(k) && !"key".equals(k) && !"sign_type".equals(k)) {
-                sb.append(k + "=" + v + "&");
+                sb.append(k).append("=").append(v).append("&");
             }
         }
 
-        if (!RSA.verify(sb.substring(0, sb.lastIndexOf("&")), params.get("sign"), this.publicKey,
+        if (!RSA.verify(sb.substring(0, sb.lastIndexOf("&")), (String) params.get("sign"), this.publicKey,
                 Strings.ENCODING_UTF8)) {
             throw new BusinessException(PaymentExceptionCodes.SIGN_FAIL);
         }

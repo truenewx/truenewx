@@ -2,8 +2,8 @@ package org.truenewx.tnxjeex.payment.core;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
+import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjeex.payment.core.gateway.PaymentGateway;
 
@@ -42,13 +42,12 @@ public interface PaymentManager {
     /**
      * 通知支付结果
      *
-     * @param gatewayName 支付网关名称
-     * @param confirmed   是否正式通知，false-表示结果展示通知
-     * @param terminal    支付终端
-     * @param params      结果参数集
+     * @param gatewayName        支付网关名称
+     * @param confirmed          是否确认通知，确认通知会触发已支付事件
+     * @param notifyDataProvider 通知数据提供者
      * @return 支付结果
      */
-    PaymentResult notifyResult(String gatewayName, boolean confirmed, Terminal terminal, Map<String, String> params);
+    PaymentResult notifyResult(String gatewayName, boolean confirmed, HttpRequestDataProvider notifyDataProvider);
 
     /**
      * 发起退款请求

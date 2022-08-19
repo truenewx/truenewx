@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
+import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjeex.payment.core.gateway.PaymentGateway;
 import org.truenewx.tnxjeex.payment.core.gateway.PaymentGatewayAdapter;
@@ -40,9 +41,12 @@ public class PaymentManagerImpl implements PaymentManager, ContextInitializedBea
     public List<PaymentGateway> getGateways(Terminal terminal) {
         List<PaymentGateway> gateways = new ArrayList<>();
         for (PaymentGateway gateway : this.gateways.values()) {
-            for (Terminal t : gateway.getTerminals()) {
-                if (t.supports(terminal)) {
-                    gateways.add(gateway);
+            Terminal[] terminals = gateway.getTerminals();
+            if (terminals != null) {
+                for (Terminal t : terminals) {
+                    if (t.supports(terminal)) {
+                        gateways.add(gateway);
+                    }
                 }
             }
         }
@@ -64,14 +68,14 @@ public class PaymentManagerImpl implements PaymentManager, ContextInitializedBea
     }
 
     @Override
-    public PaymentResult notifyResult(String gatewayName, boolean confirmed, Terminal terminal,
-            Map<String, String> params) {
+    public PaymentResult notifyResult(String gatewayName, boolean confirmed,
+            HttpRequestDataProvider notifyDataProvider) {
         PaymentGatewayAdapter adapter = this.gateways.get(gatewayName);
         if (adapter != null) {
-            PaymentResult result = adapter.getResult(confirmed, terminal, params);
-            if (confirmed && result != null && this.listener != null) {
-                this.listener.onPaid(adapter.getChannel(), result.getGatewayPaymentNo(), result.getTerminal(),
-                        result.getOrderNo());
+            PaymentResult result = adapter.getResult(notifyDataProvider);
+            if (confirmed && result != null && result.isSuccessful() && this.listener != null) {
+                this.listener.onPaid(adapter.getChannel(), result.getGatewayPaymentNo(), result.getOrderNo(),
+                        result.getAmount());
             }
             return result;
         }

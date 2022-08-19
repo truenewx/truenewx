@@ -1,9 +1,8 @@
 package org.truenewx.tnxjeex.payment.core.gateway;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
-import org.truenewx.tnxjee.model.spec.Terminal;
+import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjeex.payment.core.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.core.PaymentRequestParameter;
 import org.truenewx.tnxjeex.payment.core.PaymentResult;
@@ -24,14 +23,12 @@ public interface PaymentGatewayAdapter extends PaymentGateway {
     PaymentRequestParameter getRequestParameter(PaymentDefinition definition);
 
     /**
-     * 获取支付结果
+     * 解析支付结果
      *
-     * @param confirmed 是否确认的通知，false-表示结果展示通知
-     * @param terminal  支付终端
-     * @param params    结果参数集
+     * @param notifyDataProvider 通知数据提供者
      * @return 支付结果
      */
-    PaymentResult getResult(boolean confirmed, Terminal terminal, Map<String, String> params);
+    PaymentResult getResult(HttpRequestDataProvider notifyDataProvider);
 
     /**
      * 发起退款请求

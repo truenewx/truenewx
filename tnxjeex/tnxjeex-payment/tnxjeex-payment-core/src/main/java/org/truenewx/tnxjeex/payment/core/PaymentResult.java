@@ -2,7 +2,8 @@ package org.truenewx.tnxjeex.payment.core;
 
 import java.math.BigDecimal;
 
-import org.truenewx.tnxjee.model.spec.Terminal;
+import org.apache.http.HttpStatus;
+
 
 /**
  * 支付结果
@@ -15,49 +16,58 @@ public class PaymentResult {
      */
     private String gatewayPaymentNo;
     /**
-     * 支付金额
-     */
-    private BigDecimal amount;
-    /**
-     * 支付终端类型
-     */
-    private Terminal terminal;
-    /**
      * 订单编号
      */
     private String orderNo;
     /**
-     * 返回给支付网关的响应内容
+     * 支付金额
      */
-    private String response;
+    private BigDecimal amount;
+    /**
+     * 响应状态码
+     */
+    private int responseStatus;
+    /**
+     * 返回给支付网关的响应体内容
+     */
+    private String responseBody;
 
-    public PaymentResult(String gatewayPaymentNo, BigDecimal amount, Terminal terminal,
-            String orderNo, String response) {
+    public PaymentResult(String gatewayPaymentNo, String orderNo, BigDecimal amount, String responseBody) {
         this.gatewayPaymentNo = gatewayPaymentNo;
-        this.amount = amount;
-        this.terminal = terminal;
         this.orderNo = orderNo;
-        this.response = response;
+        this.amount = amount;
+        this.responseStatus = HttpStatus.SC_OK;
+        this.responseBody = responseBody;
+    }
+
+    public PaymentResult(int responseStatus, String responseBody) {
+        assert responseStatus != HttpStatus.SC_OK;
+        this.responseStatus = responseStatus;
+        this.responseBody = responseBody;
     }
 
     public String getGatewayPaymentNo() {
         return this.gatewayPaymentNo;
     }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public Terminal getTerminal() {
-        return this.terminal;
-    }
-
     public String getOrderNo() {
         return this.orderNo;
     }
 
-    public String getResponse() {
-        return this.response;
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public int getResponseStatus() {
+        return this.responseStatus;
+    }
+
+    public String getResponseBody() {
+        return this.responseBody;
+    }
+
+    public boolean isSuccessful() {
+        return this.responseStatus == HttpStatus.SC_OK;
     }
 
 }

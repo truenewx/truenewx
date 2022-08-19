@@ -2,8 +2,9 @@ package org.truenewx.tnxjeex.payment.core.gateway;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.service.spec.region.RegionNationCodes;
 
@@ -23,11 +24,11 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
     private String resultConfirmUrl;
     private String resultShowUrl;
 
-    protected Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LogUtil.getLogger(getClass());
 
     @Override
     public String getName() {
-        return this.name;
+        return StringUtils.isBlank(this.name) ? getChannel().name().toLowerCase() : this.name;
     }
 
     public void setName(String name) {
@@ -85,7 +86,7 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
 
     private String replaceName(String url) {
         if (url != null && url.contains("{name}")) {
-            url = url.replaceAll("\\{name\\}", this.name);
+            url = url.replaceAll("\\{name\\}", getName());
         }
         return url;
     }
@@ -106,6 +107,7 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
     public String requestRefund(String gatewayPaymentNo, BigDecimal paymentAmount, String refundNo,
             String refundAmount) {
         // 默认不支持退款
-        return null;
+        throw new UnsupportedOperationException();
     }
+
 }

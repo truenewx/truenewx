@@ -14,17 +14,9 @@ public enum PaymentChannel {
     @EnumValue("alipay")
     ALIPAY,
 
-    @Caption("财付通")
-    @EnumValue("tenpay")
-    TENPAY,
-
     @Caption("微信支付")
-    @EnumValue("weixin")
-    WEIXIN,
-
-    @Caption("QQ钱包")
-    @EnumValue("qpay")
-    QPAY,
+    @EnumValue("wechat")
+    WECHAT,
 
     @Caption("PayPal")
     @EnumValue("paypal")

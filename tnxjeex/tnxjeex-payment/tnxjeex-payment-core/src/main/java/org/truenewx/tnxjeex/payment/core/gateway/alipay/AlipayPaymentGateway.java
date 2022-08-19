@@ -1,13 +1,14 @@
 package org.truenewx.tnxjeex.payment.core.gateway.alipay;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.core.util.MathUtil;
-import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjeex.payment.core.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.core.PaymentRequestParameter;
@@ -60,19 +61,20 @@ public abstract class AlipayPaymentGateway extends AbstractPaymentGateway {
     protected abstract void sign(SortedMap<String, String> params);
 
     @Override
-    public PaymentResult getResult(boolean confirmed, Terminal terminal, Map<String, String> params) {
+    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider) {
+        Map<String, Object> params = notifyDataProvider.getParameters();
         validateSign(params);
-        String paymentStatus = params.get("trade_status"); // 支付状态
+        String paymentStatus = (String) params.get("trade_status"); // 支付状态
         if ("TRADE_SUCCESS".equals(paymentStatus) || "TRADE_FINISHED".equals(paymentStatus)) { // 支付结果不等于0，支付失败
-            String gatewayPaymentNo = params.get("trade_no"); // 支付交易号
-            String fee = params.get("total_fee"); // 金额，以分为单位
-            BigDecimal amount = new BigDecimal(fee).divide(MathUtil.HUNDRED); // 转换为以元为单位的金额
-            String orderNo = params.get("out_trade_no"); // 商户订单号
-            return new PaymentResult(gatewayPaymentNo, amount, terminal, orderNo, "success");
+            String gatewayPaymentNo = (String) params.get("trade_no"); // 支付交易号
+            String fee = (String) params.get("total_fee"); // 金额，以分为单位
+            BigDecimal amount = new BigDecimal(fee).divide(MathUtil.HUNDRED, RoundingMode.HALF_UP); // 转换为以元为单位的金额
+            String orderNo = (String) params.get("out_trade_no"); // 商户订单号
+            return new PaymentResult(gatewayPaymentNo, orderNo, amount, "success");
         }
         return null; // 状态不为成功，则一律返回null
     }
 
-    protected abstract void validateSign(Map<String, String> params);
+    protected abstract void validateSign(Map<String, Object> params);
 
 }
