@@ -10,7 +10,8 @@
     <packaging>pom</packaging>
     <groupId>org.truenewx.tnxjeex</groupId>
     <modules>
-        <module>tnxjeex-payment-core</module>
+        <module>tnxjeex-payment-model</module>
+        <module>tnxjeex-payment-service</module>
         <module>tnxjeex-payment-web</module>
     </modules>
 </project>

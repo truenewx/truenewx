@@ -110,7 +110,12 @@
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.payment</groupId>
-                <artifactId>tnxjeex-payment-core</artifactId>
+                <artifactId>tnxjeex-payment-model</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.payment</groupId>
+                <artifactId>tnxjeex-payment-service</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
