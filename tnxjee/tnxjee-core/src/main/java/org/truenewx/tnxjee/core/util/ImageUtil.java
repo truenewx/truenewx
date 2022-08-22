@@ -2,6 +2,8 @@ package org.truenewx.tnxjee.core.util;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -401,18 +403,46 @@ public class ImageUtil {
         graphics.dispose();
     }
 
+    /**
+     * 获取指定图片指定格式的输入流。如果图片大小超过1MB，会产生临时文件进行读取
+     *
+     * @param image      图片
+     * @param formatName 格式扩展名，不含.
+     * @return 图片输入流
+     * @throws IOException 如果转换过程出现IO错误
+     */
     public static InputStream getImageInputStream(BufferedImage image, String formatName) throws IOException {
         // 粗略计算图片大致容量，未压缩情况下不超过1MB，则在内存中操作
         long capacity = (long) image.getWidth() * (long) image.getHeight() * 4; // 每个像素用4个字节表示
         if (capacity <= 1024 * 1024) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(image, formatName, out);
-            return new ByteArrayInputStream(out.toByteArray());
+            return toByteArrayInputStream(image, formatName);
         }
         // 否则借助临时文件操作
         File file = new File(IOUtil.getTomcatTempDir(), StringUtil.uuid32() + Strings.DOT + formatName);
         ImageIO.write(image, formatName, file);
         return new FileInputStream(file);
+    }
+
+    /**
+     * 将指定图片按指定格式转换为二进制数组输入流。与 {@link #getImageInputStream} 不同的是，本方法不会产生临时文件，始终在内存中操作，请调用者注意内存占用情况
+     *
+     * @param image      图片
+     * @param formatName 格式扩展名，不含.
+     * @return 二进制数组输入流
+     * @throws IOException 如果转换过程出现IO错误
+     */
+    public static ByteArrayInputStream toByteArrayInputStream(BufferedImage image, String formatName)
+            throws IOException {
+        byte[] bytes;
+        DataBuffer dataBuffer = image.getRaster().getDataBuffer();
+        if (dataBuffer instanceof DataBufferByte) {
+            bytes = ((DataBufferByte) dataBuffer).getData();
+        } else {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(image, formatName, out);
+            bytes = out.toByteArray();
+        }
+        return new ByteArrayInputStream(bytes);
     }
 
     public static BufferedImage newImage(int width, int height, boolean hasAlpha) {

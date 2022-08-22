@@ -47,10 +47,10 @@ public class QrCodeTag extends UiTagSupport {
     @Override
     public void doTag() throws JspException, IOException {
         try {
-            QrCodeGenerator qrCodeGenerator = getBeanFromApplicationContext(QrCodeGenerator.class);
-            String md5 = qrCodeGenerator.generate(this.value, this.size, this.logo);
+            QrCodeGenerator generator = getBeanFromApplicationContext(QrCodeGenerator.class);
+            String name = generator.save(this.value, this.size, this.logo, 0);
             // 输出标签
-            print("<img src=\"", getRequest().getContextPath() + "/qrcode/" + md5, "\"");
+            print("<img src=\"", getRequest().getContextPath() + "/qrcode/" + name, "\"");
             print(joinAttributes());
             print("/>", Strings.ENTER);
         } catch (WriterException e) {
