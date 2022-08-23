@@ -20,10 +20,7 @@ import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.OS;
 import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
-import org.truenewx.tnxjeex.payment.model.PaymentChannel;
-import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
-import org.truenewx.tnxjeex.payment.model.PaymentResult;
+import org.truenewx.tnxjeex.payment.model.*;
 
 /**
  * 支付网关：微信支付
@@ -52,16 +49,16 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(PaymentDefinition definition) {
         Terminal terminal = definition.getTerminal();
         WechatPayProduct product = getProduct(terminal);
         if (product != null) {
-            Map<String, Object> requestParams = new HashMap<>();
-            requestParams.put("mchid", this.client.getMerchantId()); // 商户id
-            requestParams.put("appid", this.client.getAppId()); // 应用id
-            requestParams.put("out_trade_no", definition.getOrderNo()); // 商户订单号
-            requestParams.put("description", definition.getDescription()); // 商品描述
-            requestParams.put("notify_url", getResultConfirmUrl()); // 通知地址
+            Map<String, Object> prepareParams = new HashMap<>();
+            prepareParams.put("mchid", this.client.getMerchantId()); // 商户id
+            prepareParams.put("appid", this.client.getAppId()); // 应用id
+            prepareParams.put("out_trade_no", definition.getOrderNo()); // 商户订单号
+            prepareParams.put("description", definition.getDescription()); // 商品描述
+            prepareParams.put("notify_url", getResultConfirmUrl()); // 通知地址
 
             Map<String, Object> amount = new HashMap<>();
             amount.put("total", definition.getAmount().multiply(BigDecimal.valueOf(100)).intValue()); // 金额
@@ -70,21 +67,21 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
                 currency = Currency.getInstance(Locale.getDefault());
             }
             amount.put("currency", currency.getCurrencyCode()); // 币种
-            requestParams.put("amount", amount);
+            prepareParams.put("amount", amount);
 
             if (product == WechatPayProduct.JSAPI) { // 微信内嵌支付时，用户openId必填
                 Map<String, Object> payer = new HashMap<>();
                 payer.put("openid", definition.getTarget());
-                requestParams.put("payer", payer);
+                prepareParams.put("payer", payer);
             } else if (product == WechatPayProduct.H5) { // 微信外部移动网页支付时，用户终端IP和H5场景类型必填
                 Map<String, Object> scene = new HashMap<>();
                 scene.put("payer_client_ip", definition.getPayerIp());
                 Map<String, Object> h5 = new HashMap<>();
                 h5.put("type", getH5Type(terminal.getOs()));
                 scene.put("h5_info", h5);
-                requestParams.put("scene_info", scene);
+                prepareParams.put("scene_info", scene);
             }
-            return request(product, requestParams);
+            return request(product, prepareParams);
         }
         return null;
     }
@@ -118,30 +115,30 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
         return "Wap";
     }
 
-    private PaymentRequestParameter request(WechatPayProduct product, Map<String, Object> requestParams) {
+    private PaymentRequest request(WechatPayProduct product, Map<String, Object> prepareParams) {
         try {
             String uri = TRANS_URL_PREFIX + product.name().toLowerCase();
-            HttpResponse response = this.client.post(uri, requestParams);
+            HttpResponse response = this.client.post(uri, prepareParams);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_ACCEPTED) { // 202，服务器已接受请求，但尚未处理；使用原参数重复请求一遍
-                return request(product, requestParams);
+                return request(product, prepareParams);
             }
             String responseJson = EntityUtils.toString(response.getEntity());
             Map<String, Object> responseData = JsonUtil.json2Map(responseJson);
             if (statusCode == HttpStatus.SC_OK) {
                 if (product == WechatPayProduct.NATIVE) {
-                    PaymentRequestParameter result = new PaymentRequestParameter();
-                    result.setUrl((String) responseData.get("code_url"));
-                    return result;
+                    String url = (String) responseData.get("code_url");
+                    return new PaymentRequest(url, PaymentRequestMode.QRCODE, null);
                 }
-                Map<String, String> callParams = new LinkedHashMap<>();
-                callParams.put("appId", this.client.getAppId());
-                callParams.put("timeStamp", String.valueOf(System.currentTimeMillis() / 1000));
-                callParams.put("nonceStr", StringUtil.uuid32());
-                callParams.put("package", "prepay_id=" + responseData.get("prepay_id"));
-                callParams.put("paySign", generateSignature(callParams.values(), this.client.getCertPrivateKey()));
-                callParams.put("signType", "RSA"); // 不参与签名
-                return new PaymentRequestParameter(callParams);
+                Map<String, String> requestParams = new LinkedHashMap<>();
+                requestParams.put("appId", this.client.getAppId());
+                requestParams.put("timeStamp", String.valueOf(System.currentTimeMillis() / 1000));
+                requestParams.put("nonceStr", StringUtil.uuid32());
+                requestParams.put("package", "prepay_id=" + responseData.get("prepay_id"));
+                requestParams.put("paySign",
+                        generateSignature(requestParams.values(), this.client.getCertPrivateKey()));
+                requestParams.put("signType", "RSA"); // 不参与签名
+                return new PaymentRequest(null, PaymentRequestMode.GET, requestParams);
             }
             String errorMessage = (String) responseData.get("message");
             throw new RuntimeException(errorMessage);
@@ -171,7 +168,7 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider) {
+    public PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider) {
         try {
             String certSerialNo = notifyDataProvider.getHeader("Wechatpay-Serial");
             Certificate platformCert = this.platformCertManager.getCert(certSerialNo);

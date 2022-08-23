@@ -14,7 +14,7 @@ import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
 
 /**
@@ -26,7 +26,7 @@ import org.truenewx.tnxjeex.payment.model.PaymentResult;
 public class PaymentManagerImpl implements PaymentManager, ContextInitializedBean {
 
     private Map<String, PaymentGatewayAdapter> gateways = new HashMap<>();
-    @Autowired(required = false)
+    @Autowired // 必须有侦听器实现，否则支付业务一定不完整
     private PaymentListener listener;
 
     @Override
@@ -60,10 +60,10 @@ public class PaymentManagerImpl implements PaymentManager, ContextInitializedBea
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(String gatewayName, PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(String gatewayName, PaymentDefinition definition) {
         PaymentGatewayAdapter adapter = this.gateways.get(gatewayName);
         if (adapter != null) {
-            return adapter.getRequestParameter(definition);
+            return adapter.prepareRequest(definition);
         }
         return null;
     }
@@ -73,8 +73,8 @@ public class PaymentManagerImpl implements PaymentManager, ContextInitializedBea
             HttpRequestDataProvider notifyDataProvider) {
         PaymentGatewayAdapter adapter = this.gateways.get(gatewayName);
         if (adapter != null) {
-            PaymentResult result = adapter.getResult(notifyDataProvider);
-            if (confirmed && result != null && result.isSuccessful() && this.listener != null) {
+            PaymentResult result = adapter.parseResult(notifyDataProvider);
+            if (confirmed && result != null && result.isSuccessful()) {
                 this.listener.onPaid(adapter.getChannel(), result.getGatewayPaymentNo(), result.getOrderNo(),
                         result.getAmount());
             }

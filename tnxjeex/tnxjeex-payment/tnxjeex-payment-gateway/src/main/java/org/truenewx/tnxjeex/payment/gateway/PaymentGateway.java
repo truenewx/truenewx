@@ -19,8 +19,6 @@ public interface PaymentGateway extends Named {
 
     Terminal[] getTerminals();
 
-    String getLogoUrl();
-
     boolean isRefundable();
 
 }

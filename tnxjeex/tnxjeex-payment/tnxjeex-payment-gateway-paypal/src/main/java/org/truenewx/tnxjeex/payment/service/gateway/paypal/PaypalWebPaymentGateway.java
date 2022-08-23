@@ -6,10 +6,8 @@ import java.util.List;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Program;
-import org.truenewx.tnxjeex.payment.model.PaymentChannel;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
-import org.truenewx.tnxjeex.payment.model.PaymentResult;
+import org.truenewx.tnxjeex.payment.model.*;
 
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
@@ -32,7 +30,7 @@ public class PaypalWebPaymentGateway extends PaypalPaymentGateway {
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(PaymentDefinition definition) {
         // 建立金额与币种
         Amount amountDetail = new Amount();
         amountDetail.setCurrency(definition.getCurrency().toString());
@@ -60,14 +58,12 @@ public class PaypalWebPaymentGateway extends PaypalPaymentGateway {
         try {
             APIContext apiContext = new APIContext(getClientId(), getClientSecret(), getMode());
             Payment createdPayment = payment.create(apiContext);
-            PaymentRequestParameter parameter = new PaymentRequestParameter();
-            parameter.setSelfTarget(true);
             for (Links links : createdPayment.getLinks()) {
                 if ("approval_url".equals(links.getRel())) {
-                    parameter.setUrl(links.getHref());
+                    String url = links.getHref();
+                    return new PaymentRequest(url, PaymentRequestMode.GET, null);
                 }
             }
-            return parameter;
         } catch (PayPalRESTException e) {
             this.logger.error(e.getMessage(), e);
         }
@@ -75,7 +71,7 @@ public class PaypalWebPaymentGateway extends PaypalPaymentGateway {
     }
 
     @Override
-    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider) {
+    public PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider) {
         Payment payment = new Payment();
         payment.setId(notifyDataProvider.getParameter("paymentId"));
         PaymentExecution paymentExecution = new PaymentExecution();

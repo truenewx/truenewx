@@ -11,10 +11,7 @@ import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
-import org.truenewx.tnxjeex.payment.model.PaymentChannel;
-import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
-import org.truenewx.tnxjeex.payment.model.PaymentResult;
+import org.truenewx.tnxjeex.payment.model.*;
 
 /**
  * 支付网关：支付宝
@@ -35,7 +32,7 @@ public abstract class AlipayPaymentGateway extends AbstractPaymentGateway {
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(PaymentDefinition definition) {
         SortedMap<String, String> params = new TreeMap<>();
         params.put("service", "create_direct_pay_by_user");
         params.put("partner", this.partner);
@@ -48,20 +45,17 @@ public abstract class AlipayPaymentGateway extends AbstractPaymentGateway {
         }
         params.put("out_trade_no", definition.getOrderNo());
         params.put("total_fee", definition.getAmount().toString());
-        // String body =
-        // this.messageSource.getMessage("info.payment.body",
-        // new String[] { description }, Locale.getDefault());
         params.put("subject", definition.getDescription());
         params.put("body", definition.getDescription());
 
         sign(params);
-        return new PaymentRequestParameter(params);
+        return new PaymentRequest(null, PaymentRequestMode.GET, params);
     }
 
     protected abstract void sign(SortedMap<String, String> params);
 
     @Override
-    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider) {
+    public PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider) {
         Map<String, Object> params = notifyDataProvider.getParameters();
         validateSign(params);
         String paymentStatus = (String) params.get("trade_status"); // 支付状态

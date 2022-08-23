@@ -5,7 +5,7 @@ import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjeex.payment.model.PaymentChannel;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
 
 import com.paypal.api.payments.Payment;
@@ -29,12 +29,12 @@ public class PaypalAppPaymentGateway extends PaypalPaymentGateway {
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(PaymentDefinition definition) {
         return null;
     }
 
     @Override
-    public PaymentResult getResult(HttpRequestDataProvider notifyDataProvider) {
+    public PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider) {
         APIContext apiContext = new APIContext(getClientId(), getClientSecret(), getMode());
         String paymentId = notifyDataProvider.getParameter("paymentId");
         try {

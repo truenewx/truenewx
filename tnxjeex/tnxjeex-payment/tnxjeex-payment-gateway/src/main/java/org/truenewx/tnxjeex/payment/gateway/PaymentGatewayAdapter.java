@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
 
 /**
@@ -15,12 +15,12 @@ import org.truenewx.tnxjeex.payment.model.PaymentResult;
 public interface PaymentGatewayAdapter extends PaymentGateway {
 
     /**
-     * 获取向支付网关发起支付请求所需的参数集
+     * 预处理支付请求
      *
      * @param definition 支付定义
-     * @return 支付请求参数集
+     * @return 支付请求
      */
-    PaymentRequestParameter getRequestParameter(PaymentDefinition definition);
+    PaymentRequest prepareRequest(PaymentDefinition definition);
 
     /**
      * 解析支付结果
@@ -28,7 +28,7 @@ public interface PaymentGatewayAdapter extends PaymentGateway {
      * @param notifyDataProvider 通知数据提供者
      * @return 支付结果
      */
-    PaymentResult getResult(HttpRequestDataProvider notifyDataProvider);
+    PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider);
 
     /**
      * 发起退款请求

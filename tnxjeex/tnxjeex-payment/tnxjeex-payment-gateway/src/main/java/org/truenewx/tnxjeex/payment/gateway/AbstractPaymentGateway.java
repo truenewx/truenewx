@@ -19,7 +19,6 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
     private boolean active;
     private String nationCode = RegionNationCodes.CHINA;
     private Terminal[] terminals;
-    private String logoUrl;
     private boolean refundable;
     private String resultConfirmUrl;
     private String resultShowUrl;
@@ -60,15 +59,6 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
 
     public void setTerminals(Terminal... terminals) {
         this.terminals = terminals;
-    }
-
-    @Override
-    public String getLogoUrl() {
-        return this.logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
     }
 
     @Override

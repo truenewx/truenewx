@@ -6,7 +6,7 @@ import java.util.List;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
 
 /**
@@ -33,13 +33,13 @@ public interface PaymentManager {
     PaymentGateway getGateway(String gatewayName);
 
     /**
-     * 获取向支付网关发起支付请求所需的参数
+     * 预处理支付请求
      *
      * @param gatewayName 支付网关名称
      * @param definition  支付定义
-     * @return 支付请求参数集
+     * @return 支付请求
      */
-    PaymentRequestParameter getRequestParameter(String gatewayName, PaymentDefinition definition);
+    PaymentRequest prepareRequest(String gatewayName, PaymentDefinition definition);
 
     /**
      * 通知支付结果

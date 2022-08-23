@@ -13,15 +13,15 @@ import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.servlet.http.HttpServletRequestDataProvider;
 import org.truenewx.tnxjeex.payment.gateway.PaymentManager;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
 
 /**
- * 抽象的支付控制器
+ * 支付控制器支持
  *
  * @author jianglei
  */
-public abstract class AbstractPayController {
+public abstract class PayControllerSupport {
 
     @Autowired
     protected PaymentManager paymentManager;
@@ -29,9 +29,9 @@ public abstract class AbstractPayController {
     // 不配置权限限定，必须子类覆写进行限定
     @PostMapping("/prepare/{gatewayName}")
     @ResponseBody
-    public PaymentRequestParameter prepare(@PathVariable("gatewayName") String gatewayName,
+    public PaymentRequest prepare(@PathVariable("gatewayName") String gatewayName,
             @RequestBody PaymentDefinition definition) {
-        return this.paymentManager.getRequestParameter(gatewayName, definition);
+        return this.paymentManager.prepareRequest(gatewayName, definition);
     }
 
     @RequestMapping(value = "/result/confirm/{gatewayName}")

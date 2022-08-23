@@ -13,7 +13,8 @@ import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.region.RegionNationCodes;
 import org.truenewx.tnxjeex.payment.gateway.PaymentExceptionCodes;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
-import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
+import org.truenewx.tnxjeex.payment.model.PaymentRequest;
+import org.truenewx.tnxjeex.payment.model.PaymentRequestMode;
 
 /**
  * 支付宝APP支付网关
@@ -38,7 +39,7 @@ public class AlipayAppPaymentGateway extends AlipayPaymentGateway {
     }
 
     @Override
-    public PaymentRequestParameter getRequestParameter(PaymentDefinition definition) {
+    public PaymentRequest prepareRequest(PaymentDefinition definition) {
         SortedMap<String, String> params = new TreeMap<>();
         params.put("_input_charset", Strings.ENCODING_UTF8.toLowerCase());
         params.put("appenv", definition.getTerminal().getOs().toString().toLowerCase());
@@ -58,7 +59,7 @@ public class AlipayAppPaymentGateway extends AlipayPaymentGateway {
         params.put("subject", definition.getDescription());
         params.put("total_fee", definition.getAmount().toString());
         sign(params);
-        return new PaymentRequestParameter(params);
+        return new PaymentRequest(null, PaymentRequestMode.GET, params);
     }
 
     @Override
