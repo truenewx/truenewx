@@ -1,29 +1,39 @@
 package org.truenewx.tnxjeex.payment.service.gateway.alipay;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
-import org.truenewx.tnxjee.core.util.MathUtil;
+import org.truenewx.tnxjee.core.util.JsonUtil;
+import org.truenewx.tnxjee.model.spec.Terminal;
+import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
 import org.truenewx.tnxjeex.payment.model.*;
+
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.AlipayConfig;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradePagePayResponse;
 
 /**
  * 支付网关：支付宝
  *
  * @author jianglei
  */
-public abstract class AlipayPaymentGateway extends AbstractPaymentGateway {
+public class AlipayPaymentGateway extends AbstractPaymentGateway {
 
-    public String partner;
+    private AlipayClient client;
+    private boolean needEncrypt;
 
-    public void setPartner(String partner) {
-        this.partner = partner;
+    public AlipayPaymentGateway(AlipayConfig config) throws AlipayApiException {
+        this.client = new DefaultAlipayClient(config);
+        this.needEncrypt = config.getEncryptKey() != null;
     }
 
     @Override
@@ -33,42 +43,78 @@ public abstract class AlipayPaymentGateway extends AbstractPaymentGateway {
 
     @Override
     public PaymentRequest prepareRequest(PaymentDefinition definition) {
-        SortedMap<String, String> params = new TreeMap<>();
-        params.put("service", "create_direct_pay_by_user");
-        params.put("partner", this.partner);
-        params.put("seller_id", this.partner);
-        params.put("_input_charset", Strings.ENCODING_UTF8.toLowerCase());
-        params.put("payment_type", "1");
-        params.put("notify_url", getResultConfirmUrl());
-        if (definition.getTerminal().getProgram() == Program.WEB) { // 网页才需要提供结果展示页URL
-            params.put("return_url", getResultShowUrl());
+        Terminal terminal = definition.getTerminal();
+        Program program = terminal.getProgram();
+        Device device = terminal.getDevice();
+        try {
+            if (program == Program.WEB) {
+                if (device == Device.PC) { // 电脑网站支付
+                    AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
+                    request.setNeedEncrypt(this.needEncrypt);
+                    request.setNotifyUrl(getResultConfirmUrl());
+                    request.setReturnUrl(getResultShowUrl());
+                    Map<String, Object> prepareParams = new HashMap<>();
+                    prepareParams.put("out_trade_no", definition.getOrderNo());
+                    prepareParams.put("total_amount", definition.getAmount().doubleValue());
+                    prepareParams.put("subject", definition.getDescription());
+                    prepareParams.put("product_code", "FAST_INSTANT_TRADE_PAY");
+                    request.setBizContent(JsonUtil.toJson(prepareParams));
+                    AlipayTradePagePayResponse response = this.client.pageExecute(request);
+                    if (response.isSuccess()) {
+                        String body = response.getBody();
+                        // 由于action属性值中存在未转义的&符号，xml无法正确解析，而biz_content中又存在包含&的转义符，无法转义后再反转，
+                        // 此处通过简单字符串解析
+                        int formIndex = body.indexOf("<form ");
+                        String url = getAttributeValue(body, formIndex, "action");
+                        String method = getAttributeValue(body, formIndex, "method").toUpperCase();
+                        PaymentRequestMode mode = PaymentRequestMode.valueOf(method);
+                        int inputIndex = body.indexOf(Strings.GREATER_THAN, formIndex) + 1;
+                        String inputString = body.substring(inputIndex, body.indexOf("</form>")).trim();
+                        String[] inputs = inputString.split(Strings.ENTER);
+                        Map<String, String> params = new HashMap<>();
+                        for (String input : inputs) {
+                            String name = getAttributeValue(input, 0, "name");
+                            if (name != null) {
+                                String value = getAttributeValue(input, 0, "value");
+                                if (value != null) {
+                                    params.put(name, value);
+                                }
+                            }
+                        }
+                        return new PaymentRequest(url, mode, params);
+                    }
+                } else { // 手机网站支付（含平板）
+                    AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
+                    request.setNotifyUrl(getResultConfirmUrl());
+                    request.setReturnUrl(getResultShowUrl());
+                    // TODO
+                }
+            } else if (program == Program.NATIVE) { // APP支付
+                AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
+                request.setNotifyUrl(getResultConfirmUrl());
+                request.setReturnUrl(getResultShowUrl());
+                // TODO
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        params.put("out_trade_no", definition.getOrderNo());
-        params.put("total_fee", definition.getAmount().toString());
-        params.put("subject", definition.getDescription());
-        params.put("body", definition.getDescription());
-
-        sign(params);
-        return new PaymentRequest(null, PaymentRequestMode.GET, params);
+        return null;
     }
 
-    protected abstract void sign(SortedMap<String, String> params);
+    private String getAttributeValue(String xml, int fromIndex, String attributeName) {
+        String prefix = attributeName + Strings.EQUAL + Strings.DOUBLE_QUOTES;
+        int attrIndex = xml.indexOf(prefix, fromIndex);
+        if (attrIndex >= 0) {
+            attrIndex += prefix.length();
+            int quotesIndex = xml.indexOf(Strings.DOUBLE_QUOTES, attrIndex);
+            return xml.substring(attrIndex, quotesIndex);
+        }
+        return null;
+    }
 
     @Override
     public PaymentResult parseResult(HttpRequestDataProvider notifyDataProvider) {
-        Map<String, Object> params = notifyDataProvider.getParameters();
-        validateSign(params);
-        String paymentStatus = (String) params.get("trade_status"); // 支付状态
-        if ("TRADE_SUCCESS".equals(paymentStatus) || "TRADE_FINISHED".equals(paymentStatus)) { // 支付结果不等于0，支付失败
-            String gatewayPaymentNo = (String) params.get("trade_no"); // 支付交易号
-            String fee = (String) params.get("total_fee"); // 金额，以分为单位
-            BigDecimal amount = new BigDecimal(fee).divide(MathUtil.HUNDRED, RoundingMode.HALF_UP); // 转换为以元为单位的金额
-            String orderNo = (String) params.get("out_trade_no"); // 商户订单号
-            return new PaymentResult(gatewayPaymentNo, orderNo, amount, "success");
-        }
-        return null; // 状态不为成功，则一律返回null
+        return null;
     }
-
-    protected abstract void validateSign(Map<String, Object> params);
 
 }
