@@ -115,7 +115,22 @@
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.payment</groupId>
-                <artifactId>tnxjeex-payment-service</artifactId>
+                <artifactId>tnxjeex-payment-gateway</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.payment</groupId>
+                <artifactId>tnxjeex-payment-gateway-alipay</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.payment</groupId>
+                <artifactId>tnxjeex-payment-gateway-paypal</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.payment</groupId>
+                <artifactId>tnxjeex-payment-gateway-wechat</artifactId>
                 <version>${truenewx.version}</version>
             </dependency>
             <dependency>
@@ -152,6 +167,11 @@
                 <groupId>fr.opensagres.xdocreport</groupId>
                 <artifactId>fr.opensagres.poi.xwpf.converter.xhtml</artifactId>
                 <version>2.0.3</version>
+            </dependency>
+            <dependency>
+            	<groupId>com.alipay.sdk</groupId>
+            	<artifactId>alipay-sdk-java</artifactId>
+            	<version>4.33.12.ALL</version>
             </dependency>
             <dependency>
             	<groupId>com.github.wechatpay-apiv3</groupId>

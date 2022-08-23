@@ -11,7 +11,10 @@
     <groupId>org.truenewx.tnxjeex</groupId>
     <modules>
         <module>tnxjeex-payment-model</module>
-        <module>tnxjeex-payment-service</module>
+        <module>tnxjeex-payment-gateway</module>
+        <module>tnxjeex-payment-gateway-alipay</module>
+        <module>tnxjeex-payment-gateway-paypal</module>
+        <module>tnxjeex-payment-gateway-wechat</module>
         <module>tnxjeex-payment-web</module>
     </modules>
 </project>
