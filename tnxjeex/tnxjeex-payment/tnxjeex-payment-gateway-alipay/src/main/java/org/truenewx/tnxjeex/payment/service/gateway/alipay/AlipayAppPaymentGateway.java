@@ -11,9 +11,9 @@ import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.spec.region.RegionNationCodes;
+import org.truenewx.tnxjeex.payment.gateway.PaymentExceptionCodes;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
-import org.truenewx.tnxjeex.payment.service.PaymentExceptionCodes;
 
 /**
  * 支付宝APP支付网关

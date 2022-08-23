@@ -10,7 +10,7 @@ import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Program;
 import org.truenewx.tnxjee.service.exception.BusinessException;
-import org.truenewx.tnxjeex.payment.service.PaymentExceptionCodes;
+import org.truenewx.tnxjeex.payment.gateway.PaymentExceptionCodes;
 
 /**
  * 支付宝网页支付网关

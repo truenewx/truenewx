@@ -10,11 +10,11 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.model.spec.enums.Program;
+import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
 import org.truenewx.tnxjeex.payment.model.PaymentChannel;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
-import org.truenewx.tnxjeex.payment.service.gateway.AbstractPaymentGateway;
 
 /**
  * 支付网关：支付宝

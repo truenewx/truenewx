@@ -19,11 +19,11 @@ import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.OS;
+import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
 import org.truenewx.tnxjeex.payment.model.PaymentChannel;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
-import org.truenewx.tnxjeex.payment.service.gateway.AbstractPaymentGateway;
 
 /**
  * 支付网关：微信支付

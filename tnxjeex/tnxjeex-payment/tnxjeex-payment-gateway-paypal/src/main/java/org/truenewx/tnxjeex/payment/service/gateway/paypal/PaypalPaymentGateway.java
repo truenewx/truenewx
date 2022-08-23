@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.MathUtil;
+import org.truenewx.tnxjeex.payment.gateway.AbstractPaymentGateway;
 import org.truenewx.tnxjeex.payment.model.PaymentChannel;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
-import org.truenewx.tnxjeex.payment.service.gateway.AbstractPaymentGateway;
 
 import com.paypal.api.payments.*;
 

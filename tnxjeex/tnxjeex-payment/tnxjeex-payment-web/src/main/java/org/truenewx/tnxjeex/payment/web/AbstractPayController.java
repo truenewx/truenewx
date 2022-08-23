@@ -11,10 +11,10 @@ import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
 import org.truenewx.tnxjee.webmvc.servlet.http.HttpServletRequestDataProvider;
+import org.truenewx.tnxjeex.payment.gateway.PaymentManager;
 import org.truenewx.tnxjeex.payment.model.PaymentDefinition;
 import org.truenewx.tnxjeex.payment.model.PaymentRequestParameter;
 import org.truenewx.tnxjeex.payment.model.PaymentResult;
-import org.truenewx.tnxjeex.payment.service.PaymentManager;
 
 /**
  * 抽象的支付控制器
