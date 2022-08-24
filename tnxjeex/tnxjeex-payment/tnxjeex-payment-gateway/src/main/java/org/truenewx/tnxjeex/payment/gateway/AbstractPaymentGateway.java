@@ -16,6 +16,7 @@ import org.truenewx.tnxjee.service.spec.region.RegionNationCodes;
 public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
 
     private String name;
+    private int order;
     private boolean active;
     private String nationCode = RegionNationCodes.CHINA;
     private Terminal[] terminals;
@@ -32,6 +33,15 @@ public abstract class AbstractPaymentGateway implements PaymentGatewayAdapter {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

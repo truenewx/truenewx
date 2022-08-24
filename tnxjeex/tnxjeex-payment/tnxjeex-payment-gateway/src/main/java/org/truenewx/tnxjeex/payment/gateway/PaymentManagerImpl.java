@@ -1,13 +1,11 @@
 package org.truenewx.tnxjeex.payment.gateway;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
@@ -51,6 +49,7 @@ public class PaymentManagerImpl implements PaymentManager, ContextInitializedBea
                 }
             }
         }
+        gateways.sort(Comparator.comparingInt(Ordered::getOrder));
         return gateways;
     }
 

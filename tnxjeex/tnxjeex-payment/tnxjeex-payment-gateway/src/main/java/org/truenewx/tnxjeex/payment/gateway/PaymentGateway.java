@@ -1,5 +1,6 @@
 package org.truenewx.tnxjeex.payment.gateway;
 
+import org.springframework.core.Ordered;
 import org.truenewx.tnxjee.core.spec.Named;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjeex.payment.model.PaymentChannel;
@@ -9,7 +10,7 @@ import org.truenewx.tnxjeex.payment.model.PaymentChannel;
  *
  * @author jianglei
  */
-public interface PaymentGateway extends Named {
+public interface PaymentGateway extends Named, Ordered {
 
     boolean isActive();
 
