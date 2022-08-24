@@ -48,10 +48,16 @@ public abstract class PayControllerSupport {
         return Strings.EMPTY;
     }
 
+    @RequestMapping(value = "/result/show/{gatewayName}")
+    @ConfigAnonymous
+    public ModelAndView showResult(@PathVariable("gatewayName") String gatewayName, HttpServletRequest request) {
+        return showResult(gatewayName, null, request);
+    }
+
     @RequestMapping(value = "/result/show/{gatewayName}/{terminal}")
     @ConfigAnonymous
     public ModelAndView showResult(@PathVariable("gatewayName") String gatewayName,
-            @PathVariable(value = "terminal", required = false) String terminal, HttpServletRequest request) {
+            @PathVariable("terminal") String terminal, HttpServletRequest request) {
         HttpRequestDataProvider notifyDataProvider = new HttpServletRequestDataProvider(request);
         PaymentResult result = this.paymentManager.notifyResult(gatewayName, false, notifyDataProvider);
         return resolveShowResult(request, result, Terminal.of(terminal));
