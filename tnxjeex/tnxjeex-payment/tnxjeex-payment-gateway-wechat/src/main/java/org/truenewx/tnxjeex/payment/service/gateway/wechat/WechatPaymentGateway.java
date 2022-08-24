@@ -195,7 +195,7 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
                     Map<String, Object> amount = (Map<String, Object>) resource.get("amount");
                     BigDecimal amountTotal = new BigDecimal((Integer) amount.get("total"))
                             .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
-                    return new PaymentResult(gatewayPaymentNo, orderNo, amountTotal, Strings.EMPTY);
+                    return new PaymentResult(orderNo, gatewayPaymentNo, amountTotal, Strings.EMPTY);
                 }
             }
         } catch (Exception e) {

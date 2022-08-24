@@ -134,14 +134,14 @@ public class AlipayPaymentGateway extends AbstractPaymentGateway {
         String signType = this.config.getSignType();
         try {
             if (AlipaySignature.rsaCheckV1(params, this.config.getAlipayPublicKey(), charset, signType)) {
-                String gatewayPaymentNo = params.get("trade_no");
                 String orderNo = params.get("out_trade_no");
-                BigDecimal amount = MathUtil.parseDecimal(params.get("total_amount"));
                 String tradeStatus = params.get("trade_status");
                 if (tradeStatus == null) { // 结果展示时交易状态为null
-                    return new PaymentResult(gatewayPaymentNo, orderNo, amount, null);
+                    return new PaymentResult(orderNo, null, null, null);
                 } else if ("TRADE_SUCCESS".equals(tradeStatus)) { // 结果通知时交易状态不为null
-                    return new PaymentResult(gatewayPaymentNo, orderNo, amount, "success");
+                    String gatewayPaymentNo = params.get("trade_no");
+                    BigDecimal amount = MathUtil.parseDecimal(params.get("total_amount"));
+                    return new PaymentResult(orderNo, gatewayPaymentNo, amount, "success");
                 }
             }
         } catch (Exception e) {

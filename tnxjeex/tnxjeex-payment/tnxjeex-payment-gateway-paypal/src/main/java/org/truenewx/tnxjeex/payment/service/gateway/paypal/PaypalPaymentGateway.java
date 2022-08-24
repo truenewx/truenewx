@@ -62,7 +62,7 @@ public abstract class PaypalPaymentGateway extends AbstractPaymentGateway {
             Item item = transaction.getItemList().getItems().get(0);
             String orderNo = item.getSku();
 
-            return new PaymentResult(gatewayPaymentNo, orderNo, amount, Strings.EMPTY);
+            return new PaymentResult(orderNo, gatewayPaymentNo, amount, Strings.EMPTY);
         }
         return null;
     }
