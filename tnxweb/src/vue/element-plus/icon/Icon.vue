@@ -5,6 +5,7 @@
         <ArrowLeft v-else-if="value === 'ArrowLeft'"/>
         <ArrowLeftBold v-else-if="value === 'ArrowLeftBold'"/>
         <ArrowRight v-else-if="value === 'ArrowRight'"/>
+        <ArrowRightBold v-else-if="value === 'ArrowRightBold'"/>
         <Bottom v-else-if="value === 'Bottom'"/>
         <CaretBottom v-else-if="value === 'CaretBottom'"/>
         <CaretTop v-else-if="value === 'CaretTop'"/>
@@ -54,6 +55,7 @@ import {
     ArrowLeft,
     ArrowLeftBold,
     ArrowRight,
+    ArrowRightBold,
     Bottom,
     CaretBottom,
     CaretTop,
@@ -102,6 +104,7 @@ const components = {
     ArrowLeft,
     ArrowLeftBold,
     ArrowRight,
+    ArrowRightBold,
     Bottom,
     CaretBottom,
     CaretTop,
