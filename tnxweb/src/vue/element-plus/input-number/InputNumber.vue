@@ -1,6 +1,6 @@
 <template>
     <div class="tnxel-input-number" :class="containerClassObject">
-        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-right-0': suffix}"
+        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-end-0': suffix}"
             v-model="model"
             :min="min" :max="max"
             :controls="controls" controls-position="right"
@@ -111,5 +111,16 @@ export default {
 
 .tnxel-input-number .el-input-number .el-input__wrapper .el-input__suffix {
     display: none;
+}
+
+.tnxel-input-number .el-input-number.rounded-end-0 .el-input__wrapper {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.tnxel-input-number .el-input-group__append {
+    border: 1px solid var(--el-border-color);
+    border-left: none;
+    line-height: 1;
 }
 </style>
