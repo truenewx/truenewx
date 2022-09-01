@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -484,9 +483,25 @@ public class CollectionUtil {
         return -1;
     }
 
+    /**
+     * 逐一转换指定清单中的元素组成新的清单
+     *
+     * @param list   转换前的清单
+     * @param mapper 转换函数，返回null将不纳入结果清单中
+     * @param <T>    来源元素类型
+     * @param <R>    结果元素类型
+     * @return 转换后的清单
+     */
     public static <T, R> List<R> map(List<T> list, Function<? super T, ? extends R> mapper) {
         if (list != null) {
-            return list.stream().map(mapper).collect(Collectors.toList());
+            List<R> result = new ArrayList<>();
+            for (T t : list) {
+                R r = mapper.apply(t);
+                if (r != null) {
+                    result.add(r);
+                }
+            }
+            return result;
         }
         return null;
     }
