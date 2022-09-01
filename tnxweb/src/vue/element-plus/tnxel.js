@@ -232,7 +232,6 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
             type: 'warning',
             confirmButtonText: '确定',
         }, options);
-        this._closeMessage();
         ElMessageBox.alert(message, title, options).then(callback);
         this._handleZIndex('.el-message-box__wrapper:last');
     },
@@ -243,7 +242,6 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
             type: 'success',
             confirmButtonText: '确定',
         });
-        this._closeMessage();
         ElMessageBox.alert(message, '成功', options).then(callback);
         this._handleZIndex('.el-message-box__wrapper:last');
     },
@@ -254,7 +252,6 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
             type: 'error',
             confirmButtonText: '确定',
         });
-        this._closeMessage();
         ElMessageBox.alert(message, '错误', options).then(callback);
         this._handleZIndex('.el-message-box__wrapper:last');
     },
@@ -293,7 +290,6 @@ const tnxel = Object.assign({}, tnxbs, tnxvue, {
                 callback(yes);
             }
         }
-        this._closeMessage();
         ElMessageBox.confirm(message, title, options);
         this._handleZIndex('.el-message-box__wrapper:last');
     },
