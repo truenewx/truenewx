@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjeex.notice.model.sms.SmsNotifyResult;
 import org.truenewx.tnxjeex.notice.service.sms.content.SmsContentProvider;
@@ -35,6 +38,7 @@ public class SmsNotifierImpl implements SmsNotifier, ContextInitializedBean {
     private ExecutorService executorService;
     @Value("${tnxjeex.notice.sms.disabled}")
     private boolean disabled;
+    private Logger logger = LogUtil.getLogger(getClass());
 
     @Override
     public void afterInitialized(ApplicationContext context) throws Exception {
@@ -111,8 +115,12 @@ public class SmsNotifierImpl implements SmsNotifier, ContextInitializedBean {
 
                     String signName = contentProvider.getSignName(locale);
                     int maxCount = contentProvider.getMaxCount();
-                    SmsNotifyResult result = contentSender
-                            .send(signName, content, maxCount, this.disabled ? new String[0] : cellphones);
+                    SmsNotifyResult result = contentSender.send(signName, content, maxCount,
+                            this.disabled ? new String[0] : cellphones);
+                    if (this.disabled) {
+                        this.logger.debug("====== Sms has been sent to {}: [{}]{}",
+                                StringUtils.join(cellphones, Strings.COMMA), signName, content);
+                    }
                     putSendableInstants(contentSender, cellphones);
                     // 添加不是手机号码的错误
                     notCellphones.forEach(cellphone -> {
