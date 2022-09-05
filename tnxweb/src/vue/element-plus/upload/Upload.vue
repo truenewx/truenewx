@@ -819,6 +819,10 @@ export default {
     margin: 0 0.25rem;
 }
 
+.el-form-item__content .tnxel-upload-container ul {
+    padding-left: 0;
+}
+
 .el-dropdown-menu__item .tnxel-upload-container {
     width: 100%;
 }
