@@ -123,6 +123,9 @@ export default {
     },
     request(url, options) {
         const config = {
+            headers: {
+                'Original-Page': window.location.href, // 用于登录失效时，跳转到登录页重新登录后，返回当前所在页
+            },
             referer: url,
             method: options.method,
             params: options.params,

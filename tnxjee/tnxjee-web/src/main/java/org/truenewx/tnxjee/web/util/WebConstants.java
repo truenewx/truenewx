@@ -33,6 +33,10 @@ public class WebConstants {
      */
     public static final String HEADER_LOGIN_URL = "Login-Url";
     /**
+     * 头信息：原始页面
+     */
+    public static final String HEADER_ORIGINAL_PAGE = "Original-Page";
+    /**
      * 头信息：原始请求
      */
     public static final String HEADER_ORIGINAL_REQUEST = "Original-Request";

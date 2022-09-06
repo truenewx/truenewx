@@ -43,13 +43,27 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) {
         String loginFormUrl = this.securityUrlProvider.getLoginFormUrl(request);
-        String queryString = request.getQueryString();
-        if (StringUtils.isNotBlank(queryString)) {
-            String nextUrl = request.getRequestURI() + Strings.QUESTION + queryString;
+
+        String nextUrl;
+        if (WebUtil.isAjaxRequest(request)) {
+            nextUrl = request.getHeader(WebConstants.HEADER_ORIGINAL_PAGE);
+            if (StringUtils.isBlank(nextUrl)) {
+                nextUrl = request.getHeader(WebConstants.HEADER_REFERER);
+            }
+        } else {
+            nextUrl = request.getRequestURI();
+            String queryString = request.getQueryString();
+            if (StringUtils.isNotBlank(queryString)) {
+                nextUrl += Strings.QUESTION + queryString;
+            }
+        }
+
+        if (StringUtils.isNotBlank(nextUrl)) {
             String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
             loginFormUrl += Strings.AND + redirectParameter + Strings.EQUAL
                     + URLEncoder.encode(nextUrl, StandardCharsets.UTF_8);
         }
+
         return loginFormUrl;
     }
 
