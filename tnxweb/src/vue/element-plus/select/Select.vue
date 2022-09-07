@@ -8,7 +8,7 @@
             </el-checkbox>
             <template v-if="items.length === 0">
                 <slot name="empty" v-if="$slots.empty"></slot>
-                <span class="text-muted" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
+                <span class="text-secondary" :class="emptyClass" v-else-if="emptyText">{{ emptyText }}</span>
             </template>
         </template>
         <tnxel-icon value="Loading" v-else/>
@@ -98,7 +98,7 @@
     </el-dropdown>
     <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :theme="theme" :size="size"
         :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
-        <el-option class="text-muted" :value="emptyValue" :label="emptyText" :class="emptyClass" v-if="empty"/>
+        <el-option class="text-secondary" :value="emptyValue" :label="emptyText" :class="emptyClass" v-if="empty"/>
         <template v-for="item in items">
             <el-option :key="item[valueName]" :value="item[valueName]" :label="item[textName]"
                 :data-value="item[valueName]" :title="item.title" :disabled="item.disabled"

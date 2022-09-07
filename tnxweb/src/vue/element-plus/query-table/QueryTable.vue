@@ -4,7 +4,7 @@
             :size="size" :border="border" :stripe="stripe" :max-height="tableMaxHeight"
             @sort-change="sort" :default-sort="defaultSort" :key="defaultSortString"
             :row-class-name="rowClassName" @cell-click="selectRow">
-            <el-table-column header-align="center" align="center" :width="selectable === 'all' ? 24 : 44"
+            <el-table-column header-align="center" align="center" :width="selectable === 'all' ? 40 : 54"
                 v-if="selectable">
                 <template #header>
                     <el-checkbox :model-value="pageAllSelected" :indeterminate="allSelectedIndeterminate"
@@ -397,6 +397,5 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-right: 4px;
 }
 </style>

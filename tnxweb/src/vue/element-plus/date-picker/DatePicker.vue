@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex" v-if="permanentable">
+    <div class="tnxel-date-picker d-flex" v-if="permanentable">
         <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
             :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate"
             :disabled-date="disabledDate" :disabled="disabled || model.permanent"
@@ -9,9 +9,9 @@
             @change="onPermanentChange">{{ permanentText }}
         </el-checkbox>
     </div>
-    <el-date-picker :type="type" v-model="model.value" :value-format="format" :editable="editable"
-        :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate" :disabled-date="disabledDate"
-        :disabled="disabled" :style="{width: pickerWidth}" v-else/>
+    <el-date-picker class="tnxel-date-picker" :type="type" v-model="model.value" :value-format="format"
+        :editable="editable" :placeholder="placeholderText" :clearable="empty" :default-value="defaultDate"
+        :disabled-date="disabledDate" :disabled="disabled" :style="{width: pickerWidth}" v-else/>
 </template>
 
 <script>
@@ -197,3 +197,10 @@ export default {
     }
 }
 </script>
+
+<style>
+.tnxel-date-picker.el-date-editor.el-input,
+.tnxel-date-picker.el-date-editor.el-input__wrapper {
+    width: 150px;
+}
+</style>

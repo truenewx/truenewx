@@ -1,7 +1,7 @@
 <template>
     <el-select v-model="model" :loading="loading" :filterable="filterable" remote :remote-method="load"
-        :placeholder="finalPlaceholder" :disabled="disabled" :title="title" :clearable="empty" default-first-option
-        @clear="clear">
+        :placeholder="finalPlaceholder" :disabled="disabled" :title="title" default-first-option>
+        <el-option class="text-secondary" :value="null" :label="emptyText" v-if="empty"/>
         <el-option v-for="item in items" :key="item[valueName]" :value="item[valueName]" :label="label(item)"/>
         <el-option label="还有更多结果..." disabled v-if="more"/>
     </el-select>
@@ -32,7 +32,10 @@ export default {
             default: () => 'name',
         },
         descName: String,
-        empty: Boolean,
+        empty: {
+            type: [Boolean, String],
+            default: false,
+        },
         filterable: Boolean,
         placeholder: [String, Array],
         disabled: Boolean,
@@ -68,7 +71,10 @@ export default {
         },
         title() {
             return this.model ? undefined : this.finalPlaceholder;
-        }
+        },
+        emptyText() {
+            return typeof this.empty === 'string' ? this.empty : '';
+        },
     },
     watch: {
         model(value) {
@@ -155,10 +161,6 @@ export default {
                 return null;
             }
         },
-        clear() {
-            this.model = null;
-            this.load();
-        }
     }
 }
 </script>

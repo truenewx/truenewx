@@ -1,7 +1,7 @@
 <template>
     <el-form :id="id" :inline="inline" :model="params" :class="theme ? ('theme-' + theme) : null">
         <slot></slot>
-        <el-form-item v-if="queryText || clearText">
+        <el-form-item class="me-0" v-if="queryText || clearText">
             <tnxel-button :type="theme || 'primary'" icon="Search" @click="toQuery" :plain="plain"
                 v-if="queryText">
                 {{ queryText }}

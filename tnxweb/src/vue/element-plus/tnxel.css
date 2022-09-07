@@ -619,6 +619,10 @@ el-card {
     width: auto !important;
 }
 
+.el-table .cell > .el-image {
+    display: table-cell;
+}
+
 .tnxel-tag-select .el-input {
     margin-bottom: 5px;
     width: 210px;

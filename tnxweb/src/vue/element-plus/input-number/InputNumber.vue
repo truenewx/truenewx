@@ -1,6 +1,6 @@
 <template>
     <div class="tnxel-input-number" :class="containerClassObject">
-        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-end-0': suffix}"
+        <el-input-number ref="input" class="flex-grow-1" :class="{'rounded-end-0': suffix, 'text-start': !controls}"
             v-model="model"
             :min="min" :max="max"
             :controls="controls" controls-position="right"
@@ -103,6 +103,10 @@ export default {
 
 .tnxel-input-number .el-input-number {
     width: auto;
+}
+
+.tnxel-input-number .el-input-number.text-start .el-input__inner {
+    text-align: left;
 }
 
 .tnxel-input-number .el-input-number.is-controls-right .el-input__wrapper {
