@@ -90,7 +90,7 @@ export default {
     },
     computed: {
         uploadingFiles() {
-            return this.$refs.upload?.uploadingFiles || [];
+            return this.$refs.upload?.files || [];
         },
     },
     watch: {
