@@ -48,8 +48,8 @@
         </template>
         <tnxel-icon value="Loading" v-else/>
     </div>
-    <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
-        v-else-if="selector === 'radio'">
+    <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
+        :disabled="disabled" v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]" :data-value="item[valueName]"
             :title="item.title" :disabled="item.disabled">
@@ -57,8 +57,8 @@
             <span>{{ item[textName] }}</span>
         </el-radio>
     </el-radio-group>
-    <el-radio-group v-model="model" class="ignore-feedback" :theme="theme" :size="size" :disabled="disabled"
-        v-else-if="selector === 'radio-button'">
+    <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
+        :disabled="disabled" v-else-if="selector === 'radio-button'">
         <el-radio-button :class="emptyClass" :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]"
             :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
@@ -385,5 +385,37 @@ export default {
 
 .tnxel-text-button-group .el-button + .el-button {
     margin-left: 0;
+}
+
+.tnxel-radio-group[theme="error"] .el-radio-button__original-radio:checked + .el-radio-button__inner,
+.tnxel-radio-group[theme="danger"] .el-radio-button__original-radio:checked + .el-radio-button__inner {
+    background-color: var(--el-color-danger);
+    border-color: var(--el-color-danger);
+    box-shadow: -1px 0 0 0 var(--el-color-danger);
+}
+
+.tnxel-radio-group[theme="error"] .el-radio-button__original-radio:not(:checked) + .el-radio-button__inner:hover,
+.tnxel-radio-group[theme="danger"] .el-radio-button__original-radio:not(:checked) + .el-radio-button__inner:hover {
+    color: var(--el-color-danger);
+}
+
+.tnxel-radio-group[theme="warning"] .el-radio-button__original-radio:checked + .el-radio-button__inner {
+    background-color: var(--el-color-warning);
+    border-color: var(--el-color-warning);
+    box-shadow: -1px 0 0 0 var(--el-color-warning);
+}
+
+.tnxel-radio-group[theme="warning"] .el-radio-button__original-radio:not(:checked) + .el-radio-button__inner:hover {
+    color: var(--el-color-warning);
+}
+
+.tnxel-radio-group[theme="success"] .el-radio-button__original-radio:checked + .el-radio-button__inner {
+    background-color: var(--el-color-success);
+    border-color: var(--el-color-success);
+    box-shadow: -1px 0 0 0 var(--el-color-success);
+}
+
+.tnxel-radio-group[theme="success"] .el-radio-button__original-radio:not(:checked) + .el-radio-button__inner:hover {
+    color: var(--el-color-success);
 }
 </style>
