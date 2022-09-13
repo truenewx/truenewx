@@ -25,6 +25,7 @@
         <Folder v-else-if="value === 'Folder'"/>
         <HomeFilled v-else-if="value === 'HomeFilled'"/>
         <InfoFilled v-else-if="value === 'InfoFilled'"/>
+        <MoreFilled v-else-if="value === 'MoreFilled'"/>
         <OfficeBuilding v-else-if="value === 'OfficeBuilding'"/>
         <Picture v-else-if="value === 'Picture'"/>
         <PictureFilled v-else-if="value === 'PictureFilled'"/>
@@ -76,6 +77,7 @@ import {
     HomeFilled,
     InfoFilled,
     Loading,
+    MoreFilled,
     OfficeBuilding,
     Picture,
     PictureFilled,
@@ -124,6 +126,7 @@ const components = {
     Folder,
     HomeFilled,
     InfoFilled,
+    MoreFilled,
     Loading,
     OfficeBuilding,
     Picture,
