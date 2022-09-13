@@ -39,7 +39,8 @@
                 <tnxel-button class="py-0 px-1 mx-2 border-0" icon="Top" tooltip="回到顶部" plain @click="scrollToTop"/>
             </template>
         </el-table>
-        <slot name="paged" :paged="paged" :show="showPaged" :query="query" v-if="typeof paged?.total === 'number'">
+        <slot name="paged" :paged="paged" :show="showPaged" :query="query"
+            v-if="params.pageSize > 0 && typeof paged?.total === 'number'">
             <tnxel-paged :value="paged" :change="onPagedChange" :align="pagedAlign" v-if="showPaged"/>
         </slot>
     </div>
@@ -206,7 +207,7 @@ export default {
                 }
             }
             return false;
-        }
+        },
     },
     watch: {
         modelValue(value) {
