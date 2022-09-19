@@ -134,4 +134,10 @@ public class Pagination implements Serializable {
         return null;
     }
 
+    public void copyTo(Pagination pagination) {
+        pagination.setPageSize(getPageSize());
+        pagination.setPageNo(getPageNo());
+        pagination.setOrders(getOrders());
+    }
+
 }

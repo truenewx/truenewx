@@ -168,4 +168,9 @@ public class Querying extends Pagination implements QueryModel, Paging {
         });
     }
 
+    public void copyTo(Querying querying) {
+        super.copyTo(querying);
+        querying.setIgnoring(getIgnoring());
+    }
+
 }
