@@ -4,7 +4,7 @@
             v-model="model"
             :min="min" :max="max"
             :controls="controls" controls-position="right"
-            :placeholder="disabled ? '未设置' : placeholder" :disabled="disabled"
+            :placeholder="placeholderText" :disabled="disabled"
             :step="step || Math.pow(10, -this.scale)" step-strictly
             :precision="scale"
             :value-on-clear="null"
@@ -47,6 +47,11 @@ export default {
         }
     },
     computed: {
+        placeholderText() {
+            let text = this.disabled ? '未' : '请';
+            text += this.controls ? '设置' : '输入';
+            return text;
+        },
         containerClassObject() {
             let classObject = {
                 'is-error': this.showRequiredError,
