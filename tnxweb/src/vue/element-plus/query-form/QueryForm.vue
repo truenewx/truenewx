@@ -119,7 +119,7 @@ export default {
                         return;
                     }
                 } else {
-                    ObjectUtil.clear(this.params, ['pageSize', 'pageNo', 'ignoring']);
+                    ObjectUtil.clear(this.params, ['pageSize', 'pageNo', 'ignoring', 'orderBy']);
                     if (ObjectUtil.isNotNull(this.params.pageNo)) {
                         this.params.pageNo = 1;
                     }
