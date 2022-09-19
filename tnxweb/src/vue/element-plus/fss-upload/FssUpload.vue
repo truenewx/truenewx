@@ -62,7 +62,6 @@ export default {
                 return true;
             }
         },
-        onlyStorage: Boolean, // 上传完成后，是否只需要返回存储地址，以减少数据传输量
         extension: [String, Array], // 可接受的文件扩展名集合，最终实际生效的扩展名集合，是它与服务端上传配置中的扩展名限制集合的并集
         beforeUpload: Function,
         onUpload: Function,
@@ -81,9 +80,7 @@ export default {
             tnx: tnx,
             appName: tnx.fss.appName,
             action: tnx.fss.getUploadUrl(this.type, this.scope),
-            params: {
-                onlyStorage: this.onlyStorage,
-            },
+            params: {},
             uploadOptions: {},
             fileList: [],
         };
@@ -224,7 +221,7 @@ export default {
                 file.downloadUrl = result.downloadUrl;
                 // 构建Upload组件用到的文件字段
                 file.url = result.readUrl;
-                file.previewUrl = result.thumbnailReadUrl;
+                file.previewUrl = (process.env.VUE_APP_API_BASE_URL + result.downloadUrl) || result.readUrl;
 
                 this.fileList = fileList;
                 this.emitInput();

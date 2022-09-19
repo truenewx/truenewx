@@ -312,9 +312,7 @@ export default {
 
                 // 不显示文件清单，或文件数量未达到上限，则显示添加框
                 if (!vm.showFileList || !vm.fileNumExceed) {
-                    $upload.css({
-                        display: 'inline-flex'
-                    });
+                    $upload.removeClass('d-none');
                 }
                 // 构建初始化文件显示面板
                 if (vm.fileList) {
@@ -489,8 +487,8 @@ export default {
             // 显示文件清单且文件数量已达上限，则隐藏添加框
             if (this.showFileList && this.fileNumExceed) {
                 // 隐藏添加框
+                $upload.addClass('d-none');
                 $upload.css({
-                    display: 'none',
                     visibility: 'unset',
                 });
             }
@@ -499,8 +497,6 @@ export default {
             let $fileItem = $('.el-upload-list__panel[data-file-id="' + fileId + '"]', $container).parent();
             let uploadStyle = $upload.attr('style');
             if (uploadStyle) {
-                // 去掉display样式
-                uploadStyle = uploadStyle.replace(/display:.*;/, '').trim();
                 $fileItem.attr('style', uploadStyle);
             }
         },
@@ -550,6 +546,7 @@ export default {
             this.files.remove(function(f) {
                 return file.uid === f.uid;
             });
+            this.$refs.upload.handleRemove(file);
             if (!this.fileNumExceed) {
                 this.handleErrors([]); // 移除一个文件后，此时如果有错误提示则一定为数量超限，需清空错误提示
                 let container = $('#' + this.id);
@@ -557,7 +554,7 @@ export default {
                     // 去掉文件列表的样式，以免其占高度
                     $('.el-upload-list', container).removeAttr('style');
                     // 恢复添加框默认样式
-                    $('.el-upload', container).css('display', 'inline-flex');
+                    $('.el-upload', container).removeClass('d-none');
                 });
             }
             if (this.onRemoved) {
@@ -565,24 +562,27 @@ export default {
             }
         },
         previewFile(file) {
-            let extension = getExtension(file);
-            if (extension === 'pdf') {
-                let url = this.tnx.util.net.appendParams(file.previewUrl, {
-                    inline: true
-                });
-                window.open(url);
-            } else {
-                if (!file.width || !file.height) {
-                    const image = new Image();
-                    image.src = file.previewUrl || file.url;
-                    const _this = this;
-                    image.onload = function() {
-                        file.width = image.width;
-                        file.height = image.height;
-                        _this._doPreviewImage(file);
-                    }
+            let url = file.previewUrl || file.url;
+            if (url) {
+                let extension = getExtension(file);
+                if (extension === 'pdf') {
+                    url = this.tnx.util.net.appendParams(url, {
+                        inline: true
+                    });
+                    window.open(url);
                 } else {
-                    this._doPreviewImage(file);
+                    if (!file.width || !file.height) {
+                        const image = new Image();
+                        image.src = url;
+                        const _this = this;
+                        image.onload = function() {
+                            file.width = image.width;
+                            file.height = image.height;
+                            _this._doPreviewImage(file);
+                        }
+                    } else {
+                        this._doPreviewImage(file);
+                    }
                 }
             }
         },
@@ -592,7 +592,7 @@ export default {
             top = Math.max(top, 5); // 最高顶部留5px空隙
             let width = file.width;
             width = Math.min(width, this.tnx.util.dom.getDocWidth() - 10); // 最宽两边各留10px空隙
-            const content = '<img src="' + file.url + '" style="max-width: 100%;">';
+            const content = '<img src="' + (file.previewUrl || file.url) + '" style="max-width: 100%;">';
             this.tnx.dialog(content, '', [], {
                 top: top + 'px',
                 width: width + 'px',
@@ -605,7 +605,7 @@ export default {
             return 0;
         },
         isPreviewable(file) {
-            return isImage(file);
+            return isImage(file) || getExtension(file) === 'pdf';
         },
     }
 }
@@ -628,7 +628,7 @@ export default {
 
 .tnxel-upload-container .el-upload {
     border-radius: .25rem;
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 0.5rem;
@@ -741,8 +741,11 @@ export default {
     display: none;
 }
 
-.tnxel-upload-container .el-upload-list--text .el-upload-list__item:hover .el-upload-list__item-actions {
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:hover .el-upload-list__item-actions,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:focus:not(:hover) .el-upload-list__item-status-label,
+.tnxel-upload-container .el-upload-list--text .el-upload-list__item:active:not(:hover) .el-upload-list__item-status-label {
     display: flex;
+    opacity: 100;
 }
 
 .tnxel-upload-container .el-upload-list__panel {
@@ -845,5 +848,9 @@ export default {
 
 .el-dropdown-menu__item .tnxel-upload-container .el-upload .upload-trigger-text {
     margin-left: 2px;
+}
+
+.el-form-item__content .tnxel-upload-container .el-upload.d-none + .el-upload__tip {
+    margin-top: 11px;
 }
 </style>
