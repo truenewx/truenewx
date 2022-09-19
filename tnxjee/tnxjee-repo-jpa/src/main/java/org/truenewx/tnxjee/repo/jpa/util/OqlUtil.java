@@ -270,4 +270,12 @@ public class OqlUtil {
         }
     }
 
+    public static void appendAndCondition(StringBuilder ql, Map<String, Object> params, String fieldName,
+            Object paramValue) {
+        if (paramValue != null) {
+            ql.append(" and ").append(fieldName).append("=:").append(fieldName);
+            params.put(fieldName, paramValue);
+        }
+    }
+
 }
