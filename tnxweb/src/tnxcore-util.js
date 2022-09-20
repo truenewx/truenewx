@@ -939,12 +939,15 @@ export const DomUtil = {
     },
     maxZIndex(elements) {
         let result = -1;
-        elements.forEach(function(element) {
+        if (!elements) {
+            elements = document.body.getElementsByTagName('*');
+        }
+        for (let element of elements) {
             const zIndex = Number(element.style.zIndex);
             if (result < zIndex) {
                 result = zIndex;
             }
-        });
+        }
         return result;
     },
     /**
