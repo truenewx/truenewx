@@ -16,7 +16,7 @@
             </template>
         </el-image>
         <template v-else>
-            <a class="overflow-ellipsis" :href="meta.readUrl" target="_blank" :title="'下载 ' + meta.name">
+            <a class="overflow-ellipsis" :href="downloadUrl" target="_blank" :title="'下载 ' + meta.name">
                 {{ meta.name }}
             </a>
             <a class="preview" :href="previewUrl" target="_blank" :title="'预览 ' + meta.name"
@@ -78,13 +78,21 @@ export default {
             }
             return height;
         },
+        downloadUrl() {
+            return process.env.VUE_APP_API_BASE_URL + this.meta.downloadUrl;
+        },
         previewUrl() {
             if (this.extension === 'pdf') {
-                return tnx.util.net.appendParams(this.meta.readUrl, {
-                    inline: true,
-                });
+                // 下载地址与读取地址相同，说明读取地址为自有地址，需添加inline参数以表示展示而不是下载
+                if (this.downloadUrl === this.meta.readUrl) {
+                    return tnx.util.net.appendParams(this.downloadUrl, {
+                        inline: true,
+                    });
+                }
+                return this.meta.readUrl;
             }
-            return this.meta.readUrl;
+            // 其它格式的文件不可预览
+            return undefined;
         },
         thumbnailIconValue() {
             if (this.thumbnailIcon) {
