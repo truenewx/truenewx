@@ -1,7 +1,13 @@
 <template>
     <div class="tnxel-fss-view" v-if="meta.readUrl">
         <span class="text-muted" v-if="denied">没有权限查看该文件</span>
-        <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain"
+        <template v-else-if="thumbnailIconValue">
+            <tnxel-button type="primary" link :icon="thumbnailIconValue" :title="$attrs.title || meta.name"
+                @click="toPreview"/>
+            <el-image-viewer :url-list="[previewUrl]" teleported @close="imagePreviewing = false"
+                v-if="imagePreviewing"/>
+        </template>
+        <el-image :src="meta.thumbnailReadUrl" :preview-src-list="[meta.readUrl]" fit="contain" preview-teleported
             :style="{width: imageWidth, height: imageHeight}" v-else-if="imageable">
             <template #error>
                 <div class="text-muted h-100 flex-center">
@@ -13,20 +19,30 @@
             <a class="overflow-ellipsis" :href="meta.readUrl" target="_blank" :title="'下载 ' + meta.name">
                 {{ meta.name }}
             </a>
-            <a class="preview" :href="previewUrl" target="_blank" :title="'预览 ' + meta.name" v-if="previewUrl">预览</a>
+            <a class="preview" :href="previewUrl" target="_blank" :title="'预览 ' + meta.name"
+                v-if="previewUrl">预览</a>
         </template>
     </div>
 </template>
 
 <script>
+import Button from '../button/Button';
+
 const tnx = window.tnx;
 
 export default {
     name: 'TnxelFssView',
+    components: {
+        'tnxel-button': Button,
+    },
     props: {
         url: String,
         width: [String, Number],
         height: [String, Number],
+        thumbnailIcon: { // 为Boolean时表示是否仅显示缩略图标，图标采用与扩展名匹配的图标，为String时仅显示指定图标
+            type: [Boolean, String],
+            default: false,
+        },
     },
     data() {
         return {
@@ -36,15 +52,12 @@ export default {
                 imageable: false,
             },
             denied: false,
+            imagePreviewing: false,
         }
     },
     computed: {
         extension() {
-            let extension = tnx.util.net.getExtension(this.meta.readUrl);
-            if (extension) {
-                return extension.toLowerCase();
-            }
-            return undefined;
+            return tnx.util.net.getExtension(this.meta.readUrl);
         },
         imageable() {
             return tnx.util.file.isImage(this.extension);
@@ -70,6 +83,21 @@ export default {
                 return tnx.util.net.appendParams(this.meta.readUrl, {
                     inline: true,
                 });
+            }
+            return this.meta.readUrl;
+        },
+        thumbnailIconValue() {
+            if (this.thumbnailIcon) {
+                if (typeof this.thumbnailIcon === 'string') {
+                    return this.thumbnailIcon;
+                }
+                if (this.imageable) {
+                    return 'bi bi-file-earmark-image';
+                }
+                if (this.extension === 'pdf') {
+                    return 'bi bi-file-earmark-pdf';
+                }
+                return 'bi bi-file-earmark';
             }
             return undefined;
         },
@@ -100,7 +128,14 @@ export default {
                     }
                 });
             }
-        }
+        },
+        toPreview() {
+            if (this.imageable) {
+                this.imagePreviewing = true;
+            } else {
+                tnx.util.bom.openUniquely(this.previewUrl);
+            }
+        },
     }
 }
 </script>
