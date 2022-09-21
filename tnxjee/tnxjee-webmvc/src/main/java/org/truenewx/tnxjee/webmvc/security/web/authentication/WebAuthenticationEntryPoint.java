@@ -43,6 +43,7 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) {
         String loginFormUrl = this.securityUrlProvider.getLoginFormUrl(request);
+        String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
 
         String nextUrl;
         if (WebUtil.isAjaxRequest(request)) {
@@ -51,11 +52,13 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
                 nextUrl = request.getHeader(WebConstants.HEADER_REFERER);
             }
         } else {
-            nextUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
+            nextUrl = request.getParameter(redirectParameter);
+            if (StringUtils.isBlank(nextUrl)) {
+                nextUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
+            }
         }
 
         if (StringUtils.isNotBlank(nextUrl) && !Strings.SLASH.equals(nextUrl)) {
-            String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
             loginFormUrl += Strings.AND + redirectParameter + Strings.EQUAL
                     + URLEncoder.encode(nextUrl, StandardCharsets.UTF_8);
         }

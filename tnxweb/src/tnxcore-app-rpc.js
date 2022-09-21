@@ -208,16 +208,17 @@ export default {
                         }
                         let loginUrl = util.net.getHeader(response.headers, 'Login-Url');
                         if (loginUrl) {
-                            // 默认登录后跳转回当前页面
-                            if (loginUrl.contains('?')) {
-                                loginUrl += '&';
-                            } else {
-                                loginUrl += '?';
+                            // 默认登录后跳转回当前页面，如果已指定跳转目标地址，则忽略
+                            if (!loginUrl.contains('?' + _this.loginSuccessRedirectParameter + '=')
+                                && !loginUrl.contains('&' + _this.loginSuccessRedirectParameter + '=')) {
+                                let loginSuccessRedirectUrl = encodeURIComponent(window.location.href);
+                                if (loginUrl.contains('?')) {
+                                    loginUrl += '&';
+                                } else {
+                                    loginUrl += '?';
+                                }
+                                loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
                             }
-                            let loginSuccessRedirectUrl = originalUrl === _this.logoutProcessUrl ? window.location.origin
-                                : window.location.href;
-                            loginSuccessRedirectUrl = encodeURIComponent(loginSuccessRedirectUrl);
-                            loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
                         }
                         // 原始地址是授权验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
                         if (originalUrl && (originalUrl.startsWith(_this.authenticationContextUrl + '/')
