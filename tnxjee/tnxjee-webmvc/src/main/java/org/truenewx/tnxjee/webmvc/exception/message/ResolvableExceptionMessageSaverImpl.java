@@ -20,6 +20,7 @@ import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.service.exception.SingleException;
 import org.truenewx.tnxjee.service.exception.message.SingleExceptionMessageResolver;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
+import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.model.ExceptionErrorBody;
 import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 
@@ -33,11 +34,11 @@ public class ResolvableExceptionMessageSaverImpl implements ResolvableExceptionM
     private SingleExceptionMessageResolver resolver;
 
     @Override
-    public void saveMessage(HttpServletRequest request, HttpServletResponse response,
-            HandlerMethod handlerMethod, ResolvableException re) {
+    public void saveMessage(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod,
+            ResolvableException re) {
         List<ExceptionError> errors = buildErrors(re, request.getLocale());
         if (errors.size() > 0) {
-            if (SpringWebMvcUtil.isResponseBody(handlerMethod)) {
+            if (isResponseBody(request, handlerMethod)) {
                 try {
                     ExceptionErrorBody body = new ExceptionErrorBody(errors);
                     String json = JsonUtil.toJson(body);
@@ -50,6 +51,14 @@ public class ResolvableExceptionMessageSaverImpl implements ResolvableExceptionM
             } else {
                 request.setAttribute(ATTRIBUTE, errors);
             }
+        }
+    }
+
+    private boolean isResponseBody(HttpServletRequest request, HandlerMethod handlerMethod) {
+        if (handlerMethod != null) {
+            return SpringWebMvcUtil.isResponseBody(handlerMethod);
+        } else {
+            return WebUtil.isAjaxRequest(request);
         }
     }
 
