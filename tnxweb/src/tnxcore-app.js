@@ -237,6 +237,13 @@ const app = {
             }
         }
     },
+    logout() {
+        if (this.isProduction()) {
+            window.location.href = this.context + this.rpc.logoutProcessUrl;
+        } else {
+            this.rpc.logout();
+        }
+    },
 };
 
 export default app;
