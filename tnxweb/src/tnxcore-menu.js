@@ -298,6 +298,12 @@ Menu.prototype.loadGrantedItems = function(scope, callback) {
         if (this._url) {
             window.tnx.app.rpc.get(this._url, function(authorities) {
                 _this._applyAuthorities(authorities, scope, callback);
+            }, function(errors) {
+                let error = errors[0];
+                if (error && error.code && error.code.startsWith('error.service.security.')) {
+                    // 没有操作权限，说明当前用户类型不被允许访问当前系统
+                    _this.handleLoadingAuthoritiesError();
+                }
             });
         } else { // 未指定获权地址，则视为具有所有权限，用于没有或不关心服务端权限的场景
             this._applyAuthorities({
@@ -343,6 +349,12 @@ Menu.prototype.resolveItemPathParams = function(vm, item) {
         return path;
     }
     return undefined;
+}
+
+Menu.prototype.handleLoadingAuthoritiesError = function() {
+    window.tnx.error('没有访问该系统的权限，请重新登录。', function() {
+        window.tnx.app.logout();
+    });
 }
 
 export default Menu;
