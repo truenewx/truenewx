@@ -51,14 +51,10 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
                 nextUrl = request.getHeader(WebConstants.HEADER_REFERER);
             }
         } else {
-            nextUrl = request.getRequestURI();
-            String queryString = request.getQueryString();
-            if (StringUtils.isNotBlank(queryString)) {
-                nextUrl += Strings.QUESTION + queryString;
-            }
+            nextUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
         }
 
-        if (StringUtils.isNotBlank(nextUrl)) {
+        if (StringUtils.isNotBlank(nextUrl) && !Strings.SLASH.equals(nextUrl)) {
             String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
             loginFormUrl += Strings.AND + redirectParameter + Strings.EQUAL
                     + URLEncoder.encode(nextUrl, StandardCharsets.UTF_8);
