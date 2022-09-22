@@ -89,7 +89,12 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
 
     private ObjectMetadata getObjectMetadata(String path) {
         path = AliyunOssUtil.standardizePath(path);
-        return this.account.getOssClient().getObjectMetadata(getBucketName(), path);
+        try {
+            return this.account.getOssClient().getObjectMetadata(getBucketName(), path);
+        } catch (Exception e) {
+            LogUtil.error(getClass(), e);
+        }
+        return null;
     }
 
     @Override
@@ -101,24 +106,29 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
             }
         }
         ObjectMetadata meta = getObjectMetadata(storagePath);
-        String filename = meta.getUserMetadata().get("filename");
-        if (StringUtils.isNotBlank(filename)) {
-            try {
-                filename = EncryptUtil.decryptByBase64(filename);
-            } catch (Exception ignored) {
+        if (meta != null) {
+            String filename = meta.getUserMetadata().get("filename");
+            if (StringUtils.isNotBlank(filename)) {
+                try {
+                    filename = EncryptUtil.decryptByBase64(filename);
+                } catch (Exception ignored) {
+                }
             }
+            return new FssFileDetail(filename, meta.getLastModified().getTime(), meta.getContentLength());
         }
-        return new FssFileDetail(filename, meta.getLastModified().getTime(), meta.getContentLength());
+        return null;
     }
 
     @Override
     public Charset getCharset(String storagePath) {
         ObjectMetadata meta = getObjectMetadata(storagePath);
-        String encoding = meta.getContentEncoding();
-        if (encoding != null) {
-            try {
-                return Charset.forName(encoding);
-            } catch (Exception ignored) {
+        if (meta != null) {
+            String encoding = meta.getContentEncoding();
+            if (encoding != null) {
+                try {
+                    return Charset.forName(encoding);
+                } catch (Exception ignored) {
+                }
             }
         }
         return null;
