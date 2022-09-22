@@ -21,7 +21,17 @@
 </template>
 
 <script>
-function addMenuItemToTreeNodes(parentId, menuItems, treeNodes, permissions) {
+function isChecked(app, permissions, permission) {
+    if (permission && permissions) {
+        if (app) {
+            permission = app + '.' + permission;
+        }
+        return permissions.contains(permission);
+    }
+    return false;
+}
+
+function addMenuItemToTreeNodes(app, parentId, menuItems, treeNodes, permissions) {
     for (let i = 0; i < menuItems.length; i++) {
         const item = menuItems[i];
         if (item.caption) { // 有显示名称才可进行权限分配，否则只是一个隐藏的菜单项
@@ -31,12 +41,12 @@ function addMenuItemToTreeNodes(parentId, menuItems, treeNodes, permissions) {
                 label: item.caption,
                 path: item.path,
                 permission: item.permission,
-                checked: item.permission && permissions && permissions.contains(item.permission),
+                checked: isChecked(app, permissions, item.permission),
                 remark: item.desc || item.permissionCaption,
             };
             if (item.subs && item.subs.length) {
                 node.children = node.children || [];
-                addMenuItemToTreeNodes(node.id, item.subs, node.children, permissions);
+                addMenuItemToTreeNodes(app, node.id, item.subs, node.children, permissions);
             }
             treeNodes.push(node);
         }
@@ -47,7 +57,7 @@ function getTreeNodes(menu, permissions) {
     const nodes = [];
     if (menu) {
         let items = menu.getAssignableItems();
-        addMenuItemToTreeNodes(undefined, items, nodes, permissions);
+        addMenuItemToTreeNodes(menu.app, undefined, items, nodes, permissions);
     }
     return nodes;
 }
@@ -137,7 +147,12 @@ export default {
             setCheckdByPermission(this.nodes, node.permission, node.checked);
         },
         getPermissions(withApp) {
-            let app = withApp ? this.menu.app : null;
+            // 除非指定不附带app，否则默认根据菜单中配置的app进行附带
+            let app = this.menu.app;
+            if (withApp === false) {
+                app = null;
+            }
+
             const permissions = [];
             addCheckedNodePermissionTo(app, this.nodes, permissions);
             return permissions;
