@@ -213,14 +213,17 @@ Menu.prototype.findBelongingItem = function(path, level) {
     return undefined;
 }
 
-function findItemByPermission(items, permission) {
+function findItemByPermission(app, items, permission) {
     for (let item of items) {
         prepareItem(item);
         if (item.permission === permission) {
             return item;
         }
+        if (app && (app + '.' + item.permission) === permission) {
+            return item;
+        }
         if (item.subs) {
-            const sub = findItemByPermission(item.subs, permission);
+            const sub = findItemByPermission(app, item.subs, permission);
             if (sub) {
                 return sub;
             }
@@ -230,7 +233,7 @@ function findItemByPermission(items, permission) {
 }
 
 Menu.prototype.getItemByPermission = function(permission) {
-    return findItemByPermission(this.items, permission);
+    return findItemByPermission(this.app, this.items, permission);
 }
 
 function findAssignableItems(items) {
