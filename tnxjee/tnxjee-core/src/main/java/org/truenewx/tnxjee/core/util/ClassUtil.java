@@ -741,6 +741,19 @@ public class ClassUtil {
         }
     }
 
+    public static void loopStaticFields(Class<?> clazz, Predicate<Field> predicate) {
+        if (clazz != Object.class) {
+            for (Field field : clazz.getDeclaredFields()) {
+                // 遍历静态字段
+                if (Modifier.isStatic(field.getModifiers()) && !predicate.test(field)) {
+                    return;
+                }
+            }
+            // 再遍历父类
+            loopDynamicFields(clazz.getSuperclass(), predicate);
+        }
+    }
+
     /**
      * 判断指定类型是否包含可读的枚举属性
      *
