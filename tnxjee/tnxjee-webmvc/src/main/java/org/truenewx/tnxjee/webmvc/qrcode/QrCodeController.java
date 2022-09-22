@@ -1,6 +1,8 @@
 package org.truenewx.tnxjee.webmvc.qrcode;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +43,13 @@ public class QrCodeController {
             @RequestParam(value = "margin", required = false, defaultValue = "0") int margin,
             @RequestParam(value = "filename", required = false) String filename,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
+        value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+        if (logoUrl != null) {
+            logoUrl = URLDecoder.decode(logoUrl, StandardCharsets.UTF_8);
+        }
         if (StringUtils.isNotBlank(filename)) { // 指定了下载文件名，表示有下载二维码图片的可能性，说明为变化可能性低的静态图片，生成缓存文件以提高访问性能
             String name = this.generator.save(value, size, logoUrl, margin);
+            filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
             return download(name, filename, request, response);
         }
         try (InputStream in = this.generator.getInputStream(value, size, logoUrl, margin)) {
@@ -70,6 +77,7 @@ public class QrCodeController {
         if (imageFile.exists()) {
             if (StringUtils.isNotBlank(filename)) {
                 String extension = StringUtil.getExtension(imageFile.getName(), true);
+                filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
                 WebUtil.setDownloadFilename(request, response, filename + extension);
             } else {
                 String contentType = Mimetypes.getInstance().getMimetype(imageFile.getName());
