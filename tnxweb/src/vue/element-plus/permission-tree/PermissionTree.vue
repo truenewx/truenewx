@@ -1,5 +1,5 @@
 <template>
-    <el-tree class="permission-tree px-1 py-2"
+    <el-tree class="permission-tree"
         ref="tree"
         :data="nodes"
         :default-expand-all="true"
@@ -149,6 +149,7 @@ export default {
 <style>
 .permission-tree {
     overflow-y: auto;
+    padding: 4px;
 }
 
 .permission-tree .permission-node {
