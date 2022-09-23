@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -43,6 +44,18 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
             }
         }
         return mav;
+    }
+
+    @Override
+    protected ModelAndView handleTypeMismatch(TypeMismatchException ex, HttpServletRequest request,
+            HttpServletResponse response, Object handler) throws IOException {
+        if (!WebUtil.isAjaxRequest(request)) { // 非ajax请求才跳转错误页面，否则采用默认处理
+            String path = this.pathProperties.getBadRequest();
+            if (this.webContextPathPredicate.test(path)) {
+                return new ModelAndView(path, "exception", ex);
+            }
+        }
+        return super.handleTypeMismatch(ex, request, response, handler);
     }
 
     @Override

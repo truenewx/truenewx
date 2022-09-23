@@ -9,6 +9,7 @@ public class ViewErrorPathProperties {
 
     private String business = "/error/business";
     private String format = "/error/format";
+    private String badRequest = "/error/400";
     private String notFound = "/error/404";
     private String internal = "/error/500";
 
@@ -26,6 +27,14 @@ public class ViewErrorPathProperties {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getBadRequest() {
+        return this.badRequest;
+    }
+
+    public void setBadRequest(String badRequest) {
+        this.badRequest = badRequest;
     }
 
     public String getNotFound() {
