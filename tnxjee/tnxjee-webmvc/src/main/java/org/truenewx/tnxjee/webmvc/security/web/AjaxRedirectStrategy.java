@@ -1,7 +1,6 @@
 package org.truenewx.tnxjee.webmvc.security.web;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -26,20 +25,29 @@ import org.truenewx.tnxjee.web.util.WebUtil;
 @Component
 public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
 
-    private Set<String> allowedHostList = new HashSet<>();
+    private Set<String> allowedHosts = new HashSet<>();
 
     @Autowired(required = false)
     public void setCommonProperties(CommonProperties commonProperties) {
-        this.allowedHostList.addAll(commonProperties.getAllAppUris());
+        Set<String> uris = commonProperties.getAllAppUris();
+        for (String uri : uris) {
+            addAllowedUri(uri);
+        }
+    }
+
+    private void addAllowedUri(String uri) {
+        String host = NetUtil.getHost(uri, false);
+        if (this.allowedHosts.add(host)) {
+            this.logger.info("====== Added allowed host: " + host);
+        }
     }
 
     @Autowired(required = false)
     public void setCorsRegistryProperties(CorsRegistryProperties corsRegistryProperties) {
-        addAllowedHost(corsRegistryProperties.getAllowedOrigins());
-    }
-
-    public void addAllowedHost(String... allowedHost) {
-        Collections.addAll(this.allowedHostList, allowedHost);
+        String[] uris = corsRegistryProperties.getAllowedOrigins();
+        for (String uri : uris) {
+            addAllowedUri(uri);
+        }
     }
 
     @Override
@@ -53,10 +61,9 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "illegal redirect target url: " + redirectUrl);
             return;
         }
-        redirectUrl = response.encodeRedirectURL(redirectUrl);
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Redirecting to '" + redirectUrl + "'");
+            this.logger.debug("====== Redirecting to '" + redirectUrl + "'");
         }
 
         if (WebUtil.isAjaxRequest(request)) {
@@ -104,7 +111,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
             return true;
         }
         // 匹配允许名单可以重定向
-        return this.allowedHostList.contains(redirectHost);
+        return this.allowedHosts.contains(redirectHost);
     }
 
     protected String buildRedirectBody(String redirectUrl) {
