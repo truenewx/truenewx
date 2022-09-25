@@ -785,3 +785,7 @@ i svg {
 .el-popper.is-dark .el-popover__title {
     color: var(--el-bg-color);
 }
+
+.el-tabs__nav.is-top {
+    display: flex;
+}
