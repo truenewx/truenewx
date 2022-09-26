@@ -82,16 +82,14 @@ export default {
             return process.env.VUE_APP_API_BASE_URL + this.meta.downloadUrl;
         },
         previewUrl() {
-            if (this.extension === 'pdf') {
-                // 下载地址与读取地址相同，说明读取地址为自有地址，需添加inline参数以表示展示而不是下载
-                if (this.downloadUrl === this.meta.readUrl) {
-                    return tnx.util.net.appendParams(this.downloadUrl, {
-                        inline: true,
-                    });
-                }
-                return this.meta.readUrl;
+            if (this.imageable) {
+                return this.meta.readUrl; // 图片预览尽量使用第三方文件服务提供商地址
             }
-            // 其它格式的文件不可预览
+            if (this.extension === 'pdf') { // pdf预览会打开新页面，故使用自有地址，尽量不暴露第三方文件服务提供商地址
+                return tnx.util.net.appendParams(this.downloadUrl, {
+                    inline: true,
+                });
+            }
             return undefined;
         },
         thumbnailIconValue() {
