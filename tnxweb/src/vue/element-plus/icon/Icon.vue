@@ -33,6 +33,7 @@
         <Pointer v-else-if="value === 'Pointer'"/>
         <QuestionFilled v-else-if="value === 'QuestionFilled'"/>
         <Rank v-else-if="value === 'Rank'"/>
+        <Refresh v-else-if="value === 'Refresh'"/>
         <Remove v-else-if="value === 'Remove'"/>
         <RemoveFilled v-else-if="value === 'RemoveFilled'"/>
         <Right v-else-if="value === 'Right'"/>
@@ -85,6 +86,7 @@ import {
     Pointer,
     QuestionFilled,
     Rank,
+    Refresh,
     Remove,
     RemoveFilled,
     Right,
@@ -135,6 +137,7 @@ const components = {
     Pointer,
     QuestionFilled,
     Rank,
+    Refresh,
     Remove,
     RemoveFilled,
     Right,
