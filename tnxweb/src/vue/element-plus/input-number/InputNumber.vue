@@ -108,6 +108,7 @@ export default {
 
 .tnxel-input-number .el-input-number {
     width: auto;
+    line-height: 1;
 }
 
 .tnxel-input-number .el-input-number.text-start .el-input__inner {
@@ -115,7 +116,7 @@ export default {
 }
 
 .tnxel-input-number .el-input-number.is-controls-right .el-input__wrapper {
-    padding-left: 12px;
+    padding-left: 8px;
 }
 
 .tnxel-input-number .el-input-number .el-input__wrapper .el-input__suffix {
@@ -131,5 +132,7 @@ export default {
     border: 1px solid var(--el-border-color);
     border-left: none;
     line-height: 1;
+    border-top-right-radius: var(--el-input-border-radius, var(--el-border-radius-base));
+    border-bottom-right-radius: var(--el-input-border-radius, var(--el-border-radius-base));
 }
 </style>
