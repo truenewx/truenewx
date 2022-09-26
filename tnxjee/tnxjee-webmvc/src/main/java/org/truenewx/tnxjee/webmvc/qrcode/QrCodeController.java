@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.truenewx.tnxjee.core.util.DateUtil;
 import org.truenewx.tnxjee.core.util.Mimetypes;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
@@ -46,6 +47,9 @@ public class QrCodeController {
         value = URLDecoder.decode(value, StandardCharsets.UTF_8);
         if (logoUrl != null) {
             logoUrl = URLDecoder.decode(logoUrl, StandardCharsets.UTF_8);
+            if (NetUtil.isRelativeUrl(logoUrl)) { // 相对地址需加上当前站点上下文地址
+                logoUrl = WebUtil.getContextUrl(request) + logoUrl;
+            }
         }
         if (StringUtils.isNotBlank(filename)) { // 指定了下载文件名，表示有下载二维码图片的可能性，说明为变化可能性低的静态图片，生成缓存文件以提高访问性能
             String name = this.generator.save(value, size, logoUrl, margin);
