@@ -269,7 +269,7 @@ export default {
                         break;
                     }
                     default: {
-                        _this.handleOtherError(url + ':\n' + error.stack);
+                        _this.handleOtherError(url + ':\n' + error.stack, options);
                     }
                 }
             }
@@ -316,8 +316,12 @@ export default {
             message: '哎呀，非常抱歉服务器出了点小小的错误，这并不影响你的其它操作，我们会尽快修正这个错误。'
         }], options);
     },
-    handleOtherError(message) {
-        console.error(message);
+    handleOtherError(message, options) {
+        if (typeof options?.error === 'function') {
+            options.error(message);
+        } else {
+            console.error(message);
+        }
     },
     handleErrors(errors, options) {
         if (errors) {
