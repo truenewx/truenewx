@@ -39,7 +39,7 @@ import {computed, ref, toRefs, watchEffect} from 'vue';
 import {Close} from '@element-plus/icons-vue';
 
 export default {
-    name: 'Vue3Verify',
+    name: 'CaptchaVerify',
     components: {
         VerifySlide,
         VerifyPoints,
