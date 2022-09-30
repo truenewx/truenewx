@@ -13,5 +13,10 @@
             <groupId>org.truenewx.tnxjee</groupId>
             <artifactId>tnxjee-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.anji-plus</groupId>
+            <artifactId>captcha</artifactId>
+            <version>1.3.0</version>
+        </dependency>
     </dependencies>
 </project>
