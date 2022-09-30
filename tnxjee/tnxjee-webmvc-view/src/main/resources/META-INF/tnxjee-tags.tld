@@ -44,6 +44,12 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
         <attribute>
+            <description>匹配错误码</description>
+            <name>code</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
             <description>分隔符显示多个错误消息,默认为br标记</description>
             <name>delimiter</name>
             <required>false</required>
@@ -59,6 +65,12 @@
         <attribute>
             <description>绑定字段名称</description>
             <name>field</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>匹配错误码</description>
+            <name>code</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
         </attribute>
@@ -81,6 +93,12 @@
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
         </attribute>
+        <attribute>
+            <description>匹配错误码</description>
+            <name>code</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
     </tag>
 
     <tag>
@@ -91,6 +109,12 @@
         <attribute>
             <description>绑定字段名称</description>
             <name>field</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <description>匹配错误码</description>
+            <name>code</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
         </attribute>
