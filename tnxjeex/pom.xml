@@ -10,6 +10,7 @@
     <artifactId>tnxjeex</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>tnxjeex-captcha</module>
         <module>tnxjeex-cas</module>
         <module>tnxjeex-doc</module>
         <module>tnxjeex-fss</module>
@@ -32,6 +33,16 @@
                 <version>2021.0.3</version><!-- 适配spring-boot-2.6 -->
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.captcha</groupId>
+                <artifactId>tnxjeex-captcha-core</artifactId>
+                <version>${truenewx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.truenewx.tnxjeex.captcha</groupId>
+                <artifactId>tnxjeex-captcha-web</artifactId>
+                <version>${truenewx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.cas</groupId>

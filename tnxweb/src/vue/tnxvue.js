@@ -7,6 +7,7 @@ import validator from './tnxvue-validator';
 import createRouter from './tnxvue-router';
 import Text from './text/Text';
 import Percent from './percent/Percent';
+import CaptchaVerify from './aj-captcha/Verify';
 import * as Vue from 'vue';
 import mitt from 'mitt';
 import './tnxvue.css';
@@ -22,6 +23,7 @@ const components = {
     },
     Text,
     Percent,
+    CaptchaVerify,
 };
 
 const tnxvue = Object.assign({}, tnxcore, {
