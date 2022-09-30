@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
+import com.anji.captcha.util.StringUtils;
 
 public abstract class AbstractCaptchaVerifier implements CaptchaVerifier {
 
@@ -12,7 +13,7 @@ public abstract class AbstractCaptchaVerifier implements CaptchaVerifier {
 
     @Override
     public boolean verify(String scene, String verification) {
-        if (verification != null) {
+        if (StringUtils.isNotBlank(verification)) {
             CaptchaVO vo = new CaptchaVO();
             vo.setCaptchaVerification(verification);
             return this.captchaService.verification(vo).isSuccess();
