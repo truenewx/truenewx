@@ -11,6 +11,7 @@ import Avatar from './avatar/Avatar';
 import Alert from './alert/Alert';
 import Button from './button/Button';
 import CheckIcon from './check-icon/CheckIcon';
+import CloseErrorButton from './close-error-button/CloseErrorButton';
 import Curd from './curd/Curd';
 import DatePicker from './date-picker/DatePicker';
 import DateRange from './date-range/DateRange';
@@ -50,6 +51,7 @@ const components = Object.assign({}, tnxvue.components, {
     Alert,
     Button,
     CheckIcon,
+    CloseErrorButton,
     Curd,
     DatePicker,
     DateRange,
