@@ -35,3 +35,8 @@ body {
     font-weight: 400;
     font-size: 1rem;
 }
+
+.weui-form-preview__label {
+    text-align: left;
+    text-align-last: auto;
+}
