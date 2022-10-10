@@ -112,7 +112,6 @@ public class SpringWebContext {
      *
      * @param name 属性名
      * @param <T>  属性类型
-     * @param <T>  属性类型
      * @return 属性值
      */
     @SuppressWarnings("unchecked")

@@ -20,6 +20,7 @@ public interface UnityRepox<T extends Unity<K>, K extends Serializable> extends 
      * @param propertyName 数值属性名
      * @param step         递增的值，为负值即表示递减
      * @param limit        增减后允许的最大/最小值，设定以避免数值超限
+     * @param <N>          值类型
      * @return 单体
      */
     <N extends Number> T increaseNumber(K id, String propertyName, N step, N limit);

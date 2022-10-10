@@ -61,6 +61,8 @@ public class UserConfigAuthority implements ConfigAttribute {
 
     /**
      * 构建拒绝所有访问的必备权限
+     *
+     * @return 拒绝所有访问的必备权限
      */
     public static UserConfigAuthority ofDenyAll() {
         UserConfigAuthority authority = new UserConfigAuthority();

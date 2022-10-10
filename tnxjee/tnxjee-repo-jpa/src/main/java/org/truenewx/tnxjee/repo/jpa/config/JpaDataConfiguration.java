@@ -48,9 +48,7 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
     private HibernateProperties hibernateProperties;
     private ApplicationContext context;
 
-    /**
-     * 在多数据源场景下，可创建子类，构造函数中指定DataSourceProperties和DataSource的beanName
-     */
+    // 在多数据源场景下，可创建子类，构造函数中指定DataSourceProperties和DataSource的beanName
     public JpaDataConfiguration(ApplicationContext context, SqlInitializationProperties dataSourceProperties,
             DataSource dataSource, JpaProperties properties,
             ObjectProvider<JtaTransactionManager> jtaTransactionManager) {

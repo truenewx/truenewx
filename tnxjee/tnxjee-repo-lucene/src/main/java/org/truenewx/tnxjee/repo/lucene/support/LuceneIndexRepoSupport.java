@@ -258,8 +258,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
     /**
      * 构建分词查询条件
      *
-     * @param name     索引字段名
-     * @param keywords 查询关键字集
+     * @param queryParser 查询解析器
+     * @param name        索引字段名
+     * @param keywords    查询关键字集
      * @return 分词查询条件
      */
     protected Query buildTokenizedQuery(QueryParser queryParser, String name, String[] keywords) {

@@ -31,6 +31,7 @@ public abstract class LuceneOwnedIndexRepoSupport<T extends Owned<O>, O extends 
     private IndexFactory indexFactory;
 
     /**
+     * @param owner 所属者
      * @return 当前仓库相对于存储根目录的路径
      */
     protected abstract String getDirectoryPath(O owner);
