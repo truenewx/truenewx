@@ -11,6 +11,7 @@ import java.util.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.Base64Utils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
@@ -27,7 +28,7 @@ import org.truenewx.tnxjeex.payment.model.*;
  *
  * @author jianglei
  */
-public class WechatPaymentGateway extends AbstractPaymentGateway {
+public class WechatPaymentGateway extends AbstractPaymentGateway implements DisposableBean {
 
     /**
      * 下单地址前缀
@@ -203,6 +204,11 @@ public class WechatPaymentGateway extends AbstractPaymentGateway {
             return new PaymentResult(HttpStatus.SC_INTERNAL_SERVER_ERROR, JsonUtil.toJson(error));
         }
         return null;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        this.client.close();
     }
 
 }

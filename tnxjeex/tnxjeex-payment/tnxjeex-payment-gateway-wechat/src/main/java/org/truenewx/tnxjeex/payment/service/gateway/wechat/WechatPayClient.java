@@ -118,4 +118,8 @@ public class WechatPayClient {
         return execute(httpPost);
     }
 
+    public void close() {
+        CertificatesManager.getInstance().stop();
+    }
+
 }
