@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class EmailMessage implements Serializable {
 
-    private static long serialVersionUID = 8622432486119864365L;
+    private static final long serialVersionUID = 8622432486119864365L;
 
     /**
      * 收件人地址清单

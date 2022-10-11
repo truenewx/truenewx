@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public class EmailSendProgress {
 
-    private static final long serialVersionUID = 6339119160936381551L;
-
     private int total;
     private Collection<Serializable> successes = new ArrayList<>();
     private Map<Serializable, Exception> failureExceptionMap = new HashMap<>();
