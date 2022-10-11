@@ -16,5 +16,10 @@
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version><!-- 修正fastjson安全漏洞 -->
+        </dependency>
     </dependencies>
 </project>
