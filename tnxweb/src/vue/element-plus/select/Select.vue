@@ -3,8 +3,11 @@
         <template v-if="items">
             <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]"
                 :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
-                <i :class="item[iconName]" v-if="item[iconName]"></i>
-                <span>{{ item[textName] }}</span>
+                <slot name="option" :item="item" v-if="$slots.option"></slot>
+                <template v-else>
+                    <i :class="item[iconName]" v-if="item[iconName]"></i>
+                    <span>{{ item[textName] }}</span>
+                </template>
             </el-checkbox>
             <template v-if="items.length === 0">
                 <slot name="empty" v-if="$slots.empty"></slot>
@@ -21,8 +24,11 @@
             <el-tag v-for="item in items" :key="item[valueName]" :type="theme"
                 :effect="isSelected(item[valueName]) ? 'dark' : 'plain'" :data-value="item[valueName]"
                 :title="item.title" :disabled="item.disabled" @click="select(item[valueName])">
-                <i :class="item[iconName]" v-if="item[iconName]"></i>
-                <span>{{ item[textName] }}</span>
+                <slot name="option" :item="item" v-if="$slots.option"></slot>
+                <template v-else>
+                    <i :class="item[iconName]" v-if="item[iconName]"></i>
+                    <span>{{ item[textName] }}</span>
+                </template>
             </el-tag>
             <template v-if="items.length === 0">
                 <slot name="empty"></slot>
@@ -39,8 +45,11 @@
                 :link="!isSelected(item[valueName])" :plain="isSelected(item[valueName])"
                 :size="size" :data-value="item[valueName]" :title="item.title" :disabled="item.disabled"
                 @click="select(item[valueName], $event)">
-                <i :class="item[iconName]" v-if="item[iconName]"></i>
-                <span>{{ item[textName] }}</span>
+                <slot name="option" :item="item" v-if="$slots.option"></slot>
+                <template v-else>
+                    <i :class="item[iconName]" v-if="item[iconName]"></i>
+                    <span>{{ item[textName] }}</span>
+                </template>
             </el-button>
             <template v-if="items.length === 0">
                 <slot name="empty"></slot>
@@ -50,11 +59,14 @@
     </div>
     <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
         :disabled="disabled" v-else-if="selector === 'radio'">
-        <el-radio :label="emptyValue" :class="emptyClass" v-if="empty">{{ emptyText }}</el-radio>
+        <el-radio :label="emptyValue" :class="emptyClass" :border="border" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]" :data-value="item[valueName]"
-            :title="item.title" :disabled="item.disabled">
-            <i :class="item[iconName]" v-if="item[iconName]"></i>
-            <span>{{ item[textName] }}</span>
+            :title="item.title" :disabled="item.disabled" :border="border">
+            <slot name="option" :item="item" v-if="$slots.option"></slot>
+            <template v-else>
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
+            </template>
         </el-radio>
     </el-radio-group>
     <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
@@ -62,8 +74,11 @@
         <el-radio-button :class="emptyClass" :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]"
             :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
-            <i :class="item[iconName]" v-if="item[iconName]"></i>
-            <span>{{ item[textName] }}</span>
+            <slot name="option" :item="item" v-if="$slots.option"></slot>
+            <template v-else>
+                <i :class="item[iconName]" v-if="item[iconName]"></i>
+                <span>{{ item[textName] }}</span>
+            </template>
         </el-radio-button>
     </el-radio-group>
     <el-dropdown trigger="click" :size="size" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
@@ -77,8 +92,11 @@
             <el-dropdown-menu>
                 <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]"
                     :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
-                    <i :class="item[iconName]" v-if="item[iconName]"></i>
-                    <span>{{ item[textName] }}</span>
+                    <slot name="option" :item="item" v-if="$slots.option"></slot>
+                    <template v-else>
+                        <i :class="item[iconName]" v-if="item[iconName]"></i>
+                        <span>{{ item[textName] }}</span>
+                    </template>
                 </el-dropdown-item>
             </el-dropdown-menu>
         </template>
@@ -90,8 +108,11 @@
             <el-dropdown-menu>
                 <el-dropdown-item v-for="item in items" :key="item[valueName]" :command="item[valueName]"
                     :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
-                    <i :class="item[iconName]" v-if="item[iconName]"></i>
-                    <span>{{ item[textName] }}</span>
+                    <slot name="option" :item="item" v-if="$slots.option"></slot>
+                    <template v-else>
+                        <i :class="item[iconName]" v-if="item[iconName]"></i>
+                        <span>{{ item[textName] }}</span>
+                    </template>
                 </el-dropdown-item>
             </el-dropdown-menu>
         </template>
@@ -164,6 +185,7 @@ export default {
         filterable: Boolean,
         theme: String,
         size: String,
+        border: Boolean,
     },
     emits: ['update:modelValue'],
     data() {
