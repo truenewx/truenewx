@@ -6,6 +6,7 @@ package org.truenewx.tnxjee.core.config;
 public class AppFacade {
 
     private String name;
+    private String alias;
     private String caption;
     private String business;
     private String contextUri;
@@ -17,6 +18,14 @@ public class AppFacade {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAlias() {
+        return this.alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public String getCaption() {

@@ -123,6 +123,7 @@ public class CommonProperties implements InitializingBean {
         }
         AppFacade basic = new AppFacade();
         basic.setName(name);
+        basic.setAlias(appConfig.getAlias());
         basic.setCaption(appConfig.getCaption());
         basic.setBusiness(appConfig.getBusiness());
         if (relativeContextUri) {

@@ -12,6 +12,7 @@ import org.truenewx.tnxjee.core.Strings;
  */
 public class AppConfiguration {
 
+    private String alias;
     private String caption;
     private String business;
     private String gatewayUri;
@@ -21,6 +22,14 @@ public class AppConfiguration {
     private String logoutPath = "/logout";
     private String loginedPath = Strings.EMPTY;
     private Map<String, String> subs;
+
+    public String getAlias() {
+        return this.alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
     public String getCaption() {
         return this.caption;
