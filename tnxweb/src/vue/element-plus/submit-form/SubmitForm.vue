@@ -5,10 +5,10 @@
         :class="theme ? ('theme-' + theme) : null" :size="size" :status-icon="statusIcon">
         <slot></slot>
         <el-form-item class="w-100 mb-0" :label-width="labelWidth" v-if="submit !== undefined && submit !== null">
-            <el-button :type="theme || 'primary'" @click="toSubmit" v-if="submit !== false">
+            <el-button :type="theme || 'primary'" :size="size" @click="toSubmit" v-if="submit !== false">
                 {{ _submitText }}
             </el-button>
-            <el-button @click="toCancel" v-if="cancel !== false">{{ cancelText }}</el-button>
+            <el-button :size="size" @click="toCancel" v-if="cancel !== false">{{ cancelText }}</el-button>
         </el-form-item>
     </el-form>
 </template>
