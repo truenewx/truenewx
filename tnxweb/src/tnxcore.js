@@ -6,6 +6,7 @@
 import util from './tnxcore-util';
 import app from './tnxcore-app';
 import fss from './tnxcore-fss';
+import Menu from './tnxcore-menu';
 import wechat from './tnxcore-wechat';
 import './tnxcore.css';
 
@@ -14,6 +15,7 @@ const tnxcore = {
     util: util,
     app: app,
     fss: fss,
+    Menu: Menu,
     wechat: wechat,
     alert(message, title, callback) {
         if (typeof title === 'function') {
