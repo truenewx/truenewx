@@ -29,7 +29,6 @@ public class CasClientHttpSecurityConfigurer implements WebHttpSecurityConfigure
 
         // 在默认的登出过滤器之前插入单点登出过滤器，确保后者执行
         SingleSignOutFilter logoutFilter = new SingleSignOutFilter();
-        logoutFilter.setCasServerUrlPrefix(this.casClientProperties.getServerContextUri(false));
         http.addFilterBefore(logoutFilter, LogoutFilter.class);
     }
 
