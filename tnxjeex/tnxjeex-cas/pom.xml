@@ -17,10 +17,10 @@
     </modules>
     <dependencyManagement>
         <dependencies>
-            <dependency>
+            <dependency><!-- 与spring-security-cas中依赖的版本保持一致 -->
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.4</version>
             </dependency>
             <dependency>
                 <groupId>org.truenewx.tnxjeex.cas</groupId>
