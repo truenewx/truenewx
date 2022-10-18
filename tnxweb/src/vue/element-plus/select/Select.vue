@@ -1,5 +1,6 @@
 <template>
-    <el-checkbox-group v-model="model" :theme="theme" :size="size" :disabled="disabled" v-if="selector === 'checkbox'">
+    <el-checkbox-group class="tnxel-select tnxel-checkbox-group" v-model="model" :theme="theme" :size="size"
+        :disabled="disabled" v-if="selector === 'checkbox'">
         <template v-if="items">
             <el-checkbox v-for="item in items" :key="item[valueName]" :label="item[valueName]"
                 :data-value="item[valueName]" :title="item.title" :disabled="item.disabled">
@@ -16,7 +17,7 @@
         </template>
         <tnxel-icon value="Loading" v-else/>
     </el-checkbox-group>
-    <div class="tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
+    <div class="tnxel-select tnxel-tag-group d-flex flex-wrap" v-else-if="selector === 'tag' || selector === 'tags'">
         <template v-if="items">
             <el-button link :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
@@ -36,7 +37,8 @@
         </template>
         <tnxel-icon value="Loading" v-else/>
     </div>
-    <div class="tnxel-text-button-group d-flex flex-wrap" v-else-if="selector === 'text' || selector === 'texts'">
+    <div class="tnxel-select tnxel-text-button-group d-flex flex-wrap"
+        v-else-if="selector === 'text' || selector === 'texts'">
         <template v-if="items">
             <el-button link :size="size" :class="emptyClass" v-if="emptyText" @click="clear">
                 {{ emptyText }}
@@ -57,7 +59,7 @@
         </template>
         <tnxel-icon value="Loading" v-else/>
     </div>
-    <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
+    <el-radio-group class="tnxel-select tnxel-radio-group ignore-feedback" v-model="model" :theme="theme" :size="size"
         :disabled="disabled" v-else-if="selector === 'radio'">
         <el-radio :label="emptyValue" :class="emptyClass" :border="border" v-if="empty">{{ emptyText }}</el-radio>
         <el-radio v-for="item in items" :key="item[valueName]" :label="item[valueName]" :data-value="item[valueName]"
@@ -69,7 +71,7 @@
             </template>
         </el-radio>
     </el-radio-group>
-    <el-radio-group v-model="model" class="tnxel-radio-group ignore-feedback" :theme="theme" :size="size"
+    <el-radio-group class="tnxel-select tnxel-radio-group ignore-feedback" v-model="model" :theme="theme" :size="size"
         :disabled="disabled" v-else-if="selector === 'radio-button'">
         <el-radio-button :class="emptyClass" :label="emptyValue" v-if="empty">{{ emptyText }}</el-radio-button>
         <el-radio-button v-for="item in items" :key="item[valueName]" :label="item[valueName]"
@@ -81,7 +83,8 @@
             </template>
         </el-radio-button>
     </el-radio-group>
-    <el-dropdown trigger="click" :size="size" @command="onDropdownCommand" v-else-if="selector === 'dropdown'">
+    <el-dropdown class="tnxel-select tnxel-dropdown" trigger="click" :size="size" @command="onDropdownCommand"
+        v-else-if="selector === 'dropdown'">
         <el-button style="width: 100%" :type="theme">
             <div class="d-flex justify-content-between">
                 <span>{{ currentText }}</span>
@@ -101,8 +104,8 @@
             </el-dropdown-menu>
         </template>
     </el-dropdown>
-    <el-dropdown :type="theme" :size="size" trigger="click" split-button @command="onDropdownCommand"
-        v-else-if="selector === 'split-dropdown'">
+    <el-dropdown class="tnxel-select tnxel-split-dropdown" :type="theme" :size="size" trigger="click" split-button
+        @command="onDropdownCommand" v-else-if="selector === 'split-dropdown'">
         <span>{{ currentText }}</span>
         <template #dropdown v-if="items && items.length">
             <el-dropdown-menu>
@@ -117,8 +120,8 @@
             </el-dropdown-menu>
         </template>
     </el-dropdown>
-    <el-select v-model="model" class="ignore-feedback" :placeholder="placeholder" :theme="theme" :size="size"
-        :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
+    <el-select class="tnxel-select ignore-feedback" v-model="model" :placeholder="placeholder" :theme="theme"
+        :size="size" :disabled="disabled" :filterable="filterable" :filter-method="filter" v-else>
         <el-option class="text-secondary" :value="emptyValue" :label="emptyText" :class="emptyClass" v-if="empty"/>
         <template v-for="item in items">
             <el-option :key="item[valueName]" :value="item[valueName]" :label="item[textName]"
