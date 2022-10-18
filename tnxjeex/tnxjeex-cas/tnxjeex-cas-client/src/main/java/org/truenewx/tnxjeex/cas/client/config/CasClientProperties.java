@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.cas.ServiceProperties;
+import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.AppConstants;
@@ -44,6 +45,7 @@ public class CasClientProperties extends ServiceProperties {
     public void afterPropertiesSet() {
         if (StringUtils.isBlank(getService())) {
             AppConfiguration app = this.commonProperties.getApp(this.appName);
+            Assert.notNull(app, "There is no app named '" + this.appName + "' in common.apps");
             String service = app.getContextUri(false) + app.getLoginedPath();
             setService(service);
         }
