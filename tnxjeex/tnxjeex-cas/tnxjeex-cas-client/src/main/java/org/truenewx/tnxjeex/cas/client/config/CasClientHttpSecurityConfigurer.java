@@ -2,7 +2,6 @@ package org.truenewx.tnxjeex.cas.client.config;
 
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +16,6 @@ import org.truenewx.tnxjeex.cas.client.web.CasClientSecurityContextPrepareFilter
  */
 @Configuration
 public class CasClientHttpSecurityConfigurer implements WebHttpSecurityConfigurer {
-
-    @Autowired
-    private CasClientProperties casClientProperties;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
