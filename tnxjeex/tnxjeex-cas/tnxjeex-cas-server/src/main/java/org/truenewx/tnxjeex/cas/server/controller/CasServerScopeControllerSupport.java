@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
-import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAuthority;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 import org.truenewx.tnxjee.webmvc.security.web.AjaxRedirectStrategy;
@@ -42,13 +43,13 @@ public abstract class CasServerScopeControllerSupport {
     @RequestMapping("/scope/put")
     @ConfigAuthority
     public void putScope(@RequestParam(value = "scope", required = false) String scope,
-            @RequestParam(value = WebConstants.DEFAULT_REDIRECT_TARGET_URL_PARAMETER, required = false) String next,
+            @RequestParam(value = "next", required = false) String next, // 与登录时的_next不同，以避免冲突
             HttpServletRequest request, HttpServletResponse response) {
         UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
         if (this.scopeResolver.applyScope(userDetails, scope)) {
             this.logoutHandler.logoutClients(request);
         }
-        if (StringUtils.isNotBlank(next)) {
+        if (StringUtils.isNotBlank(next) && (NetUtil.isHttpUrl(next, true) || next.startsWith(Strings.SLASH))) {
             try {
                 this.redirectStrategy.sendRedirect(request, response, next);
             } catch (IOException e) {
