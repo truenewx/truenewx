@@ -31,7 +31,7 @@ import org.truenewx.tnxjee.core.util.StringUtil;
 public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     private static final String DEFAULT_ROOT_LOCATION = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config";
-    private static final String SOURCE_NAME_PREFIX = Framework.NAME + "Config: ";
+    private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " property source: ";
     private static final String BASENAME = "application"; // 配置文件基本名称固定为application，以便于IDE工具编辑
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -57,7 +57,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             if (added) {
                 System.out.println("====== Classpath Config Dir Property Sources ======");
                 for (PropertySource<?> propertySource : propertySources) {
-                    if (propertySource.getName().startsWith(SOURCE_NAME_PREFIX)) {
+                    if (propertySource.getName().startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
                         System.out.println(propertySource.getName());
                     }
                 }
@@ -154,11 +154,10 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             String filename = resource.getFilename();
             PropertySourceLoader sourceLoader = getSourceLoader(filename);
             if (sourceLoader != null) {
-                String sourceName = SOURCE_NAME_PREFIX + Strings.LEFT_SQUARE_BRACKET + dirLocation + Strings.SLASH
-                        + filename + Strings.RIGHT_SQUARE_BRACKET;
+                String sourceName = PROPERTY_SOURCE_NAME_PREFIX + resource.getURL();
                 if (!propertySources.contains(sourceName)) {
-                    PropertySource<?> propertySource = CollectionUtil
-                            .getFirst(sourceLoader.load(sourceName, resource), null);
+                    PropertySource<?> propertySource = CollectionUtil.getFirst(sourceLoader.load(sourceName, resource),
+                            null);
                     if (propertySource != null) {
                         propertySources.addLast(propertySource);
                         return true;
