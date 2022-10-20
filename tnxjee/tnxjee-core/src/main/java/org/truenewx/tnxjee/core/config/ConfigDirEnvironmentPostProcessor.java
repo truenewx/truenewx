@@ -24,11 +24,11 @@ import org.truenewx.tnxjee.core.util.SpringUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
- * 基于配置子目录的环境配置后置处理器，于Spring容器启动前加载基于分层机制的自定义配置属性
+ * 基于配置目录的环境配置后置处理器，于Spring容器启动前加载基于分层机制的自定义配置属性
  *
  * @author jianglei
  */
-public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     private static final String DEFAULT_ROOT_LOCATION = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config";
     private static final String SOURCE_NAME_PREFIX = Framework.NAME + "Config: ";
@@ -43,8 +43,7 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
         try {
             MutablePropertySources propertySources = environment.getPropertySources();
             String rootLocation = getRootLocation(environment);
-            // 先从根目录中加载配置
-            boolean added = addPropertySource(environment, rootLocation);
+            boolean added = false;
             // 找出根目录下的所有子目录并按照优先级排序
             List<String> dirNames = getSortedDirNames(rootLocation);
             // 从顶层至底层依次加载配置文件以确保上层配置优先
@@ -52,9 +51,11 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
                 String dirLocation = rootLocation + Strings.SLASH + dirName;
                 added = addPropertySource(environment, dirLocation) || added;
             }
+            // 最后从根目录中加载最低优先级的配置
+            added = addPropertySource(environment, rootLocation) || added;
 
             if (added) {
-                System.out.println("====== Config Sub Dir Property Sources ======");
+                System.out.println("====== Classpath Config Dir Property Sources ======");
                 for (PropertySource<?> propertySource : propertySources) {
                     if (propertySource.getName().startsWith(SOURCE_NAME_PREFIX)) {
                         System.out.println(propertySource.getName());
@@ -88,8 +89,9 @@ public class ConfigSubDirEnvironmentPostProcessor implements EnvironmentPostProc
             int ordinal2 = getDirOrdinal(dirName2);
             int result = Integer.compare(ordinal1, ordinal2);
             if (result == 0) {
-                // 子目录序号相同，则比较子目录名称，由于core,model,repo,service,web的层级名称符合自然排序，所以此处只需简单比较名称即可
-                result = dirName1.compareTo(dirName2);
+                // 子目录序号相同，则比较子目录名称
+                // 由于core,model,repo,service,web的层级名称符合自然排序，所以此处只需简单倒序排列名称即可，确保更高层更靠前
+                result = dirName2.compareTo(dirName1);
             }
             return result;
         });
