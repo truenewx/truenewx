@@ -48,9 +48,10 @@ public abstract class CasServerLoginControllerSupport {
             if (StringUtils.isBlank(service)) {
                 return toBadServiceView(response);
             }
-            // 写入请求属性中，便于后续获取
-            request.setAttribute(CasConstants.PARAMETER_SERVICE, service);
         }
+        // 写入请求属性中，便于后续获取
+        request.setAttribute(CasConstants.PARAMETER_SERVICE, service);
+
         String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (WebUtil.isAjaxRequest(request)) {
             String originalRequest = request.getHeader(WebConstants.HEADER_ORIGINAL_REQUEST);

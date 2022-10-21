@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.web.SecurityUrlProvider;
 import org.truenewx.tnxjeex.cas.core.CasConstants;
@@ -26,7 +27,7 @@ public class CasServerLogoutSuccessHandler extends CasLogoutSuccessHandler {
             String service = request.getParameter(CasConstants.PARAMETER_SERVICE);
             if (service != null) {
                 targetUrl = CasConstants.URL_LOGIN + Strings.QUESTION + CasConstants.PARAMETER_SERVICE + Strings.EQUAL
-                        + service;
+                        + NetUtil.encode(service);
             }
         }
         if (StringUtils.isBlank(targetUrl)) {

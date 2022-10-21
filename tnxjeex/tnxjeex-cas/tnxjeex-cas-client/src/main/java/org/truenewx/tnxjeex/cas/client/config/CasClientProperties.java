@@ -1,19 +1,18 @@
 package org.truenewx.tnxjeex.cas.client.config;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.cas.ServiceProperties;
-import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.config.CommonProperties;
+import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.NetUtil;
+import org.truenewx.tnxjeex.cas.core.util.CasUtil;
 
 /**
  * CAS客户端配置属性
@@ -45,9 +44,15 @@ public class CasClientProperties extends ServiceProperties {
     public void afterPropertiesSet() {
         if (StringUtils.isBlank(getService())) {
             AppConfiguration app = this.commonProperties.getApp(this.appName);
-            Assert.notNull(app, "There is no app named '" + this.appName + "' in common.apps");
-            String service = app.getContextUri(false) + app.getLoginedPath();
-            setService(service);
+            if (app == null) {
+                String service = CasUtil.getServicePrefixByAppName(this.appName);
+                setService(service);
+                LogUtil.warn(getClass(),
+                        "There is no app named '{}' in tnxjee.common.apps. '{}' has been used as the service",
+                        this.appName, service);
+            } else {
+                setService(app.getContextUri(false) + app.getLoginedPath());
+            }
         }
         super.afterPropertiesSet();
     }
@@ -59,7 +64,7 @@ public class CasClientProperties extends ServiceProperties {
 
     public String getLoginFormUrl() {
         String url = getServerContextUrl();
-        String service = URLEncoder.encode(getService(), StandardCharsets.UTF_8);
+        String service = NetUtil.encode(getService());
         return url + "/login?" + getServiceParameter() + Strings.EQUAL + service;
     }
 
@@ -78,7 +83,7 @@ public class CasClientProperties extends ServiceProperties {
         if (this.appName.equals(this.serverAppName)) { // 当前应用同时也是CAS服务端，则登出成功后默认跳转到登录表单页
             return getLoginFormUrl();
         } else { // 否则当前客户端登出后，跳转到服务端执行登出
-            String service = URLEncoder.encode(getService(), StandardCharsets.UTF_8);
+            String service = NetUtil.encode(getService());
             return getServerContextUrl() + "/logout?" + getServiceParameter() + Strings.EQUAL + service;
         }
     }
