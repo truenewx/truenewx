@@ -125,10 +125,15 @@ public class AppConfiguration {
      * @return 上下文根路径
      */
     public String getContextUri(boolean direct) {
+        String directUri = getDirectUri();
+        // 如果直连地址为*，则无论需要的是否直连地址，均返回*，表示任意地址，需使用者动态赋值
+        if (Strings.ASTERISK.equals(directUri)) {
+            return directUri;
+        }
         String uri = getGatewayUri();
         // 默认为网关地址，指定需要直连地址或网关地址为空，则使用直连地址
         if (direct || StringUtils.isBlank(uri)) {
-            uri = getDirectUri();
+            uri = directUri;
         }
         // 添加上下文根
         if (StringUtils.isNotBlank(this.contextPath) && !Strings.SLASH.equals(this.contextPath)) {

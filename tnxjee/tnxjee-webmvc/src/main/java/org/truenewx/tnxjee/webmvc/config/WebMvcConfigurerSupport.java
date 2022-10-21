@@ -13,6 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.*;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.CommonProperties;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.CollectionUtil;
@@ -77,6 +78,7 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
         Set<String> allowedOriginals = new HashSet<>(this.commonProperties.getAllAppUris());
         // 加入额外配置的跨域访问白名单
         CollectionUtil.addAll(allowedOriginals, this.corsRegistryProperties.getAllowedOrigins());
+        boolean all = allowedOriginals.removeIf(Strings.ASTERISK::equals);
 
         CorsRegistration registration = registry
                 .addMapping(this.corsRegistryProperties.getPathPattern())
@@ -93,6 +95,9 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
             registration.maxAge(this.corsRegistryProperties.getMaxAge());
         }
         CorsConfiguration corsConfiguration = BeanUtil.getFieldValue(registration, CorsConfiguration.class);
+        if (all) {
+            corsConfiguration.addAllowedOriginPattern(Strings.ASTERISK);
+        }
         this.corsConfigurationSource.setCorsConfiguration(corsConfiguration);
     }
 

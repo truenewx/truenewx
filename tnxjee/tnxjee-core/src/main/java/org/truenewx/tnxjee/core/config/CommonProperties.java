@@ -80,6 +80,20 @@ public class CommonProperties implements InitializingBean {
 
     public String findAppName(String url, boolean direct) {
         if (url != null) {
+            if (url.startsWith(Strings.LEFT_SQUARE_BRACKET)) {
+                int index = url.indexOf(Strings.RIGHT_SQUARE_BRACKET);
+                if (index > 0) { // 以[appName]开头的地址，检查应用是否存在且允许任意地址
+                    String appName = url.substring(1, index);
+                    AppConfiguration configuration = getApp(appName);
+                    if (configuration != null) {
+                        String contextUri = configuration.getContextUri(direct);
+                        if (Strings.ASTERISK.equals(contextUri)) {
+                            return appName;
+                        }
+                    }
+                    return null; // 不存在或不允许任意地址的，返回null表示未找到
+                }
+            }
             for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
                 AppConfiguration configuration = entry.getValue();
                 String contextUri = configuration.getContextUri(direct);
