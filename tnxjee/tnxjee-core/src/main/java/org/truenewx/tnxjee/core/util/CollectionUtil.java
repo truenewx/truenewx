@@ -207,6 +207,24 @@ public class CollectionUtil {
     }
 
     /**
+     * 将指定数据中的满足指定断言的元素添加到指定集合中
+     *
+     * @param collection 集合
+     * @param array      数组
+     * @param predicate  断言
+     * @param <T>        元素类型
+     */
+    public static <T> void addAll(Collection<T> collection, @Nullable T[] array, Predicate<T> predicate) {
+        if (array != null) {
+            for (T element : array) {
+                if (predicate.test(element)) {
+                    collection.add(element);
+                }
+            }
+        }
+    }
+
+    /**
      * 将Key为字符串的映射集转为Key为整型的映射集
      *
      * @param map    Key为字符串的映射

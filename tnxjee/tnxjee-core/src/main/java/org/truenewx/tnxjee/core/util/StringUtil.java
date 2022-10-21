@@ -123,10 +123,40 @@ public class StringUtil {
      */
     public static boolean regexMatch(String s, String pattern) {
         try {
-            return Pattern.matches(pattern, s);
+            return Pattern.compile(pattern).matcher(s).find();
         } catch (PatternSyntaxException ignored) {
         }
         return false;
+    }
+
+    /**
+     * 在指定字符串中查找指定正则表达式首个匹配的起始位置
+     *
+     * @param s       字符串
+     * @param pattern 正则表达式
+     * @return 首个匹配的起始位置
+     */
+    public static int regexFirstStart(String s, String pattern) {
+        Matcher matcher = Pattern.compile(pattern).matcher(s);
+        if (matcher.find()) {
+            return matcher.start();
+        }
+        return -1;
+    }
+
+    /**
+     * 在指定字符串中查找指定正则表达式首个匹配的结束位置
+     *
+     * @param s       字符串
+     * @param pattern 正则表达式
+     * @return 首个匹配的结束位置
+     */
+    public static int regexFirstEnd(String s, String pattern) {
+        Matcher matcher = Pattern.compile(pattern).matcher(s);
+        if (matcher.find()) {
+            return matcher.end();
+        }
+        return -1;
     }
 
     /**

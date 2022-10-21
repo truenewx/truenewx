@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -538,6 +539,35 @@ public class NetUtil {
             return true;
         }
         return false;
+    }
+
+    public static String encode(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
+    }
+
+    public static String getContextUrl(String url, String contextPath) {
+        if (StringUtils.isBlank(contextPath) || Strings.SLASH.equals(contextPath)) {
+            if (isRelativeUrl(url)) { // 相对地址的上下文地址设为/
+                return Strings.SLASH;
+            }
+            int index = url.indexOf(Strings.DOUBLE_SLASH);
+            if (index >= 0) {
+                index = url.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length());
+                if (index > 0) {
+                    return url.substring(0, index);
+                } else {
+                    return url;
+                }
+            }
+        } else {
+            int index = url.indexOf(contextPath + Strings.SLASH);
+            if (index >= 0) {
+                return url.substring(0, index + contextPath.length());
+            } else if (url.endsWith(contextPath)) {
+                return url;
+            }
+        }
+        return null; // 无法解析出上下文地址
     }
 
 }
