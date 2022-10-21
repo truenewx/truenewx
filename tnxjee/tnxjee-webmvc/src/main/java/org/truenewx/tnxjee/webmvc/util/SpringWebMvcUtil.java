@@ -27,6 +27,11 @@ import org.truenewx.tnxjee.webmvc.bind.annotation.ResponseStream;
  */
 public class SpringWebMvcUtil {
 
+    /**
+     * 直接重定向的视图名称前缀
+     */
+    public static final String REDIRECT_VIEW_NAME_PREFIX = "redirect:";
+
     private SpringWebMvcUtil() {
     }
 
@@ -95,4 +100,13 @@ public class SpringWebMvcUtil {
         return requestMapping == null ? null : ArrayUtil.get(requestMapping.value(), 0);
     }
 
+    /**
+     * 转换指定结果名为直接重定向的结果名
+     *
+     * @param result 结果名
+     * @return 直接重定向的结果名
+     */
+    public static String toRedirectResult(String result) {
+        return StringUtils.join(REDIRECT_VIEW_NAME_PREFIX, result);
+    }
 }

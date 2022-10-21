@@ -20,13 +20,13 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.function.WebContextPathPredicate;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
+import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 import org.truenewx.tnxjee.webmvc.view.exception.resolver.ViewErrorPathProperties;
 import org.truenewx.tnxjee.webmvc.view.util.WebViewUtil;
 
 @Controller
 public class NotFoundErrorController extends BasicErrorController {
 
-    private static final String REDIRECT_PREFIX = "redirect:";
     private static final String PARAMETER_PATH = "path";
     private static final String PARAMETER_PREV = "prev";
 
@@ -49,7 +49,7 @@ public class NotFoundErrorController extends BasicErrorController {
             // 获取后台请求地址，由于此场景为非常低频的访问，故不进行内存缓存，节省内存空间
             String path = this.pathProperties.getNotFound();
             if (supports(path)) {
-                if (!path.startsWith(REDIRECT_PREFIX)) {
+                if (!path.startsWith(SpringWebMvcUtil.REDIRECT_VIEW_NAME_PREFIX)) {
                     String prefix = this.mvcProperties.getView().getPrefix();
                     if (prefix.endsWith(Strings.SLASH) && path.startsWith(Strings.SLASH)) {
                         path = path.substring(1);
@@ -70,8 +70,8 @@ public class NotFoundErrorController extends BasicErrorController {
     }
 
     protected boolean supports(String path) {
-        if (path.startsWith(REDIRECT_PREFIX)) {
-            path = path.substring(REDIRECT_PREFIX.length());
+        if (path.startsWith(SpringWebMvcUtil.REDIRECT_VIEW_NAME_PREFIX)) {
+            path = path.substring(SpringWebMvcUtil.REDIRECT_VIEW_NAME_PREFIX.length());
         }
         return this.webContextPathPredicate.test(path);
     }

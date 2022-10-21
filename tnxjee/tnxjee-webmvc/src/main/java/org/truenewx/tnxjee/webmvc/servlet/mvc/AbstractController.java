@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.truenewx.tnxjee.web.context.SpringWebContext;
+import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 
 /**
  * 抽象的控制器，为具体控制器类提供便利
@@ -16,7 +17,7 @@ public abstract class AbstractController {
      *
      * @return 当前HTTP请求
      */
-    protected final HttpServletRequest getRequest() {
+    protected HttpServletRequest getRequest() {
         return SpringWebContext.getRequest();
     }
 
@@ -25,7 +26,7 @@ public abstract class AbstractController {
      *
      * @return 当前HTTP会话
      */
-    protected final HttpSession getSession() {
+    protected HttpSession getSession() {
         return getRequest().getSession();
     }
 
@@ -35,7 +36,7 @@ public abstract class AbstractController {
      * @param name  属性名
      * @param value 属性值
      */
-    protected final void setRequestAttribute(final String name, final Object value) {
+    protected void setRequestAttribute(String name, Object value) {
         if (name != null && value != null) {
             getRequest().setAttribute(name, value);
         }
@@ -47,7 +48,7 @@ public abstract class AbstractController {
      * @param result 结果名
      * @return 直接重定向的结果名
      */
-    protected final String getRedirectResult(final String result) {
-        return SpringWebContext.toRedirectResult(result);
+    protected String getRedirectResult(String result) {
+        return SpringWebMvcUtil.toRedirectResult(result);
     }
 }

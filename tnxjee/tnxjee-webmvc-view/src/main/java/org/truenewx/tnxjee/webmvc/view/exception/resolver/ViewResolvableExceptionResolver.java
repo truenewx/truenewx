@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.webmvc.view.exception.resolver;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,7 +12,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.truenewx.tnxjee.service.exception.*;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.resolver.ResolvableExceptionResolver;
-import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 import org.truenewx.tnxjee.webmvc.view.exception.annotation.ResolvableExceptionResult;
 import org.truenewx.tnxjee.webmvc.view.util.WebViewUtil;
 
@@ -35,8 +35,8 @@ public class ViewResolvableExceptionResolver extends ResolvableExceptionResolver
     }
 
     @Override
-    protected boolean supports(HandlerMethod handlerMethod) {
-        return !SpringWebMvcUtil.isResponseBody(handlerMethod);
+    protected boolean supports(HttpServletRequest request, HandlerMethod handlerMethod) {
+        return !this.messageSaver.isResponseBody(request, handlerMethod);
     }
 
     private String getErrorPath(ResolvableException re) {
@@ -55,12 +55,14 @@ public class ViewResolvableExceptionResolver extends ResolvableExceptionResolver
 
     @Override
     protected ModelAndView getResult(HttpServletRequest request, HttpServletResponse response,
-            HandlerMethod handlerMethod, ResolvableException re) {
+            @Nullable HandlerMethod handlerMethod, ResolvableException re) {
         String errorPath = getErrorPath(re);
         ModelAndView mav = new ModelAndView(errorPath);
         mav.addObject("ajaxRequest", WebUtil.isAjaxRequest(request));
-        ResolvableExceptionResult rer =
-                handlerMethod.getMethodAnnotation(ResolvableExceptionResult.class);
+        ResolvableExceptionResult rer = null;
+        if (handlerMethod != null) {
+            rer = handlerMethod.getMethodAnnotation(ResolvableExceptionResult.class);
+        }
         if (rer != null) {
             String view = rer.value();
             if (ResolvableExceptionResult.PREV_VIEW.equals(view)) {

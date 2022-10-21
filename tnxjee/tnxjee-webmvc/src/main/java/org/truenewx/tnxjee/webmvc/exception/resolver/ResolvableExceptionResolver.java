@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.webmvc.exception.resolver;
 
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
@@ -24,7 +25,7 @@ import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSa
 public abstract class ResolvableExceptionResolver extends AbstractHandlerExceptionResolver {
 
     @Autowired
-    private ResolvableExceptionMessageSaver messageSaver;
+    protected ResolvableExceptionMessageSaver messageSaver;
 
     public static boolean supports(Exception ex) {
         ex = prepare(ex);
@@ -50,31 +51,29 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
     @Override
     protected final ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
             Object handler, Exception ex) {
-        if (handler instanceof HandlerMethod) {
-            ex = prepare(ex);
-            if (ex instanceof ConstraintViolationException) {
-                ConstraintViolationException cve = (ConstraintViolationException) ex;
-                Set<ConstraintViolation<?>> violations = cve.getConstraintViolations();
-                if (violations != null && violations.size() > 0) {
-                    if (violations.size() == 1) {
-                        ConstraintViolation<?> violation = CollectionUtil.getFirst(violations, null);
-                        ex = buildFormatException(violation, request);
-                    } else {
-                        MultiException me = new MultiException();
-                        for (ConstraintViolation<?> violation : violations) {
-                            me.add(buildFormatException(violation, request));
-                        }
-                        ex = me;
+        ex = prepare(ex);
+        if (ex instanceof ConstraintViolationException) {
+            ConstraintViolationException cve = (ConstraintViolationException) ex;
+            Set<ConstraintViolation<?>> violations = cve.getConstraintViolations();
+            if (violations != null && violations.size() > 0) {
+                if (violations.size() == 1) {
+                    ConstraintViolation<?> violation = CollectionUtil.getFirst(violations, null);
+                    ex = buildFormatException(violation, request);
+                } else {
+                    MultiException me = new MultiException();
+                    for (ConstraintViolation<?> violation : violations) {
+                        me.add(buildFormatException(violation, request));
                     }
+                    ex = me;
                 }
             }
-            if (ex instanceof ResolvableException) {
-                HandlerMethod handlerMethod = (HandlerMethod) handler;
+        }
+        if (ex instanceof ResolvableException) {
+            HandlerMethod handlerMethod = (handler instanceof HandlerMethod) ? (HandlerMethod) handler : null;
+            if (supports(request, handlerMethod)) {
                 ResolvableException re = (ResolvableException) ex;
-                if (supports(handlerMethod)) {
-                    this.messageSaver.saveMessage(request, response, handlerMethod, re);
-                    return getResult(request, response, handlerMethod, re);
-                }
+                this.messageSaver.saveMessage(request, response, handlerMethod, re);
+                return getResult(request, response, handlerMethod, re);
             }
         }
         return null;
@@ -86,10 +85,10 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
         return new FormatException(code, violation.getRootBeanClass(), property);
     }
 
-    protected abstract boolean supports(HandlerMethod handlerMethod);
+    protected abstract boolean supports(HttpServletRequest request, @Nullable HandlerMethod handlerMethod);
 
     protected abstract ModelAndView getResult(HttpServletRequest request,
-            HttpServletResponse response, HandlerMethod handlerMethod, ResolvableException re);
+            HttpServletResponse response, @Nullable HandlerMethod handlerMethod, ResolvableException re);
 
     @Override
     protected String buildLogMessage(Exception ex, HttpServletRequest request) {

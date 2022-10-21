@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.truenewx.tnxjee.core.util.JsonUtil;
@@ -22,6 +23,7 @@ import org.truenewx.tnxjee.service.exception.message.SingleExceptionMessageResol
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.model.ExceptionErrorBody;
+import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 import org.truenewx.tnxjee.webmvc.util.SpringWebMvcUtil;
 
 /**
@@ -32,10 +34,12 @@ public class ResolvableExceptionMessageSaverImpl implements ResolvableExceptionM
 
     @Autowired
     private SingleExceptionMessageResolver resolver;
+    @Autowired
+    private HandlerMethodMapping handlerMethodMapping;
 
     @Override
-    public void saveMessage(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod,
-            ResolvableException re) {
+    public void saveMessage(HttpServletRequest request, HttpServletResponse response,
+            @Nullable HandlerMethod handlerMethod, ResolvableException re) {
         List<ExceptionError> errors = buildErrors(re, request.getLocale());
         if (errors.size() > 0) {
             if (isResponseBody(request, handlerMethod)) {
@@ -54,7 +58,11 @@ public class ResolvableExceptionMessageSaverImpl implements ResolvableExceptionM
         }
     }
 
-    private boolean isResponseBody(HttpServletRequest request, HandlerMethod handlerMethod) {
+    @Override
+    public boolean isResponseBody(HttpServletRequest request, HandlerMethod handlerMethod) {
+        if (handlerMethod == null) {
+            handlerMethod = this.handlerMethodMapping.getHandlerMethod(request);
+        }
         if (handlerMethod != null) {
             return SpringWebMvcUtil.isResponseBody(handlerMethod);
         } else {

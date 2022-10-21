@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,7 @@ import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSaver;
+import org.truenewx.tnxjee.webmvc.servlet.mvc.WebMvcViewResolver;
 
 /**
  * 基于可解决异常的登录认证失败处理器
@@ -26,11 +26,11 @@ import org.truenewx.tnxjee.webmvc.exception.message.ResolvableExceptionMessageSa
 public class ResolvableExceptionAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     @Autowired(required = false)
-    private AuthenticationFailureViewResolver viewResolver = new DefaultAuthenticationFailureViewResolver();
+    private AuthenticationFailureViewResolver failureViewResolver = new DefaultAuthenticationFailureViewResolver();
     @Autowired
     private ResolvableExceptionMessageSaver resolvableExceptionMessageSaver;
     @Autowired
-    private WebMvcProperties webMvcProperties;
+    private WebMvcViewResolver mvcViewResolver;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -41,7 +41,7 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
         if (WebUtil.isAjaxRequest(request)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
-            String targetView = this.viewResolver.resolveFailureView(request);
+            String targetView = this.failureViewResolver.resolveFailureView(request);
             if (StringUtils.isBlank(targetView)) { // 登录认证失败后的目标地址未设置，则报401错误
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             } else { // 跳转到目标地址
@@ -56,10 +56,7 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
                     targetUrl = Strings.SLASH + targetUrl;
                 }
                 if (useForward) {
-                    WebMvcProperties.View view = this.webMvcProperties.getView();
-                    targetUrl = view.getPrefix() + targetUrl + view.getSuffix();
-                    targetUrl = targetUrl.replaceAll(Strings.DOUBLE_SLASH, Strings.SLASH);
-                    request.getRequestDispatcher(targetUrl).forward(request, response);
+                    this.mvcViewResolver.resolveView(request, response, targetUrl, null);
                 } else {
                     response.sendRedirect(targetUrl);
                 }

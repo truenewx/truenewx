@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -168,16 +167,6 @@ public class SpringWebContext {
             session.removeAttribute(name);
         }
         return (T) value;
-    }
-
-    /**
-     * 转换指定结果名为直接重定向的结果名
-     *
-     * @param result 结果名
-     * @return 直接重定向的结果名
-     */
-    public static String toRedirectResult(String result) {
-        return StringUtils.join("redirect:", result);
     }
 
     public static RequestMethod getRequestMethod() {
