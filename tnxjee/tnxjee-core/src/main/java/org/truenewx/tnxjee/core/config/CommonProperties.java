@@ -7,7 +7,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
 
 /**
  * Web通用配置属性
@@ -18,7 +17,7 @@ import org.truenewx.tnxjee.core.util.CollectionUtil;
 @ConfigurationProperties("tnxjee.common")
 public class CommonProperties implements InitializingBean {
 
-    private Map<String, AppConfiguration> apps = new HashMap<>(); // 必须用Map，在Spring占位符表达式中才可以取指定应用的配置
+    private Map<String, AppConfiguration> apps = new LinkedHashMap<>(); // 必须用Map，在Spring占位符表达式中才可以取指定应用的配置
     private boolean gatewayEnabled;
     private String gatewayUri;
 
@@ -27,13 +26,7 @@ public class CommonProperties implements InitializingBean {
     }
 
     public void setApps(Map<String, AppConfiguration> apps) {
-        this.apps = CollectionUtil.sortedByValueMap(apps, (app1, app2) -> {
-            int result = app1.getContextUri(false).compareTo(app2.getContextUri(false));
-            if (result == 0) {
-                result = app1.getContextPath().compareTo(app2.getContextPath());
-            }
-            return -result; // 反向排序，以避免错误匹配
-        });
+        this.apps = apps;
     }
 
     public boolean isGatewayEnabled() {
@@ -117,7 +110,9 @@ public class CommonProperties implements InitializingBean {
             if (StringUtils.isNotBlank(app.getGatewayUri())) {
                 uris.add(app.getGatewayUri());
             }
-            uris.add(app.getDirectUri());
+            if (StringUtils.isNotBlank(app.getDirectUri())) {
+                uris.add(app.getDirectUri());
+            }
         });
         return uris;
     }
@@ -135,18 +130,18 @@ public class CommonProperties implements InitializingBean {
         if (appConfig == null) {
             return null;
         }
-        AppFacade basic = new AppFacade();
-        basic.setName(name);
-        basic.setAlias(appConfig.getAlias());
-        basic.setCaption(appConfig.getCaption());
-        basic.setBusiness(appConfig.getBusiness());
+        AppFacade facade = new AppFacade();
+        facade.setName(name);
+        facade.setAlias(appConfig.getAlias());
+        facade.setCaption(appConfig.getCaption());
+        facade.setBusiness(appConfig.getBusiness());
         if (relativeContextUri) {
-            basic.setContextUri(appConfig.getContextPath());
+            facade.setContextUri(appConfig.getContextPath());
         } else {
-            basic.setContextUri(appConfig.getContextUri(false));
+            facade.setContextUri(appConfig.getContextUri(false));
         }
-        basic.setLoginedUri(basic.getContextUri() + appConfig.getLoginedPath());
-        return basic;
+        facade.setLoginedUri(facade.getContextUri() + appConfig.getLoginedPath());
+        return facade;
     }
 
 }
