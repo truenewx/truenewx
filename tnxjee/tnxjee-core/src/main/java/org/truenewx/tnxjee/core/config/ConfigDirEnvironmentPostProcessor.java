@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.core.config;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -30,9 +33,11 @@ import org.truenewx.tnxjee.core.util.StringUtil;
  */
 public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static final String DEFAULT_ROOT_LOCATION = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config";
     private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " property source: ";
-    private static final String BASENAME = "application"; // 配置文件基本名称固定为application，以便于IDE工具编辑
+    private static final String DIR_NAME = "config";
+    private static final String BASENAME = "application";
+    private static final String FILE_PATH_PREFIX = "file:";
+    private static final String JAR_PATH_PREFIX = "jar:" + FILE_PATH_PREFIX;
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private YamlPropertySourceLoader yamlLoader = new YamlPropertySourceLoader();
@@ -41,21 +46,15 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         try {
-            MutablePropertySources propertySources = environment.getPropertySources();
-            String rootLocation = getRootLocation(environment);
-            boolean added = false;
-            // 找出根目录下的所有子目录并按照优先级排序
-            List<String> dirNames = getSortedDirNames(rootLocation);
-            // 从顶层至底层依次加载配置文件以确保上层配置优先
-            for (String dirName : dirNames) {
-                String dirLocation = rootLocation + Strings.SLASH + dirName;
-                added = addPropertySource(environment, dirLocation) || added;
-            }
-            // 最后从根目录中加载最低优先级的配置
-            added = addPropertySource(environment, rootLocation) || added;
+            // 优先添加外部配置
+            boolean added = addExternalPropertySources(environment);
+
+            // 再添加内部配置
+            added = addInternalPropertySources(environment, added);
 
             if (added) {
                 System.out.println("====== Classpath Config Dir Property Sources ======");
+                MutablePropertySources propertySources = environment.getPropertySources();
                 for (PropertySource<?> propertySource : propertySources) {
                     if (propertySource.getName().startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
                         System.out.println(propertySource.getName());
@@ -67,8 +66,54 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         }
     }
 
-    private String getRootLocation(ConfigurableEnvironment environment) {
-        return environment.getProperty("spring.config.location", DEFAULT_ROOT_LOCATION);
+    private boolean addExternalPropertySources(ConfigurableEnvironment environment) throws IOException {
+        Resource resource = new ClassPathResource(Strings.SLASH);
+
+        String dirLocation = null;
+        String url = resource.getURL().toString();
+        if (url.startsWith(JAR_PATH_PREFIX)) { // 位于jar/war中
+            int index = url.indexOf("ar!/");
+            if (index > 0) {
+                dirLocation = url.substring(JAR_PATH_PREFIX.length(), index);
+                dirLocation = dirLocation.substring(0, dirLocation.lastIndexOf(Strings.SLASH));
+                dirLocation += Strings.SLASH + DIR_NAME;
+            }
+        } else {
+            File root = resource.getFile().getParentFile().getParentFile();
+            if ("webapps".equals(root.getParentFile().getName())) { // 位于tomcat中
+                dirLocation = root.getParentFile().getParentFile().getAbsolutePath() + "/conf"; // tomcat的配置目录名特殊
+            } else { // 位于IDE中
+                dirLocation = root.getAbsolutePath() + Strings.SLASH + DIR_NAME;
+            }
+        }
+
+        if (dirLocation != null) {
+            File dir = new File(dirLocation);
+            if (dir.exists()) {
+                String appName = environment.getProperty("spring.application.name");
+                return addPropertySources(environment, FILE_PATH_PREFIX + dirLocation, appName);
+            }
+        }
+        return false;
+    }
+
+    private boolean addInternalPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
+        String rootLocation = getInternalRootLocation(environment);
+        // 找出根目录下的所有子目录并按照优先级排序
+        List<String> dirNames = getSortedDirNames(rootLocation);
+        // 从顶层至底层依次加载配置文件以确保上层配置优先
+        for (String dirName : dirNames) {
+            String dirLocation = rootLocation + Strings.SLASH + dirName;
+            added = addPropertySources(environment, dirLocation, BASENAME) || added;
+        }
+        // 最后从根目录中加载最低优先级的配置
+        added = addPropertySources(environment, rootLocation, BASENAME) || added;
+        return added;
+    }
+
+    private String getInternalRootLocation(ConfigurableEnvironment environment) {
+        return environment.getProperty("spring.config.location",
+                ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + DIR_NAME);
     }
 
     protected List<String> getSortedDirNames(String rootLocation) throws IOException {
@@ -109,16 +154,28 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         return 2;
     }
 
-    private boolean addPropertySource(ConfigurableEnvironment environment, String dirLocation) throws IOException {
+    private boolean addPropertySources(ConfigurableEnvironment environment, String dirLocation, String basename)
+            throws IOException {
         List<Resource> list = new ArrayList<>();
-        String location = dirLocation + Strings.SLASH + BASENAME;
         String profile = SpringUtil.getActiveProfile(environment);
-        if (StringUtils.isNotBlank(profile)) {
-            // [dir]/application-[profile].*
-            addResources(list, location + Strings.MINUS + profile + Strings.DOT + Strings.ASTERISK);
+        if (FILE_PATH_PREFIX.equals(dirLocation)) { // 基于文件系统绝对路径
+            dirLocation = dirLocation.substring(FILE_PATH_PREFIX.length());
+            if (StringUtils.isNotBlank(profile)) {
+                // [dir]/application-[profile].*
+                addFileSystemResources(list, dirLocation,
+                        basename + Strings.MINUS + profile + Strings.DOT + Strings.ASTERISK);
+            }
+            // [dir]/[basename].*
+            addFileSystemResources(list, dirLocation, basename + Strings.DOT + Strings.ASTERISK);
+        } else { // 基于classpath
+            String location = dirLocation + Strings.SLASH + basename;
+            if (StringUtils.isNotBlank(profile)) {
+                // [dir]/application-[profile].*
+                addClasspathResources(list, location + Strings.MINUS + profile + Strings.DOT + Strings.ASTERISK);
+            }
+            // [dir]/[basename].*
+            addClasspathResources(list, location + Strings.DOT + Strings.ASTERISK);
         }
-        // [dir]/[basename].*
-        addResources(list, location + Strings.DOT + Strings.ASTERISK);
         list.sort((res1, res2) -> {
             String filename1 = res1.getFilename();
             String filename2 = res2.getFilename();
@@ -133,12 +190,24 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         boolean added = false;
         MutablePropertySources propertySources = environment.getPropertySources();
         for (Resource resource : list) {
-            added = addPropertySource(propertySources, dirLocation, resource) || added;
+            added = addPropertySource(propertySources, resource) || added;
         }
         return added;
     }
 
-    private void addResources(List<Resource> validList, String locationPattern) throws IOException {
+    private void addFileSystemResources(List<Resource> validList, String dirLocation, String filenamePattern) {
+        File dir = new File(dirLocation);
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (StringUtil.wildcardMatch(file.getName(), filenamePattern)) {
+                    validList.add(new FileSystemResource(file));
+                }
+            }
+        }
+    }
+
+    private void addClasspathResources(List<Resource> validList, String locationPattern) throws IOException {
         Resource[] resources = this.resourcePatternResolver.getResources(locationPattern);
         for (Resource resource : resources) {
             String extension = StringUtil.getExtension(resource.getFilename());
@@ -148,8 +217,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         }
     }
 
-    private boolean addPropertySource(MutablePropertySources propertySources, String dirLocation, Resource resource)
-            throws IOException {
+    private boolean addPropertySource(MutablePropertySources propertySources, Resource resource) throws IOException {
         if (resource.exists()) {
             String filename = resource.getFilename();
             PropertySourceLoader sourceLoader = getSourceLoader(filename);
