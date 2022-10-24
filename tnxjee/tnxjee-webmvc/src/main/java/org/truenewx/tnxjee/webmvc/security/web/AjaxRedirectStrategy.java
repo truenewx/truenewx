@@ -37,7 +37,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
 
     private void addAllowedUri(String uri) {
         String host = NetUtil.getHost(uri, false);
-        if (this.allowedHosts.add(host)) {
+        if (StringUtils.isNotBlank(host) && this.allowedHosts.add(host)) {
             this.logger.info("====== Added allowed host: " + host);
         }
     }
