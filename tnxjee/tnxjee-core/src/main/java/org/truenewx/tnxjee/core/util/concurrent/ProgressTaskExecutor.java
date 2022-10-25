@@ -50,7 +50,7 @@ public class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializa
     /**
      * 清理掉所有已完成的任务进度
      */
-    @Scheduled(cron = "0 * * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "0 0/10 * * * ?") // 每10分钟执行一次
     public void clean() {
         Collection<P> progresses = this.progresses.values();
         for (P progress : progresses) {
