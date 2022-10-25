@@ -10,7 +10,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
  * 单个配置的CORS配置源
  */
 @Component
-public class SingleCorsConfigurationSource implements CorsConfigurationSource {
+public class SingleCorsConfigurationSource implements CorsConfigurationSource, CorsConfigurationUpdater {
 
     private CorsConfiguration corsConfiguration;
 
@@ -21,6 +21,11 @@ public class SingleCorsConfigurationSource implements CorsConfigurationSource {
     @Override
     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
         return this.corsConfiguration;
+    }
+
+    @Override
+    public void addAllowedOrigin(String origin) {
+        this.corsConfiguration.addAllowedOrigin(origin);
     }
 
 }
