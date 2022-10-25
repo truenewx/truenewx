@@ -58,6 +58,14 @@ public class SpringWebMvcUtil {
         return getApplicationContext(SpringWebContext.getRequest());
     }
 
+    public static String getApplicationName(HttpServletRequest request) {
+        ApplicationContext context = getApplicationContext(request);
+        if (context != null) {
+            return SpringUtil.getApplicationName(context.getEnvironment());
+        }
+        return null;
+    }
+
     /**
      * 先尝试从Spring的LocaleResolver中获取区域，以便以自定义的方式获取区域
      *

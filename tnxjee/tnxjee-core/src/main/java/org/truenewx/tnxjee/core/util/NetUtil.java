@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -298,27 +299,45 @@ public class NetUtil {
      * @param localFile 本地文件
      */
     public static void download(String url, Map<String, Object> params, File localFile) {
+        download(url, params, localFile, (in, length) -> {
+            OutputStream out = null;
+            try {
+                out = new FileOutputStream(localFile);
+                IOUtils.copy(in, out);
+                out.flush();
+            } catch (IOException e) {
+                LogUtil.error(NetUtil.class, e);
+            } finally {
+                try {
+                    if (out != null) {
+                        out.close();
+                    }
+                } catch (IOException e) {
+                    LogUtil.error(NetUtil.class, e);
+                }
+            }
+        });
+    }
+
+    public static void download(String url, Map<String, Object> params, File localFile,
+            BiConsumer<InputStream, Long> consumer) {
         url = mergeParams(url, params, Strings.ENCODING_UTF8);
         InputStream in = null;
-        OutputStream out = null;
         try {
             URL urlObj = new URL(url);
-            in = urlObj.openStream();
+            URLConnection urlConnection = urlObj.openConnection();
+            urlConnection.connect();
+            long length = urlConnection.getContentLengthLong();
+            in = urlConnection.getInputStream();
             IOUtil.createFile(localFile);
-            out = new BufferedOutputStream(new FileOutputStream(localFile));
-            IOUtils.copy(in, out);
+            consumer.accept(in, length);
             in.close();
-            out.flush();
-            out.close();
         } catch (IOException e) {
             LogUtil.error(NetUtil.class, e);
         } finally {
             try {
                 if (in != null) {
                     in.close();
-                }
-                if (out != null) {
-                    out.close();
                 }
             } catch (IOException e) {
                 LogUtil.error(NetUtil.class, e);

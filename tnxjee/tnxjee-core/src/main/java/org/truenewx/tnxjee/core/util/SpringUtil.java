@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.truenewx.tnxjee.core.config.AppConstants;
 
 /**
  * Spring工具类
@@ -13,6 +14,10 @@ import org.springframework.core.env.Environment;
 public class SpringUtil {
 
     private SpringUtil() {
+    }
+
+    public static String getApplicationName(Environment env) {
+        return env.getProperty(AppConstants.PROPERTY_SPRING_APP_NAME);
     }
 
     public static String getActiveProfile(Environment env) {

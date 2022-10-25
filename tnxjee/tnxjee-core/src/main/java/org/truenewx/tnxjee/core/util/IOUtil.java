@@ -32,7 +32,10 @@ public class IOUtil {
      */
     public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 
-    public static final int DEFAULT_BUFFER_SIZE = 4096;
+    public static final int DEFAULT_BUFFER_SIZE = IOUtils.DEFAULT_BUFFER_SIZE;
+    public static final String FILE_PATH_PREFIX = "file:";
+    public static final String JAR_PATH_PREFIX = "jar:" + FILE_PATH_PREFIX;
+    public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
     private IOUtil() {
     }
@@ -332,10 +335,43 @@ public class IOUtil {
         return (strIndex == strLength);
     }
 
-    public static File getTomcatTempDir() throws IOException {
-        File root = new ClassPathResource(Strings.DOT).getFile().getParentFile().getParentFile().getParentFile()
-                .getParentFile();
-        return new File(root, "/temp");
+    public static boolean isInJar(String path) {
+        return path.startsWith(JAR_PATH_PREFIX);
+    }
+
+    public static String getWorkingDirLocation() throws IOException {
+        Resource resource = new ClassPathResource(Strings.SLASH);
+        String url = resource.getURL().toString();
+        if (isInJar(url)) { // 位于jar/war中
+            int index = url.indexOf(JAR_WORKING_DIR_SUFFIX); // 一定有
+            return url.substring(JAR_PATH_PREFIX.length(), index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
+        } else {
+            return resource.getFile().getParentFile().getParentFile().getAbsolutePath();
+        }
+    }
+
+    public static String getTomcatRootLocation(String dirLocation) {
+        int index = dirLocation.replace('\\', '/').indexOf("/webapps/");
+        if (index >= 0) {
+            return dirLocation.substring(0, index);
+        }
+        return null;
+    }
+
+    public static File getTempDir() throws IOException {
+        String rootLocation = getWorkingDirLocation();
+        if (rootLocation != null) {
+            String tomcatRootLocation = getTomcatRootLocation(rootLocation);
+            if (tomcatRootLocation != null) {
+                rootLocation = tomcatRootLocation;
+            }
+            if (rootLocation.endsWith(JAR_WORKING_DIR_SUFFIX)) {
+                int index = rootLocation.lastIndexOf(Strings.SLASH);
+                rootLocation = rootLocation.substring(0, index);
+            }
+            return new File(rootLocation + "/temp");
+        }
+        return null;
     }
 
     public static boolean copyFile(File source, File target) {
@@ -471,5 +507,4 @@ public class IOUtil {
         }
         return null;
     }
-
 }

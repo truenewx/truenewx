@@ -418,7 +418,7 @@ public class ImageUtil {
             return toByteArrayInputStream(image, formatName);
         }
         // 否则借助临时文件操作
-        File file = new File(IOUtil.getTomcatTempDir(), StringUtil.uuid32() + Strings.DOT + formatName);
+        File file = new File(IOUtil.getTempDir(), StringUtil.uuid32() + Strings.DOT + formatName);
         ImageIO.write(image, formatName, file);
         return new FileInputStream(file);
     }
