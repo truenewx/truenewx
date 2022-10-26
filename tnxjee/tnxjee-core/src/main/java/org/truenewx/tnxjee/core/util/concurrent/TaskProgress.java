@@ -9,8 +9,12 @@ import java.util.Objects;
 public class TaskProgress<K extends Serializable> {
 
     private K id;
-    private Long startTime;
-    private Long completeTime;
+    private Long beginTime;
+    private Long endTime;
+    /**
+     * 是否中止
+     */
+    private boolean stopped;
 
     public TaskProgress(K id) {
         this.id = id;
@@ -20,41 +24,61 @@ public class TaskProgress<K extends Serializable> {
         return this.id;
     }
 
-    public Long getStartTime() {
-        return this.startTime;
+    public Long getBeginTime() {
+        return this.beginTime;
     }
 
-    public Long getCompleteTime() {
-        return this.completeTime;
+    public Long getEndTime() {
+        return this.endTime;
+    }
+
+    /**
+     * 通知进度中止，任务实际是否能中止、如何中止、何时中止，由具体任务内容决定
+     */
+    public void toStop() {
+        this.stopped = true;
+    }
+
+    public boolean isStopped() {
+        return this.stopped;
     }
 
     public void start() {
-        this.startTime = System.currentTimeMillis();
+        this.beginTime = System.currentTimeMillis();
     }
 
     public boolean isStarted() {
-        return this.startTime != null;
+        return this.beginTime != null;
     }
 
     public boolean isRunning() {
-        return isStarted() && !isCompleted();
+        return isStarted() && !isEnded();
     }
 
-    public void complete() {
-        this.completeTime = System.currentTimeMillis();
+    public void end() {
+        this.endTime = System.currentTimeMillis();
     }
 
-    public boolean isCompleted() {
-        return this.completeTime != null;
+    public boolean isEnded() {
+        return this.endTime != null;
+    }
+
+    /**
+     * 判断当前进度可否被清理，即在未被指定移除的情况下，可否由线程池定期清理。默认为结束时间后的10分钟后可清理，子类可覆写自定义的判断规则
+     *
+     * @return 可否被清理
+     */
+    public boolean isCleanable() {
+        return this.endTime != null && System.currentTimeMillis() - this.endTime > 60000;
     }
 
     /**
      * @return 耗时毫秒数
      */
     public long getConsumedMilliseconds() {
-        if (this.startTime != null) {
-            long endTime = Objects.requireNonNullElseGet(this.completeTime, System::currentTimeMillis);
-            return endTime - this.startTime;
+        if (this.beginTime != null) {
+            long endTime = Objects.requireNonNullElseGet(this.endTime, System::currentTimeMillis);
+            return endTime - this.beginTime;
         }
         return 0;
     }

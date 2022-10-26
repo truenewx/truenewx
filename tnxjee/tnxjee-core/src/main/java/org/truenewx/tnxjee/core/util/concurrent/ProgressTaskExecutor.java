@@ -54,9 +54,7 @@ public class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializa
     public void clean() {
         Collection<P> progresses = this.progresses.values();
         for (P progress : progresses) {
-            Long completeTime = progress.getCompleteTime();
-            // 完成时间超过1分钟，则移除缓存的进度
-            if (completeTime != null && System.currentTimeMillis() - completeTime > 60000) {
+            if (progress.isCleanable()) {
                 remove(progress.getId());
             }
         }

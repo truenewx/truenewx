@@ -18,4 +18,13 @@ public abstract class DefaultProgressTask<P extends TaskProgress<?>> implements 
         return this.progress;
     }
 
+    @Override
+    public void run() {
+        this.progress.start();
+        execute(this.progress);
+        this.progress.end();
+    }
+
+    protected abstract void execute(P progress);
+
 }
