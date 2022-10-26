@@ -22,19 +22,22 @@ import org.truenewx.tnxjee.core.util.concurrent.ProgressTaskExecutor;
 public class ResourceDownloader {
 
     private ProgressTaskExecutor<ResourceDownloadTaskProgress, String> taskExecutor;
+    private long interval;
 
     public ResourceDownloader(ExecutorService executorService) {
         this.taskExecutor = new ProgressTaskExecutor<>(executorService);
     }
 
+    public void setInterval(long interval) {
+        this.interval = interval;
+    }
+
     public String download(String url, Map<String, Object> params, File localFile) {
-        ResourceDownloadTaskProgress progress = new ResourceDownloadTaskProgress(localFile);
-        return this.taskExecutor.submit(new DefaultProgressTask<>(progress) {
+        return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(localFile)) {
             @Override
-            public void run() {
+            protected void execute(ResourceDownloadTaskProgress progress) {
                 NetUtil.download(url, params, localFile, (in, length) -> {
-                    this.progress.setTotal(length);
-                    this.progress.start();
+                    progress.setTotal(length);
 
                     int count;
                     byte[] buffer = IOUtils.byteArray(IOUtil.DEFAULT_BUFFER_SIZE);
@@ -43,8 +46,17 @@ public class ResourceDownloader {
                         out = new FileOutputStream(localFile);
 
                         while (IOUtils.EOF != (count = in.read(buffer))) {
+                            if (progress.isStopped()) {
+                                break;
+                            }
                             out.write(buffer, 0, count);
-                            this.progress.addCount(count);
+                            progress.addCount(count);
+                            if (ResourceDownloader.this.interval > 0) {
+                                try {
+                                    Thread.sleep(ResourceDownloader.this.interval);
+                                } catch (InterruptedException ignored) {
+                                }
+                            }
                         }
                     } catch (IOException e) {
                         LogUtil.error(getClass(), e);
@@ -57,15 +69,27 @@ public class ResourceDownloader {
                             LogUtil.error(getClass(), e);
                         }
                     }
-                    
-                    this.progress.complete();
                 });
+                if (progress.isStopped()) { // 如果是中止的任务，则删除本地文件
+                    localFile.delete();
+                }
             }
         });
     }
 
     public ResourceDownloadTaskProgress getProgress(String progressId) {
         return this.taskExecutor.getProgress(progressId);
+    }
+
+    public void stop(String progressId) {
+        ResourceDownloadTaskProgress progress = getProgress(progressId);
+        if (progress != null) {
+            progress.toStop();
+        }
+    }
+
+    public void removeProgress(String progressId) {
+        this.taskExecutor.remove(progressId);
     }
 
 }
