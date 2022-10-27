@@ -325,13 +325,13 @@ public class NetUtil {
         InputStream in = null;
         OutputStream out = null;
         try {
+            IOUtil.createFile(localFile);
             out = new FileOutputStream(localFile);
             URL urlObj = new URL(url);
             URLConnection urlConnection = urlObj.openConnection();
             urlConnection.connect();
             long length = urlConnection.getContentLengthLong();
             in = urlConnection.getInputStream();
-            IOUtil.createFile(localFile);
             consumer.accept(length, in, out);
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
