@@ -140,7 +140,10 @@ public class CommonProperties implements InitializingBean {
         } else {
             facade.setContextUri(appConfig.getContextUri(false));
         }
-        facade.setLoginedUri(facade.getContextUri() + appConfig.getLoginedPath());
+        String contextUri = facade.getContextUri();
+        if (contextUri != null) {
+            facade.setLoginedUri(contextUri + appConfig.getLoginedPath());
+        }
         return facade;
     }
 
