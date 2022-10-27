@@ -585,7 +585,14 @@ public class NetUtil {
             }
             int index = url.indexOf(Strings.DOUBLE_SLASH);
             if (index >= 0) {
-                index = url.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length());
+                int fromIndex = index + Strings.DOUBLE_SLASH.length();
+                index = url.indexOf(Strings.SLASH, fromIndex);
+                if (index < 0) {
+                    index = url.indexOf(Strings.WELL, fromIndex);
+                }
+                if (index < 0) {
+                    index = url.indexOf(Strings.QUESTION, fromIndex);
+                }
                 if (index > 0) {
                     return url.substring(0, index);
                 } else {
@@ -594,6 +601,12 @@ public class NetUtil {
             }
         } else {
             int index = url.indexOf(contextPath + Strings.SLASH);
+            if (index < 0) {
+                index = url.indexOf(contextPath + Strings.WELL);
+            }
+            if (index < 0) {
+                index = url.indexOf(contextPath + Strings.QUESTION);
+            }
             if (index >= 0) {
                 return url.substring(0, index + contextPath.length());
             } else if (url.endsWith(contextPath)) {
