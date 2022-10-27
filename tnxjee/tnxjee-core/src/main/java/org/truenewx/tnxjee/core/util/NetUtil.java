@@ -589,4 +589,17 @@ public class NetUtil {
         return null; // 无法解析出上下文地址
     }
 
+    public static String getContextPathByContextUrl(String contextUrl) {
+        int index = contextUrl.indexOf(Strings.DOUBLE_SLASH);
+        if (index >= 0) {
+            index = contextUrl.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length());
+            if (index > 0) {
+                return contextUrl.substring(index);
+            } else {
+                return Strings.SLASH;
+            }
+        }
+        return null; // 无法解析出上下文根路径
+    }
+
 }
