@@ -5,15 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
-import org.truenewx.tnxjee.core.util.concurrent.ProgressTaskExecutor;
 
 /**
  * 资源下载器
@@ -21,12 +20,9 @@ import org.truenewx.tnxjee.core.util.concurrent.ProgressTaskExecutor;
 @Component
 public class ResourceDownloader {
 
-    private ProgressTaskExecutor<ResourceDownloadTaskProgress, String> taskExecutor;
+    @Autowired
+    private ResourceDownloadProgressTaskExecutor taskExecutor;
     private long interval;
-
-    public ResourceDownloader(ExecutorService executorService) {
-        this.taskExecutor = new ProgressTaskExecutor<>(executorService);
-    }
 
     public void setInterval(long interval) {
         this.interval = interval;

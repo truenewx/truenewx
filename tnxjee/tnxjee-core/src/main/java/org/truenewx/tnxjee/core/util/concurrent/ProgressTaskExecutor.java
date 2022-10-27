@@ -11,12 +11,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.truenewx.tnxjee.core.util.LogUtil;
 
 /**
- * 进度任务执行器
+ * 进度任务执行器，为保证执行定时清理，必须创建子类并实例化Bean
  *
  * @param <P> 进度类型
  */
 @EnableScheduling
-public class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializable> {
+public abstract class ProgressTaskExecutor<P extends TaskProgress<K>, K extends Serializable> {
 
     private ExecutorService executor;
     private Map<K, P> progresses = new Hashtable<>();
