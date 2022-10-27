@@ -351,11 +351,19 @@ public class IOUtil {
     }
 
     public static String getTomcatRootLocation(String dirLocation) {
-        int index = dirLocation.replace('\\', '/').indexOf("/webapps/");
+        int index = webappsIndexOf(dirLocation);
         if (index >= 0) {
             return dirLocation.substring(0, index);
         }
         return null;
+    }
+
+    private static int webappsIndexOf(String path) {
+        return path.replace('\\', '/').indexOf("/webapps/");
+    }
+
+    public static boolean isInTomcat(String path) {
+        return webappsIndexOf(path) >= 0;
     }
 
     /**
