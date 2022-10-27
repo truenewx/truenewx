@@ -33,8 +33,7 @@ public class IOUtil {
     public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 
     public static final int DEFAULT_BUFFER_SIZE = IOUtils.DEFAULT_BUFFER_SIZE;
-    public static final String FILE_PATH_PREFIX = "file:";
-    public static final String JAR_PATH_PREFIX = "jar:" + FILE_PATH_PREFIX;
+    public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
     public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
     private IOUtil() {
@@ -336,7 +335,7 @@ public class IOUtil {
     }
 
     public static boolean isInJar(String path) {
-        return path.startsWith(JAR_PATH_PREFIX);
+        return path.startsWith(JAR_FILE_URL_PREFIX);
     }
 
     public static String getWorkingDirLocation() throws IOException {
@@ -344,7 +343,8 @@ public class IOUtil {
         String url = resource.getURL().toString();
         if (isInJar(url)) { // 位于jar/war中
             int index = url.indexOf(JAR_WORKING_DIR_SUFFIX); // 一定有
-            return url.substring(JAR_PATH_PREFIX.length(), index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
+            return url.substring(JAR_FILE_URL_PREFIX.length(),
+                    index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
         } else {
             return resource.getFile().getParentFile().getParentFile().getAbsolutePath();
         }
@@ -358,7 +358,13 @@ public class IOUtil {
         return null;
     }
 
-    public static File getTempDir() throws IOException {
+    /**
+     * 获取工作临时目录，与工作目录相关，非系统临时目录
+     *
+     * @return 工作临时目录
+     * @throws IOException 如果处理过程中出现IO错误
+     */
+    public static File getWorkingTempDir() throws IOException {
         String rootLocation = getWorkingDirLocation();
         if (rootLocation != null) {
             String tomcatRootLocation = getTomcatRootLocation(rootLocation);

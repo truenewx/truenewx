@@ -14,6 +14,7 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.util.FileCopyUtils;
 import org.truenewx.tnxjee.core.Strings;
 
@@ -417,8 +418,8 @@ public class ImageUtil {
         if (capacity <= 1024 * 1024) {
             return toByteArrayInputStream(image, formatName);
         }
-        // 否则借助临时文件操作
-        File file = new File(IOUtil.getTempDir(), StringUtil.uuid32() + Strings.DOT + formatName);
+        // 否则借助系统临时文件操作
+        File file = new File(FileUtils.getTempDirectory(), StringUtil.uuid32() + Strings.DOT + formatName);
         ImageIO.write(image, formatName, file);
         return new FileInputStream(file);
     }

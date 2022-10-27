@@ -18,6 +18,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.Framework;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.*;
@@ -70,7 +71,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
                     System.out.println(
                             "====== Can't load property 'spring.application.name', please make sure it is in classpath:application.properties/yaml/yml");
                 } else {
-                    return addPropertySources(environment, IOUtil.FILE_PATH_PREFIX + dirLocation, appName);
+                    return addPropertySources(environment, ResourceUtils.FILE_URL_PREFIX + dirLocation, appName);
                 }
             }
         }
@@ -79,19 +80,16 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
 
     public static String getExternalConfigDirLocation() throws IOException {
         String dirLocation = IOUtil.getWorkingDirLocation();
-        if (dirLocation != null) {
-            String tomcatRootLocation = IOUtil.getTomcatRootLocation(dirLocation);
-            if (tomcatRootLocation != null) { // 位于tomcat中，则配置目录为：[tomcat]/conf
-                return tomcatRootLocation + "/conf";
-            } else {
-                if (dirLocation.endsWith(IOUtil.JAR_WORKING_DIR_SUFFIX)) {
-                    int index = dirLocation.lastIndexOf(Strings.SLASH);
-                    dirLocation = dirLocation.substring(0, index);
-                }
-                return dirLocation + Strings.SLASH + DIR_NAME;
+        String tomcatRootLocation = IOUtil.getTomcatRootLocation(dirLocation);
+        if (tomcatRootLocation != null) { // 位于tomcat中，则配置目录为：[tomcat]/conf
+            return tomcatRootLocation + "/conf";
+        } else {
+            if (dirLocation.endsWith(IOUtil.JAR_WORKING_DIR_SUFFIX)) {
+                int index = dirLocation.lastIndexOf(Strings.SLASH);
+                dirLocation = dirLocation.substring(0, index);
             }
+            return dirLocation + Strings.SLASH + DIR_NAME;
         }
-        return null;
     }
 
     private boolean addInternalPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
@@ -155,8 +153,8 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             throws IOException {
         List<Resource> list = new ArrayList<>();
         String profile = SpringUtil.getActiveProfile(environment);
-        if (IOUtil.FILE_PATH_PREFIX.equals(dirLocation)) { // 基于文件系统绝对路径
-            dirLocation = dirLocation.substring(IOUtil.FILE_PATH_PREFIX.length());
+        if (ResourceUtils.FILE_URL_PREFIX.equals(dirLocation)) { // 基于文件系统绝对路径
+            dirLocation = dirLocation.substring(ResourceUtils.FILE_URL_PREFIX.length());
             if (StringUtils.isNotBlank(profile)) {
                 // [dir]/application-[profile].*
                 addFileSystemResources(list, dirLocation,
