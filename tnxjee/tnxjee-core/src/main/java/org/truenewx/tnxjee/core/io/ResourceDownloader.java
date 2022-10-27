@@ -1,16 +1,13 @@
 package org.truenewx.tnxjee.core.io;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 
@@ -29,43 +26,38 @@ public class ResourceDownloader {
     }
 
     public String download(String url, Map<String, Object> params, File localFile) {
-        return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(localFile)) {
+        return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(url)) {
             @Override
             protected void execute(ResourceDownloadTaskProgress progress) {
-                NetUtil.download(url, params, localFile, (in, length) -> {
-                    progress.setTotal(length);
+                try {
+                    NetUtil.download(url, params, localFile, (length, in, out) -> {
+                        progress.setTotal(length);
 
-                    int count;
-                    byte[] buffer = IOUtils.byteArray(IOUtil.DEFAULT_BUFFER_SIZE);
-                    OutputStream out = null;
-                    try {
-                        out = new FileOutputStream(localFile);
-
-                        while (IOUtils.EOF != (count = in.read(buffer))) {
-                            if (progress.isStopped()) {
-                                break;
-                            }
-                            out.write(buffer, 0, count);
-                            progress.addCount(count);
-                            if (ResourceDownloader.this.interval > 0) {
-                                try {
-                                    Thread.sleep(ResourceDownloader.this.interval);
-                                } catch (InterruptedException ignored) {
+                        int count;
+                        byte[] buffer = IOUtils.byteArray(IOUtil.DEFAULT_BUFFER_SIZE);
+                        try {
+                            while (IOUtils.EOF != (count = in.read(buffer))) {
+                                if (progress.isStopped()) {
+                                    break;
+                                }
+                                out.write(buffer, 0, count);
+                                progress.addCount(count);
+                                if (ResourceDownloader.this.interval > 0) {
+                                    try {
+                                        Thread.sleep(ResourceDownloader.this.interval);
+                                    } catch (InterruptedException ignored) {
+                                    }
                                 }
                             }
-                        }
-                    } catch (IOException e) {
-                        LogUtil.error(getClass(), e);
-                    } finally {
-                        try {
-                            if (out != null) {
-                                out.close();
-                            }
                         } catch (IOException e) {
-                            LogUtil.error(getClass(), e);
+                            throw new RuntimeException(e);
                         }
-                    }
-                });
+                    });
+                } catch (IOException e) {
+                    progress.fail(new RuntimeException(e));
+                } catch (RuntimeException e) {
+                    progress.fail(e);
+                }
                 if (progress.isStopped()) { // 如果是中止的任务，则删除本地文件
                     localFile.delete();
                 }

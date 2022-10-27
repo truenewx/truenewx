@@ -1,7 +1,5 @@
 package org.truenewx.tnxjee.core.io;
 
-import java.io.File;
-
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.concurrent.TaskProgress;
 
@@ -10,15 +8,22 @@ import org.truenewx.tnxjee.core.util.concurrent.TaskProgress;
  */
 public class ResourceDownloadTaskProgress extends TaskProgress<String> {
 
+    private String url;
     private long total;
     private long count;
+    private RuntimeException exception;
 
-    public ResourceDownloadTaskProgress(File file) {
-        super(generateId(file));
+    public ResourceDownloadTaskProgress(String url) {
+        super(generateId(url));
+        this.url = url;
     }
 
-    public static String generateId(File file) {
-        return EncryptUtil.encryptByMd5(file.getAbsolutePath());
+    public static String generateId(String url) {
+        return EncryptUtil.encryptByMd5(url);
+    }
+
+    public String getUrl() {
+        return this.url;
     }
 
     public long getTotal() {
@@ -41,4 +46,13 @@ public class ResourceDownloadTaskProgress extends TaskProgress<String> {
         return this.count;
     }
 
+    public void fail(RuntimeException exception) {
+        this.exception = exception;
+        // 失败时中止后续处理
+        toStop();
+    }
+
+    public RuntimeException getException() {
+        return this.exception;
+    }
 }

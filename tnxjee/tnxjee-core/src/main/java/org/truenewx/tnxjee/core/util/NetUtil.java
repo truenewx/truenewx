@@ -4,11 +4,11 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.function.TrConsumer;
 
 /**
  * 网络工具类
@@ -297,44 +297,58 @@ public class NetUtil {
      * @param url       下载资源链接
      * @param params    下载资源链接的参数
      * @param localFile 本地文件
+     * @throws IOException 如果下载过程中出现IO错误
      */
-    public static void download(String url, Map<String, Object> params, File localFile) {
-        download(url, params, localFile, (in, length) -> {
-            OutputStream out = null;
-            try {
-                out = new FileOutputStream(localFile);
-                IOUtils.copy(in, out);
-                out.flush();
-            } catch (IOException e) {
-                LogUtil.error(NetUtil.class, e);
-            } finally {
+    public static void download(String url, Map<String, Object> params, File localFile) throws IOException {
+        try {
+            download(url, params, localFile, (length, in, out) -> {
                 try {
-                    if (out != null) {
-                        out.close();
-                    }
+                    IOUtils.copy(in, out);
+                    out.flush();
                 } catch (IOException e) {
-                    LogUtil.error(NetUtil.class, e);
+                    throw new RuntimeException(e);
                 }
+            });
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            } else {
+                throw e;
             }
-        });
+        }
     }
 
     public static void download(String url, Map<String, Object> params, File localFile,
-            BiConsumer<InputStream, Long> consumer) {
+            TrConsumer<Long, InputStream, OutputStream> consumer) throws IOException {
         url = mergeParams(url, params, Strings.ENCODING_UTF8);
         InputStream in = null;
+        OutputStream out = null;
         try {
+            out = new FileOutputStream(localFile);
             URL urlObj = new URL(url);
             URLConnection urlConnection = urlObj.openConnection();
             urlConnection.connect();
             long length = urlConnection.getContentLengthLong();
             in = urlConnection.getInputStream();
             IOUtil.createFile(localFile);
-            consumer.accept(in, length);
-            in.close();
-        } catch (IOException e) {
-            LogUtil.error(NetUtil.class, e);
+            consumer.accept(length, in, out);
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            } else {
+                throw e;
+            }
         } finally {
+            // 关闭时的异常不再向上层抛出
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                LogUtil.error(NetUtil.class, e);
+            }
             try {
                 if (in != null) {
                     in.close();
