@@ -3,12 +3,14 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -94,21 +96,24 @@ public class IOUtil {
     }
 
     /**
-     * 执行指定命令行指令，如果等待毫秒数大于0，则当前线程等待指定毫秒数之后返回，
+     * 执行指定命令行指令
      *
-     * @param command 命令行指令
-     * @return 执行结果
+     * @param command        命令行指令
+     * @param resultConsumer 结果消费者，为null时不等待结果反馈
+     * @throws IOException 如果执行过程出现错误
      */
-    public static String executeCommand(String command) {
-        String result = "";
-        try {
-            Process process = Runtime.getRuntime().exec(command);
-            process.waitFor();
-            result = IOUtils.toString(process.getInputStream(), Strings.ENCODING_UTF8);
-        } catch (IOException | InterruptedException e) {
-            LogUtil.error(IOUtil.class, e);
+    public static void executeCommand(String command, Consumer<String> resultConsumer)
+            throws IOException {
+        Process process = Runtime.getRuntime().exec(command);
+        if (resultConsumer != null) {
+            try {
+                process.waitFor();
+            } catch (InterruptedException e) {
+                LogUtil.error(IOUtil.class, e);
+            }
+            String result = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+            resultConsumer.accept(result);
         }
-        return result;
     }
 
     /**
