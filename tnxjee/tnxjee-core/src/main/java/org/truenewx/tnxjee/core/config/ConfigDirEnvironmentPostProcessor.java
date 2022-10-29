@@ -68,16 +68,19 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
 
     private boolean addExternalPropertySources(ConfigurableEnvironment environment) throws IOException {
         String dirLocation = getExternalConfigDirLocation();
-        if (dirLocation != null) {
-            File dir = new File(dirLocation);
-            if (dir.exists()) {
-                String appName = SpringUtil.getApplicationName(environment);
-                if (appName == null) {
-                    System.out.println(
-                            "====== Can't load property 'spring.application.name', please make sure it is in classpath:application.properties/yaml/yml");
-                } else {
-                    return addPropertySources(environment, ResourceUtils.FILE_URL_PREFIX + dirLocation, appName);
-                }
+        File dir = new File(dirLocation);
+        if (dir.exists()) {
+            String appName = SpringUtil.getApplicationName(environment);
+            if (appName == null) {
+                System.out.println(
+                        "====== Can't load property 'spring.application.name', please make sure it is in classpath:application.properties/yaml/yml");
+            } else {
+                dirLocation = ResourceUtils.FILE_URL_PREFIX + dirLocation;
+                // 先添加应用特有配置属性
+                boolean added = addPropertySources(environment, dirLocation, appName);
+                // 再添加与公共配置属性（因为是外部配置，所以存在与其它应用公用配置的可能性）
+                added = addPropertySources(environment, dirLocation, BASENAME) || added;
+                return added;
             }
         }
         return false;
