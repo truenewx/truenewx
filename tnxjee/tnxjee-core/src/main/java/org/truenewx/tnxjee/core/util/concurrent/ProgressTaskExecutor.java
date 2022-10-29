@@ -34,11 +34,17 @@ public abstract class ProgressTaskExecutor<P extends TaskProgress<K>, K extends 
     }
 
     public boolean isProgressing(K progressId) {
-        return this.progresses.containsKey(progressId);
+        P progress = getProgress(progressId);
+        return progress != null && progress.isRunning();
     }
 
     public P getProgress(K progressId) {
-        return this.progresses.get(progressId);
+        P progress = this.progresses.get(progressId);
+        if (progress != null && progress.isCleanable()) {
+            progress = null;
+            remove(progressId);
+        }
+        return progress;
     }
 
     public void remove(K progressId) {
