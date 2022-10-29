@@ -32,7 +32,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
 
     private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " property source: ";
     private static final String DIR_NAME = "config";
-    private static final String BASENAME = "application";
+    public static final String BASENAME = "application";
     private static final String PROPERTY_ENV_CONFIG_PRINT = "env.config.print";
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
