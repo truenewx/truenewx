@@ -16,15 +16,19 @@ public class PropertiesUtil {
     }
 
     public static void load(File source, Properties target) throws IOException {
-        InputStream in = new FileInputStream(source);
-        target.load(in);
-        in.close();
+        if (source.exists()) {
+            InputStream in = new FileInputStream(source);
+            target.load(in);
+            in.close();
+        }
     }
 
     public static void load(Resource source, Properties target) throws IOException {
-        InputStream in = source.getInputStream();
-        target.load(in);
-        in.close();
+        if (source.exists()) {
+            InputStream in = source.getInputStream();
+            target.load(in);
+            in.close();
+        }
     }
 
     public static void load(String sourceLocation, Properties target) throws IOException {
