@@ -504,21 +504,7 @@ public class StringUtil {
      * @return 截取之后的字符串
      */
     public static String cut(String s, int maxLength) {
-        if (s == null || maxLength < 0) {
-            return null;
-        }
-        if (s.length() <= maxLength) {
-            return s;
-        } else {
-            s = s.substring(0, maxLength);
-            char[] chars = s.toCharArray();
-            if (chars[chars.length - 1] > 255) {
-                s = s.substring(0, s.length() - 1);
-            } else if (s.length() >= 2) {
-                s = s.substring(0, s.length() - 2);
-            }
-            return s + "...";
-        }
+        return StringUtils.abbreviate(s, maxLength);
     }
 
     public static String cutForBytes(String s, int maxBytes) {
