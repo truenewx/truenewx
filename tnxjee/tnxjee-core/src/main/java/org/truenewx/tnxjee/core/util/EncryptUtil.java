@@ -1,9 +1,7 @@
 package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -66,6 +64,13 @@ public class EncryptUtil {
             }
         }
         return null;
+    }
+
+    public static StringKeyPair generateKeyPair(String algorithm, int size) throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
+        generator.initialize(size);
+        KeyPair keyPair = generator.genKeyPair();
+        return new StringKeyPair(algorithm, keyPair);
     }
 
     public static String encryptByRsa(Object source, InputStream publicKey) {
