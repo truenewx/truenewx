@@ -120,12 +120,11 @@ public abstract class ResolvableExceptionResolver extends AbstractHandlerExcepti
     private String buildLogMessage(BusinessException be) {
         StringBuilder message = new StringBuilder("====== ").append(be.getCode());
         String args = StringUtils.join(be.getArgs(), Strings.COMMA);
-        if (args.length() > 0) {
+        if (StringUtils.isNotBlank(args)) {
             message.append(Strings.COLON).append(args);
         }
         if (be.isBoundProperty()) {
-            message.append(Strings.LEFT_BRACKET).append(be.getProperty())
-                    .append(Strings.RIGHT_BRACKET);
+            message.append(Strings.LEFT_BRACKET).append(be.getProperty()).append(Strings.RIGHT_BRACKET);
         }
         message.append(" ======");
         return message.toString();
