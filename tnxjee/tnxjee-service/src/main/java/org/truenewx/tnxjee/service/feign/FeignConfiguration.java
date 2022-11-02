@@ -1,8 +1,13 @@
 package org.truenewx.tnxjee.service.feign;
 
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -14,6 +19,7 @@ import feign.Client;
 import feign.Feign;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
+import feign.httpclient.ApacheHttpClient;
 
 @Configuration
 public class FeignConfiguration {
@@ -27,15 +33,22 @@ public class FeignConfiguration {
     }
 
     @Bean
-    public Feign.Builder feignBuilder() {
+    public Feign.Builder feignBuilder(Client client) {
         return Feign.builder()
                 .queryMapEncoder(new BeanPropertyQueryMapEncoder())
-                .client(client());
+                .client(client);
     }
 
     @Bean
-    public Client client() {
-        return new Client.Default((SSLSocketFactory) SSLSocketFactory.getDefault(), new NoopHostnameVerifier());
+    public Client client() throws Exception {
+        SSLContext sslContext = new SSLContextBuilder()
+                .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                .build();
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext))
+                .setSSLHostnameVerifier(new NoopHostnameVerifier())
+                .build();
+        return new ApacheHttpClient(httpClient);
     }
 
 }
