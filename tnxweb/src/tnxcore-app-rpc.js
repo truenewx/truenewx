@@ -313,7 +313,7 @@ export default {
     handle500Error(message, options) {
         console.error(message);
         this.handleErrors([{
-            message: '哎呀，非常抱歉服务器出了点小小的错误，这并不影响你的其它操作，我们会尽快修正这个错误。'
+            message: '非常抱歉，系统出了点小小的错误，这并不影响你的其它操作，我们会尽快修正这个问题。'
         }], options);
     },
     handleOtherError(message, options) {
