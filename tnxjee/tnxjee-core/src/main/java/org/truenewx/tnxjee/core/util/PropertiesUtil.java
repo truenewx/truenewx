@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.ResourceUtils;
+import org.truenewx.tnxjee.core.Strings;
 
 /**
  * 属性集工具类
@@ -15,28 +16,40 @@ public class PropertiesUtil {
     private PropertiesUtil() {
     }
 
-    public static void load(File source, Properties target) throws IOException {
-        if (source.exists()) {
-            InputStream in = new FileInputStream(source);
-            target.load(in);
-            in.close();
-        }
-    }
-
-    public static void load(Resource source, Properties target) throws IOException {
-        if (source.exists()) {
+    public static void load(Resource source, Properties target) {
+        try {
+            // 资源的exists()判断可能导致资源锁定，即使下面in.close()也无法解锁，故不进行存在与否的判断
             InputStream in = source.getInputStream();
             target.load(in);
             in.close();
+        } catch (IOException e) {
+            logException(e);
+        }
+    }
+
+    private static void logException(IOException e) {
+        LogUtil.warn(PropertiesUtil.class, e.getClass().getName() + Strings.COLON + Strings.SPACE + e.getMessage());
+    }
+
+    public static void load(File source, Properties target) {
+        try {
+            if (source.exists()) {
+                InputStream in = new FileInputStream(source);
+                target.load(in);
+                in.close();
+            }
+        } catch (IOException e) {
+            logException(e);
         }
     }
 
     public static void load(String sourceLocation, Properties target) throws IOException {
         if (sourceLocation.startsWith(IOUtil.JAR_FILE_URL_PREFIX)) {
-            load(new UrlResource(sourceLocation), target);
+            UrlResource source = new UrlResource(sourceLocation);
+            load(source, target);
         } else {
-            File file = ResourceUtils.getFile(sourceLocation);
-            load(file, target);
+            File source = ResourceUtils.getFile(sourceLocation);
+            load(source, target);
         }
     }
 
