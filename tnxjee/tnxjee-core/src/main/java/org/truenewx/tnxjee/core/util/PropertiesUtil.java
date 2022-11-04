@@ -59,25 +59,25 @@ public class PropertiesUtil {
         return properties;
     }
 
-    public static void store(Properties source, File target) throws IOException {
+    public static void store(Properties source, File target, String comment) throws IOException {
         target.createNewFile(); // 确保文件存在
         // 先加载文件中的原数据，再写入
         Properties properties = new KeySortedProperties();
         load(target, properties);
         properties.putAll(source);
         OutputStream out = new FileOutputStream(target);
-        properties.store(out, null);
+        properties.store(out, comment);
         out.close();
     }
 
-    public static void store(Properties source, String targetLocation) throws IOException {
+    public static void store(Properties source, String targetLocation, String comment) throws IOException {
         File file;
         if (targetLocation.startsWith(IOUtil.JAR_FILE_URL_PREFIX)) {
             file = new UrlResource(targetLocation).getFile();
         } else {
             file = ResourceUtils.getFile(targetLocation);
         }
-        store(source, file);
+        store(source, file, comment);
     }
 
 }
