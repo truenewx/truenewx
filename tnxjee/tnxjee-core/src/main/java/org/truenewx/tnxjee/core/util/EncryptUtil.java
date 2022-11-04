@@ -2,6 +2,9 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -66,13 +69,6 @@ public class EncryptUtil {
         return null;
     }
 
-    public static StringKeyPair generateKeyPair(String algorithm, int size) throws NoSuchAlgorithmException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
-        generator.initialize(size);
-        KeyPair keyPair = generator.genKeyPair();
-        return new StringKeyPair(algorithm, keyPair);
-    }
-
     public static String encryptByRsa(Object source, InputStream publicKey) {
         try {
             byte[] data = toBytes(source);
@@ -127,6 +123,33 @@ public class EncryptUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static StringKeyPair generateKeyPair(String algorithm, int size) throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
+        generator.initialize(size);
+        KeyPair keyPair = generator.genKeyPair();
+        return new StringKeyPair(algorithm, keyPair);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends PublicKey> T generatePublic(KeyFactory factory, String publicKey) {
+        try {
+            byte[] data = Base64.getDecoder().decode(publicKey);
+            return (T) factory.generatePublic(new X509EncodedKeySpec(data));
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends PrivateKey> T generatePrivate(KeyFactory factory, String privateKey) {
+        try {
+            byte[] data = Base64.getDecoder().decode(privateKey);
+            return (T) factory.generatePrivate(new PKCS8EncodedKeySpec(data));
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

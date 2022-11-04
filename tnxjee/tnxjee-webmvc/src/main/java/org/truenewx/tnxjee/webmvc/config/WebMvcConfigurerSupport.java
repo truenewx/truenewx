@@ -22,8 +22,10 @@ import org.truenewx.tnxjee.web.util.SwaggerUtil;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.webmvc.cors.IgnoreNullConfigCorsProcessor;
 import org.truenewx.tnxjee.webmvc.cors.SingleCorsConfigurationSource;
-import org.truenewx.tnxjee.webmvc.jwt.DefaultInternalJwtResolver;
-import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
+import org.truenewx.tnxjee.webmvc.jwt.JwtGenerator;
+import org.truenewx.tnxjee.webmvc.jwt.JwtGeneratorImpl;
+import org.truenewx.tnxjee.webmvc.jwt.JwtParser;
+import org.truenewx.tnxjee.webmvc.jwt.JwtParserImpl;
 
 /**
  * WEB MVC配置器支持，可选的控制层配置均在此配置支持体系中
@@ -115,9 +117,15 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
     }
 
     @Bean
-    @ConditionalOnMissingBean(InternalJwtResolver.class)
-    public InternalJwtResolver internalJwtResolver() {
-        return new DefaultInternalJwtResolver();
+    @ConditionalOnMissingBean(JwtGenerator.class)
+    public JwtGenerator jwtGenerator() {
+        return new JwtGeneratorImpl();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtParser.class)
+    public JwtParser jwtParser() {
+        return new JwtParserImpl();
     }
 
 }

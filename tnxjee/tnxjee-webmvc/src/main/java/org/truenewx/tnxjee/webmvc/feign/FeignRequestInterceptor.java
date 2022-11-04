@@ -7,13 +7,16 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.config.AppConstants;
+import org.springframework.util.Assert;
+import org.truenewx.tnxjee.core.api.RpcApi;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
 import org.truenewx.tnxjee.model.spec.user.security.DefaultUserSpecificDetails;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
@@ -21,7 +24,7 @@ import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.feign.GrantAuthority;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.web.util.WebConstants;
-import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
+import org.truenewx.tnxjee.webmvc.jwt.JwtGenerator;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 
 import feign.RequestInterceptor;
@@ -35,10 +38,8 @@ import feign.RequestTemplate;
 @Component
 public class FeignRequestInterceptor implements RequestInterceptor {
 
-    @Value(AppConstants.EL_SPRING_APP_NAME)
-    private String appName;
     @Autowired
-    private InternalJwtResolver jwtResolver;
+    private JwtGenerator jwtGenerator;
 
     @Override
     public void apply(RequestTemplate template) {
@@ -70,6 +71,11 @@ public class FeignRequestInterceptor implements RequestInterceptor {
             if (jwt == null) { // 确保存在JWT头信息，以便于判断是否内部RPC
                 jwt = Boolean.TRUE.toString();
             }
+            if (jwt.length() > 8000) { // 单个头信息允许的最大长度为8192，超过8000则进行警告
+                LogUtil.warn(getClass(), "====== The jwt length is {}.", jwt.length());
+            } else {
+                LogUtil.debug(getClass(), "====== The jwt length is {}.", jwt.length());
+            }
             template.header(WebConstants.HEADER_RPC_JWT, jwt);
         }
         // 确保远程调用始终使用JSON格式传递数据，避免出现html结果
@@ -78,7 +84,10 @@ public class FeignRequestInterceptor implements RequestInterceptor {
     }
 
     private String generateJwt(RequestTemplate template) {
-        if (this.jwtResolver.isGenerable(this.appName)) {
+        Class<?> apiClass = template.methodMetadata().method().getDeclaringClass();
+        RpcApi apiAnno = AnnotationUtils.findAnnotation(apiClass, RpcApi.class);
+        Assert.notNull(apiAnno, () -> "Annotation @" + RpcApi.class.getName() + " is required for " + apiClass);
+        if (this.jwtGenerator.isAvailable()) {
             UserSpecificDetails<?> userDetails = SecurityUtil.getAuthorizedUserDetails();
             Class<?> targetType = template.feignTarget().type();
             GrantAuthority grantAuthority = targetType.getAnnotation(GrantAuthority.class);
@@ -106,7 +115,11 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                         break;
                 }
             }
-            return this.jwtResolver.generate(this.appName, userDetails);
+            String type = apiAnno.value();
+            if (StringUtils.isNotBlank(type)) {
+                template.header(WebConstants.HEADER_RPC_TYPE, type);
+            }
+            return this.jwtGenerator.generate(type, userDetails);
         }
         return null;
     }

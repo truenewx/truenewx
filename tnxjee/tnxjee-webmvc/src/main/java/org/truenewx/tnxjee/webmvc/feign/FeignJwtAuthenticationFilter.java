@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.webmvc.security.web.authentication;
+package org.truenewx.tnxjee.webmvc.feign;
 
 import java.io.IOException;
 
@@ -15,30 +15,31 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.web.util.WebConstants;
-import org.truenewx.tnxjee.webmvc.jwt.InternalJwtResolver;
+import org.truenewx.tnxjee.webmvc.jwt.JwtParser;
 import org.truenewx.tnxjee.webmvc.security.authentication.UserSpecificDetailsAuthenticationToken;
 
 /**
- * RPC JWT鉴定过滤器
+ * Feign JWT鉴定过滤器
  */
-public class RpcJwtAuthenticationFilter extends GenericFilterBean {
+public class FeignJwtAuthenticationFilter extends GenericFilterBean {
 
-    private InternalJwtResolver jwtResolver;
+    private JwtParser jwtParser;
 
-    public RpcJwtAuthenticationFilter(ApplicationContext context) {
-        this.jwtResolver = context.getBean(InternalJwtResolver.class);
+    public FeignJwtAuthenticationFilter(ApplicationContext context) {
+        this.jwtParser = context.getBean(JwtParser.class);
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         boolean clearAuthentication = false;
-        if (this.jwtResolver.isParsable()) {
+        if (this.jwtParser.isAvailable()) {
             SecurityContext securityContext = SecurityContextHolder.getContext();
             if (securityContext != null) {
                 HttpServletRequest request = (HttpServletRequest) req;
+                String type = request.getHeader(WebConstants.HEADER_RPC_TYPE);
                 String jwt = request.getHeader(WebConstants.HEADER_RPC_JWT);
-                UserSpecificDetails<?> details = this.jwtResolver.parse(jwt, UserSpecificDetails.class);
+                UserSpecificDetails<?> details = this.jwtParser.parse(type, jwt, UserSpecificDetails.class);
                 if (details != null) {
                     Authentication authResult = new UserSpecificDetailsAuthenticationToken(details);
                     securityContext.setAuthentication(authResult);

@@ -1,9 +1,6 @@
 package org.truenewx.tnxjee.core.util;
 
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,22 +39,12 @@ public class StringKeyPair {
 
     @JsonIgnore
     public PublicKey getPublic() {
-        try {
-            byte[] data = Base64.getDecoder().decode(this.publicKey);
-            return this.factory.generatePublic(new X509EncodedKeySpec(data));
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
+        return EncryptUtil.generatePublic(this.factory, this.publicKey);
     }
 
     @JsonIgnore
     public PrivateKey getPrivate() {
-        try {
-            byte[] data = Base64.getDecoder().decode(this.privateKey);
-            return this.factory.generatePrivate(new PKCS8EncodedKeySpec(data));
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
+        return EncryptUtil.generatePrivate(this.factory, this.privateKey);
     }
 
 }

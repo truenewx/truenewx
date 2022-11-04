@@ -48,8 +48,12 @@ public class PropertiesUtil {
 
     public static void store(Properties source, File target) throws IOException {
         target.createNewFile(); // 确保文件存在
+        // 先加载文件中的原数据，再写入
+        Properties properties = new Properties();
+        load(target, properties);
+        properties.putAll(source);
         OutputStream out = new FileOutputStream(target);
-        source.store(out, null);
+        properties.store(out, null);
         out.close();
     }
 

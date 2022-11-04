@@ -42,6 +42,11 @@ public class WebConstants {
     public static final String HEADER_ORIGINAL_REQUEST = "Original-Request";
 
     /**
+     * 头信息名：RPC业务类型
+     */
+    public static final String HEADER_RPC_TYPE = "Rpc-Type";
+
+    /**
      * 头信息名：RPC JWT
      */
     public static final String HEADER_RPC_JWT = "Rpc-Jwt";

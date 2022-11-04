@@ -5,12 +5,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.truenewx.tnxjee.core.Strings;
+
 /**
- * RPC的API接口标注，用于在源代码中快速定位所有API接口
+ * RPC接口标注
  *
  * @author jianglei
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface RpcApi {
+
+    /**
+     * @return 业务类型，不能包含斜杠/
+     */
+    String value() default Strings.EMPTY;
+
 }
