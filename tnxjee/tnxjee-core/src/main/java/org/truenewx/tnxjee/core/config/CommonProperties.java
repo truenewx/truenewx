@@ -47,18 +47,12 @@ public class CommonProperties implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (this.gatewayEnabled) {
-            if (StringUtils.isNotBlank(this.gatewayUri)) {
-                this.apps.values().forEach(app -> {
-                    // 应用未配置特殊的网关地址，则用通用网关地址作为应用网关地址
-                    if (StringUtils.isBlank(app.getGatewayUri())) {
-                        app.setGatewayUri(this.gatewayUri);
-                    }
-                });
-            }
-        } else { // 不开启网关访问，则将所有应用的网关地址置为空
+        if (this.gatewayEnabled && StringUtils.isNotBlank(this.gatewayUri)) {
             this.apps.values().forEach(app -> {
-                app.setGatewayUri(null);
+                // 应用未配置特殊的网关地址，则用通用网关地址作为应用网关地址
+                if (StringUtils.isBlank(app.getGatewayUri())) {
+                    app.setGatewayUri(this.gatewayUri);
+                }
             });
         }
     }
