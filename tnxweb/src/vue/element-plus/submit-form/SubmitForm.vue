@@ -1,10 +1,10 @@
 <template>
-    <el-form ref="form" :id="id" label-width="auto" :label-position="vertical ? 'top' : 'right'"
+    <el-form ref="form" :id="id" :label-width="labelWidth" :label-position="vertical ? 'top' : 'right'"
         :model="model" :rules="validationRules" :validate-on-rule-change="false"
         :inline="inline" :inline-message="!vertical" :disabled="disabled"
         :class="theme ? ('theme-' + theme) : null" :size="size" :status-icon="statusIcon">
         <slot></slot>
-        <el-form-item class="w-100 mb-0" :label-width="labelWidth" v-if="submit !== undefined && submit !== null">
+        <el-form-item class="w-100 mb-0" v-if="submit !== undefined && submit !== null">
             <el-button :type="theme || 'primary'" :size="size" @click="toSubmit" v-if="submit !== false">
                 {{ _submitText }}
             </el-button>
@@ -60,7 +60,10 @@ export default {
             type: Boolean,
             default: false,
         },
-        labelWidth: [String, Number],
+        labelWidth: {
+            type: [String, Number],
+            default: 'auto',
+        },
         size: String,
         statusIcon: {
             type: Boolean,
