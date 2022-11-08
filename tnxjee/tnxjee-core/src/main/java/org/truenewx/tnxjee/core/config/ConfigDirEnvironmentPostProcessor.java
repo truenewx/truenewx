@@ -87,17 +87,15 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
     }
 
     public static String getExternalConfigDirLocation() throws IOException {
-        String dirLocation = IOUtil.getWorkingDirLocation();
-        String tomcatRootLocation = IOUtil.getTomcatRootLocation(dirLocation);
-        if (tomcatRootLocation != null) { // 位于tomcat中，则配置目录为：[tomcat]/conf
-            return tomcatRootLocation + "/conf";
-        } else {
-            if (dirLocation.endsWith(IOUtil.JAR_WORKING_DIR_SUFFIX)) {
-                int index = dirLocation.lastIndexOf(Strings.SLASH);
-                dirLocation = dirLocation.substring(0, index);
-            }
-            return dirLocation + Strings.SLASH + DIR_NAME;
+        String rootLocation = IOUtil.getWorkingDirLocation();
+        String tomcatRootLocation = IOUtil.getTomcatRootLocation(rootLocation);
+        if (tomcatRootLocation != null) { // 位于tomcat中，则根目录为tomcat安装目录
+            rootLocation = tomcatRootLocation;
+        } else if (rootLocation.endsWith(IOUtil.JAR_WORKING_DIR_SUFFIX)) { // 位于jar中，则根目录为上级目录的上级目录
+            rootLocation = rootLocation.substring(0, rootLocation.lastIndexOf(Strings.SLASH));
+            rootLocation = rootLocation.substring(0, rootLocation.lastIndexOf(Strings.SLASH));
         }
+        return rootLocation + "/conf"; // 外部配置目录为conf，与内部配置目录名不同
     }
 
     private boolean addInternalPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
@@ -115,8 +113,9 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
     }
 
     private String getInternalRootLocation(ConfigurableEnvironment environment) {
+        // 内部配置目录为config，与spring默认的配置目录保持一致
         return environment.getProperty("spring.config.location",
-                ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + DIR_NAME);
+                ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config");
     }
 
     protected List<String> getSortedDirNames(String rootLocation) throws IOException {
