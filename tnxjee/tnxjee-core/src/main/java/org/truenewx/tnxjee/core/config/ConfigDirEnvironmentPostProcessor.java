@@ -31,7 +31,6 @@ import org.truenewx.tnxjee.core.util.*;
 public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " property source: ";
-    private static final String DIR_NAME = "config";
     public static final String BASENAME = "application";
     private static final String PROPERTY_ENV_CONFIG_PRINT = "env.config.print";
 
@@ -48,16 +47,12 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             // 再添加内部配置
             added = addInternalPropertySources(environment, added);
 
-            if (added) {
-                String profile = SpringUtil.getActiveProfile(environment);
-                if (Profiles.LOCAL.equals(profile)
-                        || environment.getProperty(PROPERTY_ENV_CONFIG_PRINT, Boolean.class, Boolean.FALSE)) {
-                    System.out.println("====== Classpath Config Dir Property Sources ======");
-                    MutablePropertySources propertySources = environment.getPropertySources();
-                    for (PropertySource<?> propertySource : propertySources) {
-                        if (propertySource.getName().startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
-                            System.out.println(propertySource.getName());
-                        }
+            if (added && environment.getProperty(PROPERTY_ENV_CONFIG_PRINT, Boolean.class, Boolean.FALSE)) {
+                System.out.println("====== Classpath Config Dir Property Sources ======");
+                MutablePropertySources propertySources = environment.getPropertySources();
+                for (PropertySource<?> propertySource : propertySources) {
+                    if (propertySource.getName().startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
+                        System.out.println(propertySource.getName());
                     }
                 }
             }
@@ -86,16 +81,8 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         return false;
     }
 
-    public static String getExternalConfigDirLocation() throws IOException {
-        String rootLocation = IOUtil.getWorkingDirLocation();
-        String tomcatRootLocation = IOUtil.getTomcatRootLocation(rootLocation);
-        if (tomcatRootLocation != null) { // 位于tomcat中，则根目录为tomcat安装目录
-            rootLocation = tomcatRootLocation;
-        } else if (rootLocation.endsWith(IOUtil.JAR_WORKING_DIR_SUFFIX)) { // 位于jar中，则根目录为上级目录的上级目录
-            rootLocation = rootLocation.substring(0, rootLocation.lastIndexOf(Strings.SLASH));
-            rootLocation = rootLocation.substring(0, rootLocation.lastIndexOf(Strings.SLASH));
-        }
-        return rootLocation + "/conf"; // 外部配置目录为conf，与内部配置目录名不同
+    public static String getExternalConfigDirLocation() {
+        return ApplicationUtil.getApplicationRootLocation() + "/conf"; // 外部配置目录为conf，与内部配置目录名不同
     }
 
     private boolean addInternalPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {

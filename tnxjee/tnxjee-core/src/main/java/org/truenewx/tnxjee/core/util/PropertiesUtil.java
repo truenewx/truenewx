@@ -44,7 +44,7 @@ public class PropertiesUtil {
     }
 
     public static void load(String sourceLocation, Properties target) throws IOException {
-        if (sourceLocation.startsWith(IOUtil.JAR_FILE_URL_PREFIX)) {
+        if (sourceLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
             UrlResource source = new UrlResource(sourceLocation);
             load(source, target);
         } else {
@@ -72,7 +72,7 @@ public class PropertiesUtil {
 
     public static void store(Properties source, String targetLocation, String comment) throws IOException {
         File file;
-        if (targetLocation.startsWith(IOUtil.JAR_FILE_URL_PREFIX)) {
+        if (targetLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
             file = new UrlResource(targetLocation).getFile();
         } else {
             file = ResourceUtils.getFile(targetLocation);

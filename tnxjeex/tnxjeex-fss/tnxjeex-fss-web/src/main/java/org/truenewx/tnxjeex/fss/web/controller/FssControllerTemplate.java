@@ -219,7 +219,8 @@ public abstract class FssControllerTemplate<I extends UserIdentity<?>> implement
                 try {
                     String sourceFilename = getFilename(sourceUrl, command.getExtension());
                     String fileId = StringUtil.uuid32();
-                    File tempFile = new File(IOUtil.getWorkingTempDir(), fileId + Strings.UNDERLINE + sourceFilename);
+                    File tempFile = new File(ApplicationUtil.getWorkingTempDir(),
+                            fileId + Strings.UNDERLINE + sourceFilename);
                     NetUtil.download(sourceUrl, null, tempFile);
                     FssUploadedFileMeta meta = write(targetType, command.getTargetScope(), fileId, tempFile.length(),
                             sourceFilename, new FileInputStream(tempFile), true);

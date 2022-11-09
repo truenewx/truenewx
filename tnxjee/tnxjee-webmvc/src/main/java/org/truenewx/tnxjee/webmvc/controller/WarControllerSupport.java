@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.CommonProperties;
-import org.truenewx.tnxjee.core.util.IOUtil;
+import org.truenewx.tnxjee.core.util.ApplicationUtil;
 import org.truenewx.tnxjee.core.version.VersionReader;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
@@ -38,7 +38,7 @@ public abstract class WarControllerSupport {
     @GetMapping("/download")
     @ConfigAnonymous // 后台下载时不便携带Cookie，无法判断权限，故允许匿名下载
     public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String dirLocation = IOUtil.getWorkingDirLocation();
+        String dirLocation = ApplicationUtil.getWorkingDirLocation();
         File sourceFile = getSourceFile(dirLocation);
         if (sourceFile != null) {
             response.setContentLengthLong(sourceFile.length());
@@ -55,10 +55,10 @@ public abstract class WarControllerSupport {
     }
 
     protected File getSourceFile(String workingDirLocation) {
-        String tomcatRootLocation = IOUtil.getTomcatRootLocation(workingDirLocation);
+        String tomcatRootLocation = ApplicationUtil.getTomcatRootLocation(workingDirLocation);
         if (tomcatRootLocation != null) { // 默认只支持在tomcat中运行的应用
             return new File(workingDirLocation + EXTENSION);
-        } else if (IOUtil.isInJar(workingDirLocation)) {
+        } else if (ApplicationUtil.isInJar(workingDirLocation)) {
             return new File(workingDirLocation.substring(0, workingDirLocation.length() - 1));
         }
         return null;

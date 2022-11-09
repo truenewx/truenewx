@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -35,8 +34,6 @@ public class IOUtil {
     public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 
     public static final int DEFAULT_BUFFER_SIZE = IOUtils.DEFAULT_BUFFER_SIZE;
-    public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
-    public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
     private IOUtil() {
     }
@@ -337,60 +334,6 @@ public class IOUtil {
             }
         }
         return (strIndex == strLength);
-    }
-
-    public static boolean isInJar(String path) {
-        return path.startsWith(JAR_FILE_URL_PREFIX);
-    }
-
-    public static String getWorkingDirLocation() throws IOException {
-        Resource resource = new ClassPathResource(Strings.SLASH);
-        String url = resource.getURL().toString();
-        if (isInJar(url)) { // 位于jar/war中
-            int index = url.indexOf(JAR_WORKING_DIR_SUFFIX); // 一定有
-            return url.substring(JAR_FILE_URL_PREFIX.length(),
-                    index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
-        } else {
-            return resource.getFile().getParentFile().getParentFile().getAbsolutePath();
-        }
-    }
-
-    public static String getTomcatRootLocation(String dirLocation) {
-        int index = webappsIndexOf(dirLocation);
-        if (index >= 0) {
-            return dirLocation.substring(0, index);
-        }
-        return null;
-    }
-
-    private static int webappsIndexOf(String path) {
-        return path.replace('\\', '/').indexOf("/webapps/");
-    }
-
-    public static boolean isInTomcat(String path) {
-        return webappsIndexOf(path) >= 0;
-    }
-
-    /**
-     * 获取工作临时目录，与工作目录相关，非系统临时目录
-     *
-     * @return 工作临时目录
-     * @throws IOException 如果处理过程中出现IO错误
-     */
-    public static File getWorkingTempDir() throws IOException {
-        String rootLocation = getWorkingDirLocation();
-        if (rootLocation != null) {
-            String tomcatRootLocation = getTomcatRootLocation(rootLocation);
-            if (tomcatRootLocation != null) {
-                rootLocation = tomcatRootLocation;
-            }
-            if (rootLocation.endsWith(JAR_WORKING_DIR_SUFFIX)) {
-                int index = rootLocation.lastIndexOf(Strings.SLASH);
-                rootLocation = rootLocation.substring(0, index);
-            }
-            return new File(rootLocation + "/temp");
-        }
-        return null;
     }
 
     public static boolean copyFile(File source, File target) {

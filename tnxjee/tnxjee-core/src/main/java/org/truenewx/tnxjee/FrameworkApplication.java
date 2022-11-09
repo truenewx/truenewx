@@ -1,15 +1,14 @@
 package org.truenewx.tnxjee;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.io.CompositeOutputStream;
 import org.truenewx.tnxjee.core.io.LockingFile;
 import org.truenewx.tnxjee.core.util.IOUtil;
 
@@ -32,42 +31,59 @@ public class FrameworkApplication {
      */
     public static LockingFile STARTING_FILE;
 
-    public static void run(Class<?> primarySource, String... args) {
-        if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                processArg(args, i, ARG_PREFIX_SYSTEM_OUT_FILE, location -> {
-                    try {
-                        File file = new File(location);
-                        IOUtil.createFile(file);
-                        FileOutputStream out = new FileOutputStream(file, true);
-                        System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+    public static void run(Class<?> primarySource, String[] args) {
+        run(primarySource, args, null);
+    }
 
-                processArg(args, i, ARG_PREFIX_STARTING_FILE, location -> {
-                    try {
-                        File file = new File(location);
-                        IOUtil.createFile(file);
-                        STARTING_FILE = new LockingFile(file);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
+    /**
+     * 运行应用
+     *
+     * @param primarySource 主来源类型
+     * @param args          参数集
+     * @param defaultArgs   默认参数映射集，key:参数前缀，value:默认值
+     */
+    public static void run(Class<?> primarySource, String[] args, Map<String, String> defaultArgs) {
+        if (args != null) {
+            processArg(args, ARG_PREFIX_SYSTEM_OUT_FILE, defaultArgs, location -> {
+                try {
+                    File file = new File(location);
+                    IOUtil.createFile(file);
+                    OutputStream out = new CompositeOutputStream(System.out, new FileOutputStream(file, true));
+                    System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            processArg(args, ARG_PREFIX_STARTING_FILE, defaultArgs, location -> {
+                try {
+                    File file = new File(location);
+                    IOUtil.createFile(file);
+                    STARTING_FILE = new LockingFile(file);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         SpringApplication.run(primarySource, args);
     }
 
-    private static void processArg(String[] args, int i, String prefix, Consumer<String> consumer) {
-        String arg = args[i];
-        if (arg.startsWith(prefix)) {
-            String value = arg.substring(prefix.length());
-            if (StringUtils.isNotBlank(value)) {
-                consumer.accept(value);
+    private static void processArg(String[] args, String prefix, Map<String, String> defaultArgs,
+            Consumer<String> consumer) {
+        String value = null;
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith(prefix)) {
+                value = arg.substring(prefix.length());
                 args[i] = Strings.EMPTY;
+                break;
             }
+        }
+        if (defaultArgs != null && StringUtils.isBlank(value)) {
+            value = defaultArgs.get(prefix);
+        }
+        if (StringUtils.isNotBlank(value)) {
+            consumer.accept(value);
         }
     }
 
