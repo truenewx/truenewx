@@ -58,7 +58,7 @@ public abstract class WarControllerSupport {
         String tomcatRootLocation = ApplicationUtil.getTomcatRootLocation(workingDirLocation);
         if (tomcatRootLocation != null) { // 默认只支持在tomcat中运行的应用
             return new File(workingDirLocation + EXTENSION);
-        } else if (ApplicationUtil.isInJar(workingDirLocation)) {
+        } else if (ApplicationUtil.isInJar()) {
             return new File(workingDirLocation.substring(0, workingDirLocation.length() - 1));
         }
         return null;

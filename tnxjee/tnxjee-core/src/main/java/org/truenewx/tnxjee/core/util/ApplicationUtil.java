@@ -7,6 +7,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
 
 /**
  * 基于当前框架的应用的工具类
@@ -18,23 +19,43 @@ public class ApplicationUtil {
     public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
     public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
+    public static ApplicationRunMode RUN_MODE;
+
     private ApplicationUtil() {
     }
 
-    public static boolean isInJar(String path) {
+    private static boolean isInJar(String path) {
         return path.startsWith(JAR_FILE_URL_PREFIX) || path.endsWith(JAR_WORKING_DIR_SUFFIX);
-    }
-
-    public static boolean isInJar() {
-        return isInJar(getWorkingDirLocation());
-    }
-
-    public static boolean isInTomcat() {
-        return isInTomcat(getWorkingDirLocation());
     }
 
     private static boolean isInTomcat(String dirLocation) {
         return webappsIndexOf(dirLocation) >= 0;
+    }
+
+    public static ApplicationRunMode getRunMode() {
+        if (RUN_MODE == null) {
+            String dirLocation = getWorkingDirLocation();
+            if (isInJar(dirLocation)) {
+                RUN_MODE = ApplicationRunMode.JAR;
+            } else if (isInTomcat(dirLocation)) {
+                RUN_MODE = ApplicationRunMode.TOMCAT;
+            } else {
+                RUN_MODE = ApplicationRunMode.IDE;
+            }
+        }
+        return RUN_MODE;
+    }
+
+    public static boolean isInJar() {
+        return getRunMode() == ApplicationRunMode.JAR;
+    }
+
+    public static boolean isInTomcat() {
+        return getRunMode() == ApplicationRunMode.TOMCAT;
+    }
+
+    public static boolean isInIde() {
+        return getRunMode() == ApplicationRunMode.IDE;
     }
 
     private static int webappsIndexOf(String path) {
