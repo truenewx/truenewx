@@ -7,10 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.boot.env.PropertiesPropertySourceLoader;
-import org.springframework.boot.env.PropertySourceLoader;
-import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.boot.env.*;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -30,7 +27,7 @@ import org.truenewx.tnxjee.core.util.*;
  */
 public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " property source: ";
+    private static final String PROPERTY_SOURCE_NAME_PREFIX = Framework.NAME + " config resource: ";
     public static final String BASENAME = "application";
     private static final String PROPERTY_ENV_CONFIG_PRINT = "env.config.print";
 
@@ -44,14 +41,14 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             // 优先添加外部配置
             boolean added = addExternalPropertySources(environment);
 
-            // 再添加内部配置
-            added = addInternalPropertySources(environment, added);
+            // 再添加层级配置
+            added = addLayerPropertySources(environment, added);
 
             if (added && environment.getProperty(PROPERTY_ENV_CONFIG_PRINT, Boolean.class, Boolean.FALSE)) {
                 System.out.println("====== Classpath Config Dir Property Sources ======");
                 MutablePropertySources propertySources = environment.getPropertySources();
                 for (PropertySource<?> propertySource : propertySources) {
-                    if (propertySource.getName().startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
+                    if (propertySource instanceof OriginTrackedMapPropertySource) {
                         System.out.println(propertySource.getName());
                     }
                 }
@@ -85,27 +82,20 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         return ApplicationUtil.getApplicationRootLocation() + "/conf"; // 外部配置目录为conf，与内部配置目录名不同
     }
 
-    private boolean addInternalPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
-        String rootLocation = getInternalRootLocation(environment);
+    private boolean addLayerPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
+        String rootLocation = environment.getProperty("spring.config.location",
+                ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config");
         // 找出根目录下的所有子目录并按照优先级排序
-        List<String> dirNames = getSortedDirNames(rootLocation);
+        List<String> dirNames = getSortedLayerDirNames(rootLocation);
         // 从顶层至底层依次加载配置文件以确保上层配置优先
         for (String dirName : dirNames) {
             String dirLocation = rootLocation + Strings.SLASH + dirName;
             added = addPropertySources(environment, dirLocation, BASENAME) || added;
         }
-        // 最后从根目录中加载最低优先级的配置
-        added = addPropertySources(environment, rootLocation, BASENAME) || added;
         return added;
     }
 
-    private String getInternalRootLocation(ConfigurableEnvironment environment) {
-        // 内部配置目录为config，与spring默认的配置目录保持一致
-        return environment.getProperty("spring.config.location",
-                ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "config");
-    }
-
-    protected List<String> getSortedDirNames(String rootLocation) throws IOException {
+    protected List<String> getSortedLayerDirNames(String rootLocation) throws IOException {
         List<String> list = new ArrayList<>();
         // 模式/*无法找出位于jar包中的目录，故通过模式/*/application*先找出配置文件，再取得所处目录
         Resource[] resources = this.resourcePatternResolver.getResources(
@@ -211,13 +201,36 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             String filename = resource.getFilename();
             PropertySourceLoader sourceLoader = getSourceLoader(filename);
             if (sourceLoader != null) {
-                String sourceName = PROPERTY_SOURCE_NAME_PREFIX + resource.getURL();
+                String sourceName = PROPERTY_SOURCE_NAME_PREFIX + resource.getDescription();
                 if (!propertySources.contains(sourceName)) {
                     PropertySource<?> propertySource = CollectionUtil.getFirst(sourceLoader.load(sourceName, resource),
                             null);
                     if (propertySource != null) {
+                        // 带-[profile]的配置文件插入到首个默认配置文件前
+                        if (sourceName.contains(BASENAME + Strings.MINUS)) {
+                            for (PropertySource<?> ps : propertySources) {
+                                if (ps instanceof OriginTrackedMapPropertySource) {
+                                    String name = ps.getName();
+                                    if (!name.startsWith(PROPERTY_SOURCE_NAME_PREFIX)) {
+                                        propertySources.addBefore(name, propertySource);
+                                        return true;
+                                    }
+                                }
+                            }
+                        } else { // 不带-[profile]的配置文件插入到首个application.*默认配置文件前
+                            for (PropertySource<?> ps : propertySources) {
+                                if (ps instanceof OriginTrackedMapPropertySource) {
+                                    String name = ps.getName();
+                                    if (!name.startsWith(PROPERTY_SOURCE_NAME_PREFIX)
+                                            && name.contains(BASENAME + Strings.DOT)) {
+                                        propertySources.addBefore(name, propertySource);
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        // 没有找到插入位置，则加入到最后（最低优先级）
                         propertySources.addLast(propertySource);
-                        return true;
                     }
                 }
             }
