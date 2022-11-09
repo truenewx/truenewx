@@ -147,7 +147,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             throws IOException {
         List<Resource> list = new ArrayList<>();
         String profile = SpringUtil.getActiveProfile(environment);
-        if (ResourceUtils.FILE_URL_PREFIX.equals(dirLocation)) { // 基于文件系统绝对路径
+        if (dirLocation.startsWith(ResourceUtils.FILE_URL_PREFIX)) { // 基于文件系统绝对路径
             dirLocation = dirLocation.substring(ResourceUtils.FILE_URL_PREFIX.length());
             if (StringUtils.isNotBlank(profile)) {
                 // [dir]/application-[profile].*
