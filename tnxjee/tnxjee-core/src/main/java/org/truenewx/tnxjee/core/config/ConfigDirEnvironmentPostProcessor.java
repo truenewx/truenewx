@@ -45,7 +45,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             added = addLayerPropertySources(environment, added);
 
             if (added && environment.getProperty(PROPERTY_ENV_CONFIG_PRINT, Boolean.class, Boolean.FALSE)) {
-                System.out.println("====== Classpath Config Dir Property Sources ======");
+                System.out.println("====== Config Resources ======");
                 MutablePropertySources propertySources = environment.getPropertySources();
                 for (PropertySource<?> propertySource : propertySources) {
                     if (propertySource instanceof OriginTrackedMapPropertySource) {
