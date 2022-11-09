@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.ResourceUtils;
@@ -65,9 +66,12 @@ public class PropertiesUtil {
         Properties properties = new KeySortedProperties();
         load(target, properties);
         properties.putAll(source);
-        OutputStream out = new FileOutputStream(target);
-        properties.store(out, comment);
-        out.close();
+        FileWriter writer = new FileWriter(target);
+        if (StringUtils.isNotBlank(comment)) {
+            writer.write(Strings.WELL + comment + Strings.ENTER);
+        }
+        properties.store(writer, null);
+        writer.close();
     }
 
     public static void store(Properties source, String targetLocation, String comment) throws IOException {
