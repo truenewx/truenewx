@@ -51,12 +51,8 @@ public class NetUtil {
         return s.toString();
     }
 
-    /**
-     * 获取本机网卡IP地址
-     *
-     * @return 本机网卡IP地址
-     */
-    public static String getLocalIp() {
+    public static List<String> getLocalIntranetIps() {
+        List<String> ips = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
             while (nis.hasMoreElements()) {
@@ -64,15 +60,25 @@ public class NetUtil {
                 Enumeration<InetAddress> ias = ni.getInetAddresses();
                 while (ias.hasMoreElements()) {
                     String ip = ias.nextElement().getHostAddress();
-                    if (NetUtil.isIntranetIp(ip) && !LOCAL_IP_V4.equals(ip)) {
-                        return ip;
+                    if (NetUtil.isIntranetIp(ip) && !LOCAL_IP_V4.equals(ip) && !LOCAL_IP_V6.equals(ip)) {
+                        ips.add(ip);
                     }
                 }
             }
         } catch (SocketException e) {
             LogUtil.error(NetUtil.class, e);
         }
-        return LOCAL_IP_V4;
+        return ips;
+    }
+
+    /**
+     * 获取本机网卡IP地址
+     *
+     * @return 本机网卡IP地址
+     */
+    public static String getLocalIp() {
+        List<String> ips = getLocalIntranetIps();
+        return ips.size() > 0 ? ips.get(0) : LOCAL_IP_V4;
     }
 
     /**
