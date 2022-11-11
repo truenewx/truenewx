@@ -10,7 +10,6 @@ import org.springframework.util.Assert;
  */
 public class ContextInitializedBeanProxy extends DelayContextInitializedBean {
 
-    private ApplicationContext context;
     private ContextInitializedBean target;
     private long delayMillis = DEFAULT_MIN_DELAY_MILLIS;
 
@@ -34,15 +33,9 @@ public class ContextInitializedBeanProxy extends DelayContextInitializedBean {
     }
 
     @Override
-    public void afterInitialized(ApplicationContext context) throws Exception {
-        this.context = context;
-        super.afterInitialized(context);
-    }
-
-    @Override
-    protected void execute() {
+    protected void execute(ApplicationContext context) {
         try {
-            this.target.afterInitialized(this.context);
+            this.target.afterInitialized(context);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

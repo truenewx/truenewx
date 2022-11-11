@@ -29,7 +29,7 @@ public abstract class DelayContextInitializedBean implements ContextInitializedB
         Class<?> beanClass = getClass();
         this.executor.schedule(() -> {
             try {
-                execute();
+                execute(context);
             } catch (Exception e) {
                 LogUtil.error(beanClass, e);
             }
@@ -46,6 +46,6 @@ public abstract class DelayContextInitializedBean implements ContextInitializedB
         return MathUtil.randomLong(DEFAULT_MIN_DELAY_MILLIS, DEFAULT_MIN_DELAY_MILLIS * 2);
     }
 
-    protected abstract void execute();
+    protected abstract void execute(ApplicationContext context);
 
 }
