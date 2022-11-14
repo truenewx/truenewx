@@ -36,8 +36,7 @@ public class EncryptUtil {
                 return source.toString().getBytes();
             }
         } catch (IOException e) {
-            LogUtil.error(Md5Encryptor.class, e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -72,34 +71,34 @@ public class EncryptUtil {
     public static String encryptByRsa(Object source, InputStream publicKey) {
         try {
             byte[] data = toBytes(source);
-            /** 将文件中的公钥对象读出 */
+            // 将文件中的公钥对象读出
             ObjectInputStream ois = new ObjectInputStream(publicKey);
             Key key = (Key) ois.readObject();
             ois.close();
-            /** 得到Cipher对象来实现对源数据的RSA加密 */
+            // 得到Cipher对象来实现对源数据的RSA加密
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, key);
-            /** 执行加密操作 */
+            // 执行加密操作
             byte[] b1 = cipher.doFinal(data);
             return encryptByBase64(b1);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtil.error(Md5Encryptor.class, e);
         }
         return null;
     }
 
     public static String decryptByRsa(String encryptedText, InputStream privateKey) {
         try {
-            /** 将文件中的私钥对象读出 */
+            // 将文件中的私钥对象读出
             ObjectInputStream ois = new ObjectInputStream(privateKey);
             Key key = (Key) ois.readObject();
             ois.close();
-            /** 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
+            // 得到Cipher对象对已用公钥加密的数据进行RSA解密
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, key);
             return decryptByBase64(encryptedText);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtil.error(Md5Encryptor.class, e);
         }
         return null;
     }
@@ -109,10 +108,10 @@ public class EncryptUtil {
             byte[] data = toBytes(source);
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             digest.update(data);
-            byte digestBytes[] = digest.digest();
-            StringBuffer s = new StringBuffer();
-            for (int i = 0; i < digestBytes.length; i++) {
-                String shaHex = Integer.toHexString(digestBytes[i] & 0xFF);
+            byte[] digestBytes = digest.digest();
+            StringBuilder s = new StringBuilder();
+            for (byte digestByte : digestBytes) {
+                String shaHex = Integer.toHexString(digestByte & 0xFF);
                 if (shaHex.length() < 2) {
                     s.append(0);
                 }
@@ -120,9 +119,8 @@ public class EncryptUtil {
             }
             return s.toString();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public static StringKeyPair generateKeyPair(String algorithm, int size) throws NoSuchAlgorithmException {
