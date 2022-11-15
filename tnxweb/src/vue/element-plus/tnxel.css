@@ -299,10 +299,12 @@
     display: none;
 }
 
+.mx-auto.el-form--label-top .el-form-item__content > .el-button:not(.w-fit-content),
 .mx-auto .el-form--label-top .el-form-item__content > .el-button:not(.w-fit-content) {
     width: 100%;
 }
 
+.mx-auto.el-form--label-top .el-form-item__content > .el-button:not(.w-fit-content):not(:first-child),
 .mx-auto .el-form--label-top .el-form-item__content > .el-button:not(.w-fit-content):not(:first-child) {
     margin: 0.75rem 0 0 0;
 }
