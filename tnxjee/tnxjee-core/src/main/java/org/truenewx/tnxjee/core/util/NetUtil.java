@@ -635,4 +635,49 @@ public class NetUtil {
         return null; // 无法解析出上下文根路径
     }
 
+    /**
+     * 判断指定端口是否已被占用
+     *
+     * @param port 端口号
+     * @return 指定端口是否已被占用
+     */
+    public static boolean isOccupiedPort(int port) {
+        try {
+            InetAddress address = InetAddress.getByName(LOCAL_IP_V4);
+            Socket socket = new Socket(address, port);
+            socket.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static String replacePort(String url, int newPort) {
+        int beginIndex;
+        if (url.startsWith(Strings.DOUBLE_SLASH)) {
+            beginIndex = Strings.DOUBLE_SLASH.length();
+        } else {
+            int index = url.indexOf("://");
+            if (index < 0) { // 不以//开头，又不包含://，说明为相对地址，返回原地址，表示无法替换端口
+                return url;
+            }
+            beginIndex = index + 3;
+        }
+        int colonIndex = url.indexOf(Strings.COLON, beginIndex);
+        if (colonIndex > beginIndex) {
+            beginIndex = colonIndex;
+        }
+        int endIndex = url.indexOf(Strings.SLASH, beginIndex);
+        if (endIndex > 0 && colonIndex < 0) { // 不含冒号:，则替换开始位置为结束位置的前一位
+            beginIndex = endIndex - 1;
+        }
+        if (endIndex > beginIndex) {
+            return url.substring(0, beginIndex) + Strings.COLON + newPort + url.substring(endIndex);
+        } else if (colonIndex < 0) { // 不含冒号且没有结束位置的，直接附加端口号
+            return url + Strings.COLON + newPort;
+        } else { // 包含冒号且没有结束位置的，替换末尾的端口
+            return url.substring(0, colonIndex + 1) + newPort;
+        }
+    }
+
 }
