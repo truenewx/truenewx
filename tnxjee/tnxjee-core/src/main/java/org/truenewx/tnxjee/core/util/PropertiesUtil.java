@@ -61,27 +61,31 @@ public class PropertiesUtil {
     }
 
     public static void store(Properties source, File target, String comment) throws IOException {
-        target.createNewFile(); // 确保文件存在
-        // 先加载文件中的原数据，再写入
-        Properties properties = new KeySortedProperties();
-        load(target, properties);
-        properties.putAll(source);
-        FileWriter writer = new FileWriter(target);
-        if (StringUtils.isNotBlank(comment)) {
-            writer.write(Strings.WELL + comment + Strings.ENTER);
+        if (!source.isEmpty()) {
+            target.createNewFile(); // 确保文件存在
+            // 先加载文件中的原数据，再写入
+            Properties properties = new KeySortedProperties();
+            load(target, properties);
+            properties.putAll(source);
+            FileWriter writer = new FileWriter(target);
+            if (StringUtils.isNotBlank(comment)) {
+                writer.write(Strings.WELL + comment + Strings.ENTER);
+            }
+            properties.store(writer, null);
+            writer.close();
         }
-        properties.store(writer, null);
-        writer.close();
     }
 
     public static void store(Properties source, String targetLocation, String comment) throws IOException {
-        File file;
-        if (targetLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
-            file = new UrlResource(targetLocation).getFile();
-        } else {
-            file = ResourceUtils.getFile(targetLocation);
+        if (!source.isEmpty()) {
+            File file;
+            if (targetLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
+                file = new UrlResource(targetLocation).getFile();
+            } else {
+                file = ResourceUtils.getFile(targetLocation);
+            }
+            store(source, file, comment);
         }
-        store(source, file, comment);
     }
 
 }
