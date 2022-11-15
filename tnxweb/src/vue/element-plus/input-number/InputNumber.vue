@@ -8,6 +8,7 @@
             :step="step || Math.pow(10, -this.scale)" step-strictly
             :precision="scale"
             :value-on-clear="null"
+            :size="size"
             @change="onChange"
             @blur="$emit('blur', $event)"/>
         <div class="el-input-group__append" v-if="suffix">{{ suffix }}</div>
@@ -38,6 +39,7 @@ export default {
             default: 0,
         },
         required: Boolean,
+        size: String,
     },
     emits: ['update:modelValue', 'blur'],
     data() {
@@ -48,6 +50,9 @@ export default {
     },
     computed: {
         placeholderText() {
+            if (this.placeholder) {
+                return this.placeholder;
+            }
             let text = this.disabled ? '未' : '请';
             text += this.controls ? '设置' : '输入';
             return text;
