@@ -9,7 +9,7 @@ import org.truenewx.tnxjee.core.util.MathUtil;
 import com.anji.captcha.service.CaptchaCacheService;
 
 /**
- *
+ * 基于RAM的校验码缓存服务
  */
 public class RamCaptchaCacheService implements CaptchaCacheService, DisposableBean {
 
