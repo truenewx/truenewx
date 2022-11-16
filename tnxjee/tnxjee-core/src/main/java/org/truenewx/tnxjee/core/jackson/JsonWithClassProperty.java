@@ -1,4 +1,4 @@
-package org.truenewx.tnxjee.webmvc.jackson;
+package org.truenewx.tnxjee.core.jackson;
 
 import java.lang.annotation.*;
 

@@ -20,8 +20,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
+import org.truenewx.tnxjee.core.jackson.JsonWithClassProperty;
 import org.truenewx.tnxjee.core.jackson.TypedPropertyFilter;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.JacksonUtil;
@@ -29,7 +31,6 @@ import org.truenewx.tnxjee.core.util.PropertyMeta;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
 import org.truenewx.tnxjee.webmvc.http.annotation.ResultFilter;
 import org.truenewx.tnxjee.webmvc.jackson.AttachFieldBeanSerializerModifier;
-import org.truenewx.tnxjee.webmvc.jackson.JsonWithClassProperty;
 import org.truenewx.tnxjee.webmvc.servlet.mvc.method.HandlerMethodMapping;
 import org.truenewx.tnxjee.webmvc.util.WebMvcUtil;
 
@@ -79,7 +80,8 @@ public class JacksonHttpMessageConverter extends MappingJackson2HttpMessageConve
             HandlerMethod handlerMethod = this.handlerMethodMapping.getHandlerMethod(request);
             if (handlerMethod != null) {
                 Method method = handlerMethod.getMethod();
-                boolean internal = WebMvcUtil.isInternalRpc(request);
+                boolean internal = !(outputMessage instanceof ServerHttpResponse) // RPC请求端视为内部
+                        || WebMvcUtil.isInternalRpc(request);
                 ObjectMapper mapper = getMapper(internal, method);
                 String json = mapper.writeValueAsString(object);
                 Charset charset = Objects.requireNonNullElse(getDefaultCharset(), StandardCharsets.UTF_8);
