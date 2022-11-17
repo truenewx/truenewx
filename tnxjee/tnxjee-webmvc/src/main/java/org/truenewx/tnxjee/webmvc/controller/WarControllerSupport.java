@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConfiguration;
 import org.truenewx.tnxjee.core.config.CommonProperties;
@@ -34,6 +35,18 @@ public abstract class WarControllerSupport {
     protected CommonProperties commonProperties;
     @Autowired
     protected VersionReader versionReader;
+
+    @GetMapping("/size")
+    @ConfigAnonymous
+    @ResponseBody
+    public Long getSize() {
+        String dirLocation = ApplicationUtil.getWorkingDirLocation();
+        File sourceFile = getSourceFile(dirLocation);
+        if (sourceFile != null) {
+            return sourceFile.length();
+        }
+        return null;
+    }
 
     @GetMapping("/download")
     @ConfigAnonymous // 后台下载时不便携带Cookie，无法判断权限，故允许匿名下载
