@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 @Component
 public class ResourceDownloader {
 
+    private static final String DOWNLOADING_FILE_EXTENSION = ".downloading";
+
     @Autowired
     private ResourceDownloadProgressTaskExecutor taskExecutor;
     private long interval;
@@ -25,12 +28,27 @@ public class ResourceDownloader {
         this.interval = interval;
     }
 
-    public String download(String url, Map<String, Object> params, File localFile) {
+    public String download(String url, Map<String, Object> params, File targetFile) {
+        if (targetFile.exists()) { // 目标文件已存在，判断是否正在下载中
+            String progressId = ResourceDownloadTaskProgress.generateId(url);
+            ResourceDownloadTaskProgress progress = getProgress(progressId);
+            if (progress != null) { // 正在下载中则返回进度id
+                return progressId;
+            }
+            // 不是正在下载中，则删除目标文件，重新下载
+            try {
+                FileUtils.forceDelete(targetFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(url)) {
             @Override
             protected void execute(ResourceDownloadTaskProgress progress) {
+                File downloadingFile = new File(targetFile.getParentFile(),
+                        targetFile.getName() + DOWNLOADING_FILE_EXTENSION);
                 try {
-                    NetUtil.download(url, params, localFile, (length, in, out) -> {
+                    NetUtil.download(url, params, downloadingFile, (length, in, out) -> {
                         progress.setTotal(length);
 
                         int count;
@@ -59,7 +77,10 @@ public class ResourceDownloader {
                     progress.fail(e);
                 }
                 if (progress.isStopped()) { // 如果是中止的任务，则删除本地文件
-                    localFile.delete();
+                    downloadingFile.delete();
+                } else {  // 下载完成后，下载中文件更名为目标文件
+                    targetFile.delete();
+                    downloadingFile.renameTo(targetFile);
                 }
             }
         });
