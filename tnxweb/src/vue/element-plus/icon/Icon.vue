@@ -17,10 +17,11 @@
         <Close v-else-if="value === 'Close'"/>
         <CloseBold v-else-if="value === 'CloseBold'"/>
         <CopyDocument v-else-if="value === 'CopyDocument'"/>
-        <Document v-else-if="value === 'Document'"/>
         <Delete v-else-if="value === 'Delete'"/>
         <DeleteFilled v-else-if="value === 'DeleteFilled'"/>
+        <Document v-else-if="value === 'Document'"/>
         <DocumentCopy v-else-if="value === 'DocumentCopy'"/>
+        <Download v-else-if="value === 'Download'"/>
         <Edit v-else-if="value === 'Edit'"/>
         <Folder v-else-if="value === 'Folder'"/>
         <HomeFilled v-else-if="value === 'HomeFilled'"/>
@@ -73,6 +74,7 @@ import {
     DeleteFilled,
     Document,
     DocumentCopy,
+    Download,
     Edit,
     Folder,
     HomeFilled,
@@ -120,10 +122,11 @@ const components = {
     Close,
     CloseBold,
     CopyDocument,
-    Document,
     Delete,
     DeleteFilled,
+    Document,
     DocumentCopy,
+    Download,
     Edit,
     Folder,
     HomeFilled,
