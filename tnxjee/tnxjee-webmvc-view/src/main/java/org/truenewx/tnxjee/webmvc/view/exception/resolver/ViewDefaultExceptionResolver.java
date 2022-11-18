@@ -59,6 +59,7 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
     }
 
     @Override
+    // 处理请求无对应控制器方法的异常，不能处理控制器方法抛出的404错误
     protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request,
             HttpServletResponse response, Object handler) throws IOException {
         if (!WebUtil.isAjaxRequest(request)) { // 非ajax请求才跳转错误页面，否则采用默认处理
