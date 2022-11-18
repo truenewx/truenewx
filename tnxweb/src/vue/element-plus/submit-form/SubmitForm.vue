@@ -88,25 +88,14 @@ export default {
             return this.cancel === false ? '保存' : '提交';
         }
     },
-    created() {
-        if (typeof this.rules === 'string') {
-            const vm = this;
-            window.tnx.app.rpc.getMeta(this.rules, meta => {
-                if (vm.rulesLoaded) {
-                    vm.rulesLoaded(meta.$rules);
-                } else {
-                    vm.$emit('rules-loaded', meta.$rules);
-                }
-                vm.validationRules = meta.$rules;
-                delete meta.$rules;
-                this.$emit('meta', meta);
-                vm.fieldNames = Object.keys(meta);
-            }, this.rulesApp);
-        } else if (this.rules) {
-            this.validationRules = this.rules;
-        }
+    watch: {
+        rules() {
+            this.initRules();
+        },
     },
     mounted() {
+        this.initRules();
+
         let vm = this;
         this.$nextTick(function() {
             let container = $(vm.container);
@@ -116,6 +105,24 @@ export default {
         });
     },
     methods: {
+        initRules() {
+            if (typeof this.rules === 'string') {
+                const vm = this;
+                window.tnx.app.rpc.getMeta(this.rules, meta => {
+                    if (vm.rulesLoaded) {
+                        vm.rulesLoaded(meta.$rules);
+                    } else {
+                        vm.$emit('rules-loaded', meta.$rules);
+                    }
+                    vm.validationRules = meta.$rules;
+                    delete meta.$rules;
+                    this.$emit('meta', meta);
+                    vm.fieldNames = Object.keys(meta);
+                }, this.rulesApp);
+            } else if (this.rules) {
+                this.validationRules = this.rules;
+            }
+        },
         disable(disabled) {
             this.disabled = disabled !== false;
         },
