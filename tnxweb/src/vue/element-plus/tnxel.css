@@ -291,10 +291,16 @@
     --el-input-inner-height: var(--el-input-height, 32px);
 }
 
+.el-form-item--feedback.ignore-feedback .el-form-item__label:before {
+    content: unset;
+}
+
+.el-form-item--feedback.ignore-feedback .el-input__inner,
 .el-form-item--feedback .ignore-feedback .el-input__inner {
     border-color: var(--el-border-color);
 }
 
+.el-form-item--feedback.ignore-feedback .el-input__validateIcon,
 .el-form-item--feedback .ignore-feedback .el-input__validateIcon {
     display: none;
 }
