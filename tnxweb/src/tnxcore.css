@@ -168,3 +168,11 @@ pre {
 .border-transparent {
     border-color: transparent !important;
 }
+
+.no-before-content:before {
+    content: unset !important;
+}
+
+.no-after-content:after {
+    content: unset !important;
+}
