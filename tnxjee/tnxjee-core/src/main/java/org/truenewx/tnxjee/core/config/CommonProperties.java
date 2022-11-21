@@ -126,7 +126,7 @@ public class CommonProperties implements InitializingBean {
         }
         AppFacade facade = new AppFacade();
         facade.setName(name);
-        facade.setAlias(appConfig.getAlias());
+        facade.setSymbol(appConfig.getSymbol());
         facade.setCaption(appConfig.getCaption());
         facade.setBusiness(appConfig.getBusiness());
         if (relativeContextUri) {

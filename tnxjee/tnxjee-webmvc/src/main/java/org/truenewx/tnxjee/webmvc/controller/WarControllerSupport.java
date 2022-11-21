@@ -86,9 +86,9 @@ public abstract class WarControllerSupport {
         String filename = appName;
         AppConfiguration app = this.commonProperties.getApp(appName);
         if (app != null) {
-            String alias = app.getAlias();
-            if (StringUtils.isNotBlank(alias)) {
-                filename = alias;
+            String symbol = app.getSymbol();
+            if (StringUtils.isNotBlank(symbol)) {
+                filename = symbol;
             }
         }
         filename += Strings.MINUS + this.versionReader.getVersionText();

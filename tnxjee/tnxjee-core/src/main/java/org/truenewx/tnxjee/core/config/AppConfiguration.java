@@ -12,7 +12,7 @@ import org.truenewx.tnxjee.core.Strings;
  */
 public class AppConfiguration {
 
-    private String alias;
+    private String symbol;
     private String caption;
     private String business;
     private String gatewayUri;
@@ -23,12 +23,12 @@ public class AppConfiguration {
     private String loginedPath = Strings.EMPTY;
     private Map<String, String> subs;
 
-    public String getAlias() {
-        return this.alias;
+    public String getSymbol() {
+        return this.symbol;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public String getCaption() {
