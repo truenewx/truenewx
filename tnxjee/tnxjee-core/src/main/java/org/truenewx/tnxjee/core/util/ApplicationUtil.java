@@ -93,18 +93,15 @@ public class ApplicationUtil {
      */
     public static File getWorkingTempDir() {
         String rootLocation = getWorkingDirLocation();
-        if (rootLocation != null) {
-            String tomcatRootLocation = getTomcatRootLocation(rootLocation);
-            if (tomcatRootLocation != null) {
-                rootLocation = tomcatRootLocation;
-            }
-            if (rootLocation.endsWith(JAR_WORKING_DIR_SUFFIX)) {
-                int index = rootLocation.lastIndexOf(Strings.SLASH);
-                rootLocation = rootLocation.substring(0, index);
-            }
-            return new File(rootLocation + "/temp");
+        String tomcatRootLocation = getTomcatRootLocation(rootLocation);
+        if (tomcatRootLocation != null) {
+            rootLocation = tomcatRootLocation;
         }
-        return null;
+        if (rootLocation.endsWith(JAR_WORKING_DIR_SUFFIX)) {
+            int index = rootLocation.lastIndexOf(Strings.SLASH);
+            rootLocation = rootLocation.substring(0, index);
+        }
+        return new File(rootLocation + "/temp");
     }
 
     /**
