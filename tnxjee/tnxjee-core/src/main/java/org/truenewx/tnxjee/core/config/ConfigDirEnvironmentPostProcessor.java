@@ -67,7 +67,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
                 basename = SpringUtil.getApplicationName(environment);
             }
             if (StringUtils.isBlank(basename)) {
-                System.out.println("====== Can't load property '" + ApplicationUtil.PROPERTY_APPLICATION_SYMBOL
+                System.out.println("====== Can't load property '" + AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL
                         + "' and '" + AppConstants.PROPERTY_SPRING_APP_NAME
                         + "', please make sure one of them is in classpath:application.properties/yaml/yml");
             } else {

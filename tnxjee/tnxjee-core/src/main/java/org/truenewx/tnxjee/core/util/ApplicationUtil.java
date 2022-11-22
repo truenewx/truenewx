@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.config.AppConstants;
 import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
 
 /**
@@ -17,7 +18,6 @@ import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
  */
 public class ApplicationUtil {
 
-    public static final String PROPERTY_APPLICATION_SYMBOL = "application.symbol";
     public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
     public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
@@ -27,7 +27,7 @@ public class ApplicationUtil {
     }
 
     public static String getSymbol(Environment env) {
-        return env.getProperty(PROPERTY_APPLICATION_SYMBOL);
+        return env.getProperty(AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL);
     }
 
     private static boolean isInJar(String path) {
