@@ -3,6 +3,7 @@ package org.truenewx.tnxjee.core.util;
 import java.io.File;
 import java.io.IOException;
 
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
@@ -16,12 +17,17 @@ import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
  */
 public class ApplicationUtil {
 
+    public static final String PROPERTY_APPLICATION_SYMBOL = "application.symbol";
     public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
     public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
 
     public static ApplicationRunMode RUN_MODE;
 
     private ApplicationUtil() {
+    }
+
+    public static String getSymbol(Environment env) {
+        return env.getProperty(PROPERTY_APPLICATION_SYMBOL);
     }
 
     private static boolean isInJar(String path) {
