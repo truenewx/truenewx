@@ -30,7 +30,7 @@ public class ApplicationUtil {
         return env.getProperty(AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL);
     }
 
-    private static boolean isInJar(String path) {
+    public static boolean isInJar(String path) {
         return path.startsWith(JAR_FILE_URL_PREFIX) || path.endsWith(JAR_WORKING_DIR_SUFFIX);
     }
 
