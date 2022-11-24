@@ -14,8 +14,11 @@ import org.truenewx.tnxjee.core.Strings;
  * @author jianglei
  */
 @Configuration
-@ConfigurationProperties("tnxjee.common")
+@ConfigurationProperties(CommonProperties.PROPERTY_PREFIX)
 public class CommonProperties implements InitializingBean {
+
+    public static final String PROPERTY_PREFIX = "tnxjee.common";
+    public static final String PROPERTY_APPS_PREFIX = PROPERTY_PREFIX + ".apps.";
 
     private Map<String, AppConfiguration> apps = new LinkedHashMap<>(); // 必须用Map，在Spring占位符表达式中才可以取指定应用的配置
     private boolean gatewayEnabled;

@@ -38,6 +38,10 @@ public class SpringUtil {
         return isActiveProfile(context.getEnvironment(), profile);
     }
 
+    public static int getServerPort(Environment env) {
+        return MathUtil.parseInt(env.getProperty(AppConstants.PROPERTY_SERVER_PORT), AppConstants.DEFAULT_SERVER_PORT);
+    }
+
     /**
      * 从Spring容器中获取指定名称的bean
      *
