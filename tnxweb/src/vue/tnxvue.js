@@ -177,7 +177,7 @@ tnxvue.app.toDevUrl = function(url, portIndex, replacement) {
             let replaceEndIndex = prefix.length + portIndex + 1;
             let slashIndex = url.indexOf('/', prefix.length);
             url = url.substring(0, prefix.length + portIndex) + replacement
-                + url.substring(replaceEndIndex, slashIndex) + path;
+                + url.substring(replaceEndIndex, slashIndex > replaceEndIndex ? slashIndex : undefined) + path;
         }
     }
     return url;
