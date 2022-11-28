@@ -102,12 +102,38 @@
     border-color: var(--el-color-success) !important;
 }
 
-.theme-success .el-button--default:not(.el-button--success):hover,
-.theme-success .el-button--default:not(.el-button--success):active,
-.theme-success .el-button--default:not(.el-button--success):focus {
+.theme-success .el-button--primary {
+    --el-button-text-color: var(--el-color-white);
+    --el-button-bg-color: var(--el-color-success);
+    --el-button-border-color: var(--el-color-success);
+    --el-button-outline-color: var(--el-color-success-light-5);
+    --el-button-active-color: var(--el-color-success-dark-2);
+    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-link-text-color: var(--el-color-success-light-5);
+    --el-button-hover-bg-color: var(--el-color-success-light-3);
+    --el-button-hover-border-color: var(--el-color-success-light-3);
+    --el-button-active-bg-color: var(--el-color-success-dark-2);
+    --el-button-active-border-color: var(--el-color-success-dark-2);
+    --el-button-disabled-text-color: var(--el-color-white);
+    --el-button-disabled-bg-color: var(--el-color-success-light-5);
+    --el-button-disabled-border-color: var(--el-color-success-light-5);
+}
+
+.theme-success .el-button--primary:focus {
+    background-color: var(--el-color-success-light-3) !important;
+    border-color: var(--el-color-success-light-3) !important;
+}
+
+.theme-success .el-button:not(.el-button--primary):hover,
+.theme-success .el-button:not(.el-button--primary):focus,
+.theme-success .el-button:not(.el-button--primary):active {
     color: var(--el-color-success);
-    background: var(--el-color-success-lighter);
-    border-color: var(--el-color-success-light);
+    background-color: var(--el-color-success-light-9);
+    border-color: var(--el-color-success-light-5);
+}
+
+.theme-success .el-message-box__headerbtn:hover .el-message-box__close {
+    color: var(--el-color-success);
 }
 
 .text-warning,
@@ -136,12 +162,38 @@
     border-color: var(--el-color-warning) !important;
 }
 
-.theme-warning .el-button--default:not(.el-button--warning):hover,
-.theme-warning .el-button--default:not(.el-button--warning):active,
-.theme-warning .el-button--default:not(.el-button--warning):focus {
+.theme-warning .el-button--primary {
+    --el-button-text-color: var(--el-color-white);
+    --el-button-bg-color: var(--el-color-warning);
+    --el-button-border-color: var(--el-color-warning);
+    --el-button-outline-color: var(--el-color-warning-light-5);
+    --el-button-active-color: var(--el-color-warning-dark-2);
+    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-link-text-color: var(--el-color-warning-light-5);
+    --el-button-hover-bg-color: var(--el-color-warning-light-3);
+    --el-button-hover-border-color: var(--el-color-warning-light-3);
+    --el-button-active-bg-color: var(--el-color-warning-dark-2);
+    --el-button-active-border-color: var(--el-color-warning-dark-2);
+    --el-button-disabled-text-color: var(--el-color-white);
+    --el-button-disabled-bg-color: var(--el-color-warning-light-5);
+    --el-button-disabled-border-color: var(--el-color-warning-light-5);
+}
+
+.theme-warning .el-button--primary:focus {
+    background-color: var(--el-color-warning-light-3) !important;
+    border-color: var(--el-color-warning-light-3) !important;
+}
+
+.theme-warning .el-button:not(.el-button--primary):hover,
+.theme-warning .el-button:not(.el-button--primary):focus,
+.theme-warning .el-button:not(.el-button--primary):active {
     color: var(--el-color-warning);
-    background: var(--el-color-warning-lighter);
-    border-color: var(--el-color-warning-light);
+    background-color: var(--el-color-warning-light-9);
+    border-color: var(--el-color-warning-light-5);
+}
+
+.theme-warning .el-message-box__headerbtn:hover .el-message-box__close {
+    color: var(--el-color-warning);
 }
 
 .text-danger,
@@ -173,12 +225,38 @@
     border-color: var(--el-color-danger) !important;
 }
 
-.theme-danger .el-button--default:not(.el-button--danger):hover,
-.theme-danger .el-button--default:not(.el-button--danger):active,
-.theme-danger .el-button--default:not(.el-button--danger):focus {
+.theme-danger .el-button--primary {
+    --el-button-text-color: var(--el-color-white);
+    --el-button-bg-color: var(--el-color-danger);
+    --el-button-border-color: var(--el-color-danger);
+    --el-button-outline-color: var(--el-color-danger-light-5);
+    --el-button-active-color: var(--el-color-danger-dark-2);
+    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-link-text-color: var(--el-color-danger-light-5);
+    --el-button-hover-bg-color: var(--el-color-danger-light-3);
+    --el-button-hover-border-color: var(--el-color-danger-light-3);
+    --el-button-active-bg-color: var(--el-color-danger-dark-2);
+    --el-button-active-border-color: var(--el-color-danger-dark-2);
+    --el-button-disabled-text-color: var(--el-color-white);
+    --el-button-disabled-bg-color: var(--el-color-danger-light-5);
+    --el-button-disabled-border-color: var(--el-color-danger-light-5);
+}
+
+.theme-danger .el-button--primary:focus {
+    background-color: var(--el-color-danger-light-3) !important;
+    border-color: var(--el-color-danger-light-3) !important;
+}
+
+.theme-danger .el-button:not(.el-button--primary):hover,
+.theme-danger .el-button:not(.el-button--primary):focus,
+.theme-danger .el-button:not(.el-button--primary):active {
     color: var(--el-color-danger);
-    background: var(--el-color-danger-lighter);
-    border-color: var(--el-color-danger-light);
+    background-color: var(--el-color-danger-light-9);
+    border-color: var(--el-color-danger-light-5);
+}
+
+.theme-danger .el-message-box__headerbtn:hover .el-message-box__close {
+    color: var(--el-color-danger);
 }
 
 .disabled {
