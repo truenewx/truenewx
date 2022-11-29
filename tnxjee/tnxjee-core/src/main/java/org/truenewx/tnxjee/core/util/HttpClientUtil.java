@@ -1,13 +1,12 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -20,6 +19,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
+import org.truenewx.tnxjee.core.util.function.TrConsumer;
 import org.truenewx.tnxjee.core.util.tuple.Binary;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 
@@ -35,12 +35,12 @@ public class HttpClientUtil {
     private HttpClientUtil() {
     }
 
-    private static CloseableHttpResponse execute(String url, Map<String, Object> params,
-            HttpRequestMethod method, String encoding, int timeout) throws Exception {
+    private static CloseableHttpResponse execute(HttpRequestMethod method, String url, Map<String, Object> params,
+            Map<String, String> headers, String encoding) throws Exception {
         HttpRequestBase request;
         switch (method) {
             case GET:
-                request = new HttpGet(NetUtil.mergeParams(url, params, null));
+                request = new HttpGet(NetUtil.mergeParams(url, params, encoding));
                 break;
             case POST:
                 HttpPost post = new HttpPost(url);
@@ -53,20 +53,19 @@ public class HttpClientUtil {
                 request = null;
         }
         if (request != null) {
-            if (timeout > 0) {
-                RequestConfig requestConfig = RequestConfig.custom()
-                        .setConnectionRequestTimeout(timeout).setConnectTimeout(timeout)
-                        .setSocketTimeout(timeout).build();
-                request.setConfig(requestConfig);
+            if (headers != null) {
+                for (Map.Entry<String, String> header : headers.entrySet()) {
+                    request.setHeader(header.getKey(), header.getValue());
+                }
             }
             return CLIENT.execute(request);
         }
         return null;
     }
 
-    public static Binate<Integer, String> request(String url, Map<String, Object> params,
-            HttpRequestMethod method, String encoding) throws Exception {
-        CloseableHttpResponse response = execute(url, params, method, encoding, 0);
+    public static Binate<Integer, String> request(HttpRequestMethod method, String url, Map<String, Object> params,
+            Map<String, String> headers, String encoding) throws Exception {
+        CloseableHttpResponse response = execute(method, url, params, headers, encoding);
         if (response != null) {
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -87,14 +86,14 @@ public class HttpClientUtil {
         return null;
     }
 
-    public static Binate<Integer, String> requestByGet(String url, Map<String, Object> params)
-            throws Exception {
-        return request(url, params, HttpRequestMethod.GET, Strings.ENCODING_UTF8);
+    public static Binate<Integer, String> requestByGet(String url, Map<String, Object> params,
+            Map<String, String> headers) throws Exception {
+        return request(HttpRequestMethod.GET, url, params, headers, Strings.ENCODING_UTF8);
     }
 
-    public static Binate<Integer, String> requestByPost(String url, Map<String, Object> params)
-            throws Exception {
-        return request(url, params, HttpRequestMethod.POST, Strings.ENCODING_UTF8);
+    public static Binate<Integer, String> requestByPost(String url, Map<String, Object> params,
+            Map<String, String> headers) throws Exception {
+        return request(HttpRequestMethod.POST, url, params, headers, Strings.ENCODING_UTF8);
     }
 
     public static InputStream getImageByPostJson(String url, Map<String, Object> params) {
@@ -110,6 +109,37 @@ public class HttpClientUtil {
             LogUtil.error(HttpClientUtil.class, e);
         }
         return null;
+    }
+
+    public static void download(String url, Map<String, Object> params, Map<String, String> headers, File localFile,
+            TrConsumer<Long, InputStream, OutputStream> consumer) throws IOException {
+        HttpRequestBase request = new HttpGet(NetUtil.mergeParams(url, params, Strings.ENCODING_UTF8));
+        if (headers != null) {
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                request.setHeader(header.getKey(), header.getValue());
+            }
+        }
+        try {
+            CloseableHttpResponse response = execute(HttpRequestMethod.GET, url, params, headers, Strings.ENCODING_UTF8
+            );
+            if (response != null) {
+                long length = response.getEntity().getContentLength();
+                InputStream in = response.getEntity().getContent();
+                OutputStream out = new FileOutputStream(localFile);
+                consumer.accept(length, in, out);
+                out.close();
+                in.close();
+            }
+        } catch (Exception e) {
+            if (e instanceof IOException) {
+                throw (IOException) e;
+            }
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            LogUtil.error(HttpClientUtil.class, e);
+        }
     }
 
 }

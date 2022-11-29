@@ -38,7 +38,7 @@ public class CasJsonServiceTicketValidator extends AbstractUrlBasedTicketValidat
     @Override
     protected String retrieveResponseFromServer(URL validationUrl, String ticket) {
         try {
-            Binate<Integer, String> result = HttpClientUtil.requestByGet(validationUrl.toString(), null);
+            Binate<Integer, String> result = HttpClientUtil.requestByGet(validationUrl.toString(), null, null);
             if (result != null) {
                 return result.getLeft() + Strings.COLON + result.getRight();
             }

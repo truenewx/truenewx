@@ -32,7 +32,7 @@ public abstract class WechatAppAccessSupport implements WechatAppAccessor {
 
     protected Map<String, Object> get(String url, Map<String, Object> params) {
         try {
-            Binate<Integer, String> response = HttpClientUtil.requestByGet(HOST + url, params);
+            Binate<Integer, String> response = HttpClientUtil.requestByGet(HOST + url, params, null);
             if (response != null) {
                 String body = response.getRight();
                 return JsonUtil.json2Map(body);
@@ -45,7 +45,7 @@ public abstract class WechatAppAccessSupport implements WechatAppAccessor {
 
     protected Map<String, Object> post(String url, Map<String, Object> params) {
         try {
-            Binate<Integer, String> response = HttpClientUtil.requestByPost(HOST + url, params);
+            Binate<Integer, String> response = HttpClientUtil.requestByPost(HOST + url, params, null);
             if (response != null) {
                 String body = response.getRight();
                 return JsonUtil.json2Map(body);
