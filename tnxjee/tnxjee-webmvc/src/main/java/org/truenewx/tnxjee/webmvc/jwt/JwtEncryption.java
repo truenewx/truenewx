@@ -1,13 +1,18 @@
 package org.truenewx.tnxjee.webmvc.jwt;
 
-import org.truenewx.tnxjee.core.spec.Named;
-
 /**
  * JWT加密方
  *
  * @author jianglei
  */
-public interface JwtEncryption extends Named {
+public interface JwtEncryption {
+
+    /**
+     * 获取当前加密方名称，一般为当前应用名称
+     *
+     * @return 加密方名称
+     */
+    String getEncryptionName();
 
     /**
      * 获取拼接在jwt串中的负载信息

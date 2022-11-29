@@ -14,7 +14,7 @@ public abstract class JwtSymmetricEncryption extends JwtSymmetricSecretKeySuppor
     private String name;
 
     @Override
-    public final String getName() {
+    public final String getEncryptionName() {
         return this.name;
     }
 
@@ -30,7 +30,7 @@ public abstract class JwtSymmetricEncryption extends JwtSymmetricSecretKeySuppor
 
     @Override
     public final String getEncryptSecretKey(String type) {
-        return getSecretKey(type, getName());
+        return getSecretKey(type);
     }
 
 }

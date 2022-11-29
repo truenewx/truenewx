@@ -14,7 +14,7 @@ public abstract class JwtSymmetricDecryption extends JwtSymmetricSecretKeySuppor
 
     @Override
     public final String getDecryptSecretKey(String type, String payload) {
-        return getSecretKey(type, getEncryptionName());
+        return getSecretKey(type);
     }
 
 }

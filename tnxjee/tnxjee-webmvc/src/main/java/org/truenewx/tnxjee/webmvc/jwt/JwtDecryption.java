@@ -8,7 +8,7 @@ package org.truenewx.tnxjee.webmvc.jwt;
 public interface JwtDecryption {
 
     /**
-     * 获取对应的加密方名称
+     * 获取对应的加密方名称，一般为加密方应用名称
      *
      * @return 加密方名称
      */

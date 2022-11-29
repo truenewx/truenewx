@@ -51,19 +51,18 @@ public class JwtGeneratorImpl implements JwtGenerator {
             if (StringUtils.isBlank(type)) {
                 type = Strings.EMPTY;
             } else {
-                Assert.isTrue(!type.contains(Strings.SLASH), () -> "The type must not contain '/'.");
+                Assert.isTrue(!type.contains(Strings.SLASH), () -> "The type must not contain '/'");
             }
             Algorithm algorithm = getAlgorithm(type);
             if (algorithm != null) {
-                String encryptionName = this.encryption.getName();
-                Assert.isTrue(!encryptionName.contains(Strings.SLASH),
-                        () -> "The encryptionName must not contain '/'.");
+                String encryptionName = this.encryption.getEncryptionName();
+                Assert.isTrue(!encryptionName.contains(Strings.SLASH), () -> "The encryptionName must not contain '/'");
 
                 String payload = this.encryption.getPayload(type);
                 if (StringUtils.isBlank(payload)) {
                     payload = Strings.EMPTY;
                 } else {
-                    Assert.isTrue(!payload.contains(Strings.SLASH), () -> "The payload must not contain '/'.");
+                    Assert.isTrue(!payload.contains(Strings.SLASH), () -> "The payload must not contain '/'");
                 }
 
                 int expiredIntervalSeconds = getExpiredIntervalSeconds(this.profileSupplier.get());

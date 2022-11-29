@@ -14,14 +14,16 @@ public abstract class JwtSymmetricSecretKeySupport {
     private final Md5xEncryptor encryptor = new Md5xEncryptor(getStaticKey());
     private String defaultSecretKey; // 对称密钥大概率不区分业务类型，缓存默认密钥以提高密钥获取速度
 
-    protected final String getSecretKey(String type, String encryptionName) {
+    public abstract String getEncryptionName();
+
+    protected final String getSecretKey(String type) {
         if (StringUtils.isBlank(type)) {
             if (this.defaultSecretKey == null) {
-                this.defaultSecretKey = this.encryptor.encrypt(Strings.EMPTY, encryptionName);
+                this.defaultSecretKey = this.encryptor.encrypt(Strings.EMPTY, getEncryptionName());
             }
             return this.defaultSecretKey;
         }
-        return this.encryptor.encrypt(type, encryptionName);
+        return this.encryptor.encrypt(type, getEncryptionName());
     }
 
     protected abstract long getStaticKey();
