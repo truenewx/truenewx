@@ -1,15 +1,14 @@
 package org.truenewx.tnxjee.core.io;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 
 /**
@@ -28,7 +27,7 @@ public class ResourceDownloader {
         this.interval = interval;
     }
 
-    public String download(String url, Map<String, Object> params, File targetFile) {
+    public String download(String url, Map<String, Object> params, Map<String, String> headers, File targetFile) {
         if (targetFile.exists()) { // 目标文件已存在，判断是否正在下载中
             String progressId = ResourceDownloadTaskProgress.generateId(url);
             ResourceDownloadTaskProgress progress = getProgress(progressId);
@@ -48,12 +47,13 @@ public class ResourceDownloader {
                 File downloadingFile = new File(targetFile.getParentFile(),
                         targetFile.getName() + DOWNLOADING_FILE_EXTENSION);
                 try {
-                    NetUtil.download(url, params, downloadingFile, (length, in, out) -> {
-                        progress.setTotal(length);
+                    HttpClientUtil.download(url, params, headers, (responseEntity, responseHeaders) -> {
+                        progress.setTotal(responseEntity.getContentLength());
 
                         int count;
                         byte[] buffer = IOUtils.byteArray(IOUtil.DEFAULT_BUFFER_SIZE);
-                        try {
+                        try (InputStream in = responseEntity.getContent();
+                             OutputStream out = new FileOutputStream(downloadingFile)) {
                             while (IOUtils.EOF != (count = in.read(buffer))) {
                                 if (progress.isStopped()) {
                                     break;
