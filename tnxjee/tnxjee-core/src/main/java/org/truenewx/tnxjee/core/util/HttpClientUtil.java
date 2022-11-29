@@ -1,12 +1,12 @@
 package org.truenewx.tnxjee.core.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -19,7 +19,6 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
-import org.truenewx.tnxjee.core.util.function.TrConsumer;
 import org.truenewx.tnxjee.core.util.tuple.Binary;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 
@@ -44,9 +43,11 @@ public class HttpClientUtil {
                 break;
             case POST:
                 HttpPost post = new HttpPost(url);
-                // 发送微信公众号模板消息需以下写法
-                post.setEntity(new StringEntity(JsonUtil.toJson(params),
-                        ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), encoding)));
+                if (params != null) {
+                    // 发送微信公众号模板消息需以下写法
+                    post.setEntity(new StringEntity(JsonUtil.toJson(params),
+                            ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), encoding)));
+                }
                 request = post;
                 break;
             default:
@@ -111,24 +112,23 @@ public class HttpClientUtil {
         return null;
     }
 
-    public static void download(String url, Map<String, Object> params, Map<String, String> headers, File localFile,
-            TrConsumer<Long, InputStream, OutputStream> consumer) throws IOException {
-        HttpRequestBase request = new HttpGet(NetUtil.mergeParams(url, params, Strings.ENCODING_UTF8));
-        if (headers != null) {
-            for (Map.Entry<String, String> header : headers.entrySet()) {
-                request.setHeader(header.getKey(), header.getValue());
-            }
-        }
+    public static void download(String url, Map<String, Object> params, Map<String, String> headers,
+            BiConsumer<HttpEntity, Map<String, String>> consumer) throws IOException {
         try {
-            CloseableHttpResponse response = execute(HttpRequestMethod.GET, url, params, headers, Strings.ENCODING_UTF8
-            );
+            CloseableHttpResponse response = execute(HttpRequestMethod.GET, url, params, headers,
+                    Strings.ENCODING_UTF8);
             if (response != null) {
-                long length = response.getEntity().getContentLength();
-                InputStream in = response.getEntity().getContent();
-                OutputStream out = new FileOutputStream(localFile);
-                consumer.accept(length, in, out);
-                out.close();
-                in.close();
+                StatusLine statusLine = response.getStatusLine();
+                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                    Map<String, String> responseHeaders = new HashMap<>();
+                    for (Header header : response.getAllHeaders()) {
+                        responseHeaders.put(header.getName(), header.getValue());
+                    }
+                    consumer.accept(response.getEntity(), responseHeaders);
+                } else {
+                    LogUtil.error(HttpClientUtil.class,
+                            "====== " + statusLine + HttpRequestMethod.GET.name() + Strings.SPACE + url);
+                }
             }
         } catch (Exception e) {
             if (e instanceof IOException) {
