@@ -1,8 +1,6 @@
 package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import com.aliyun.oss.OSS;
 import com.aliyuncs.DefaultAcsClient;
@@ -15,9 +13,9 @@ import com.aliyuncs.profile.IClientProfile;
  *
  * @author jianglei
  */
-@Configuration
-@ConfigurationProperties("tnxjeex.fss.account.aliyun")
 public class AliyunAccountProvider implements AliyunAccount {
+
+    public static final String PROPERTIES_PREFIX = "tnxjeex.fss.account.aliyun";
 
     private String accountId;
     private String ossEndpoint;
