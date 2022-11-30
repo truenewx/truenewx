@@ -124,4 +124,19 @@ public class ApplicationUtil {
         }
         return location;
     }
+
+    public static String getAbsolutePath(String path) {
+        if (path.startsWith(Strings.DOT)) { // 相对路径
+            String rootLocation = ApplicationUtil.getApplicationRootLocation();
+            if (path.startsWith("./")) {
+                path = rootLocation + IOUtil.FILE_SEPARATOR + path.substring(2);
+            } else if (path.startsWith("../")) {
+                path = new File(rootLocation).getParent() + IOUtil.FILE_SEPARATOR + rootLocation.substring(3);
+            } else {
+                throw new RuntimeException("Invalid root path: " + path);
+            }
+        }
+        return path;
+    }
+
 }
