@@ -1,6 +1,8 @@
 package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import com.aliyun.oss.OSS;
 import com.aliyuncs.DefaultAcsClient;
@@ -13,10 +15,11 @@ import com.aliyuncs.profile.IClientProfile;
  *
  * @author jianglei
  */
+@Configuration
+@ConfigurationProperties("tnxjeex.fss.account.aliyun")
 public class AliyunAccountProvider implements AliyunAccount {
 
     private String accountId;
-    private String ossRegion;
     private String ossEndpoint;
     private String ossBucket;
     private String ramRegion = "cn-hangzhou";
@@ -36,9 +39,8 @@ public class AliyunAccountProvider implements AliyunAccount {
      * @param ossRegion OSS区域
      */
     public void setOssRegion(String ossRegion) {
-        this.ossRegion = ossRegion;
-        if (StringUtils.isNotBlank(this.ossRegion)) {
-            this.ossEndpoint = "oss-" + this.ossRegion + ".aliyuncs.com";
+        if (StringUtils.isNotBlank(ossRegion)) {
+            this.ossEndpoint = "oss-" + ossRegion + ".aliyuncs.com";
         } else {
             this.ossEndpoint = null;
         }
@@ -83,11 +85,6 @@ public class AliyunAccountProvider implements AliyunAccount {
     }
 
     @Override
-    public String getOssRegion() {
-        return this.ossRegion;
-    }
-
-    @Override
     public String getOssEndpoint() {
         return this.ossEndpoint;
     }
@@ -95,8 +92,7 @@ public class AliyunAccountProvider implements AliyunAccount {
     @Override
     public OSS getOssClient() {
         if (this.oss == null) {
-            this.oss = AliyunOssUtil.buildOss(this.ossEndpoint, this.accessKeyId,
-                    this.accessKeySecret);
+            this.oss = AliyunOssUtil.buildOss(this.ossEndpoint, this.accessKeyId, this.accessKeySecret);
         }
         return this.oss;
     }
@@ -104,11 +100,19 @@ public class AliyunAccountProvider implements AliyunAccount {
     @Override
     public IAcsClient getAcsClient() {
         if (this.acsClient == null) {
-            IClientProfile profile = DefaultProfile.getProfile(this.ramRegion,
-                    this.accessKeyId, this.accessKeySecret);
+            IClientProfile profile = DefaultProfile.getProfile(this.ramRegion, this.accessKeyId, this.accessKeySecret);
             this.acsClient = new DefaultAcsClient(profile);
         }
         return this.acsClient;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return StringUtils.isNotBlank(this.accountId)
+                && StringUtils.isNotBlank(this.ossEndpoint)
+                && StringUtils.isNotBlank(this.ossBucket)
+                && StringUtils.isNotBlank(this.accessKeyId)
+                && StringUtils.isNotBlank(this.accessKeySecret);
     }
 
 }

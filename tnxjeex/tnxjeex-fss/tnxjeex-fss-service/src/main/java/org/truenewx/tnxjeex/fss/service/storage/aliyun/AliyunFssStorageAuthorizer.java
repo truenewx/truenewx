@@ -74,7 +74,7 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
         return this.contextUrl;
     }
 
-    protected void setContextUrl(String contextUrl) {
+    public void setContextUrl(String contextUrl) {
         this.contextUrl = contextUrl;
     }
 

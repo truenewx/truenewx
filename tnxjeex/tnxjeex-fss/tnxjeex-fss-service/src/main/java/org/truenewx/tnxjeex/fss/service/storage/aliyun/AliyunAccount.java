@@ -12,8 +12,6 @@ public interface AliyunAccount {
 
     String getAccountId();
 
-    String getOssRegion();
-
     String getOssEndpoint();
 
     String getOssBucket();
@@ -21,5 +19,7 @@ public interface AliyunAccount {
     OSS getOssClient();
 
     IAcsClient getAcsClient();
+
+    boolean isAvailable();
 
 }
