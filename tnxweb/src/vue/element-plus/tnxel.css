@@ -132,6 +132,7 @@
     border-color: var(--el-color-success-light-5);
 }
 
+.theme-success .el-message-box__status,
 .theme-success .el-message-box__headerbtn:hover .el-message-box__close {
     color: var(--el-color-success);
 }
@@ -192,6 +193,7 @@
     border-color: var(--el-color-warning-light-5);
 }
 
+.theme-warning .el-message-box__status,
 .theme-warning .el-message-box__headerbtn:hover .el-message-box__close {
     color: var(--el-color-warning);
 }
@@ -255,6 +257,7 @@
     border-color: var(--el-color-danger-light-5);
 }
 
+.theme-danger .el-message-box__status,
 .theme-danger .el-message-box__headerbtn:hover .el-message-box__close {
     color: var(--el-color-danger);
 }
