@@ -18,10 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.ArrayUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.NetUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
@@ -40,14 +37,14 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     private ExecutorService executorService;
 
     public OwnFssStorageAccessor(String root, OwnFssFileStreamProvider fileStreamProvider) {
-        File file = new File(root);
-        if (!file.exists()) { // 目录不存在则创建
-            file.mkdirs();
+        File dir = new File(ApplicationUtil.getAbsolutePath(root));
+        if (!dir.exists()) { // 目录不存在则创建
+            dir.mkdirs();
         } else { // 必须是个目录
-            Assert.isTrue(file.isDirectory(), "root must be a directory");
+            Assert.isTrue(dir.isDirectory(), "root must be a directory");
         }
-        Assert.isTrue(file.canRead() && file.canWrite(), "root can not read or write");
-        this.root = file;
+        Assert.isTrue(dir.canRead() && dir.canWrite(), "root can not read or write");
+        this.root = dir;
         this.fileStreamProvider = fileStreamProvider;
     }
 
