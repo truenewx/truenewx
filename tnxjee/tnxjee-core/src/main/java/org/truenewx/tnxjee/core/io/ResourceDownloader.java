@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.IOUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 
 /**
@@ -38,7 +39,7 @@ public class ResourceDownloader {
             try {
                 FileUtils.forceDelete(targetFile);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogUtil.error(getClass(), e);
             }
         }
         return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(url)) {
