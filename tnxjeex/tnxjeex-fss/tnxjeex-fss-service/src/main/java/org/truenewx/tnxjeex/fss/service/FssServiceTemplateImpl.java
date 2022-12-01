@@ -20,6 +20,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.beans.ContextInitializedBean;
 import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.function.TrPredicate;
 import org.truenewx.tnxjee.core.util.tuple.Binary;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
@@ -612,6 +613,38 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
     @Override
     public String move(I userIdentity, String sourceLocationUrl, String targetType, String targetScope) {
         return copyOrMove(userIdentity, sourceLocationUrl, targetType, targetScope, false);
+    }
+
+    @Override
+    public long getTotalSize(I userIdentity, String[] types) {
+        long total = 0;
+        if (types != null) {
+            for (String type : types) {
+                FssServiceStrategy<I> strategy = this.strategies.get(type);
+                if (strategy != null) {
+                    FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
+                    String storageDir = strategy.getStorageRootDir() + strategy.getStorageRelativeDir(userIdentity,
+                            null);
+                    total += accessor.getTotalSize(storageDir);
+                }
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public void loopReadStream(I userIdentity, String[] types, TrPredicate<String, Long, InputStream> predicate) {
+        if (types != null) {
+            for (String type : types) {
+                FssServiceStrategy<I> strategy = this.strategies.get(type);
+                if (strategy != null) {
+                    FssStorageAccessor accessor = this.accessors.get(strategy.getProvider());
+                    String storageDir = strategy.getStorageRootDir() + strategy.getStorageRelativeDir(userIdentity,
+                            null);
+                    accessor.loopReadStream(storageDir, predicate);
+                }
+            }
+        }
     }
 
 }

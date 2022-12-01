@@ -2,6 +2,8 @@ package org.truenewx.tnxjeex.fss.service;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
@@ -53,7 +55,7 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
      * @param scope        业务范围
      * @return 相对于业务存储根目录的相对目录，返回null表示没有写权限
      */
-    String getStorageRelativeDir(I userIdentity, String scope);
+    String getStorageRelativeDir(I userIdentity, @Nullable String scope);
 
     /**
      * 获取指定文件存储时的最后一级文件名，不含扩展名，可以包含PLACEHOLDER_MD5占位表示由框架生成基于内容的MD5编码替代，默认为纯MD5编码

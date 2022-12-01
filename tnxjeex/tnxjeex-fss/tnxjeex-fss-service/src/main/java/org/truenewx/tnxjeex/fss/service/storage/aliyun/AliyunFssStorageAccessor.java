@@ -214,10 +214,10 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
     }
 
     @Override
-    public long getTotalSize(String storageDirPath) {
-        storageDirPath = AliyunOssUtil.standardizePath(storageDirPath);
+    public long getTotalSize(String storageDir) {
+        storageDir = AliyunOssUtil.standardizePath(storageDir);
         long total = 0;
-        ObjectListing objects = this.account.getOssClient().listObjects(getBucketName(), storageDirPath);
+        ObjectListing objects = this.account.getOssClient().listObjects(getBucketName(), storageDir);
         List<OSSObjectSummary> objectSummaries = objects.getObjectSummaries();
         for (OSSObjectSummary objectSummary : objectSummaries) {
             total += objectSummary.getSize();
@@ -226,10 +226,10 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
     }
 
     @Override
-    public void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate) {
-        storageDirPath = AliyunOssUtil.standardizePath(storageDirPath);
+    public void loopReadStream(String storageDir, TrPredicate<String, Long, InputStream> predicate) {
+        storageDir = AliyunOssUtil.standardizePath(storageDir);
         OSS client = this.account.getOssClient();
-        ObjectListing objects = client.listObjects(getBucketName(), storageDirPath);
+        ObjectListing objects = client.listObjects(getBucketName(), storageDir);
         List<OSSObjectSummary> objectSummaries = objects.getObjectSummaries();
         for (OSSObjectSummary objectSummary : objectSummaries) {
             long size = objectSummary.getSize();

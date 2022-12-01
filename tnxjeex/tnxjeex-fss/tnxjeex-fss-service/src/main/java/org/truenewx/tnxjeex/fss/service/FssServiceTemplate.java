@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.truenewx.tnxjee.core.util.function.TrPredicate;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjee.service.Service;
 import org.truenewx.tnxjee.service.exception.BusinessException;
@@ -156,5 +157,23 @@ public interface FssServiceTemplate<I extends UserIdentity<?>> extends Service {
      * @return 目标文件的定位地址
      */
     String move(I userIdentity, String sourceLocationUrl, String targetType, String targetScope);
+
+    /**
+     * 获取指定用户的指定业务类型的所有文件的总大小
+     *
+     * @param userIdentity 用户标识
+     * @param types        业务类型集
+     * @return 文件总大小
+     */
+    long getTotalSize(I userIdentity, String[] types);
+
+    /**
+     * 遍历指定用户的指定业务类型的所有文件
+     *
+     * @param userIdentity 用户标识
+     * @param types        业务类型集
+     * @param predicate    遍历断言
+     */
+    void loopReadStream(I userIdentity, String[] types, TrPredicate<String, Long, InputStream> predicate);
 
 }

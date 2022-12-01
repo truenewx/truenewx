@@ -56,8 +56,8 @@ public interface FssStorageAccessor {
 
     void move(String sourceStoragePath, String targetStoragePath);
 
-    long getTotalSize(String storageDirPath);
+    long getTotalSize(String storageDir);
 
-    void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate);
+    void loopReadStream(String storageDir, TrPredicate<String, Long, InputStream> predicate);
 
 }

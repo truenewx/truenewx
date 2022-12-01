@@ -217,19 +217,19 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     }
 
     @Override
-    public long getTotalSize(String storageDirPath) {
-        File dir = new File(storageDirPath);
+    public long getTotalSize(String storageDir) {
+        File dir = new File(storageDir);
         return FileUtils.sizeOfDirectory(dir);
     }
 
     @Override
-    public void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate) {
-        File dir = new File(storageDirPath);
+    public void loopReadStream(String storageDir, TrPredicate<String, Long, InputStream> predicate) {
+        File dir = new File(storageDir);
         try {
             List<File> files = FileUtils.streamFiles(dir, true).collect(Collectors.toList());
             for (File file : files) {
                 String filePath = file.getAbsolutePath();
-                String storagePath = filePath.substring(storageDirPath.length());
+                String storagePath = filePath.substring(storageDir.length());
                 InputStream in = new FileInputStream(file);
                 boolean result = predicate.test(storagePath, file.length(), in);
                 in.close();
