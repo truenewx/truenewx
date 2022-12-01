@@ -20,6 +20,4 @@ public interface AliyunAccount {
 
     IAcsClient getAcsClient();
 
-    boolean isAvailable();
-
 }

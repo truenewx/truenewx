@@ -104,13 +104,4 @@ public class AliyunAccountProvider implements AliyunAccount {
         return this.acsClient;
     }
 
-    @Override
-    public boolean isAvailable() {
-        return StringUtils.isNotBlank(this.accountId)
-                && StringUtils.isNotBlank(this.ossEndpoint)
-                && StringUtils.isNotBlank(this.ossBucket)
-                && StringUtils.isNotBlank(this.accessKeyId)
-                && StringUtils.isNotBlank(this.accessKeySecret);
-    }
-
 }

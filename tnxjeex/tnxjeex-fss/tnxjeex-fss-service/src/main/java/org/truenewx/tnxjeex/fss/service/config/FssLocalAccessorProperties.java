@@ -7,8 +7,10 @@ import org.springframework.context.annotation.Configuration;
  * 文件存储访问器配置属性集
  */
 @Configuration
-@ConfigurationProperties("tnxjeex.fss.accessor.local")
+@ConfigurationProperties(FssLocalAccessorProperties.PROPERTIES_PREFIX)
 public class FssLocalAccessorProperties {
+
+    public static final String PROPERTIES_PREFIX = "tnxjeex.fss.accessor.local";
 
     /**
      * 本地访问器根目录
