@@ -2,6 +2,7 @@ package org.truenewx.tnxjeex.fss.service.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjeex.fss.service.storage.own.EncryptOwnFssFileStreamProvider;
@@ -21,6 +22,7 @@ public class OwnFssServiceConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(FssLocalAccessorProperties.PROPERTIES_PREFIX + ".root")
     @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isNotBlank('${" +
             FssLocalAccessorProperties.PROPERTIES_PREFIX + ".root}')")
     public OwnFssStorageAccessor ownFssAccessor(FssLocalAccessorProperties properties,
