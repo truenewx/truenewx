@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import org.truenewx.tnxjee.core.util.function.TrPredicate;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 
@@ -54,5 +55,9 @@ public interface FssStorageAccessor {
     void copy(String sourceStoragePath, String targetStoragePath);
 
     void move(String sourceStoragePath, String targetStoragePath);
+
+    long getTotalSize(String storageDirPath);
+
+    void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate);
 
 }

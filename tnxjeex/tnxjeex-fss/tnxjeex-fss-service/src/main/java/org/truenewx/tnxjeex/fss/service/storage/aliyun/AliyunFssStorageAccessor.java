@@ -13,6 +13,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
+import org.truenewx.tnxjee.core.util.function.TrPredicate;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
@@ -22,10 +23,7 @@ import org.truenewx.tnxjeex.fss.service.util.FssUtil;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.DeleteObjectsRequest;
-import com.aliyun.oss.model.ListObjectsV2Result;
-import com.aliyun.oss.model.OSSObjectSummary;
-import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.*;
 
 /**
  * 阿里云的文件存储访问器
@@ -213,6 +211,35 @@ public class AliyunFssStorageAccessor implements FssStorageAccessor {
         String bucketName = getBucketName();
         client.copyObject(bucketName, sourceStoragePath, bucketName, targetStoragePath);
         client.deleteObject(bucketName, sourceStoragePath);
+    }
+
+    @Override
+    public long getTotalSize(String storageDirPath) {
+        storageDirPath = AliyunOssUtil.standardizePath(storageDirPath);
+        long total = 0;
+        ObjectListing objects = this.account.getOssClient().listObjects(getBucketName(), storageDirPath);
+        List<OSSObjectSummary> objectSummaries = objects.getObjectSummaries();
+        for (OSSObjectSummary objectSummary : objectSummaries) {
+            total += objectSummary.getSize();
+        }
+        return total;
+    }
+
+    @Override
+    public void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate) {
+        storageDirPath = AliyunOssUtil.standardizePath(storageDirPath);
+        OSS client = this.account.getOssClient();
+        ObjectListing objects = client.listObjects(getBucketName(), storageDirPath);
+        List<OSSObjectSummary> objectSummaries = objects.getObjectSummaries();
+        for (OSSObjectSummary objectSummary : objectSummaries) {
+            long size = objectSummary.getSize();
+            String storagePath = objectSummary.getKey();
+            InputStream in = client.getObject(getBucketName(), storagePath).getObjectContent();
+            // 在此调用in.close()会导致后续输入流读取超时
+            if (!predicate.test(storagePath, size, in)) {
+                break;
+            }
+        }
     }
 
 }

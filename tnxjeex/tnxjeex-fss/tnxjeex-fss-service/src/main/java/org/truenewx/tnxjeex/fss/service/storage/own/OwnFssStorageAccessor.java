@@ -1,9 +1,6 @@
 package org.truenewx.tnxjeex.fss.service.storage.own;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
@@ -13,12 +10,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.function.TrPredicate;
 import org.truenewx.tnxjeex.fss.model.FssFileDetail;
 import org.truenewx.tnxjeex.fss.service.FssDirDeletePredicate;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAccessor;
@@ -214,6 +214,32 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     @Override
     public void move(String sourceStoragePath, String targetStoragePath) {
         copyOrMove(sourceStoragePath, targetStoragePath, false);
+    }
+
+    @Override
+    public long getTotalSize(String storageDirPath) {
+        File dir = new File(storageDirPath);
+        return FileUtils.sizeOfDirectory(dir);
+    }
+
+    @Override
+    public void loopReadStream(String storageDirPath, TrPredicate<String, Long, InputStream> predicate) {
+        File dir = new File(storageDirPath);
+        try {
+            List<File> files = FileUtils.streamFiles(dir, true).collect(Collectors.toList());
+            for (File file : files) {
+                String filePath = file.getAbsolutePath();
+                String storagePath = filePath.substring(storageDirPath.length());
+                InputStream in = new FileInputStream(file);
+                boolean result = predicate.test(storagePath, file.length(), in);
+                in.close();
+                if (!result) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
