@@ -54,7 +54,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

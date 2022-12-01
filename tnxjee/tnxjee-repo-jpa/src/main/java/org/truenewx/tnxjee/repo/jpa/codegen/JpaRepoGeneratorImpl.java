@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.codegen.ClassGeneratorSupport;
 import org.truenewx.tnxjee.model.entity.Entity;
@@ -49,7 +50,7 @@ public class JpaRepoGeneratorImpl extends ClassGeneratorSupport implements JpaRe
                 try {
                     generate(module, entityClass, true); // 默认均生成实现类，多余的可手工删除
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }, modules);

@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.beans;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 
 /**
  * 容器初始化后执行bean代理，为目标bean提供线程执行能力
@@ -37,7 +38,7 @@ public class ContextInitializedBeanProxy extends DelayContextInitializedBean {
         try {
             this.target.afterInitialized(context);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 }

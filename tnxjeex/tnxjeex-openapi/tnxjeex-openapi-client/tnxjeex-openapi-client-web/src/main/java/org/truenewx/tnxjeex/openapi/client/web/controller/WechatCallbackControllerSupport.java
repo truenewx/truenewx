@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.core.util.function.ProfileSupplier;
 import org.truenewx.tnxjee.webmvc.security.config.annotation.ConfigAnonymous;
@@ -109,7 +110,7 @@ public abstract class WechatCallbackControllerSupport {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtil.error(getClass(), e);
         }
         return parameters;
     }

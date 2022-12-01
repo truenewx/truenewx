@@ -8,6 +8,7 @@ import javax.persistence.Converter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.JacksonUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +30,7 @@ public class ObjectToJsonAttributeConverter implements AttributeConverter<Object
             try {
                 json = this.mapper.writeValueAsString(attribute);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
         return json;
@@ -57,7 +58,7 @@ public class ObjectToJsonAttributeConverter implements AttributeConverter<Object
                     return value;
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
         return null;

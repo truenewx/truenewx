@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.codegen.ClassGeneratorSupport;
 import org.truenewx.tnxjee.model.entity.Entity;
@@ -53,7 +54,7 @@ public class ServiceGeneratorImpl extends ClassGeneratorSupport implements Servi
             try {
                 generate(module, entityClass);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }, modules);
     }

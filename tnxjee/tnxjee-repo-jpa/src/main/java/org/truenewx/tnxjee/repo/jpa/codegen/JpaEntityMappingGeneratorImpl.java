@@ -28,10 +28,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.message.MessageResolver;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
 import org.truenewx.tnxjee.core.spec.PermanentableDate;
-import org.truenewx.tnxjee.core.util.ClassUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
-import org.truenewx.tnxjee.core.util.XmlUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.core.util.tuple.Binary;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.ValueModel;
@@ -92,7 +89,7 @@ public class JpaEntityMappingGeneratorImpl extends ModelBasedGeneratorSupport im
                 String tableName = "t_" + StringUtil.prependUnderLineToUpperChar(entityClass.getSimpleName(), true);
                 generate(module, entityClass, tableName);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }, modules);
     }

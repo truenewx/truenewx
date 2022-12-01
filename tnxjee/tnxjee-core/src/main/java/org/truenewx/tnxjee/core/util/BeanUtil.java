@@ -440,7 +440,7 @@ public class BeanUtil {
             copyFields(source, target, ignoreFields);
             return target;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

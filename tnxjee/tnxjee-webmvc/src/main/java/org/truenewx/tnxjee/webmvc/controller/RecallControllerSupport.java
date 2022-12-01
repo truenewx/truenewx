@@ -15,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
@@ -51,7 +52,7 @@ public abstract class RecallControllerSupport extends JumpControllerSupport {
             response.getWriter().write(responseData);
         } catch (Exception e) {
             LogUtil.error(getClass(), e);
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

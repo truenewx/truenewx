@@ -15,6 +15,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.Base64Utils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.model.spec.Terminal;
@@ -144,11 +145,7 @@ public class WechatPaymentGateway extends AbstractPaymentGateway implements Disp
             String errorMessage = (String) responseData.get("message");
             throw new RuntimeException(errorMessage);
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new RuntimeException(e);
-            }
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -163,7 +160,7 @@ public class WechatPaymentGateway extends AbstractPaymentGateway implements Disp
             signer.update(token.toString().getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(signer.sign());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.webmvc.exception.parser;
 
 import org.springframework.stereotype.Component;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.service.exception.*;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
@@ -28,7 +29,7 @@ public class ResolvableExceptionParser {
                         return new MultiException(exceptions);
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }

@@ -15,6 +15,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.TemporalUtil;
 
 /**
@@ -144,7 +145,7 @@ public class DefaultQueryBuilder {
             ql = ql.replaceAll(" and ", " AND ").replaceAll(" or ", " OR ");
             return queryParser.parse(ql);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.IOUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.model.query.Paged;
@@ -98,7 +99,7 @@ public class PagerUtil {
                     t.process(params, out);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }

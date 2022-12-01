@@ -7,10 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.http.HttpRequestDataProvider;
-import org.truenewx.tnxjee.core.util.CollectionUtil;
-import org.truenewx.tnxjee.core.util.JsonUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.MathUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.model.spec.Terminal;
 import org.truenewx.tnxjee.model.spec.enums.Device;
 import org.truenewx.tnxjee.model.spec.enums.Program;
@@ -70,7 +67,7 @@ public class AlipayPaymentGateway extends AbstractPaymentGateway {
                 // TODO
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
         return null;
     }
@@ -145,7 +142,7 @@ public class AlipayPaymentGateway extends AbstractPaymentGateway {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
         return null;
     }

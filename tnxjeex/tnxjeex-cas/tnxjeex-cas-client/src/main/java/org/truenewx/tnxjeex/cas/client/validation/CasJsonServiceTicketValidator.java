@@ -10,6 +10,7 @@ import org.jasig.cas.client.validation.Assertion;
 import org.jasig.cas.client.validation.TicketValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
@@ -43,7 +44,7 @@ public class CasJsonServiceTicketValidator extends AbstractUrlBasedTicketValidat
                 return result.getLeft() + Strings.COLON + result.getRight();
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
         return null;
     }

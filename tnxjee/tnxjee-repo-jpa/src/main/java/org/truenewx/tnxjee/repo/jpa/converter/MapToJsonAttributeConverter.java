@@ -6,6 +6,7 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 
 /**
@@ -40,7 +41,7 @@ public class MapToJsonAttributeConverter implements AttributeConverter<Map<Strin
             try {
                 return JsonUtil.json2Map(dbData);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
         return null;

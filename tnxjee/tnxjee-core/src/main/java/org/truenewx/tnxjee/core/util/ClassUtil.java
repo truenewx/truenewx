@@ -682,11 +682,7 @@ public class ClassUtil {
         try {
             return clazz.getConstructor(argTypes).newInstance(args);
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new RuntimeException(e);
-            }
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

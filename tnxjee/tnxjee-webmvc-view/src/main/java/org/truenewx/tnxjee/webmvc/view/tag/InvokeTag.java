@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.servlet.jsp.JspException;
 
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.webmvc.view.tagext.SimpleDynamicAttributeTagSupport;
 
@@ -53,7 +54,7 @@ public class InvokeTag extends SimpleDynamicAttributeTagSupport {
                 print(result);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

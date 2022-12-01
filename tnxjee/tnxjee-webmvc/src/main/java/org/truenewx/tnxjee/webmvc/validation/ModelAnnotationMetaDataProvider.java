@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.truenewx.tnxjee.core.util.BeanUtil;
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.CommandModel;
 import org.truenewx.tnxjee.model.entity.Entity;
 import org.truenewx.tnxjee.model.validation.annotation.InheritConstraint;
@@ -97,7 +98,7 @@ public class ModelAnnotationMetaDataProvider implements MetaDataProvider {
                                                 this.constraintCreationContext.getConstraintValidatorManager(),
                                                 constraintDescriptor, location));
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        LogUtil.error(getClass(), e);
                                     }
                                 }
                                 BeanUtil.setFieldValue(constrainedField, "constraints", constraints);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.PrimitiveClassLoader;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
+import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.core.util.algorithm.AlgoParseString;
 import org.truenewx.tnxjee.webmvc.view.menu.model.Menu;
@@ -52,7 +53,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
                 menu.setItems(getItems(element, menu.getOptions()));
                 return menu;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
         return null;
