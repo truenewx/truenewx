@@ -268,6 +268,11 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         });
     }
 
+    protected final DataExportingTable exportData(CharSequence followedSql, Map<String, Object> params, int pageSize,
+            int pageNo) {
+        return exportData(null, followedSql, params, pageSize, pageNo);
+    }
+
     private DataExportingTable exportData(String alias, CharSequence followedSql,
             BiConsumer<DataExportingTable, CharSequence> consumer) {
         List<String> columnNames = getColumnNames();
