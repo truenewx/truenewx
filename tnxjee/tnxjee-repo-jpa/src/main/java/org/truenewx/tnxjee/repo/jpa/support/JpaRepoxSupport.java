@@ -1,6 +1,7 @@
 package org.truenewx.tnxjee.repo.jpa.support;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -129,23 +130,27 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
 
     @SuppressWarnings("unchecked")
     private List<String> getColumnNames() {
-        List<String> columns = new ArrayList<>();
+        List<String> columnNames = new ArrayList<>();
         PersistentClass persistentClass = getPersistentClass();
         Property identifierProperty = persistentClass.getIdentifierProperty();
         if (identifierProperty != null) {
             Iterator<Column> columnIterator = identifierProperty.getColumnIterator();
             while (columnIterator.hasNext()) {
                 Column column = columnIterator.next();
-                columns.add(column.getName());
+                columnNames.add(column.getName());
             }
         }
-        Iterator<Property> iterator = persistentClass.getPropertyClosureIterator();
+        Iterator<Property> iterator = persistentClass.getPropertyIterator();
         while (iterator.hasNext()) {
             Property property = iterator.next();
             Column column = (Column) property.getColumnIterator().next();
-            columns.add(column.getName());
+            String columnName = column.getName();
+            // 复合主键中的字段可能在一般引用字段中重复，需排除
+            if (!columnNames.contains(columnName)) {
+                columnNames.add(columnName);
+            }
         }
-        return columns;
+        return columnNames;
     }
 
     protected final Column getColumn(String propertyName) {
@@ -251,12 +256,44 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return getAccessTemplate().update(ql, params) > 0;
     }
 
-    protected final DataExportingTable exportData(CharSequence followedSql, Map<String, Object> params) {
-        DataExportingTable table = new DataExportingTable(getTableName(), getColumnNames());
-        StringBuilder sql = new StringBuilder("select ").append(StringUtils.join(table.getColumnNames(), Strings.COMMA))
-                .append(" from ").append(table.getTableName()).append(followedSql);
-        table.setRecords(getAccessTemplate().createNative().list(sql, params));
+    protected final DataExportingTable exportData(String alias, CharSequence followedSql, Map<String, Object> params,
+            int pageSize, int pageNo) {
+        return exportData(alias, followedSql, (table, sql) -> {
+            List<Object[]> records = getAccessTemplate().createNative().listWithOneMore(sql, params, pageSize, pageNo);
+            table.setMorePage(records.size() > pageSize);
+            if (table.isMorePage()) {
+                records.remove(records.size() - 1);
+            }
+            table.setRecords(records);
+        });
+    }
+
+    private DataExportingTable exportData(String alias, CharSequence followedSql,
+            BiConsumer<DataExportingTable, CharSequence> consumer) {
+        List<String> columnNames = getColumnNames();
+        DataExportingTable table = new DataExportingTable(getTableName(), columnNames);
+        StringBuilder sql = new StringBuilder("select ");
+        if (StringUtils.isBlank(alias)) {
+            sql.append(StringUtils.join(columnNames, Strings.COMMA));
+        } else {
+            for (String columnName : columnNames) {
+                sql.append(alias).append(Strings.DOT).append(columnName).append(Strings.COMMA);
+            }
+            sql.deleteCharAt(sql.length() - 1);
+        }
+        sql.append(" from ").append(table.getTableName()).append(followedSql);
+        consumer.accept(table, sql);
         return table;
+    }
+
+    protected final DataExportingTable exportData(String alias, CharSequence followedSql, Map<String, Object> params) {
+        return exportData(alias, followedSql, (table, sql) -> {
+            table.setRecords(getAccessTemplate().createNative().list(sql, params));
+        });
+    }
+
+    protected final DataExportingTable exportData(CharSequence followedSql, Map<String, Object> params) {
+        return exportData(null, followedSql, params);
     }
 
 }
