@@ -1,9 +1,6 @@
 package org.truenewx.tnxjee.repo.jpa.support;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -15,11 +12,13 @@ import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.ClassUtil;
 import org.truenewx.tnxjee.core.util.MathUtil;
 import org.truenewx.tnxjee.model.entity.Entity;
 import org.truenewx.tnxjee.model.query.*;
 import org.truenewx.tnxjee.repo.jpa.JpaRepox;
+import org.truenewx.tnxjee.repo.jpa.util.DataExportingTable;
 import org.truenewx.tnxjee.repo.jpa.util.OqlUtil;
 import org.truenewx.tnxjee.repo.support.RepoxSupport;
 import org.truenewx.tnxjee.repo.util.ModelPropertyLimitValueManager;
@@ -128,6 +127,27 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return getAccessTemplate().getPersistentClass(getEntityName());
     }
 
+    @SuppressWarnings("unchecked")
+    private List<String> getColumnNames() {
+        List<String> columns = new ArrayList<>();
+        PersistentClass persistentClass = getPersistentClass();
+        Property identifierProperty = persistentClass.getIdentifierProperty();
+        if (identifierProperty != null) {
+            Iterator<Column> columnIterator = identifierProperty.getColumnIterator();
+            while (columnIterator.hasNext()) {
+                Column column = columnIterator.next();
+                columns.add(column.getName());
+            }
+        }
+        Iterator<Property> iterator = persistentClass.getPropertyClosureIterator();
+        while (iterator.hasNext()) {
+            Property property = iterator.next();
+            Column column = (Column) property.getColumnIterator().next();
+            columns.add(column.getName());
+        }
+        return columns;
+    }
+
     protected final Column getColumn(String propertyName) {
         Property property = getPersistentClass().getProperty(propertyName);
         return (Column) property.getColumnIterator().next();
@@ -230,4 +250,13 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         }
         return getAccessTemplate().update(ql, params) > 0;
     }
+
+    protected final DataExportingTable exportData(CharSequence followedSql, Map<String, Object> params) {
+        DataExportingTable table = new DataExportingTable(getTableName(), getColumnNames());
+        StringBuilder sql = new StringBuilder("select ").append(StringUtils.join(table.getColumnNames(), Strings.COMMA))
+                .append(" from ").append(table.getTableName()).append(followedSql);
+        table.setRecords(getAccessTemplate().createNative().list(sql, params));
+        return table;
+    }
+
 }
