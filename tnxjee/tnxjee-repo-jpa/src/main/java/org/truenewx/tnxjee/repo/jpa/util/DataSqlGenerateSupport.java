@@ -20,6 +20,10 @@ import org.truenewx.tnxjee.core.util.TemporalUtil;
  */
 public abstract class DataSqlGenerateSupport {
 
+    protected void generateForeignKeyChecks(OutputStream out, boolean checks) {
+        writeLine(out, "set foreign_key_checks = " + toSqlString(checks) + Strings.SEMICOLON);
+    }
+
     protected void generate(OutputStream out, DataExportingTable table) {
         generate(out, table, true);
     }
