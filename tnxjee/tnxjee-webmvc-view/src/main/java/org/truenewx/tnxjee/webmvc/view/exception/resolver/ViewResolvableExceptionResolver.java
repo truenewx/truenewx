@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -31,7 +32,7 @@ public class ViewResolvableExceptionResolver extends ResolvableExceptionResolver
     }
 
     public ViewResolvableExceptionResolver() {
-        setOrder(-1); // 比 HandlerExceptionResolverComposite 先一位
+        setOrder(Ordered.HIGHEST_PRECEDENCE + 3);
     }
 
     @Override

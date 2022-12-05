@@ -265,7 +265,7 @@ export default {
                         break;
                     }
                     case 500: {
-                        _this.handle500Error(response.data.message, options);
+                        _this.handle500Error(response.data.message || response.data, options);
                         break;
                     }
                     default: {

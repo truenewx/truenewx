@@ -14,6 +14,11 @@ public class WebConstants {
     public static final String HEADER_AJAX_REQUEST = "X-Requested-With";
 
     /**
+     * AJAX请求值
+     */
+    public static final String AJAX_REQUEST_VALUE = "XMLHttpRequest";
+
+    /**
      * 带值的头信息：AJAX请求
      */
     public static final String HEADER_AJAX_REQUEST_WITH_VALUE = "X-Requested-With=XMLHttpRequest";

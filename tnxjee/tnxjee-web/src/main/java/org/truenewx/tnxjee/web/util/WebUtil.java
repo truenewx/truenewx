@@ -700,7 +700,7 @@ public class WebUtil {
      * @return 是否AJAX请求
      */
     public static boolean isAjaxRequest(HttpServletRequest request) {
-        if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader(WebConstants.HEADER_AJAX_REQUEST))) {
+        if (WebConstants.AJAX_REQUEST_VALUE.equalsIgnoreCase(request.getHeader(WebConstants.HEADER_AJAX_REQUEST))) {
             return true;
         }
         String referer = request.getHeader(WebConstants.HEADER_REFERER);

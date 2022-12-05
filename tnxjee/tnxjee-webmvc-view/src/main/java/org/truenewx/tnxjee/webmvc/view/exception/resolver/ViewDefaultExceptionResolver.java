@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -27,29 +28,32 @@ public class ViewDefaultExceptionResolver extends DefaultHandlerExceptionResolve
             WebContextPathPredicate webContextPathPredicate) {
         this.pathProperties = pathProperties;
         this.webContextPathPredicate = webContextPathPredicate;
+        setOrder(Ordered.HIGHEST_PRECEDENCE + 4);
     }
 
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler,
             Exception ex) {
         ModelAndView mav = super.doResolveException(request, response, handler, ex);
-        if (mav == null) {
-            // 非ajax请求且非可解决的异常，则跳转内部错误页
-            if (!WebUtil.isAjaxRequest(request) && !ResolvableExceptionResolver.supports(ex)) {
-                String path = this.pathProperties.getInternal();
-                if (this.webContextPathPredicate.test(path)) {
-                    mav = new ModelAndView(path);
-                    mav.addObject("errorTime", TemporalUtil.format(LocalDateTime.now()));
-                }
+        if (mav == null && supports(request, ex)) {
+            String path = this.pathProperties.getInternal();
+            if (this.webContextPathPredicate.test(path)) {
+                mav = new ModelAndView(path);
+                mav.addObject("errorTime", TemporalUtil.format(LocalDateTime.now()));
             }
         }
         return mav;
     }
 
+    private boolean supports(HttpServletRequest request, Exception ex) {
+        // 只处理非ajax请求和非可解决异常
+        return !WebUtil.isAjaxRequest(request) && !ResolvableExceptionResolver.supports(ex);
+    }
+
     @Override
     protected ModelAndView handleTypeMismatch(TypeMismatchException ex, HttpServletRequest request,
             HttpServletResponse response, Object handler) throws IOException {
-        if (!WebUtil.isAjaxRequest(request)) { // 非ajax请求才跳转错误页面，否则采用默认处理
+        if (supports(request, ex)) {
             String path = this.pathProperties.getBadRequest();
             if (this.webContextPathPredicate.test(path)) {
                 return new ModelAndView(path, "exception", ex);

@@ -50,10 +50,16 @@ public class RpcHelper {
             UserSpecificDetails<?> userSpecificDetails) {
         try {
             Map<String, String> headers = generateHeaders(type, userSpecificDetails);
+            // RPC请求一律为AJAX请求
+            headers.put(WebConstants.HEADER_AJAX_REQUEST, WebConstants.AJAX_REQUEST_VALUE);
             Binate<Integer, String> result = HttpClientUtil.request(method, url, params, headers,
                     Strings.ENCODING_UTF8);
-            if (result != null && result.getLeft() == HttpStatus.SC_OK) {
-                return result.getRight();
+            if (result != null) {
+                if (result.getLeft() == HttpStatus.SC_OK) {
+                    return result.getRight();
+                } else {
+                    throw new RuntimeException(result.getRight());
+                }
             }
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);

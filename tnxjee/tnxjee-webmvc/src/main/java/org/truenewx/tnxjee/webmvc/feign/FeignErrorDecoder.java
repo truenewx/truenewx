@@ -1,5 +1,6 @@
 package org.truenewx.tnxjee.webmvc.feign;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
@@ -28,13 +29,19 @@ public class FeignErrorDecoder extends ErrorDecoder.Default {
         try {
             int status = response.status();
             if (status == HttpStatus.FORBIDDEN.value() || status == HttpStatus.BAD_REQUEST.value()) {
-                String json = IOUtils.toString(response.body().asReader(StandardCharsets.UTF_8));
+                String json = getResponseBody(response);
                 return this.exceptionParser.parse(json);
+            } else if (status == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                return new RuntimeException(getResponseBody(response));
             }
         } catch (Exception e) {
             LogUtil.error(getClass(), e);
         }
         return super.decode(methodKey, response);
+    }
+
+    private String getResponseBody(Response response) throws IOException {
+        return IOUtils.toString(response.body().asReader(StandardCharsets.UTF_8));
     }
 
 }

@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,7 +19,7 @@ import org.truenewx.tnxjee.service.exception.*;
 public class BodyResolvableExceptionResolver extends ResolvableExceptionResolver {
 
     public BodyResolvableExceptionResolver() {
-        setOrder(-2);  // 比 HandlerExceptionResolverComposite 先两位
+        setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
     }
 
     @Override
