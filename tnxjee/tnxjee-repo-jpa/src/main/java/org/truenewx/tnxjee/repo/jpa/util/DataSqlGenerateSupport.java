@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,20 +25,21 @@ public abstract class DataSqlGenerateSupport {
         writeLine(out, "set foreign_key_checks = " + toSqlString(checks) + Strings.SEMICOLON);
     }
 
-    protected void generate(OutputStream out, DataExportingTable table) {
-        generate(out, table, true);
+    protected void generate(OutputStream out, DataExportingTable table, Consumer<Integer> lengthConsumer) {
+        generate(out, table, true, lengthConsumer);
     }
 
-    protected void generate(OutputStream out, Function<Integer, DataExportingTable> function) {
+    protected void generate(OutputStream out, Function<Integer, DataExportingTable> function,
+            Consumer<Integer> lengthConsumer) {
         int pageNo = 0;
         DataExportingTable table;
         do {
             table = function.apply(++pageNo);
-            generate(out, table, pageNo == 1);
+            generate(out, table, pageNo == 1, lengthConsumer);
         } while (table.isMorePage());
     }
 
-    private void generate(OutputStream out, DataExportingTable table, boolean clear) {
+    private void generate(OutputStream out, DataExportingTable table, boolean clear, Consumer<Integer> lengthConsumer) {
         List<Object[]> records = table.getRecords();
         if (CollectionUtils.isNotEmpty(records)) {
             if (clear) {
@@ -66,6 +68,9 @@ public abstract class DataSqlGenerateSupport {
                     line.append(Strings.COMMA);
                 }
                 writeLine(out, line.toString());
+                if (lengthConsumer != null) {
+                    lengthConsumer.accept(line.length());
+                }
             }
             writeLine(out);
         } else {
