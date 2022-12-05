@@ -96,7 +96,9 @@ public abstract class DataSqlGenerateSupport {
         if (value instanceof Date) {
             value = DateUtil.formatLong((Date) value);
         }
-        return Strings.SINGLE_QUOTES + value + Strings.SINGLE_QUOTES;
+        // 单引号需转义
+        String s = value.toString().replaceAll(Strings.SINGLE_QUOTES, "''");
+        return Strings.SINGLE_QUOTES + s + Strings.SINGLE_QUOTES;
     }
 
     protected void writeLine(OutputStream out, String data) {
