@@ -44,40 +44,36 @@ public class FeignRequestInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         HttpServletRequest request = SpringWebContext.getRequest();
-        boolean noJwt = true;
         if (request != null) {
             Map<String, Collection<String>> feignHeaders = template.headers();
             Enumeration<String> headerNames = request.getHeaderNames();
             if (headerNames != null) {
                 while (headerNames.hasMoreElements()) {
                     String headerName = headerNames.nextElement();
-                    // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动
-                    if (!feignHeaders.containsKey(headerName)) {
+                    // Feign头信息中未包含的才传递，以避免Feign创建的头信息被改动，且不传递JWT而是重新构建JWT
+                    if (!feignHeaders.containsKey(headerName)
+                            && !WebConstants.HEADER_RPC_JWT.equalsIgnoreCase(headerName)) {
                         Enumeration<String> requestHeaders = request.getHeaders(headerName);
                         Collection<String> headerValues = new ArrayList<>();
                         while (requestHeaders.hasMoreElements()) {
                             headerValues.add(requestHeaders.nextElement());
                         }
                         template.header(headerName, headerValues);
-                        if (noJwt && WebConstants.HEADER_RPC_JWT.equals(headerName)) {
-                            noJwt = false;
-                        }
                     }
                 }
             }
         }
-        if (noJwt) { // 没有JWT则构建JWT传递
-            String jwt = generateJwt(template);
-            if (jwt == null) { // 确保存在JWT头信息，以便于判断是否内部RPC
-                jwt = Boolean.TRUE.toString();
-            }
-            if (jwt.length() > 8000) { // 单个头信息允许的最大长度为8192，超过8000则进行警告
-                LogUtil.warn(getClass(), "====== The jwt length is {}.", jwt.length());
-            } else {
-                LogUtil.debug(getClass(), "====== The jwt length is {}.", jwt.length());
-            }
-            template.header(WebConstants.HEADER_RPC_JWT, jwt);
+        String jwt = generateJwt(template);
+        if (jwt == null) { // 确保存在JWT头信息，以便于判断是否内部RPC
+            jwt = Boolean.TRUE.toString();
         }
+        if (jwt.length() > 8000) { // 单个头信息允许的最大长度为8192，超过8000则进行警告
+            LogUtil.warn(getClass(), "====== The jwt length is {}.", jwt.length());
+        } else {
+            LogUtil.debug(getClass(), "====== The jwt length is {}.", jwt.length());
+        }
+        template.header(WebConstants.HEADER_RPC_JWT, jwt);
+
         // 确保远程调用始终使用JSON格式传递数据，避免出现html结果
         template.removeHeader(HttpHeaders.ACCEPT);
         template.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
