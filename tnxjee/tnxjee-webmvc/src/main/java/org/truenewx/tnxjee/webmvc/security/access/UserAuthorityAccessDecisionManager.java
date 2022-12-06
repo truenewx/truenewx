@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
@@ -91,15 +90,13 @@ public class UserAuthorityAccessDecisionManager extends UnanimousBased implement
     @Override
     public boolean isGranted(Collection<? extends GrantedAuthority> authorities, String type, String rank, String app,
             String permission) {
-        // 用户类型、级别、许可均未限定，则视为匹配
-        if (StringUtils.isBlank(type) && StringUtils.isBlank(rank) && StringUtils.isBlank(permission)) {
-            return true;
-        }
-        for (GrantedAuthority authority : authorities) {
-            if (authority instanceof UserGrantedAuthority) {
-                UserGrantedAuthority userAuthority = (UserGrantedAuthority) authority;
-                if (userAuthority.matches(type, rank, app, permission)) {
-                    return true;
+        if (authorities != null) {
+            for (GrantedAuthority authority : authorities) {
+                if (authority instanceof UserGrantedAuthority) {
+                    UserGrantedAuthority userAuthority = (UserGrantedAuthority) authority;
+                    if (userAuthority.matches(type, rank, app, permission)) {
+                        return true;
+                    }
                 }
             }
         }
