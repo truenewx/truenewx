@@ -13,7 +13,9 @@ import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
+import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.web.util.WebConstants;
+import org.truenewx.tnxjee.webmvc.exception.parser.ResolvableExceptionParser;
 import org.truenewx.tnxjee.webmvc.jwt.JwtGenerator;
 
 /**
@@ -26,6 +28,8 @@ public class RpcHelper {
 
     @Autowired
     private JwtGenerator generator;
+    @Autowired
+    private ResolvableExceptionParser resolvableExceptionParser;
 
     public Map<String, String> generateHeaders(String type, UserSpecificDetails<?> userDetails) {
         if (userDetails != null && this.generator.isAvailable()) {
@@ -55,10 +59,19 @@ public class RpcHelper {
             Binate<Integer, String> result = HttpClientUtil.request(method, url, params, headers,
                     Strings.ENCODING_UTF8);
             if (result != null) {
-                if (result.getLeft() == HttpStatus.SC_OK) {
-                    return result.getRight();
-                } else {
-                    throw new RuntimeException(result.getRight());
+                int status = result.getLeft();
+                String body = result.getRight();
+                switch (status) {
+                    case HttpStatus.SC_OK:
+                        return body;
+                    case HttpStatus.SC_FORBIDDEN:
+                    case HttpStatus.SC_BAD_REQUEST:
+                        ResolvableException e = this.resolvableExceptionParser.parse(body);
+                        if (e != null) {
+                            throw e;
+                        }
+                    default:
+                        throw new RuntimeException(body);
                 }
             }
         } catch (Exception e) {
