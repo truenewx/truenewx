@@ -1,7 +1,6 @@
 package org.truenewx.tnxjee.webmvc.exception.parser;
 
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.JsonUtil;
 import org.truenewx.tnxjee.service.exception.*;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
@@ -14,11 +13,11 @@ import org.truenewx.tnxjee.webmvc.exception.model.ExceptionErrorBody;
 public class ResolvableExceptionParser {
 
     public ResolvableException parse(String json) {
-        ExceptionErrorBody body = JsonUtil.json2Bean(json, ExceptionErrorBody.class);
-        if (body != null) {
-            ExceptionError[] errors = body.getErrors();
-            if (errors != null) {
-                try {
+        try {
+            ExceptionErrorBody body = JsonUtil.json2Bean(json, ExceptionErrorBody.class);
+            if (body != null) {
+                ExceptionError[] errors = body.getErrors();
+                if (errors != null) {
                     if (errors.length == 1) {
                         return buildException(errors[0]);
                     } else if (errors.length > 1) {
@@ -28,10 +27,10 @@ public class ResolvableExceptionParser {
                         }
                         return new MultiException(exceptions);
                     }
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
+        } catch (Exception ignored) {
+            // 忽略解析过程中产生的运行期异常，以免干扰正常的错误处理
         }
         return null;
     }
