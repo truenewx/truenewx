@@ -44,7 +44,7 @@ public class CasClientProperties extends ServiceProperties {
     public void afterPropertiesSet() {
         if (StringUtils.isBlank(getService())) {
             AppConfiguration app = this.commonProperties.getApp(this.appName);
-            if (app == null) {
+            if (app == null) { // 属性配置中不包含当前应用的配置，则当前应用可将任意地址作为service，只是需添加特殊前缀
                 String service = CasUtil.getServicePrefixByAppName(this.appName);
                 setService(service);
                 LogUtil.warn(getClass(),
