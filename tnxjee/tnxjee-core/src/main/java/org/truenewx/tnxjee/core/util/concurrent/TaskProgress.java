@@ -36,7 +36,9 @@ public class TaskProgress<K extends Serializable> {
      * 通知进度中止，任务实际是否能中止、如何中止、何时中止，由具体任务内容决定
      */
     public void toStop() {
-        this.stopped = true;
+        if (!isEnded()) {
+            this.stopped = true;
+        }
     }
 
     public boolean isStopped() {
