@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
@@ -21,6 +22,7 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
@@ -29,10 +31,13 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.ApplicationUtil;
 import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.repo.jpa.hibernate.HibernateJpaPersistenceProvider;
 import org.truenewx.tnxjee.repo.jpa.hibernate.MetadataProvider;
+import org.truenewx.tnxjee.repo.jpa.init.DataSourceInitializeListener;
 import org.truenewx.tnxjee.repo.jpa.support.JpaAccessTemplate;
 
 /**
@@ -47,42 +52,74 @@ public class JpaDataConfiguration extends JpaBaseConfiguration {
     @Autowired
     private HibernateProperties hibernateProperties;
     private ApplicationContext context;
+    private DataSourceInitializeListener initializeListener;
 
     // 在多数据源场景下，可创建子类，构造函数中指定DataSourceProperties和DataSource的beanName
-    public JpaDataConfiguration(ApplicationContext context, SqlInitializationProperties dataSourceProperties,
-            DataSource dataSource, JpaProperties properties,
-            ObjectProvider<JtaTransactionManager> jtaTransactionManager) {
+    public JpaDataConfiguration(
+            ApplicationContext context,
+            SqlInitializationProperties sqlInitProperties,
+            DataSource dataSource,
+            JpaProperties properties,
+            ObjectProvider<JtaTransactionManager> jtaTransactionManager,
+            ObjectProvider<DataSourceInitializeListener> initializeListenerProvider) {
         super(dataSource, properties, jtaTransactionManager);
         this.context = context;
+        this.initializeListener = initializeListenerProvider.getIfAvailable();
         // 当前配置会在数据源对象构建完之后，在数据源初始化之前加载，接下来spring-data-jpa框架会检查数据库表结构，
         // 此时如果数据库表结构未初始化，则会报错退出，导致后续的DataSourceInitializerInvoker无法执行，
         // 悲剧的是，通过@AutoConfigureAfter指定加载顺序，仍然无法在DataSourceInitializerInvoker之后执行，
         // 所以需要在此时提前执行数据库初始化脚本，以确保数据库表结构检查通过
-        initDataSource(dataSourceProperties);
+        initDataSource(sqlInitProperties);
     }
 
-    private void initDataSource(SqlInitializationProperties properties) {
+    private void initDataSource(SqlInitializationProperties sqlInitProperties) {
         List<String> locations = new ArrayList<>();
-        List<String> schema = properties.getSchemaLocations();
+        List<String> schema = sqlInitProperties.getSchemaLocations();
         if (schema != null) {
             locations.addAll(schema);
             schema.clear(); // 清除以避免框架再次执行
         }
-        List<String> data = properties.getDataLocations();
+        List<String> data = sqlInitProperties.getDataLocations();
         if (data != null) {
             locations.addAll(data);
             data.clear(); // 清除以避免框架再次执行
         }
         if (locations.size() > 0) {
-            DataSourceInitializer initializer = new DataSourceInitializer();
-            initializer.setDataSource(getDataSource());
+            List<Resource> scripts = new ArrayList<>();
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-            locations.forEach(location -> {
-                populator.addScript(this.context.getResource(location));
-            });
-            initializer.setDatabasePopulator(populator);
-            initializer.afterPropertiesSet();
+            for (String location : locations) {
+                Resource resource = getScriptResource(location);
+                if (resource != null && resource.exists()) {
+                    populator.addScript(resource);
+                    scripts.add(resource);
+                }
+            }
+            if (scripts.size() > 0) {
+                DataSourceInitializer initializer = new DataSourceInitializer();
+                initializer.setDatabasePopulator(populator);
+                initializer.setDataSource(getDataSource());
+                initializer.afterPropertiesSet();
+                if (this.initializeListener != null) {
+                    this.initializeListener.afterInitialized(scripts);
+                }
+            }
         }
+    }
+
+    private Resource getScriptResource(String location) {
+        if (StringUtils.isNotBlank(location)) {
+            Resource script;
+            if (location.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+                script = this.context.getResource(location.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()));
+            } else {
+                script = new FileSystemResource(ApplicationUtil.getAbsolutePath(location));
+            }
+            if (this.initializeListener != null && !this.initializeListener.isExecutable(getDataSource(), script)) {
+                script = null;
+            }
+            return script;
+        }
+        return null;
     }
 
     protected String getSchema() {
