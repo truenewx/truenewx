@@ -17,6 +17,10 @@ public class Version implements Comparable<Version> {
     private static final int DEFAULT_BASE_LEVEL = 3;
 
     /**
+     * 构建时提供的原始字符串型版本号
+     */
+    private String origin;
+    /**
      * 基础版本号，每一级都必须为整数
      */
     private int[] bases;
@@ -28,6 +32,7 @@ public class Version implements Comparable<Version> {
     public Version(String s, int baseLevel) {
         Assert.isTrue(StringUtils.isNotBlank(s), "The full version must not be blank");
         Assert.isTrue(baseLevel > 0, "base level must be greater than 0");
+        this.origin = s;
         String[] array = s.split("\\.", baseLevel + 1);
         int level = Math.min(baseLevel, array.length);
         this.bases = new int[level];
@@ -43,6 +48,18 @@ public class Version implements Comparable<Version> {
         this(s, DEFAULT_BASE_LEVEL);
     }
 
+    public String getOrigin() {
+        return this.origin;
+    }
+
+    public String getBase() {
+        return toText(false);
+    }
+
+    public String getBuild() {
+        return this.build;
+    }
+
     public String toText(boolean withBuild) {
         StringBuilder sb = new StringBuilder();
         for (int base : this.bases) {
@@ -54,14 +71,6 @@ public class Version implements Comparable<Version> {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
-    }
-
-    public String getBase() {
-        return toText(false);
-    }
-
-    public String getBuild() {
-        return this.build;
     }
 
     @Override
