@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.truenewx.tnxjee.repo.jpa.autoconfigure.JpaDataAutoConfiguration

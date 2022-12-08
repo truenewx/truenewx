@@ -16,8 +16,7 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 /**
  * 基于Hibernate的JPA持久化提供者
  */
-public class HibernateJpaPersistenceProvider extends HibernatePersistenceProvider
-        implements MetadataProvider {
+public class HibernateJpaPersistenceProvider extends HibernatePersistenceProvider implements MetadataProvider {
 
     private Metadata metadata;
 

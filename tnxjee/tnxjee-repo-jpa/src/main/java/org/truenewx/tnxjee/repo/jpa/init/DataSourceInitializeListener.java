@@ -15,6 +15,6 @@ public interface DataSourceInitializeListener {
 
     boolean isExecutable(DataSource dataSource, Resource script);
 
-    void afterInitialized(List<Resource> scripts);
+    void afterRun(List<Resource> scripts);
 
 }
