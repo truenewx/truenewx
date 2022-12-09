@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.*;
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
@@ -41,9 +40,8 @@ import org.truenewx.tnxjee.repo.jpa.support.JpaAccessTemplate;
  *
  * @author jianglei
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
-@ConditionalOnBean(DataSource.class)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class JpaDataAutoConfiguration extends JpaBaseConfiguration {
 
@@ -90,13 +88,13 @@ public class JpaDataAutoConfiguration extends JpaBaseConfiguration {
         return new HibernateJpaPersistenceProvider();
     }
 
-    @Override
     @Bean
     @Primary
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder,
+            HibernateJpaPersistenceProvider persistenceProvider) {
         addMappingResources(getProperties().getMappingResources());
         LocalContainerEntityManagerFactoryBean factoryBean = super.entityManagerFactory(factoryBuilder);
-        factoryBean.setPersistenceProvider(persistenceProvider());
+        factoryBean.setPersistenceProvider(persistenceProvider);
         return factoryBean;
     }
 
