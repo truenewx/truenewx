@@ -1,6 +1,10 @@
 package org.truenewx.tnxjee.repo.jpa.support;
 
-import java.util.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import javax.validation.constraints.DecimalMax;
@@ -9,6 +13,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
@@ -128,28 +134,19 @@ public abstract class JpaRepoxSupport<T extends Entity> extends RepoxSupport<T> 
         return getAccessTemplate().getPersistentClass(getEntityName());
     }
 
-    @SuppressWarnings("unchecked")
     private List<String> getColumnNames() {
-        List<String> columnNames = new ArrayList<>();
-        PersistentClass persistentClass = getPersistentClass();
-        Property identifierProperty = persistentClass.getIdentifierProperty();
-        if (identifierProperty != null) {
-            Iterator<Column> columnIterator = identifierProperty.getColumnIterator();
-            while (columnIterator.hasNext()) {
-                Column column = columnIterator.next();
-                columnNames.add(column.getName());
+        SessionFactory sessionFactory = getAccessTemplate().getEntityManagerFactory().unwrap(SessionFactory.class);
+        Session session = sessionFactory.openSession();
+        List<String> columnNames = session.doReturningWork(connection -> {
+            List<String> fieldNames = new ArrayList<>();
+            ResultSet rs = connection.getMetaData().getColumns(connection.getCatalog(), null, getTableName(), null);
+            while (rs.next()) {
+                fieldNames.add(rs.getString(4));
             }
-        }
-        Iterator<Property> iterator = persistentClass.getPropertyIterator();
-        while (iterator.hasNext()) {
-            Property property = iterator.next();
-            Column column = (Column) property.getColumnIterator().next();
-            String columnName = column.getName();
-            // 复合主键中的字段可能在一般引用字段中重复，需排除
-            if (!columnNames.contains(columnName)) {
-                columnNames.add(columnName);
-            }
-        }
+            rs.close();
+            return fieldNames;
+        });
+        session.close();
         return columnNames;
     }
 
