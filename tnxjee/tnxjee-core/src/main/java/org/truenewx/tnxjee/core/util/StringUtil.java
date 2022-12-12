@@ -710,8 +710,7 @@ public class StringUtil {
      * @return true if 指定字符串采用指定字符集编码, otherwise false
      * @throws UnsupportedEncodingException 如果指定字符集编码不被支持
      */
-    public static boolean validateCharset(String s, String charsetName)
-            throws UnsupportedEncodingException {
+    public static boolean checkCharset(String s, String charsetName) throws UnsupportedEncodingException {
         String s1 = new String(s.getBytes(), charsetName);
         return s1.equals(s);
     }
