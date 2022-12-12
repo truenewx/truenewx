@@ -848,6 +848,13 @@ i svg {
     top: 0;
 }
 
+.el-dialog__body {
+    padding: 1rem;
+    color: inherit;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .el-message__content {
     text-align: center;
     line-height: 1.2;

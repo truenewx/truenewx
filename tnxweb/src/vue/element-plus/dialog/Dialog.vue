@@ -1,5 +1,5 @@
 <template>
-    <el-dialog
+    <el-dialog class="tnxel-dialog"
         v-model="visible"
         destroy-on-close
         append-to-body
@@ -52,7 +52,7 @@ export default {
             default: 512,
         },
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'shown', 'closed'],
     data() {
         return {
             visible: this.modelValue,
@@ -121,6 +121,8 @@ export default {
 
             if (typeof vm.options.onShown === 'function') {
                 vm.options.onShown.call(this);
+            } else {
+                vm.$emit('shown');
             }
         });
     },
@@ -199,6 +201,8 @@ export default {
         onClosed() {
             if (typeof this.options.onClosed === 'function') {
                 this.options.onClosed.call(this.$refs.content);
+            } else {
+                this.$emit('closed');
             }
             if (this.heightChangeObserver) {
                 this.heightChangeObserver.disconnect();
@@ -209,53 +213,46 @@ export default {
 </script>
 
 <style>
-tnxel-dialog {
+.tnxel-dialog {
     display: none;
 }
 
-.el-dialog {
+.tnxel-dialog.el-dialog {
     display: flex;
     flex-direction: column;
     margin-bottom: 0;
 }
 
-.el-dialog__header {
+.tnxel-dialog .el-dialog__header {
     padding: 0;
 }
 
-.el-dialog__header .el-dialog__headerbtn {
+.tnxel-dialog .el-dialog__header .el-dialog__headerbtn {
     width: 48px;
     height: 48px;
 }
 
-.tnxel-dialog-title {
+.tnxel-dialog .tnxel-dialog-title {
     padding: 0.75rem 1rem;
     font-size: 1rem;
 }
 
-.tnxel-dialog-title > :last-child,
-.el-dialog__body > div > :last-child {
+.tnxel-dialog .tnxel-dialog-title > :last-child,
+.tnxel-dialog .el-dialog__body > div > :last-child {
     margin-bottom: 0;
 }
 
-.el-dialog__body {
-    padding: 1rem;
-    color: inherit;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
-.el-dialog__footer {
+.tnxel-dialog .el-dialog__footer {
     padding: 0;
 }
 
-.tnxel-dialog-footer {
+.tnxel-dialog .tnxel-dialog-footer {
     padding: 1rem;
     display: flex;
     flex-direction: row-reverse;
 }
 
-.el-dialog__footer .el-button {
+.tnxel-dialog .el-dialog__footer .el-button {
     margin-left: 10px;
 }
 </style>
