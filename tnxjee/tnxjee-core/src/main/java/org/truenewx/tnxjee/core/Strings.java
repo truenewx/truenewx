@@ -155,6 +155,11 @@ public class Strings {
     public static final String ENCODING_GBK = "GBK";
 
     /**
+     * 字符编码：GB18030
+     */
+    public static final String ENCODING_GB18030 = "GB18030";
+
+    /**
      * 简体中文
      */
     public static final String LOCALE_SC = "zh_CN";
