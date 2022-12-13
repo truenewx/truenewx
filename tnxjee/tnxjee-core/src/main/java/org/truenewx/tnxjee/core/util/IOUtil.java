@@ -3,7 +3,6 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,10 +95,11 @@ public class IOUtil {
      * 执行指定命令行指令
      *
      * @param command        命令行指令
+     * @param charset        结果字符集
      * @param resultConsumer 结果消费者，为null时不等待结果反馈
      * @throws IOException 如果执行过程出现错误
      */
-    public static void executeCommand(String command, Consumer<String> resultConsumer)
+    public static void executeCommand(String command, String charset, Consumer<String> resultConsumer)
             throws IOException {
         Process process = Runtime.getRuntime().exec(command);
         if (resultConsumer != null) {
@@ -108,7 +108,7 @@ public class IOUtil {
             } catch (InterruptedException e) {
                 LogUtil.error(IOUtil.class, e);
             }
-            String result = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+            String result = IOUtils.toString(process.getInputStream(), charset);
             resultConsumer.accept(result);
         }
     }
