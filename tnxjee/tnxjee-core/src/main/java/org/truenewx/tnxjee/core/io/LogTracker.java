@@ -18,14 +18,16 @@ import org.truenewx.tnxjee.core.util.LogUtil;
  */
 public class LogTracker implements Closeable {
 
-    private RandomAccessFile accessFile;
+    private File file;
+    private RandomAccessFile raf;
+    private String encoding = Strings.ENCODING_UTF8;
 
-    public LogTracker(File file) throws IOException {
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-        this.accessFile = new RandomAccessFile(file, "r");
-        seekEnd();
+    public LogTracker(File file) {
+        this.file = file;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 
     /**
@@ -34,7 +36,17 @@ public class LogTracker implements Closeable {
      * @throws IOException 如果出现IO错误
      */
     public void seekEnd() throws IOException {
-        this.accessFile.seek(this.accessFile.length());
+        if (this.raf != null) {
+            this.raf.seek(this.raf.length());
+        }
+    }
+
+    private boolean prepare() throws IOException {
+        if (this.raf == null && this.file != null && this.file.exists()) {
+            this.raf = new RandomAccessFile(this.file, "r");
+            seekEnd();
+        }
+        return this.raf != null;
     }
 
     /**
@@ -46,23 +58,27 @@ public class LogTracker implements Closeable {
      */
     public List<String> track(int size) throws IOException {
         List<String> lines = new ArrayList<>();
-        String line = this.accessFile.readLine();
-        while (line != null && (size <= 0 || lines.size() <= size)) {
-            // 去掉末尾的空白符，但不能去掉头部的
-            line = (Strings.MINUS + line).trim().substring(1);
-            line = new String(line.getBytes(StandardCharsets.ISO_8859_1), Strings.ENCODING_GB18030);
-            lines.add(line);
-            line = this.accessFile.readLine();
+        if (this.prepare()) {
+            String line = this.raf.readLine();
+            while (line != null && (size <= 0 || lines.size() <= size)) {
+                // 去掉末尾的空白符，但不能去掉头部的
+                line = (Strings.MINUS + line).trim().substring(1);
+                line = new String(line.getBytes(StandardCharsets.ISO_8859_1), this.encoding);
+                lines.add(line);
+                line = this.raf.readLine();
+            }
         }
         return lines;
     }
 
     @Override
     public void close() {
-        try {
-            this.accessFile.close();
-        } catch (IOException e) {
-            LogUtil.error(getClass(), e);
+        if (this.raf != null) {
+            try {
+                this.raf.close();
+            } catch (IOException e) {
+                LogUtil.error(getClass(), e);
+            }
         }
     }
 
