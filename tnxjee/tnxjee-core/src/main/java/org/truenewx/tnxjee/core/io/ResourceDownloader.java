@@ -48,6 +48,7 @@ public class ResourceDownloader {
                 File downloadingFile = new File(targetFile.getParentFile(),
                         targetFile.getName() + DOWNLOADING_FILE_EXTENSION);
                 try {
+                    IOUtil.createFile(downloadingFile);
                     HttpClientUtil.download(url, params, headers, (responseEntity, responseHeaders) -> {
                         progress.setTotal(responseEntity.getContentLength());
 
