@@ -93,24 +93,6 @@ public class ApplicationUtil {
     }
 
     /**
-     * 获取工作临时目录，与工作目录相关，非系统临时目录
-     *
-     * @return 工作临时目录
-     */
-    public static File getWorkingTempDir() {
-        String rootLocation = getWorkingDirLocation();
-        String tomcatRootLocation = getTomcatRootLocation(rootLocation);
-        if (tomcatRootLocation != null) {
-            rootLocation = tomcatRootLocation;
-        }
-        if (rootLocation.endsWith(JAR_WORKING_DIR_SUFFIX)) {
-            int index = rootLocation.lastIndexOf(Strings.SLASH);
-            rootLocation = rootLocation.substring(0, index);
-        }
-        return new File(rootLocation + "/temp");
-    }
-
-    /**
      * @return 应用根目录定位路径
      */
     public static String getApplicationRootLocation() {
@@ -119,10 +101,18 @@ public class ApplicationUtil {
         if (tomcatRootLocation != null) { // 位于tomcat中，则根目录为tomcat安装目录
             location = tomcatRootLocation;
         } else if (location.endsWith(JAR_WORKING_DIR_SUFFIX)) { // 位于jar中，则根目录为上级目录的上级目录
-            location = location.substring(0, location.lastIndexOf(Strings.SLASH));
-            location = location.substring(0, location.lastIndexOf(Strings.SLASH));
+            location = new File(location).getParentFile().getParentFile().getAbsolutePath();
         }
         return location;
+    }
+
+    /**
+     * 获取工作临时目录，与工作目录相关，非系统临时目录
+     *
+     * @return 工作临时目录
+     */
+    public static File getWorkingTempDir() {
+        return new File(getApplicationRootLocation(), "temp");
     }
 
     public static String getAbsolutePath(String path) {
