@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -99,9 +99,22 @@ public class IOUtil {
      * @param resultConsumer 结果消费者，为null时不等待结果反馈
      * @throws IOException 如果执行过程出现错误
      */
-    public static void executeCommand(String command, String charset, Consumer<String> resultConsumer)
+    public static void executeCommand(String command, String charset, BiConsumer<String, Long> resultConsumer)
             throws IOException {
-        Process process = Runtime.getRuntime().exec(command);
+        executeCommand(new String[]{ command }, charset, resultConsumer);
+    }
+
+    /**
+     * 执行指定命令行指令
+     *
+     * @param commands       命令行指令集
+     * @param charset        结果字符集
+     * @param resultConsumer 结果消费者，为null时不等待结果反馈
+     * @throws IOException 如果执行过程出现错误
+     */
+    public static void executeCommand(String[] commands, String charset, BiConsumer<String, Long> resultConsumer)
+            throws IOException {
+        Process process = Runtime.getRuntime().exec(commands);
         if (resultConsumer != null) {
             try {
                 process.waitFor();
@@ -109,7 +122,7 @@ public class IOUtil {
                 LogUtil.error(IOUtil.class, e);
             }
             String result = IOUtils.toString(process.getInputStream(), charset);
-            resultConsumer.accept(result);
+            resultConsumer.accept(result, process.pid());
         }
     }
 
