@@ -31,10 +31,10 @@ public class BodyRuntimeExceptionResolver extends AbstractHandlerExceptionResolv
         if (ex instanceof RuntimeException && !(ex instanceof ResolvableException)) {
             // 只处理ajax请求
             if (WebUtil.isAjaxRequest(request)) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                String message = Objects.requireNonNullElse(ex.getCause(), ex).getMessage();
-                LogUtil.error(getClass(), message);
+                LogUtil.error(getClass(), ex);
                 try {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    String message = Objects.requireNonNullElse(ex.getCause(), ex).getMessage();
                     response.getWriter().print(message);
                 } catch (IOException ignored) {
                 }
