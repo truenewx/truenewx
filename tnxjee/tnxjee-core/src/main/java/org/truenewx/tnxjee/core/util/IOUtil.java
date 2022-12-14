@@ -101,7 +101,21 @@ public class IOUtil {
      */
     public static void executeCommand(String command, String charset, BiConsumer<String, Long> resultConsumer)
             throws IOException {
-        executeCommand(new String[]{ command }, charset, resultConsumer);
+        Process process = Runtime.getRuntime().exec(command);
+        execute(process, charset, resultConsumer);
+    }
+
+    private static void execute(Process process, String charset, BiConsumer<String, Long> resultConsumer)
+            throws IOException {
+        if (resultConsumer != null) {
+            try {
+                process.waitFor();
+            } catch (InterruptedException e) {
+                LogUtil.error(IOUtil.class, e);
+            }
+            String result = IOUtils.toString(process.getInputStream(), charset);
+            resultConsumer.accept(result, process.pid());
+        }
     }
 
     /**
@@ -115,15 +129,7 @@ public class IOUtil {
     public static void executeCommand(String[] commands, String charset, BiConsumer<String, Long> resultConsumer)
             throws IOException {
         Process process = Runtime.getRuntime().exec(commands);
-        if (resultConsumer != null) {
-            try {
-                process.waitFor();
-            } catch (InterruptedException e) {
-                LogUtil.error(IOUtil.class, e);
-            }
-            String result = IOUtils.toString(process.getInputStream(), charset);
-            resultConsumer.accept(result, process.pid());
-        }
+        execute(process, charset, resultConsumer);
     }
 
     /**
