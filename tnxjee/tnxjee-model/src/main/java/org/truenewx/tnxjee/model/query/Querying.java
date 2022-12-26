@@ -8,7 +8,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.model.annotation.RequestParamIgnore;
 
 /**
@@ -68,7 +67,11 @@ public class Querying extends Pagination implements QueryModel, Paging {
     }
 
     public String getOrderBy() {
-        return StringUtil.ifBlank(toOrderBy(getOrders()), null);
+        String orderBy = toOrderBy(getOrders());
+        if (StringUtils.isBlank(orderBy)) {
+            orderBy = null;
+        }
+        return orderBy;
     }
 
     /**
