@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -1082,6 +1083,13 @@ public class StringUtil {
     public static String ifBlank(String s, String defaultValue) {
         if (StringUtils.isBlank(s)) {
             return defaultValue;
+        }
+        return s;
+    }
+
+    public static String ifBlank(String s, Supplier<String> defaultValueSupplier) {
+        if (StringUtils.isBlank(s)) {
+            return defaultValueSupplier.get();
         }
         return s;
     }
