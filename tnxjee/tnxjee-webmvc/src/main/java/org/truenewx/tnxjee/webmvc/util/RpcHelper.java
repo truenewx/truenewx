@@ -71,7 +71,7 @@ public class RpcHelper {
                             throw e;
                         }
                     default:
-                        throw new RuntimeException(body);
+                        throw new RuntimeException(status + Strings.COLON + body);
                 }
             }
         } catch (Exception e) {
