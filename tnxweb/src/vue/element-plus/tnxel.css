@@ -815,10 +815,6 @@ el-card {
     font-size: unset;
 }
 
-.el-input-group__append, .el-input-group__prepend {
-    padding: 0 1rem;
-}
-
 /*
  * 修正Bootstrap造成的影响
  */

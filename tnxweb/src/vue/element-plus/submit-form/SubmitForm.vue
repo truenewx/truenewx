@@ -4,7 +4,8 @@
         :inline="inline" :inline-message="!vertical" :disabled="disabled"
         :class="theme ? ('theme-' + theme) : null" :size="size" :status-icon="statusIcon">
         <slot></slot>
-        <el-form-item class="w-100 mb-0" label="&nbsp;" v-if="submit !== undefined && submit !== null">
+        <el-form-item class="w-100 mb-0" :label="vertical ? undefined : '&nbsp;'"
+            v-if="submit !== undefined && submit !== null">
             <el-button :type="theme || 'primary'" :size="size" @click="toSubmit" v-if="submit !== false">
                 {{ _submitText }}
             </el-button>
