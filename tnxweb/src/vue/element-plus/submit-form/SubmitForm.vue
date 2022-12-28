@@ -68,7 +68,7 @@ export default {
         size: String,
         statusIcon: {
             type: Boolean,
-            default: true,
+            default: false,
         },
     },
     emits: ['rules-loaded', 'meta'],
