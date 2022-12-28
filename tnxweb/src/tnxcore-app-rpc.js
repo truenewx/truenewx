@@ -272,6 +272,8 @@ export default {
                         _this.handleOtherError(url + ':\n' + error.stack, options);
                     }
                 }
+            } else {
+                _this.handleOtherError(url + ':\n' + error, options);
             }
         });
     },
