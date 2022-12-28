@@ -881,3 +881,10 @@ i svg {
 .el-tabs__nav.is-top {
     display: flex;
 }
+
+/* 修正表单保存后，位于输入框前置部分的下拉菜单高度未撑满导致的样式偏差 */
+.el-input-group__prepend .el-select,
+.el-input-group__prepend .el-select .select-trigger,
+.el-input-group__prepend .el-select .select-trigger .el-input {
+    height: 100%;
+}
