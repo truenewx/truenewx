@@ -218,7 +218,7 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
 
     @Override
     public long getTotalSize(String storageDir) {
-        File dir = new File(storageDir);
+        File dir = new File(this.root, storageDir);
         return FileUtils.sizeOfDirectory(dir);
     }
 
