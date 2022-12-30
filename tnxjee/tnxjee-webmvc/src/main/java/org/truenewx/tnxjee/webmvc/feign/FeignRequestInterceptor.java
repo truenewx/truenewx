@@ -77,6 +77,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
         // 确保远程调用始终使用JSON格式传递数据，避免出现html结果
         template.removeHeader(HttpHeaders.ACCEPT);
         template.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        template.header(WebConstants.HEADER_AJAX_REQUEST, WebConstants.AJAX_REQUEST_VALUE);
     }
 
     private String generateJwt(RequestTemplate template) {
