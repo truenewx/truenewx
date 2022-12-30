@@ -62,6 +62,7 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
         String dirLocation = getExternalConfigDirLocation();
         File dir = new File(dirLocation);
         if (dir.exists()) {
+            // 此时扩展的配置文件尚未加载，故应用标识和名称不能配置在扩展的配置文件中，必须配置在spring默认支持的配置文件中
             String basename = ApplicationUtil.getSymbol(environment);
             if (StringUtils.isBlank(basename)) {
                 basename = SpringUtil.getApplicationName(environment);
