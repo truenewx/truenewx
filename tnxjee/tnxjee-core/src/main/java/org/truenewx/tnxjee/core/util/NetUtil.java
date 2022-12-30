@@ -517,6 +517,17 @@ public class NetUtil {
         return url;
     }
 
+    public static String getProtocol(String url, boolean withSlash) {
+        int index = url.indexOf("://");
+        if (index > 0) {
+            if (withSlash) {
+                index += 3;
+            }
+            return url.substring(0, index);
+        }
+        return null;
+    }
+
     /**
      * 从指定URL地址中获取主机地址（域名/IP[:端口]）
      *
