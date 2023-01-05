@@ -116,6 +116,10 @@ export default {
     line-height: 1;
 }
 
+.tnxel-input-number .el-input__inner {
+    min-width: 50px;
+}
+
 .tnxel-input-number .el-input-number.text-start .el-input__inner {
     text-align: left;
 }
