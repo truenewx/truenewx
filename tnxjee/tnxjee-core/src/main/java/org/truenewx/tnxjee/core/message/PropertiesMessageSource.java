@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.enums.EnumDictResolver;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 import org.truenewx.tnxjee.core.util.LogUtil;
 
 /**
@@ -21,8 +22,6 @@ import org.truenewx.tnxjee.core.util.LogUtil;
  */
 public class PropertiesMessageSource extends ReloadableResourceBundleMessageSource
         implements MessagesSource, InitializingBean {
-
-    private static final String PROPERTIES_SUFFIX = ".properties";
 
     @Autowired
     private Environment environment;
@@ -47,10 +46,10 @@ public class PropertiesMessageSource extends ReloadableResourceBundleMessageSour
             if (basename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
                 try {
                     Resource[] resources = this.resourcePatternResolver
-                            .getResources(basename + PROPERTIES_SUFFIX);
+                            .getResources(basename + FileExtensions.DOT_PROPERTIES);
                     for (Resource resource : resources) {
                         String path = resource.getURI().toString();
-                        path = path.substring(0, path.length() - PROPERTIES_SUFFIX.length());
+                        path = path.substring(0, path.length() - FileExtensions.DOT_PROPERTIES.length());
                         // 去掉路径中可能的Locale后缀
                         if (this.locales != null) {
                             for (Locale locale : this.locales) {

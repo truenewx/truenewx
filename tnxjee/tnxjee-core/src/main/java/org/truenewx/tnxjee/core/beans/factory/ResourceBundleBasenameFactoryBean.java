@@ -16,12 +16,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.io.WebContextResource;
+import org.truenewx.tnxjee.core.util.FileExtensions;
 
 /**
  * 资源文件基本名称工厂Bean
  *
  * @author jianglei
- * 
  */
 public class ResourceBundleBasenameFactoryBean implements FactoryBean<String[]> {
 
@@ -45,7 +45,7 @@ public class ResourceBundleBasenameFactoryBean implements FactoryBean<String[]> 
                         ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX);
                 // 查找文件资源
                 Resource[] resources = this.resourcePatternResolver
-                        .getResources(searchBasename + Strings.ASTERISK + ".properties");
+                        .getResources(searchBasename + Strings.ASTERISK + FileExtensions.DOT_PROPERTIES);
                 String jarStr = ".jar!/";
                 for (Resource resource : resources) {
                     URL url = resource.getURL();
