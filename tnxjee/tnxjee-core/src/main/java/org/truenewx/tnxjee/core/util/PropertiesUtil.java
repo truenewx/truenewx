@@ -3,6 +3,8 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.util.Properties;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -86,6 +88,17 @@ public class PropertiesUtil {
             }
             store(source, file, comment);
         }
+    }
+
+    public static void store(File target, String key, @Nullable String value, String comment) throws IOException {
+        Properties properties = new Properties();
+        if (value == null) {
+            PropertiesUtil.load(target, properties);
+            properties.remove(key);
+        } else {
+            properties.setProperty(key, value);
+        }
+        store(properties, target, comment);
     }
 
 }
