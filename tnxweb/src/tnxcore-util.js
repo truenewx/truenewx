@@ -133,10 +133,20 @@ Object.assign(Date.prototype, {
     formatDateMonth() {
         return this.format(DATE_PATTERNS.dateMonth);
     },
+    plusMilliseconds(milliseconds) {
+        return new Date(this.getTime() + milliseconds);
+    },
+    plusSeconds(seconds) {
+        return this.plusMilliseconds(seconds * 1000);
+    },
+    plusMinutes(minutes) {
+        return this.plusSeconds(minutes * 60);
+    },
+    plusHours(hours) {
+        return this.plusMinutes(hours * 60);
+    },
     plusDays(days) {
-        let millis = this.getTime();
-        millis += days * 24 * 60 * 60 * 1000;
-        return new Date(millis);
+        return this.plusHours(days * 24);
     },
     plusMonths(months) {
         let year = this.getFullYear();
