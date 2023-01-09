@@ -129,4 +129,20 @@ public class ApplicationUtil {
         return path;
     }
 
+    public static File getWarFile(String buildName) {
+        String workingDirLocation = getWorkingDirLocation();
+        String tomcatRootLocation = getTomcatRootLocation(workingDirLocation);
+        if (tomcatRootLocation != null) {
+            return new File(workingDirLocation + FileExtensions.DOT_WAR);
+        } else if (isInJar()) {
+            return new File(workingDirLocation.substring(0, workingDirLocation.length() - 1));
+        } else {
+            File dir = new File(workingDirLocation).getParentFile().getParentFile();
+            File file = new File(dir, "/target/" + buildName + FileExtensions.DOT_WAR);
+            if (!file.exists()) {
+                file = null;
+            }
+            return file;
+        }
+    }
 }
