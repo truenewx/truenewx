@@ -1,12 +1,14 @@
 package org.truenewx.tnxjee.webmvc.util;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
 import org.truenewx.tnxjee.core.util.ExceptionUtil;
@@ -17,30 +19,28 @@ import org.truenewx.tnxjee.service.exception.ResolvableException;
 import org.truenewx.tnxjee.web.util.WebConstants;
 import org.truenewx.tnxjee.webmvc.exception.parser.ResolvableExceptionParser;
 import org.truenewx.tnxjee.webmvc.jwt.JwtGenerator;
+import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
 
 /**
- * RPC协助者
+ * RPC支持
  *
  * @author jianglei
  */
-@Component
-public class RpcHelper {
+public abstract class AbstractRpcInvoker implements WebRpcInvoker {
 
     @Autowired
     private JwtGenerator generator;
     @Autowired
     private ResolvableExceptionParser resolvableExceptionParser;
 
-    public Map<String, String> generateHeaders(String type, UserSpecificDetails<?> userDetails) {
-        if (userDetails != null && this.generator.isAvailable()) {
-            Map<String, String> headers = new HashMap<>();
-            fillHeaders(headers, type, userDetails);
-            return headers;
-        }
-        return null;
+    protected UserSpecificDetails<?> getUserDetails() {
+        return SecurityUtil.getAuthorizedUserDetails();
     }
 
-    public void fillHeaders(Map<String, String> headers, String type, UserSpecificDetails<?> userDetails) {
+    @Override
+    public Map<String, String> generateHeaders(String type) {
+        Map<String, String> headers = new HashMap<>();
+        UserSpecificDetails<?> userDetails = getUserDetails();
         if (userDetails != null && this.generator.isAvailable()) {
             if (StringUtils.isNotBlank(type)) {
                 headers.put(WebConstants.HEADER_RPC_TYPE, type);
@@ -48,12 +48,13 @@ public class RpcHelper {
             String jwt = this.generator.generate(type, userDetails);
             headers.put(WebConstants.HEADER_RPC_JWT, jwt);
         }
+        return headers;
     }
 
-    public String call(HttpRequestMethod method, String url, Map<String, Object> params, String type,
-            UserSpecificDetails<?> userSpecificDetails) {
+    @Override
+    public String invoke(HttpRequestMethod method, String url, Map<String, Object> params, String type) {
         try {
-            Map<String, String> headers = generateHeaders(type, userSpecificDetails);
+            Map<String, String> headers = generateHeaders(type);
             // RPC请求一律为AJAX请求
             headers.put(WebConstants.HEADER_AJAX_REQUEST, WebConstants.AJAX_REQUEST_VALUE);
             Binate<Integer, String> result = HttpClientUtil.request(method, url, params, headers,
@@ -78,6 +79,24 @@ public class RpcHelper {
             throw ExceptionUtil.toRuntimeException(e);
         }
         return null;
+    }
+
+    @Override
+    public void download(HttpServletResponse response, String url, Map<String, Object> params, String type) {
+        Map<String, String> headers = generateHeaders(type);
+        try {
+            HttpClientUtil.download(url, params, headers, (responseEntity, responseHeaders) -> {
+                try {
+                    responseHeaders.forEach(response::setHeader);
+                    response.setContentLengthLong(responseEntity.getContentLength());
+                    responseEntity.writeTo(response.getOutputStream());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
