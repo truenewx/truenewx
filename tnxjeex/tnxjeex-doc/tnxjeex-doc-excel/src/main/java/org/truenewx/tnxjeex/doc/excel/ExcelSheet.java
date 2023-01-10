@@ -2,12 +2,15 @@ package org.truenewx.tnxjeex.doc.excel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.truenewx.tnxjee.core.caption.CaptionUtil;
+import org.truenewx.tnxjee.model.spec.enums.support.EnumValueHelper;
 import org.truenewx.tnxjeex.doc.excel.display.DisplayingExcelColumnModel;
 import org.truenewx.tnxjeex.doc.excel.display.DisplayingExcelRowModel;
 import org.truenewx.tnxjeex.doc.excel.display.DisplayingExcelSheetSummary;
@@ -138,6 +141,23 @@ public class ExcelSheet {
             displayRows.add(row.toDisplayModel(columNum));
         }
         return displayRows;
+    }
+
+    public void replaceEnumValueToCaption(int columnIndex, Class<? extends Enum<?>> enumClass) {
+        Locale locale = Locale.getDefault();
+        forEach((row, rowIndex) -> {
+            ExcelCell cell = row.getCell(columnIndex);
+            if (cell != null) {
+                String value = cell.getValueAsString();
+                Enum<?> enumConstant = EnumValueHelper.valueOf(enumClass, value);
+                if (enumConstant != null) {
+                    String caption = CaptionUtil.getCaption(enumConstant, locale);
+                    if (!value.equals(caption)) {
+                        cell.setCellValue(caption);
+                    }
+                }
+            }
+        }, 0);
     }
 
 }

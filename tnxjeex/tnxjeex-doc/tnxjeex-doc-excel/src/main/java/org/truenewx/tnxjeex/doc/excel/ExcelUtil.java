@@ -1,7 +1,6 @@
 package org.truenewx.tnxjeex.doc.excel;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
@@ -14,10 +13,7 @@ import org.apache.poi.ss.usermodel.ExtendedColor;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.springframework.core.io.Resource;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.ArrayUtil;
-import org.truenewx.tnxjee.core.util.FileExtensions;
-import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjeex.doc.excel.display.ExcelDisplayUtil;
 
 public class ExcelUtil {
@@ -90,6 +86,19 @@ public class ExcelUtil {
     private static String toHexString(short s) {
         String hex = Integer.toHexString(s & 0xff);
         return StringUtils.leftPad(hex, 2, "0");
+    }
+
+    public static void replaceEnumValueToCaption(File file, int sheetIndex, int columnIndex,
+            Class<? extends Enum<?>> enumClass) throws IOException {
+        String extension = StringUtil.getExtension(file.getName(), false);
+        FileInputStream in = new FileInputStream(file);
+        ExcelDoc doc = new ExcelDoc(in, extension);
+        in.close();
+        ExcelSheet sheet = doc.getSheetAt(sheetIndex);
+        sheet.replaceEnumValueToCaption(columnIndex, enumClass);
+        FileOutputStream out = new FileOutputStream(file);
+        doc.write(out);
+        out.close();
     }
 
 }
