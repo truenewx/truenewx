@@ -1,13 +1,14 @@
 package org.truenewx.tnxjee.core.caption;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Locale;
+
+import org.apache.commons.lang3.StringUtils;
+import org.truenewx.tnxjee.core.util.ClassUtil;
 
 /**
  * 显示名称工具类
@@ -70,6 +71,12 @@ public class CaptionUtil {
     public static String getCaption(Field field, Locale locale) {
         Caption[] captionAnnotations = field.getAnnotationsByType(Caption.class);
         return getCaptionValue(captionAnnotations, locale);
+    }
+
+    public static String getCaption(Enum<?> enumConstant, Locale locale) {
+        String name = enumConstant.name();
+        Field field = ClassUtil.getField(enumConstant);
+        return field == null ? name : getCaption(field, locale);
     }
 
 }
