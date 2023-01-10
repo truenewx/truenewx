@@ -1,10 +1,13 @@
 package org.truenewx.tnxjeex.office.excel;
 
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.truenewx.tnxjee.core.caption.CaptionUtil;
+import org.truenewx.tnxjee.model.spec.enums.support.EnumValueHelper;
 import org.truenewx.tnxjeex.office.excel.exports.ExcelExportUtil;
 
 /**
@@ -77,6 +80,23 @@ public class ExcelSheet {
                 consumer.accept(new ExcelRow(this, row), i);
             }
         }
+    }
+
+    public void replaceEnumValueToCaption(int columnIndex, Class<? extends Enum<?>> enumClass) {
+        Locale locale = Locale.getDefault();
+        forEach((row, rowIndex) -> {
+            ExcelCell cell = row.getCell(columnIndex);
+            if (cell != null) {
+                String value = cell.getStringCellValue();
+                Enum<?> enumConstant = EnumValueHelper.valueOf(enumClass, value);
+                if (enumConstant != null) {
+                    String caption = CaptionUtil.getCaption(enumConstant, locale);
+                    if (!value.equals(caption)) {
+                        cell.setCellValue(caption);
+                    }
+                }
+            }
+        }, 0);
     }
 
 }
