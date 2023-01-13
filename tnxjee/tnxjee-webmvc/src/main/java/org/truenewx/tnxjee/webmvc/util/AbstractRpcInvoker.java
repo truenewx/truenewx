@@ -13,6 +13,7 @@ import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.spec.HttpRequestMethod;
 import org.truenewx.tnxjee.core.util.ExceptionUtil;
 import org.truenewx.tnxjee.core.util.HttpClientUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.tuple.Binate;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.exception.ResolvableException;
@@ -33,14 +34,14 @@ public abstract class AbstractRpcInvoker implements WebRpcInvoker {
     @Autowired
     private ResolvableExceptionParser resolvableExceptionParser;
 
-    protected UserSpecificDetails<?> getUserDetails() {
+    protected UserSpecificDetails<?> getUserDetails(String type) {
         return SecurityUtil.getAuthorizedUserDetails();
     }
 
     @Override
     public Map<String, String> generateHeaders(String type) {
         Map<String, String> headers = new HashMap<>();
-        UserSpecificDetails<?> userDetails = getUserDetails();
+        UserSpecificDetails<?> userDetails = getUserDetails(type);
         if (userDetails != null && this.generator.isAvailable()) {
             if (StringUtils.isNotBlank(type)) {
                 headers.put(WebConstants.HEADER_RPC_TYPE, type);
@@ -76,7 +77,9 @@ public abstract class AbstractRpcInvoker implements WebRpcInvoker {
                 }
             }
         } catch (Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            RuntimeException re = ExceptionUtil.toRuntimeException(e);
+            LogUtil.error(getClass(), re);
+            throw re;
         }
         return null;
     }
