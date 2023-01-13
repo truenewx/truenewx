@@ -27,8 +27,11 @@ public class WebContextPathPredicate implements Predicate<String> {
             }
             path = viewProperties.getPrefix() + path + viewProperties.getSuffix();
             path = path.replaceAll(Strings.DOUBLE_SLASH, Strings.SLASH);
-            WebContextResource resource = new WebContextResource(path);
-            return resource.exists();
+            try {
+                WebContextResource resource = new WebContextResource(path);
+                return resource.exists();
+            } catch (RuntimeException ignored) {
+            }
         }
         return false;
     }
