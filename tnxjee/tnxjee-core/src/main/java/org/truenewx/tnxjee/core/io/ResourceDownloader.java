@@ -28,7 +28,8 @@ public class ResourceDownloader {
         this.interval = interval;
     }
 
-    public String download(String url, Map<String, Object> params, Map<String, String> headers, File targetFile) {
+    public String download(String url, Map<String, Object> params, Map<String, String> headers, File targetFile,
+            Runnable endedTask) {
         if (targetFile.exists()) { // 目标文件已存在，判断是否正在下载中
             String progressId = ResourceDownloadTaskProgress.generateId(url);
             ResourceDownloadTaskProgress progress = getProgress(progressId);
@@ -83,6 +84,13 @@ public class ResourceDownloader {
                 } else {  // 下载完成后，下载中文件更名为目标文件
                     targetFile.delete();
                     downloadingFile.renameTo(targetFile);
+                }
+            }
+
+            @Override
+            protected void onEnded() {
+                if (endedTask != null) {
+                    endedTask.run();
                 }
             }
         });

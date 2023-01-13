@@ -23,8 +23,12 @@ public abstract class DefaultProgressTask<P extends TaskProgress<?>> implements 
         this.progress.start();
         execute(this.progress);
         this.progress.end();
+        onEnded();
     }
 
     protected abstract void execute(P progress);
+
+    protected void onEnded() {
+    }
 
 }
