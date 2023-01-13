@@ -21,6 +21,7 @@ public class AppConfiguration {
     private String loginPath = "/login/cas";
     private String logoutPath = "/logout";
     private String loginedPath = Strings.EMPTY;
+    private Map<String, String> settings;
     private Map<String, String> subs;
 
     public String getSymbol() {
@@ -108,6 +109,17 @@ public class AppConfiguration {
      */
     public void setLoginedPath(String loginedPath) {
         this.loginedPath = loginedPath;
+    }
+
+    public Map<String, String> getSettings() {
+        return this.settings;
+    }
+
+    /**
+     * @param settings 附加配置
+     */
+    public void setSettings(Map<String, String> settings) {
+        this.settings = settings;
     }
 
     public Map<String, String> getSubs() {
