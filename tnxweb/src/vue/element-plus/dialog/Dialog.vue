@@ -31,13 +31,14 @@
 
 <script>
 import $ from 'jquery';
+import DialogContent from './DialogContent';
 
 const util = window.tnx.util;
 
 export default {
     name: 'TnxelDialog',
     components: {
-        'tnxel-dialog-content': null,
+        'tnxel-dialog-content': DialogContent,
     },
     props: {
         modelValue: Boolean,
