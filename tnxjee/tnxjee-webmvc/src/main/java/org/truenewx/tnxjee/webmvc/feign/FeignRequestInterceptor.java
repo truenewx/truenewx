@@ -12,14 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.api.RpcApi;
 import org.truenewx.tnxjee.core.util.LogUtil;
-import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
-import org.truenewx.tnxjee.model.spec.user.security.DefaultUserSpecificDetails;
-import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.feign.GrantAuthority;
 import org.truenewx.tnxjee.web.context.SpringWebContext;
@@ -105,7 +101,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                         } else {
                             // 不能将临时权限追加到会话级用户特性细节中，只能追加到用户特性细节克隆体中
                             userDetails = userDetails.clone();
-                            addGrantedAuthorities(userDetails, grantAuthority);
+                            addGrantedAuthority(userDetails, grantAuthority);
                         }
                         break;
                     default:
@@ -122,26 +118,13 @@ public class FeignRequestInterceptor implements RequestInterceptor {
     }
 
     private UserSpecificDetails<?> buildGrantUserSpecificDetails(GrantAuthority grantAuthority) {
-        DefaultUserSpecificDetails userDetails = new DefaultUserSpecificDetails();
-        addGrantedAuthorities(userDetails, grantAuthority);
-        DefaultUserIdentity identity = new DefaultUserIdentity(grantAuthority.type(), 0);
-        userDetails.setIdentity(identity);
-        userDetails.setUsername(identity.getId().toString());
-        userDetails.setCaption(identity.toString());
-        userDetails.setEnabled(true);
-        userDetails.setAccountNonExpired(true);
-        userDetails.setAccountNonLocked(true);
-        userDetails.setCredentialsNonExpired(true);
-        return userDetails;
+        return SecurityUtil.buildDefaultUserDetails(grantAuthority.type(), grantAuthority.rank(), grantAuthority.app(),
+                grantAuthority.permission());
     }
 
-    @SuppressWarnings("unchecked")
-    private void addGrantedAuthorities(UserSpecificDetails<?> userDetails, GrantAuthority grantAuthority) {
-        Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
-        UserGrantedAuthority userAuthority = new UserGrantedAuthority(grantAuthority.type(), grantAuthority.rank(),
-                grantAuthority.app());
-        userAuthority.addPermissions(grantAuthority.permission());
-        authorities.add(userAuthority);
+    private void addGrantedAuthority(UserSpecificDetails<?> userDetails, GrantAuthority grantAuthority) {
+        SecurityUtil.addGrantedAuthority(userDetails, grantAuthority.type(), grantAuthority.rank(),
+                grantAuthority.app(), grantAuthority.permission());
     }
 
 }

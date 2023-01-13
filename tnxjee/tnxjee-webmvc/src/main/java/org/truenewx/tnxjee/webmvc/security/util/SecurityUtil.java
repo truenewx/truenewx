@@ -14,7 +14,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.truenewx.tnxjee.core.util.BeanUtil;
+import org.truenewx.tnxjee.model.spec.user.DefaultUserIdentity;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
+import org.truenewx.tnxjee.model.spec.user.security.DefaultUserSpecificDetails;
 import org.truenewx.tnxjee.model.spec.user.security.UserGrantedAuthority;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 
@@ -134,6 +136,30 @@ public class SecurityUtil {
 
     public static boolean isAuthorized() {
         return getAuthorizedUserDetails() != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void addGrantedAuthority(UserSpecificDetails<?> userDetails, String type, String rank, String app,
+            String[] permissions) {
+        Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
+        UserGrantedAuthority authority = new UserGrantedAuthority(type, rank, app);
+        authority.addPermissions(permissions);
+        authorities.add(authority);
+    }
+
+    public static UserSpecificDetails<?> buildDefaultUserDetails(String type, String rank, String app,
+            String[] permissions) {
+        DefaultUserSpecificDetails userDetails = new DefaultUserSpecificDetails();
+        addGrantedAuthority(userDetails, type, rank, app, permissions);
+        DefaultUserIdentity identity = new DefaultUserIdentity(type, 0);
+        userDetails.setIdentity(identity);
+        userDetails.setUsername(identity.getId().toString());
+        userDetails.setCaption(identity.toString());
+        userDetails.setEnabled(true);
+        userDetails.setAccountNonExpired(true);
+        userDetails.setAccountNonLocked(true);
+        userDetails.setCredentialsNonExpired(true);
+        return userDetails;
     }
 
 }
