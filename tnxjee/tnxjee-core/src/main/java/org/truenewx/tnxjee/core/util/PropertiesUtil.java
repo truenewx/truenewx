@@ -1,11 +1,11 @@
 package org.truenewx.tnxjee.core.util;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.ResourceUtils;
@@ -69,13 +69,14 @@ public class PropertiesUtil {
             Properties properties = new KeySortedProperties();
             load(target, properties);
             properties.putAll(source);
-            FileWriter writer = new FileWriter(target);
-            if (StringUtils.isNotBlank(comment)) {
-                writer.write(Strings.WELL + comment + Strings.ENTER);
-            }
-            properties.store(writer, null);
-            writer.close();
+            storeOnly(properties, target, comment);
         }
+    }
+
+    private static void storeOnly(Properties properties, File file, String comment) throws IOException {
+        FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+        properties.store(writer, comment);
+        writer.close();
     }
 
     public static void store(Properties source, String targetLocation, String comment) throws IOException {
@@ -91,14 +92,17 @@ public class PropertiesUtil {
     }
 
     public static void store(File target, String key, @Nullable String value, String comment) throws IOException {
-        Properties properties = new Properties();
         if (value == null) {
+            target.createNewFile(); // 确保文件存在
+            Properties properties = new KeySortedProperties();
             PropertiesUtil.load(target, properties);
             properties.remove(key);
+            storeOnly(properties, target, comment);
         } else {
+            Properties properties = new Properties();
             properties.setProperty(key, value);
+            store(properties, target, comment);
         }
-        store(properties, target, comment);
     }
 
 }
