@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.io;
 
 import java.io.*;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -29,7 +30,7 @@ public class ResourceDownloader {
     }
 
     public String download(String url, Map<String, Object> params, Map<String, String> headers, File targetFile,
-            Runnable endedTask) {
+            Consumer<ResourceDownloadTaskProgress> endedConsumer) {
         if (targetFile.exists()) { // 目标文件已存在，判断是否正在下载中
             String progressId = ResourceDownloadTaskProgress.generateId(url);
             ResourceDownloadTaskProgress progress = getProgress(progressId);
@@ -89,8 +90,8 @@ public class ResourceDownloader {
 
             @Override
             protected void onEnded() {
-                if (endedTask != null) {
-                    endedTask.run();
+                if (endedConsumer != null) {
+                    endedConsumer.accept(this.progress);
                 }
             }
         });
@@ -100,11 +101,13 @@ public class ResourceDownloader {
         return this.taskExecutor.getProgress(progressId);
     }
 
-    public void stop(String progressId) {
+    public boolean stop(String progressId) {
         ResourceDownloadTaskProgress progress = getProgress(progressId);
-        if (progress != null) {
+        if (progress != null && !progress.isEnded()) {
             progress.toStop();
+            return true;
         }
+        return false;
     }
 
     public void removeProgress(String progressId) {
