@@ -178,4 +178,10 @@ public class Strings {
 
     public static final String PLACEHOLDER_SUFFIX = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
+    public static final String OS_WINDOWS = "windows";
+    public static final String OS_ANDROID = "android";
+    public static final String OS_IOS = "ios";
+    public static final String OS_MAC = "mac";
+    public static final String OS_LINUX = "linux";
+
 }

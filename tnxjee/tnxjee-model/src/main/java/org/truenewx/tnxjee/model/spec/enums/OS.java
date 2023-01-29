@@ -1,6 +1,8 @@
 package org.truenewx.tnxjee.model.spec.enums;
 
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.caption.Caption;
+import org.truenewx.tnxjee.core.util.OSUtil;
 import org.truenewx.tnxjee.model.annotation.EnumValue;
 
 /**
@@ -31,15 +33,18 @@ public enum OS {
     ALL;
 
     public static OS current() {
-        String name = System.getProperty("os.name").toUpperCase();
-        if (name.contains(WINDOWS.name())) {
-            return WINDOWS;
-        } else if (name.contains(ANDROID.name())) {
-            return ANDROID;
-        } else if (name.contains(MAC.name()) || name.contains("IOS")) {
-            return MAC;
+        String os = OSUtil.currentSystem();
+        switch (os) {
+            case Strings.OS_WINDOWS:
+                return WINDOWS;
+            case Strings.OS_ANDROID:
+                return ANDROID;
+            case Strings.OS_IOS:
+            case Strings.OS_MAC:
+                return MAC;
+            default:
+                return LINUX;
         }
-        return LINUX;
     }
 
 }
