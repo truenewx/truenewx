@@ -373,12 +373,10 @@ public class StringUtil {
      */
     public static boolean wildcardMatch(String s, String pattern) {
         // 先将通配符表达式转换为正则表达式
-        pattern = pattern.replace('.', '#');
-        pattern = pattern.replaceAll("#", "\\\\.");
-        pattern = pattern.replace('*', '#');
-        pattern = pattern.replaceAll("#", ".*");
-        pattern = pattern.replace('?', '#');
-        pattern = pattern.replaceAll("#", ".?");
+        pattern = pattern.replace(Strings.BACKSLASH, "\\\\");
+        pattern = pattern.replace(Strings.DOT, "\\.");
+        pattern = pattern.replace(Strings.ASTERISK, ".*");
+        pattern = pattern.replace(Strings.QUESTION, ".?");
         pattern = "^" + pattern + "$";
         // 按正则表达式校验匹配
         return regexMatch(s, pattern);
