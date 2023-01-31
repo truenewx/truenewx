@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.ResourceUtils;
@@ -75,7 +76,10 @@ public class PropertiesUtil {
 
     private static void storeOnly(Properties properties, File file, String comment) throws IOException {
         FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
-        properties.store(writer, comment);
+        if (StringUtils.isNotBlank(comment)) { // 直接写入注释文本而不使用默认的注释机制，以免中文注释被转换为unicode编码
+            writer.write(Strings.WELL + comment + Strings.ENTER);
+        }
+        properties.store(writer, null);
         writer.close();
     }
 
