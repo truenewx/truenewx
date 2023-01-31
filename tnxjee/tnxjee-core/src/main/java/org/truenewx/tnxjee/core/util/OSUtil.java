@@ -57,16 +57,23 @@ public class OSUtil {
         }
     }
 
-    private static String getResult(Process process) throws IOException {
+    public static String getResult(Process process) throws IOException {
         InputStream in = process.getInputStream();
-        String result = IOUtils.toString(in, getResultCharset());
+        String result = IOUtils.toString(in, getOutputCharset());
         in.close();
         return result;
     }
 
-    private static String getResultCharset() {
+    private static String getOutputCharset() {
         String os = currentSystem();
         return Strings.OS_WINDOWS.equals(os) ? Strings.ENCODING_GB18030 : Strings.ENCODING_UTF8;
+    }
+
+    public static String getError(Process process) throws IOException {
+        InputStream in = process.getErrorStream();
+        String error = IOUtils.toString(in, getOutputCharset());
+        in.close();
+        return error;
     }
 
     /**
