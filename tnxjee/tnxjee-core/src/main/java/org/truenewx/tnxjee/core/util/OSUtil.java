@@ -17,6 +17,8 @@ public class OSUtil {
     private OSUtil() {
     }
 
+    public static String JAVA_HOME = System.getProperty("java.home");
+
     public static String currentSystem() {
         String name = System.getProperty("os.name").toLowerCase();
         if (name.contains(Strings.OS_WINDOWS)) {
