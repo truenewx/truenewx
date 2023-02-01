@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.truenewx.tnxjee.core.Strings;
@@ -123,9 +124,14 @@ public class OSUtil {
         }
     }
 
-    public static void killProcesses(String name, String findstr) {
+    public static boolean exitsProcess(String name, String keyword) {
+        return findProcessHandles(name, keyword).size() > 0;
+    }
+
+    private static List<ProcessHandle> findProcessHandles(String name, String keyword) {
         String os = currentSystem();
-        if (Strings.OS_WINDOWS.equals(os)) { // Windows系统无法通过ProcessHandle取得命令行参数，无法比对findstr
+        if (Strings.OS_WINDOWS.equals(os)) { // Windows系统无法通过ProcessHandle取得命令行参数，无法比对keyword
+            List<ProcessHandle> phs = new ArrayList<>();
             String command = "wmic process where name=\"" + name + "\" get CommandLine,ProcessId";
             executeCommand(command, (exitValue, result) -> {
                 if (exitValue == 0) {
@@ -136,10 +142,10 @@ public class OSUtil {
                             String[] cells = line.split(" {2,}", 2);
                             if (cells.length > 1) {
                                 String commandLine = cells[0];
-                                if (commandLine.contains(findstr)) {
+                                if (commandLine.contains(keyword)) {
                                     Long pid = MathUtil.parseLongObject(cells[1].trim());
                                     if (pid != null) {
-                                        executeCommand("taskkill /f /pid " + pid, null);
+                                        ProcessHandle.of(pid).ifPresent(phs::add);
                                     }
                                 }
                             }
@@ -149,17 +155,23 @@ public class OSUtil {
                     LogUtil.error(OSUtil.class, "{}\n{}", command, result);
                 }
             });
+            return phs;
         } else {
-            ProcessHandle.allProcesses().filter(ph -> {
+            return ProcessHandle.allProcesses().filter(ph -> {
                 ProcessHandle.Info phi = ph.info();
                 Optional<String> commandLineOptional = phi.commandLine();
                 if (commandLineOptional.isPresent()) {
                     String commandLine = commandLineOptional.get();
-                    return commandLine.contains(name) && commandLine.contains(findstr);
+                    return commandLine.contains(name) && commandLine.contains(keyword);
                 }
                 return false;
-            }).forEach(ProcessHandle::destroyForcibly);
+            }).collect(Collectors.toList());
         }
+    }
+
+    public static void killProcesses(String name, String keyword) {
+        List<ProcessHandle> phs = findProcessHandles(name, keyword);
+        phs.forEach(ProcessHandle::destroyForcibly);
     }
 
 }
