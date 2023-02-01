@@ -1,9 +1,12 @@
 package org.truenewx.tnxjee.core.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
@@ -38,28 +41,43 @@ public class OSUtil {
      *
      * @param command        命令行指令
      * @param resultConsumer 结果消费者，为null时不等待结果反馈
-     * @throws IOException 如果执行过程出现错误
      */
-    public static void executeCommand(String command, BiConsumer<String, Long> resultConsumer)
-            throws IOException {
-        Process process = Runtime.getRuntime().exec(command);
-        consumeResult(process, resultConsumer);
-    }
-
-    private static void consumeResult(Process process, BiConsumer<String, Long> resultConsumer)
-            throws IOException {
-        if (resultConsumer != null) {
-            try {
-                process.waitFor();
-            } catch (InterruptedException e) {
-                LogUtil.error(OSUtil.class, e);
+    public static void executeCommand(String command, BiConsumer<Integer, String> resultConsumer) {
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            if (!command.endsWith(" &")) {
+                try {
+                    process.waitFor(1, TimeUnit.SECONDS);
+                } catch (InterruptedException ignored) {
+                }
             }
-            String result = getResult(process);
-            resultConsumer.accept(result, process.pid());
+            consumeResult(process, resultConsumer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static String getResult(Process process) throws IOException {
+    private static void consumeResult(Process process, BiConsumer<Integer, String> resultConsumer)
+            throws IOException {
+        if (resultConsumer != null) {
+            int exitValue = -1;
+            String result = null;
+            try {
+                if (process.waitFor(1, TimeUnit.SECONDS)) {
+                    exitValue = process.exitValue();
+                    if (exitValue == 0) {
+                        result = getResult(process);
+                    } else {
+                        result = getError(process);
+                    }
+                }
+            } catch (InterruptedException ignored) {
+            }
+            resultConsumer.accept(exitValue, result);
+        }
+    }
+
+    private static String getResult(Process process) throws IOException {
         InputStream in = process.getInputStream();
         String result = IOUtils.toString(in, getOutputCharset());
         in.close();
@@ -71,7 +89,7 @@ public class OSUtil {
         return Strings.OS_WINDOWS.equals(os) ? Strings.ENCODING_GB18030 : Strings.ENCODING_UTF8;
     }
 
-    public static String getError(Process process) throws IOException {
+    private static String getError(Process process) throws IOException {
         InputStream in = process.getErrorStream();
         String error = IOUtils.toString(in, getOutputCharset());
         in.close();
@@ -82,57 +100,66 @@ public class OSUtil {
      * 执行指定命令行指令
      *
      * @param commands       命令行指令集
+     * @param dir            执行目录
      * @param resultConsumer 结果消费者，为null时不等待结果反馈
-     * @throws IOException 如果执行过程出现错误
      */
-    public static void executeCommand(String[] commands, BiConsumer<String, Long> resultConsumer)
-            throws IOException {
-        Process process = Runtime.getRuntime().exec(commands);
-        consumeResult(process, resultConsumer);
-    }
-
-    public static String executeCommand(String command) throws IOException {
-        Process process = Runtime.getRuntime().exec(command);
-        return getResult(process);
-    }
-
-    public static List<Long> findPids(String name, String findstr) {
-        List<Long> pids = new ArrayList<>();
+    public static void executeCommand(String[] commands, File dir, BiConsumer<Integer, String> resultConsumer) {
         try {
-            String os = currentSystem();
-            if (Strings.OS_WINDOWS.equals(os)) {
-                String result = executeCommand("wmic process where name=\"" + name + "\" get CommandLine,ProcessId");
-                String[] lines = result.trim().split(Strings.ENTER);
-                if (lines.length > 1) {
-                    String pattern = Strings.ASTERISK + findstr + Strings.ASTERISK;
-                    for (int i = 1; i < lines.length; i++) {
-                        String line = lines[i].trim();
-                        String[] cells = line.split(" {2,}", 2);
-                        if (cells.length > 1) {
-                            String commandLine = cells[0];
-                            if (StringUtil.wildcardMatch(commandLine, pattern)) {
-                                Long pid = MathUtil.parseLongObject(cells[1].trim());
-                                if (pid != null) {
-                                    pids.add(pid);
+            ProcessBuilder processBuilder = new ProcessBuilder(commands);
+            if (dir != null) {
+                dir.mkdirs();
+                processBuilder.directory(dir);
+            }
+            Process process = processBuilder.start();
+            if (!" &".equals(commands[commands.length - 1])) {
+                try {
+                    process.waitFor(1, TimeUnit.SECONDS);
+                } catch (InterruptedException ignored) {
+                }
+            }
+            consumeResult(process, resultConsumer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void killProcesses(String name, String findstr) {
+        String os = currentSystem();
+        if (Strings.OS_WINDOWS.equals(os)) { // Windows系统无法通过ProcessHandle取得命令行参数，无法比对findstr
+            String command = "wmic process where name=\"" + name + "\" get CommandLine,ProcessId";
+            executeCommand(command, (exitValue, result) -> {
+                if (exitValue == 0) {
+                    String[] lines = result.trim().split(Strings.ENTER);
+                    if (lines.length > 1) {
+                        for (int i = 1; i < lines.length; i++) {
+                            String line = lines[i].trim();
+                            String[] cells = line.split(" {2,}", 2);
+                            if (cells.length > 1) {
+                                String commandLine = cells[0];
+                                if (commandLine.contains(findstr)) {
+                                    Long pid = MathUtil.parseLongObject(cells[1].trim());
+                                    if (pid != null) {
+                                        executeCommand("taskkill /f /pid " + pid, null);
+                                    }
                                 }
                             }
                         }
                     }
+                } else {
+                    LogUtil.error(OSUtil.class, "{}\n{}", command, result);
                 }
-            } else {
-                String result = executeCommand("ps -ef |grep " + name + " |grep " + findstr);
-                String[] cells = result.split(" {2,}", 3);
-                if (cells.length > 1) {
-                    Long pid = MathUtil.parseLongObject(cells[1].trim());
-                    if (pid != null) {
-                        pids.add(pid);
-                    }
+            });
+        } else {
+            ProcessHandle.allProcesses().filter(ph -> {
+                ProcessHandle.Info phi = ph.info();
+                Optional<String> commandLineOptional = phi.commandLine();
+                if (commandLineOptional.isPresent()) {
+                    String commandLine = commandLineOptional.get();
+                    return commandLine.contains(name) && commandLine.contains(findstr);
                 }
-            }
-        } catch (IOException e) {
-            LogUtil.error(OSUtil.class, e);
+                return false;
+            }).forEach(ProcessHandle::destroyForcibly);
         }
-        return pids;
     }
 
 }
