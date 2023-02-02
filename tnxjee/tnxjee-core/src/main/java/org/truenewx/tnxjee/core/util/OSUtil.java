@@ -130,6 +130,7 @@ public class OSUtil {
 
     private static List<ProcessHandle> findProcessHandles(String name, String keyword) {
         String os = currentSystem();
+        String pattern = Strings.ASTERISK + keyword + Strings.ASTERISK; // 支持keyword中包含通配符
         if (Strings.OS_WINDOWS.equals(os)) { // Windows系统无法通过ProcessHandle取得命令行参数，无法比对keyword
             List<ProcessHandle> phs = new ArrayList<>();
             String command = "wmic process where name=\"" + name + "\" get CommandLine,ProcessId";
@@ -142,7 +143,7 @@ public class OSUtil {
                             String[] cells = line.split(" {2,}", 2);
                             if (cells.length > 1) {
                                 String commandLine = cells[0];
-                                if (commandLine.contains(keyword)) {
+                                if (StringUtil.wildcardMatch(commandLine, pattern)) {
                                     Long pid = MathUtil.parseLongObject(cells[1].trim());
                                     if (pid != null) {
                                         ProcessHandle.of(pid).ifPresent(phs::add);
@@ -162,7 +163,7 @@ public class OSUtil {
                 Optional<String> commandLineOptional = phi.commandLine();
                 if (commandLineOptional.isPresent()) {
                     String commandLine = commandLineOptional.get();
-                    return commandLine.contains(name) && commandLine.contains(keyword);
+                    return commandLine.contains(name) && StringUtil.wildcardMatch(commandLine, pattern);
                 }
                 return false;
             }).collect(Collectors.toList());
