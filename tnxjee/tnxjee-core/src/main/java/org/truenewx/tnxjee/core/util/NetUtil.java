@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.function.TrConsumer;
+import org.truenewx.tnxjee.core.util.tuple.Binary;
+import org.truenewx.tnxjee.core.util.tuple.Binate;
 
 /**
  * 网络工具类
@@ -663,32 +665,53 @@ public class NetUtil {
         }
     }
 
-    public static String replacePort(String url, int newPort) {
-        int beginIndex;
+    public static int getPort(String url) {
+        Binate<Integer, Integer> position = getPortPosition(url);
+        int beginIndex = position.getLeft();
+        int endIndex = position.getRight();
+        String port = url.substring(beginIndex, endIndex);
+        int defaultPort = url.startsWith(PROTOCOL_HTTPS) ? 443 : 80;
+        return MathUtil.parseInt(port, defaultPort);
+    }
+
+    private static Binate<Integer, Integer> getPortPosition(String url) {
+        int beginIndex = 0;
+        // 跳过协议部分
         if (url.startsWith(Strings.DOUBLE_SLASH)) {
             beginIndex = Strings.DOUBLE_SLASH.length();
         } else {
             int index = url.indexOf("://");
-            if (index < 0) { // 不以//开头，又不包含://，说明为相对地址，返回原地址，表示无法替换端口
-                return url;
+            if (index >= 0) {
+                beginIndex = index + 3;
             }
-            beginIndex = index + 3;
         }
         int colonIndex = url.indexOf(Strings.COLON, beginIndex);
-        if (colonIndex > beginIndex) {
-            beginIndex = colonIndex;
+        if (colonIndex > beginIndex) { // 包含冒号的，冒号后一位为起始位置
+            beginIndex = colonIndex + 1;
         }
         int endIndex = url.indexOf(Strings.SLASH, beginIndex);
-        if (endIndex > 0 && colonIndex < 0) { // 不含冒号:，则替换开始位置为结束位置的前一位
-            beginIndex = endIndex - 1;
+        if (endIndex < 0) { // 不包含/的，结束位置为末尾
+            endIndex = url.length();
         }
-        if (endIndex > beginIndex) {
-            return url.substring(0, beginIndex) + Strings.COLON + newPort + url.substring(endIndex);
-        } else if (colonIndex < 0) { // 不含冒号且没有结束位置的，直接附加端口号
-            return url + Strings.COLON + newPort;
-        } else { // 包含冒号且没有结束位置的，替换末尾的端口
-            return url.substring(0, colonIndex + 1) + newPort;
+        if (colonIndex < 0) { // 不含冒号的，起始位置和结束位置相同，表示url中不包含端口，位置为端口应该所在的起始位置
+            beginIndex = endIndex;
         }
+        return new Binary<>(beginIndex, endIndex);
+    }
+
+    public static String replacePort(String url, int newPort) {
+        Binate<Integer, Integer> position = getPortPosition(url);
+        int beginIndex = position.getLeft();
+        int endIndex = position.getRight();
+        String newUrl = url.substring(0, beginIndex);
+        if (!newUrl.endsWith(Strings.COLON)) {
+            newUrl += Strings.COLON;
+        }
+        newUrl += newPort;
+        if (0 <= endIndex && endIndex < url.length()) {
+            newUrl += url.substring(endIndex);
+        }
+        return newUrl;
     }
 
 }
