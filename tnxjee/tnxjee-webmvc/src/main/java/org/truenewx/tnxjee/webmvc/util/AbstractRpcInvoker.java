@@ -77,11 +77,15 @@ public abstract class AbstractRpcInvoker implements WebRpcInvoker {
                 }
             }
         } catch (Exception e) {
-            RuntimeException re = ExceptionUtil.toRuntimeException(e);
-            LogUtil.error(getClass(), re);
-            throw re;
+            handleException(e);
         }
         return null;
+    }
+
+    protected void handleException(Exception e) {
+        RuntimeException re = ExceptionUtil.toRuntimeException(e);
+        LogUtil.error(getClass(), re);
+        throw re;
     }
 
     @Override
