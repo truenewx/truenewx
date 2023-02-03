@@ -17,11 +17,14 @@ public class LogUtil {
         return LoggerFactory.getLogger(clazz);
     }
 
-    public static void error(Class<?> clazz, Throwable t) {
-        Logger logger = getLogger(clazz);
+    public static void error(Logger logger, Throwable t) {
         if (logger.isErrorEnabled()) {
             logger.error(t.getLocalizedMessage(), t);
         }
+    }
+
+    public static void error(Class<?> clazz, Throwable t) {
+        error(getLogger(clazz), t);
     }
 
     public static void error(Class<?> clazz, String format, Object... args) {
@@ -31,11 +34,14 @@ public class LogUtil {
         }
     }
 
-    public static void warn(Class<?> clazz, Throwable t) {
-        Logger logger = getLogger(clazz);
+    public static void warn(Logger logger, Throwable t) {
         if (logger.isWarnEnabled()) {
             logger.warn(t.getLocalizedMessage(), t);
         }
+    }
+
+    public static void warn(Class<?> clazz, Throwable t) {
+        warn(getLogger(clazz), t);
     }
 
     public static void warn(Class<?> clazz, String format, Object... args) {
@@ -45,11 +51,14 @@ public class LogUtil {
         }
     }
 
-    public static void info(Class<?> clazz, Throwable t) {
-        Logger logger = getLogger(clazz);
+    public static void info(Logger logger, Throwable t) {
         if (logger.isInfoEnabled()) {
             logger.info(t.getLocalizedMessage(), t);
         }
+    }
+
+    public static void info(Class<?> clazz, Throwable t) {
+        info(getLogger(clazz), t);
     }
 
     public static void info(Class<?> clazz, String format, Object... args) {
@@ -59,31 +68,20 @@ public class LogUtil {
         }
     }
 
-    public static void debug(Class<?> clazz, Throwable t) {
-        Logger logger = getLogger(clazz);
+    public static void debug(Logger logger, Throwable t) {
         if (logger.isDebugEnabled()) {
             logger.debug(t.getLocalizedMessage(), t);
         }
+    }
+
+    public static void debug(Class<?> clazz, Throwable t) {
+        debug(getLogger(clazz), t);
     }
 
     public static void debug(Class<?> clazz, String format, Object... args) {
         Logger logger = getLogger(clazz);
         if (logger.isDebugEnabled()) {
             logger.debug(format, args);
-        }
-    }
-
-    public static void trace(Class<?> clazz, Throwable t) {
-        Logger logger = getLogger(clazz);
-        if (logger.isTraceEnabled()) {
-            logger.trace(t.getLocalizedMessage(), t);
-        }
-    }
-
-    public static void trace(Class<?> clazz, String format, Object... args) {
-        Logger logger = getLogger(clazz);
-        if (logger.isTraceEnabled()) {
-            logger.trace(format, args);
         }
     }
 
