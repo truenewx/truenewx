@@ -97,11 +97,14 @@ public class PropertiesUtil {
 
     public static void store(File target, String key, @Nullable String value, String comment) throws IOException {
         if (value == null) {
-            target.createNewFile(); // 确保文件存在
-            Properties properties = new KeySortedProperties();
-            PropertiesUtil.load(target, properties);
-            properties.remove(key);
-            storeOnly(properties, target, comment);
+            if (target.exists()) {
+                Properties properties = new KeySortedProperties();
+                PropertiesUtil.load(target, properties);
+                if (properties.remove(key) != null) {
+                    storeOnly(properties, target, comment);
+                }
+            }
+            // 设置值为null，目标文件不存在，则无需保存
         } else {
             Properties properties = new Properties();
             properties.setProperty(key, value);
