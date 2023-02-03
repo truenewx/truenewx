@@ -443,7 +443,9 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
         try {
             String[] names = directory.listAll();
             for (String name : names) {
-                directory.deleteFile(name);
+                if (!"write.lock".equals(name)) {
+                    directory.deleteFile(name);
+                }
             }
             writer.close();
         } catch (IOException e) {
