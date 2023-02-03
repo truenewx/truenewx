@@ -42,7 +42,7 @@ public abstract class SingleException extends ResolvableException {
      * @return 异常错误消息是否已经过本地化处理
      */
     public boolean isMessageLocalized() {
-        return !this.code.equals(getLocalizedMessage());
+        return !getMessage().equals(getLocalizedMessage());
     }
 
     public boolean matches(String property) {
@@ -67,8 +67,8 @@ public abstract class SingleException extends ResolvableException {
             return false;
         }
         BusinessException other = (BusinessException) obj;
-        return Objects.deepEquals(this.code, other.code) && Objects
-                .deepEquals(this.property, other.property);
+        return Objects.deepEquals(this.code, other.code)
+                && Objects.deepEquals(this.property, other.property);
     }
 
 }

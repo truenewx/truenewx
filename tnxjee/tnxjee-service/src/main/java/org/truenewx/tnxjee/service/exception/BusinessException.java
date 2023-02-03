@@ -2,7 +2,9 @@ package org.truenewx.tnxjee.service.exception;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.service.exception.model.ExceptionError;
 
 /**
@@ -17,9 +19,19 @@ public class BusinessException extends SingleException {
     private Object[] args;
 
     public BusinessException(String code, Object... args) {
-        super(code);
+        super(toMessage(code, args));
         this.code = code;
         this.args = args;
+    }
+
+    private static String toMessage(String code, Object... args) {
+        String message = code;
+        if (ArrayUtils.isNotEmpty(args)) {
+            message += Strings.LEFT_SQUARE_BRACKET
+                    + StringUtils.join(args, ", ")
+                    + Strings.RIGHT_SQUARE_BRACKET;
+        }
+        return message;
     }
 
     public BusinessException(ExceptionError error) {
