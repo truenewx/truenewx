@@ -70,11 +70,19 @@ public class PropertiesUtil {
             Properties properties = new KeySortedProperties();
             load(target, properties);
             properties.putAll(source);
-            storeOnly(properties, target, comment);
+            save(properties, target, comment);
         }
     }
 
-    private static void storeOnly(Properties properties, File file, String comment) throws IOException {
+    /**
+     * 用指定属性集覆盖保存至指定文件，不加载文件内原有属性
+     *
+     * @param properties 属性集
+     * @param file       文件
+     * @param comment    注释
+     * @throws IOException 如果保存过程出现错误
+     */
+    public static void save(Properties properties, File file, String comment) throws IOException {
         FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
         if (StringUtils.isNotBlank(comment)) { // 直接写入注释文本而不使用默认的注释机制，以免中文注释被转换为unicode编码
             writer.write(Strings.WELL + comment + Strings.ENTER);
@@ -101,7 +109,7 @@ public class PropertiesUtil {
                 Properties properties = new KeySortedProperties();
                 PropertiesUtil.load(target, properties);
                 if (properties.remove(key) != null) {
-                    storeOnly(properties, target, comment);
+                    save(properties, target, comment);
                 }
             }
             // 设置值为null，目标文件不存在，则无需保存
