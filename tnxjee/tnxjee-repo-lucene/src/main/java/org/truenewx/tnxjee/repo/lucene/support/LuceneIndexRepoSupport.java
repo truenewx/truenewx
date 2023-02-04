@@ -135,9 +135,12 @@ public abstract class LuceneIndexRepoSupport<T> implements IndexRepo<T> {
                 fields.add(tokenizedField);
             }
         }
-        IndexableField generalField = getGeneralField(name, value, feature.isStored());
-        if (generalField != null) {
-            fields.add(generalField);
+        // 默认索引属性一般都超长，不生成一般性的可索引字段，没有进行等于比较的需求，浪费存储空间，且容易造成超长错误
+        if (!name.equals(getDefaultPropertyName())) {
+            IndexableField generalField = getGeneralField(name, value, feature.isStored());
+            if (generalField != null) {
+                fields.add(generalField);
+            }
         }
     }
 
