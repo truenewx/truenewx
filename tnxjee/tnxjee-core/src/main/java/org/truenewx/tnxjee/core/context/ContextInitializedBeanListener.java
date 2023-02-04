@@ -1,7 +1,6 @@
 package org.truenewx.tnxjee.core.context;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -38,6 +37,8 @@ public class ContextInitializedBeanListener implements ApplicationListener<Conte
                 map.putIfAbsent(bean, bean);
             }
         }
+        List<ContextInitializedBean> list = new ArrayList<>(map.values());
+        list.sort(Comparator.comparingInt(ContextInitializedBean::getOrder));
         for (ContextInitializedBean bean : map.values()) {
             try {
                 bean.afterInitialized(context);
