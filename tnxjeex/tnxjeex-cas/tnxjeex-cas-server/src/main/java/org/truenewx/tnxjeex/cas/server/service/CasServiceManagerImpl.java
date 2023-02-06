@@ -55,20 +55,17 @@ public class CasServiceManagerImpl implements CasServiceManager {
     private String getService(AppConfiguration app) {
         if (app != null) {
             String contextUri = app.getContextUri(false);
-            if (Strings.ASTERISK.equals(contextUri)) {
-                return contextUri;
-            }
-            return contextUri + app.getLoginedPath();
+            return NetUtil.concatUri(contextUri, app.getLoginedPath());
         }
         return null;
     }
 
     private AppConfiguration loadAppConfiguration(String appName) {
-        AppConfiguration appConfiguration = this.commonProperties.getApp(appName);
-        if (appConfiguration == null) {
+        AppConfiguration configuration = this.commonProperties.getApp(appName);
+        if (configuration == null) {
             throw new BusinessException(CasServerExceptionCodes.INVALID_SERVICE);
         }
-        return appConfiguration;
+        return configuration;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
 
 /**
  * Web通用配置属性
@@ -72,21 +73,21 @@ public class CommonProperties implements InitializingBean {
         if (url != null) {
             if (url.startsWith(Strings.LEFT_SQUARE_BRACKET)) {
                 int index = url.indexOf(Strings.RIGHT_SQUARE_BRACKET);
-                if (index > 0) { // 以[appName]开头的地址，检查应用是否存在且允许任意地址
+                if (index > 0) { // 以[appName]开头的地址，检查应用是否存在且为允许访问地址
                     String appName = url.substring(1, index);
+                    url = url.substring(index + 1);
+                    url = NetUtil.standardizeUrl(url);
                     AppConfiguration configuration = getApp(appName);
-                    if (configuration != null) {
-                        String contextUri = configuration.getContextUri(direct);
-                        if (Strings.ASTERISK.equals(contextUri)) {
-                            return appName;
-                        }
+                    if (configuration != null && configuration.isAllowedUri(url)) {
+                        return appName;
                     }
-                    return null; // 不存在或不允许任意地址的，返回null表示未找到
+                    return null;
                 }
             }
+            url = NetUtil.standardizeUrl(url);
             for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
                 AppConfiguration configuration = entry.getValue();
-                String contextUri = configuration.getContextUri(direct);
+                String contextUri = NetUtil.standardizeUrl(configuration.getContextUri(direct));
                 if (url.equals(contextUri) || url.startsWith(contextUri + Strings.SLASH)
                         || url.startsWith(contextUri + Strings.WELL) || url.startsWith(contextUri + Strings.QUESTION)) {
                     return entry.getKey();
@@ -97,20 +98,24 @@ public class CommonProperties implements InitializingBean {
     }
 
     /**
-     * 获取所有应用URI，提供给cors配置，作为允许跨域访问的地址清单
+     * 允许cors跨域访问的地址清单
      *
      * @return 所有应用URI
      */
-    public Set<String> getAllAppUris() {
+    public Set<String> getAllAllowedUris() {
         Set<String> uris = new HashSet<>();
-        this.apps.forEach((name, app) -> {
-            if (StringUtils.isNotBlank(app.getGatewayUri())) {
-                uris.add(app.getGatewayUri());
+        for (AppConfiguration configuration : this.apps.values()) {
+            String[] allowedUris = configuration.getAllowedUris();
+            if (allowedUris != null) {
+                uris.addAll(Arrays.asList(allowedUris));
             }
-            if (StringUtils.isNotBlank(app.getDirectUri())) {
-                uris.add(app.getDirectUri());
+            if (StringUtils.isNotBlank(configuration.getGatewayUri())) {
+                uris.add(configuration.getGatewayUri());
             }
-        });
+            if (StringUtils.isNotBlank(configuration.getDirectUri())) {
+                uris.add(configuration.getDirectUri());
+            }
+        }
         return uris;
     }
 
@@ -123,23 +128,23 @@ public class CommonProperties implements InitializingBean {
     }
 
     public AppFacade getAppFacade(String name, boolean relativeContextUri) {
-        AppConfiguration appConfig = getApp(name);
-        if (appConfig == null) {
+        AppConfiguration configuration = getApp(name);
+        if (configuration == null) {
             return null;
         }
         AppFacade facade = new AppFacade();
         facade.setName(name);
-        facade.setSymbol(appConfig.getSymbol());
-        facade.setCaption(appConfig.getCaption());
-        facade.setBusiness(appConfig.getBusiness());
+        facade.setSymbol(configuration.getSymbol());
+        facade.setCaption(configuration.getCaption());
+        facade.setBusiness(configuration.getBusiness());
         if (relativeContextUri) {
-            facade.setContextUri(appConfig.getContextPath());
+            facade.setContextUri(configuration.getContextPath());
         } else {
-            facade.setContextUri(appConfig.getContextUri(false));
+            facade.setContextUri(configuration.getContextUri(false));
         }
         String contextUri = facade.getContextUri();
-        if (contextUri != null) {
-            facade.setLoginedUri(contextUri + appConfig.getLoginedPath());
+        if (StringUtils.isNotBlank(contextUri)) {
+            facade.setLoginedUri(NetUtil.concatUri(contextUri, configuration.getLoginedPath()));
         }
         return facade;
     }

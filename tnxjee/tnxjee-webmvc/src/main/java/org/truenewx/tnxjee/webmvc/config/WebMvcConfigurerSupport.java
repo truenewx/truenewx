@@ -77,7 +77,7 @@ public abstract class WebMvcConfigurerSupport implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         // 配置的应用URI均允许跨域访问
-        Set<String> allowedOriginals = new HashSet<>(this.commonProperties.getAllAppUris());
+        Set<String> allowedOriginals = new HashSet<>(this.commonProperties.getAllAllowedUris());
         // 加入额外配置的跨域访问白名单
         CollectionUtil.addAll(allowedOriginals, this.corsRegistryProperties.getAllowedOrigins());
         boolean all = allowedOriginals.removeIf(Strings.ASTERISK::equals);

@@ -2,8 +2,11 @@ package org.truenewx.tnxjee.core.config;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.NetUtil;
+import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
  * 应用配置
@@ -17,6 +20,7 @@ public class AppConfiguration {
     private String business;
     private String gatewayUri;
     private String directUri;
+    private String[] allowedUris;
     private String contextPath = Strings.EMPTY;
     private String loginPath = "/login/cas";
     private String logoutPath = "/logout";
@@ -48,6 +52,9 @@ public class AppConfiguration {
         this.business = business;
     }
 
+    /**
+     * @return 网关地址，用于于浏览器中访问时使用的显示地址，为空时意味着使用直连地址
+     */
     public String getGatewayUri() {
         return this.gatewayUri;
     }
@@ -56,15 +63,26 @@ public class AppConfiguration {
         this.gatewayUri = gatewayUri;
     }
 
+    /**
+     * @return 直连地址，包含协议、主机地址和可能的端口号的地址
+     */
     public String getDirectUri() {
         return this.directUri;
     }
 
-    /**
-     * @param directUri 直连地址，包含协议、主机地址和可能的端口号的地址，必须指定
-     */
     public void setDirectUri(String directUri) {
         this.directUri = directUri;
+    }
+
+    /**
+     * @return 除网关地址外，CORS策略中允许的其它地址，支持*表示所有地址
+     */
+    public String[] getAllowedUris() {
+        return this.allowedUris;
+    }
+
+    public void setAllowedUris(String[] allowedUris) {
+        this.allowedUris = allowedUris;
     }
 
     public String getContextPath() {
@@ -137,33 +155,32 @@ public class AppConfiguration {
      * @return 上下文根路径
      */
     public String getContextUri(boolean direct) {
-        String directUri = getDirectUri();
-        // 如果直连地址为*，则无论需要的是否直连地址，均返回*，表示任意地址，需使用者动态赋值
-        if (Strings.ASTERISK.equals(directUri)) {
-            return directUri;
-        }
-        String uri = getGatewayUri();
         // 默认为网关地址，指定需要直连地址或网关地址为空，则使用直连地址
+        String uri = this.gatewayUri;
         if (direct || StringUtils.isBlank(uri)) {
-            uri = directUri;
+            uri = this.directUri;
         }
-        // 添加上下文根
-        if (StringUtils.isNotBlank(this.contextPath) && !Strings.SLASH.equals(this.contextPath)) {
-            // 确保上下文根以/开头
-            if (!this.contextPath.startsWith(Strings.SLASH)) {
-                uri += Strings.SLASH;
-            }
-            uri += this.contextPath;
+        // 附加上下文根路径
+        return NetUtil.concatUri(uri, this.contextPath);
+    }
+
+    public boolean isAllowedUri(String uri) {
+        // 判断地址为空，则配置必须允许所有地址
+        if (StringUtils.isBlank(uri)) {
+            return this.allowedUris != null && ArrayUtils.contains(this.allowedUris, Strings.ASTERISK);
         }
-        return uri;
+        // 否则需匹配配置的允许地址清单
+        String contextUri = NetUtil.getContextUrl(uri, this.contextPath);
+        return contextUri != null && this.allowedUris != null
+                && StringUtil.wildcardMatchOneOf(contextUri, this.allowedUris);
     }
 
     public String getLoginProcessUrl() {
-        return getContextUri(false) + getLoginPath();
+        return NetUtil.concatUri(getContextUri(false), getLoginPath());
     }
 
     public String getLogoutProcessUrl() {
-        return getContextUri(false) + getLogoutPath();
+        return NetUtil.concatUri(getContextUri(false), getLogoutPath());
     }
 
 }

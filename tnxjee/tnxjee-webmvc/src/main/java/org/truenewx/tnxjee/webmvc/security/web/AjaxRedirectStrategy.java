@@ -29,7 +29,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
 
     @Autowired(required = false)
     public void setCommonProperties(CommonProperties commonProperties) {
-        Set<String> uris = commonProperties.getAllAppUris();
+        Set<String> uris = commonProperties.getAllAllowedUris();
         for (String uri : uris) {
             addAllowedUri(uri);
         }
