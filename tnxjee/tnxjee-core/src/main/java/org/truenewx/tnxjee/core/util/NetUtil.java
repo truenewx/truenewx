@@ -17,6 +17,9 @@ import org.truenewx.tnxjee.core.util.tuple.Binate;
  *
  * @author jianglei
  */
+// TODO 后续需调整方法和参数命名，以严格区分uri与url：
+// uri为资源的抽象语义，可相对也可绝对，类似于面向对象中的类，默认使用uri命名；
+// url为资源的具体定位，是uri的实例，必须为包含协议的绝对地址，类似于面向对象中的对象，对于必须包含协议的绝对地址使用url命名。
 public class NetUtil {
 
     public static final String LOCAL_HOST_NAME = "localhost";
@@ -26,6 +29,30 @@ public class NetUtil {
     public static final String PROTOCOL_HTTPS = "https://";
 
     private NetUtil() {
+    }
+
+    /**
+     * 拼接URI
+     *
+     * @param contextUri 上下文URI
+     * @param path       相对路径
+     * @return 拼接后的完整URI
+     */
+    public static String concatUri(String contextUri, String path) {
+        // 如果相对路径为空或/，则无需拼接
+        if (StringUtils.isBlank(path) || Strings.SLASH.equals(path)) {
+            return contextUri;
+        }
+        if (contextUri == null) {
+            return null;
+        }
+        if (contextUri.endsWith(Strings.SLASH)) {
+            contextUri = contextUri.substring(0, contextUri.length() - 1);
+        }
+        if (!path.startsWith(Strings.SLASH)) {
+            path = Strings.SLASH + path;
+        }
+        return contextUri + path;
     }
 
     /**
