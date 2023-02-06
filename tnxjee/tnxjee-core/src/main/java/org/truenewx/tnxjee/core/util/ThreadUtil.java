@@ -1,5 +1,7 @@
 package org.truenewx.tnxjee.core.util;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -44,6 +46,24 @@ public class ThreadUtil {
             }
         }
         return false;
+    }
+
+    public static void runAsync(Runnable runnable, Executor executor) {
+        if (executor == null) {
+            CompletableFuture.supplyAsync(() -> {
+                runnable.run();
+                return null;
+            });
+        } else {
+            CompletableFuture.supplyAsync(() -> {
+                runnable.run();
+                return null;
+            }, executor);
+        }
+    }
+
+    public static void runAsync(Runnable runnable) {
+        runAsync(runnable, null);
     }
 
 }

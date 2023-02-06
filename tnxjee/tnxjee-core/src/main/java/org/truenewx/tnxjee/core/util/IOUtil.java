@@ -3,13 +3,13 @@ package org.truenewx.tnxjee.core.util;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -446,4 +446,33 @@ public class IOUtil {
         }
         return null;
     }
+
+    public static void deleteAsync(File file, Executor executor) {
+        ThreadUtil.runAsync(() -> {
+            boolean done = false;
+            long time0 = System.currentTimeMillis();
+            while (!done) {
+                try {
+                    if (file.isDirectory()) {
+                        FileUtils.deleteDirectory(file);
+                        LogUtil.info(IOUtil.class, "====== Deleted: {}", file.getAbsolutePath());
+                    } else if (file.isFile()) {
+                        file.delete();
+                        LogUtil.info(IOUtil.class, "====== Deleted: {}", file.getAbsolutePath());
+                    }
+                    done = true;
+                } catch (AccessDeniedException | NoSuchFileException e) {
+                    if (System.currentTimeMillis() - time0 < 10000) {
+                        ThreadUtil.sleep(100);
+                    } else {
+                        done = true;
+                    }
+                } catch (IOException e) {
+                    LogUtil.error(IOUtil.class, e);
+                    done = true;
+                }
+            }
+        }, executor);
+    }
+
 }
