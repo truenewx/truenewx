@@ -12,7 +12,9 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.springframework.beans.factory.DisposableBean;
+import org.truenewx.tnxjee.core.util.ThreadUtil;
 import org.truenewx.tnxjee.repo.lucene.store.DirectoryFactory;
 
 /**
@@ -43,7 +45,12 @@ public class IndexFactory implements DisposableBean {
             Directory directory = this.directoryFactory.getDirectory(path);
             IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
             prepareConfig(config);
-            writer = new IndexWriter(directory, config);
+            try {
+                writer = new IndexWriter(directory, config);
+            } catch (LockObtainFailedException e) {
+                ThreadUtil.sleep(100); // 如果出现锁定异常，等待100ms重试，通常情况下可恢复正常
+                writer = new IndexWriter(directory, config);
+            }
             this.writers.put(path, writer);
         }
         return writer;
