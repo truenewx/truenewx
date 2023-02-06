@@ -41,9 +41,7 @@ public abstract class SingleException extends ResolvableException {
      *
      * @return 异常错误消息是否已经过本地化处理
      */
-    public boolean isMessageLocalized() {
-        return !getMessage().equals(getLocalizedMessage());
-    }
+    public abstract boolean isMessageLocalized();
 
     public boolean matches(String property) {
         if (this.property == null) { // 未绑定属性，则指定匹配空属性

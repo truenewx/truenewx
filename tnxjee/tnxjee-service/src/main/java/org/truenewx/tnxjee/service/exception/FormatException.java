@@ -33,6 +33,11 @@ public class FormatException extends SingleException {
         super(error);
     }
 
+    @Override
+    public boolean isMessageLocalized() {
+        return !this.code.equals(getLocalizedMessage());
+    }
+
     public Class<?> getModelClass() {
         return this.modelClass;
     }

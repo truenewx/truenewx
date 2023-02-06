@@ -38,6 +38,12 @@ public class BusinessException extends SingleException {
         super(error);
     }
 
+    @Override
+    public boolean isMessageLocalized() {
+        String message = getLocalizedMessage();
+        return !this.code.equals(message) && !message.startsWith(this.code + Strings.LEFT_SQUARE_BRACKET);
+    }
+
     public Object[] getArgs() {
         return this.args;
     }
