@@ -14,6 +14,11 @@ public class CasServerExceptionCodes {
     public static final String INVALID_SERVICE = "error.cas.server.invalid_service";
 
     /**
+     * 无效的应用票据
+     */
+    public static final String INVALID_APP_TICKET = "error.cas.server.invalid_app_ticket";
+
+    /**
      * 不支持的登录认证方式
      */
     public static final String UNSUPPORTED_AUTHENTICATE_MODE = "error.cas.server.unsupported_authenticate_mode";

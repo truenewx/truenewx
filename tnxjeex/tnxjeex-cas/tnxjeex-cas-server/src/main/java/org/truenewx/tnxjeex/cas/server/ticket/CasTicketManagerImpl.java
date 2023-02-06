@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
+import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
 import org.truenewx.tnxjee.web.util.WebUtil;
 import org.truenewx.tnxjee.webmvc.security.util.SecurityUtil;
@@ -28,6 +29,7 @@ import org.truenewx.tnxjeex.cas.server.repo.AppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryAppTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.MemoryTicketGrantingTicketRepo;
 import org.truenewx.tnxjeex.cas.server.repo.TicketGrantingTicketRepo;
+import org.truenewx.tnxjeex.cas.server.service.CasServerExceptionCodes;
 
 /**
  * CAS票据管理器实现
@@ -188,7 +190,7 @@ public class CasTicketManagerImpl implements CasTicketManager {
     public Assertion validateAppTicket(String app, String appTicketId) {
         AppTicket appTicket = this.appTicketRepo.findById(appTicketId).orElse(null);
         if (appTicket == null || !appTicket.getApp().equals(app)) {
-            return null;
+            throw new BusinessException(CasServerExceptionCodes.INVALID_APP_TICKET);
         }
         UserSpecificDetails<?> userDetails = appTicket.getTicketGrantingTicket().getUserDetails();
         if (this.userDetailsConverter != null) {
