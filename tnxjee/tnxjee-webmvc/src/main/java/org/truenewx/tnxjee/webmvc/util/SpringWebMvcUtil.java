@@ -106,7 +106,7 @@ public class SpringWebMvcUtil {
         if (StringUtils.isNotBlank(path)) {
             url += path;
         }
-        return NetUtil.standardizeUrl(url);
+        return NetUtil.standardizeUri(url);
     }
 
     private static String getPath(RequestMapping requestMapping) {

@@ -339,7 +339,7 @@ public class WebUtil {
      */
     public static byte[] readWebContextFile(ServletContext context, String relativePath) {
         try {
-            Resource resource = new ServletContextResource(context, NetUtil.standardizeUrl(relativePath));
+            Resource resource = new ServletContextResource(context, NetUtil.standardizeUri(relativePath));
             return FileUtils.readFileToByteArray(resource.getFile());
         } catch (IOException e) {
             LogUtil.error(WebUtil.class, e);

@@ -69,27 +69,27 @@ public class CommonProperties implements InitializingBean {
         return name == null ? null : this.apps.get(name);
     }
 
-    public String findAppName(String url, boolean direct) {
-        if (url != null) {
-            if (url.startsWith(Strings.LEFT_SQUARE_BRACKET)) {
-                int index = url.indexOf(Strings.RIGHT_SQUARE_BRACKET);
+    public String findAppName(String uri, boolean direct) {
+        if (uri != null) {
+            if (uri.startsWith(Strings.LEFT_SQUARE_BRACKET)) {
+                int index = uri.indexOf(Strings.RIGHT_SQUARE_BRACKET);
                 if (index > 0) { // 以[appName]开头的地址，检查应用是否存在且为允许访问地址
-                    String appName = url.substring(1, index);
-                    url = url.substring(index + 1);
-                    url = NetUtil.standardizeUrl(url);
+                    String appName = uri.substring(1, index);
+                    uri = uri.substring(index + 1);
+                    uri = NetUtil.standardizeUri(uri);
                     AppConfiguration configuration = getApp(appName);
-                    if (configuration != null && configuration.isAllowedUri(url)) {
+                    if (configuration != null && configuration.isAllowedUri(uri)) {
                         return appName;
                     }
                     return null;
                 }
             }
-            url = NetUtil.standardizeUrl(url);
+            uri = NetUtil.standardizeUri(uri);
             for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
                 AppConfiguration configuration = entry.getValue();
-                String contextUri = NetUtil.standardizeUrl(configuration.getContextUri(direct));
-                if (url.equals(contextUri) || url.startsWith(contextUri + Strings.SLASH)
-                        || url.startsWith(contextUri + Strings.WELL) || url.startsWith(contextUri + Strings.QUESTION)) {
+                String contextUri = NetUtil.standardizeUri(configuration.getContextUri(direct));
+                if (uri.equals(contextUri) || uri.startsWith(contextUri + Strings.SLASH)
+                        || uri.startsWith(contextUri + Strings.WELL) || uri.startsWith(contextUri + Strings.QUESTION)) {
                     return entry.getKey();
                 }
             }

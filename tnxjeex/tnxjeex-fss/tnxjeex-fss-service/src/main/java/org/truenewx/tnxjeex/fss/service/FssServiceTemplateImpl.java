@@ -172,7 +172,7 @@ public class FssServiceTemplateImpl<I extends UserIdentity<?>>
         if (storageDir == null) {
             throw new BusinessException(FssExceptionCodes.NO_WRITE_AUTHORITY);
         }
-        return strategy.getStorageRootDir() + NetUtil.standardizeUrl(storageDir);
+        return strategy.getStorageRootDir() + NetUtil.standardizeUri(storageDir);
     }
 
     private String getWriteStoragePath(String storageDir, String storageFilename) {

@@ -92,7 +92,7 @@ public class OwnFssStorageAccessor implements FssStorageAccessor {
     }
 
     private File getStorageFile(String path, boolean supportsFilenameWildcard) {
-        path = NetUtil.standardizeUrl(path);
+        path = NetUtil.standardizeUri(path);
         File file = null;
         if (supportsFilenameWildcard) {
             // 如果支持文件名的通配符，则返回找到的第一个匹配的文件，如果找不到匹配的文件，则以普通方式返回一个不存在的文件对象

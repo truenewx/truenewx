@@ -78,18 +78,18 @@ public class CasServiceManagerImpl implements CasServiceManager {
     public String getLoginProcessUrl(HttpServletRequest request, String service, String scope) {
         String appName = getAppName(service);
         AppConfiguration app = loadAppConfiguration(appName);
-        String contextUrl;
+        String contextUri;
         String loginUrl;
         if (service.startsWith(CasUtil.getServicePrefixByAppName(appName))) {
             service = service.substring(appName.length() + 2);
             String contextPath = app.getContextPath();
-            contextUrl = NetUtil.getContextUrl(service, contextPath);
-            if (contextUrl == null) {
+            contextUri = NetUtil.getContextUri(service, contextPath);
+            if (contextUri == null) {
                 throw new BusinessException(CasServerExceptionCodes.INVALID_SERVICE);
             }
-            loginUrl = contextUrl + app.getLoginPath();
+            loginUrl = contextUri + app.getLoginPath();
         } else {
-            contextUrl = app.getContextUri(false);
+            contextUri = app.getContextUri(false);
             loginUrl = app.getLoginProcessUrl();
         }
         int index = loginUrl.indexOf(Strings.QUESTION);
@@ -101,8 +101,8 @@ public class CasServiceManagerImpl implements CasServiceManager {
         loginUrl += this.artifactParameter + Strings.EQUAL + this.ticketManager.getAppTicketId(request, appName, scope);
         String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (StringUtils.isBlank(request.getParameter(redirectParameter))) {
-            if (service.length() > contextUrl.length()) {
-                String redirectUrl = service.substring(contextUrl.length());
+            if (service.length() > contextUri.length()) {
+                String redirectUrl = service.substring(contextUri.length());
                 if (redirectUrl.contains(Strings.WELL)) {
                     redirectUrl = redirectUrl.replace(Strings.WELL, ENCODED_WELL);
                 }

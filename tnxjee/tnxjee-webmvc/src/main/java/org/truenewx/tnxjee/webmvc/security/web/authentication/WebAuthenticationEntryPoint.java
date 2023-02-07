@@ -77,7 +77,7 @@ public class WebAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoin
             String loginPageUrl = buildRedirectUrlToLoginPage(request, response, authException);
             // AJAX POST请求无法通过自动登录重新提交，或者默认登录页面地址是相对地址（在当前应用，无需转发试探），则直接跳转到登录页面
             if (HttpMethod.POST.name().equalsIgnoreCase(request.getMethod())
-                    || NetUtil.isRelativeUrl(getLoginFormUrl())) {
+                    || NetUtil.isRelativeUri(getLoginFormUrl())) {
                 response.setHeader(WebConstants.HEADER_LOGIN_URL, loginPageUrl);
             } else {
                 this.redirectStrategy.sendRedirect(request, response, loginPageUrl);

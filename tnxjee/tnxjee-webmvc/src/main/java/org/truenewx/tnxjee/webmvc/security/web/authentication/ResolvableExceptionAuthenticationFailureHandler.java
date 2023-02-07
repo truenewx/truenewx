@@ -52,7 +52,7 @@ public class ResolvableExceptionAuthenticationFailureHandler implements Authenti
                     useForward = false;
                 }
                 // 不是http地址又不是相对地址，则前面加/以视为相对地址
-                if (!NetUtil.isHttpUrl(targetUrl, true) && !NetUtil.isRelativeUrl(targetUrl)) {
+                if (!NetUtil.isHttpUrl(targetUrl, true) && !NetUtil.isRelativeUri(targetUrl)) {
                     targetUrl = Strings.SLASH + targetUrl;
                 }
                 if (useForward) {

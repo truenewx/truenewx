@@ -51,7 +51,7 @@ public class CasClientSecurityUrlProvider implements SecurityUrlProvider {
     @Override
     public String getLoginFormUrl(HttpServletRequest request) {
         String loginFormUrl = getDefaultLoginFormUrl();
-        String url = NetUtil.standardizeUrl(request.getRequestURL().toString());
+        String url = NetUtil.standardizeUri(request.getRequestURL().toString());
         loginFormUrl = CasUtil.appendService(loginFormUrl, getServiceParameterName(), url);
         if (!WebUtil.isAjaxRequest(request)) {
             String service = this.casClientProperties.getService();

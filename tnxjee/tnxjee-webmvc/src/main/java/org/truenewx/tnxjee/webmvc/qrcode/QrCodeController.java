@@ -47,7 +47,7 @@ public class QrCodeController {
         value = URLDecoder.decode(value, StandardCharsets.UTF_8);
         if (logoUrl != null) {
             logoUrl = URLDecoder.decode(logoUrl, StandardCharsets.UTF_8);
-            if (NetUtil.isRelativeUrl(logoUrl)) { // 相对地址需加上当前站点上下文地址
+            if (NetUtil.isRelativeUri(logoUrl)) { // 相对地址需加上当前站点上下文地址
                 logoUrl = WebUtil.getContextUrl(request) + logoUrl;
             }
         }

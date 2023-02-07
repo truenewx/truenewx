@@ -90,7 +90,7 @@ public class AjaxRedirectStrategy extends DefaultRedirectStrategy {
             return false;
         }
         // 相对路径地址可以重定向
-        if (NetUtil.isRelativeUrl(redirectUrl)) {
+        if (NetUtil.isRelativeUri(redirectUrl)) {
             return true;
         }
         String redirectHost = NetUtil.getHost(redirectUrl, false);

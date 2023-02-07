@@ -176,7 +176,7 @@ public class AppConfiguration {
             return this.allowedUris != null && ArrayUtils.contains(this.allowedUris, Strings.ASTERISK);
         }
         // 否则需匹配配置的允许地址清单
-        String contextUri = NetUtil.getContextUrl(uri, this.contextPath);
+        String contextUri = NetUtil.getContextUri(uri, this.contextPath);
         return contextUri != null && this.allowedUris != null
                 && StringUtil.wildcardMatchOneOf(contextUri, this.allowedUris);
     }

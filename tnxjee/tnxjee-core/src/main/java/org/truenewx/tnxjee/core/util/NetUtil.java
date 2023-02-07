@@ -17,8 +17,7 @@ import org.truenewx.tnxjee.core.util.tuple.Binate;
  *
  * @author jianglei
  */
-// TODO 后续需调整方法和参数命名，以严格区分uri与url：
-// uri为资源的抽象语义，可相对也可绝对，类似于面向对象中的类，默认使用uri命名；
+// uri为资源的抽象语义，可相对也可绝对，可以不包含协议，类似于面向对象中的类，默认使用uri命名；
 // url为资源的具体定位，是uri的实例，必须为包含协议的绝对地址，类似于面向对象中的对象，对于必须包含协议的绝对地址使用url命名。
 public class NetUtil {
 
@@ -467,83 +466,83 @@ public class NetUtil {
         return response;
     }
 
-    public static boolean isRelativeUrl(String url) {
-        return url.startsWith(Strings.SLASH) && !url.startsWith(Strings.DOUBLE_SLASH);
+    public static boolean isRelativeUri(String uri) {
+        return uri.startsWith(Strings.SLASH) && !uri.startsWith(Strings.DOUBLE_SLASH);
     }
 
     /**
-     * 标准化URL地址。所谓标准URL即：所有斜杠均为/，以/开头，不以/结尾
+     * 标准化URI地址。所谓标准URI即：所有斜杠均为/，以/开头，不以/结尾
      *
-     * @param url URL
-     * @return 标准化后的URL
+     * @param uri URI
+     * @return 标准化后的URI
      */
-    public static String standardizeUrl(String url) {
-        if (isRelativeUrl(url)) {
-            url = url.replace('\\', '/');
-            if (!url.startsWith(Strings.SLASH)) {
-                url = Strings.SLASH + url;
+    public static String standardizeUri(String uri) {
+        if (isRelativeUri(uri)) {
+            uri = uri.replace('\\', '/');
+            if (!uri.startsWith(Strings.SLASH)) {
+                uri = Strings.SLASH + uri;
             }
-            if (Strings.SLASH.equals(url)) {
-                return url;
+            if (Strings.SLASH.equals(uri)) {
+                return uri;
             }
         }
-        if (url.endsWith(Strings.SLASH)) {
-            url = url.substring(0, url.length() - 1);
+        if (uri.endsWith(Strings.SLASH)) {
+            uri = uri.substring(0, uri.length() - 1);
         }
-        return url;
+        return uri;
     }
 
     /**
-     * 标准化指定URL中的协议，确保返回的URL包含协议，如果指定URL未包含协议，则返回包含有指定默认协议的URL
+     * 标准化指定URI中的协议，确保返回的URI包含协议，如果指定URI未包含协议，则返回包含有指定默认协议的URI
      *
-     * @param url             URL
+     * @param uri             URI
      * @param defaultProtocol 默认协议，如："http"
-     * @return 包含有协议的URL，如果输入的URL为相对路径，则原样返回
+     * @return 包含有协议的URI，如果输入的URL为相对路径，则原样返回
      */
-    public static String standardizeUrlWithProtocol(String url, String defaultProtocol) {
-        if (!url.contains("://")) {
-            if (url.startsWith(Strings.DOUBLE_SLASH)) {
-                url = defaultProtocol + Strings.COLON + url;
-            } else if (!url.startsWith(Strings.SLASH)) {
-                url = defaultProtocol + "://" + url;
+    public static String standardizeUriWithProtocol(String uri, String defaultProtocol) {
+        if (!uri.contains("://")) {
+            if (uri.startsWith(Strings.DOUBLE_SLASH)) {
+                uri = defaultProtocol + Strings.COLON + uri;
+            } else if (!uri.startsWith(Strings.SLASH)) {
+                uri = defaultProtocol + "://" + uri;
             }
             // 斜杠开头的为相对URL，不作处理
         }
-        if (url.endsWith(Strings.SLASH)) { // 确保不以斜杠结尾
-            url = url.substring(0, url.length() - 1);
+        if (uri.endsWith(Strings.SLASH)) { // 确保不以斜杠结尾
+            uri = uri.substring(0, uri.length() - 1);
         }
-        return url;
+        return uri;
     }
 
     /**
-     * 标准化指定URL，当该URL不包含协议时，返回包含HTTP协议的URL
+     * 标准化指定URI，当该URI不包含协议时，返回包含HTTP协议的URI
      *
-     * @param url URL
-     * @return 包含有协议（默认为HTTP协议）的URL
+     * @param uri URI
+     * @return 包含有协议（默认为HTTP协议）的URI
      */
-    public static String standardizeHttpUrl(String url) {
-        return standardizeUrlWithProtocol(url, "http");
+    public static String standardizeHttpUri(String uri) {
+        return standardizeUriWithProtocol(uri, "http");
     }
 
     /**
-     * 从指定URL中截取请求action部分，即请求url中去掉参数和请求后缀之后的部分
+     * 从指定URI中截取请求action部分，即请求uri中去掉参数和请求后缀之后的部分
      *
-     * @param url 请求url
+     * @param uri 请求uri
      * @return 请求action
      */
-    public static String getAction(String url) {
-        int questionIndex = url.indexOf(Strings.QUESTION);
+    public static String getAction(String uri) {
+        int questionIndex = uri.indexOf(Strings.QUESTION);
         if (questionIndex >= 0) {
-            url = url.substring(0, questionIndex);
+            uri = uri.substring(0, questionIndex);
         }
-        int dotIndex = url.lastIndexOf(Strings.DOT);
+        int dotIndex = uri.lastIndexOf(Strings.DOT);
         if (dotIndex >= 0) {
-            int slashIndex = url.lastIndexOf(Strings.SLASH);
+            int slashIndex = uri.lastIndexOf(Strings.SLASH);
             if (dotIndex > slashIndex) { // .在最后一个/之后，才是扩展名
-                url = url.substring(0, dotIndex);
+                uri = uri.substring(0, dotIndex);
             }
         }
-        return url;
+        return uri;
     }
 
     public static String getProtocol(String url, boolean withSlash) {
@@ -624,50 +623,50 @@ public class NetUtil {
         return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
-    public static String getContextUrl(String url, String contextPath) {
+    public static String getContextUri(String uri, String contextPath) {
         if (StringUtils.isBlank(contextPath) || Strings.SLASH.equals(contextPath)) {
-            if (isRelativeUrl(url)) { // 相对地址的上下文地址设为/
+            if (isRelativeUri(uri)) { // 相对地址的上下文地址设为/
                 return Strings.SLASH;
             }
-            int index = url.indexOf(Strings.DOUBLE_SLASH);
+            int index = uri.indexOf(Strings.DOUBLE_SLASH);
             if (index >= 0) {
                 int fromIndex = index + Strings.DOUBLE_SLASH.length();
-                index = url.indexOf(Strings.SLASH, fromIndex);
+                index = uri.indexOf(Strings.SLASH, fromIndex);
                 if (index < 0) {
-                    index = url.indexOf(Strings.WELL, fromIndex);
+                    index = uri.indexOf(Strings.WELL, fromIndex);
                 }
                 if (index < 0) {
-                    index = url.indexOf(Strings.QUESTION, fromIndex);
+                    index = uri.indexOf(Strings.QUESTION, fromIndex);
                 }
                 if (index > 0) {
-                    return url.substring(0, index);
+                    return uri.substring(0, index);
                 } else {
-                    return url;
+                    return uri;
                 }
             }
         } else {
-            int index = url.indexOf(contextPath + Strings.SLASH);
+            int index = uri.indexOf(contextPath + Strings.SLASH);
             if (index < 0) {
-                index = url.indexOf(contextPath + Strings.WELL);
+                index = uri.indexOf(contextPath + Strings.WELL);
             }
             if (index < 0) {
-                index = url.indexOf(contextPath + Strings.QUESTION);
+                index = uri.indexOf(contextPath + Strings.QUESTION);
             }
             if (index >= 0) {
-                return url.substring(0, index + contextPath.length());
-            } else if (url.endsWith(contextPath)) {
-                return url;
+                return uri.substring(0, index + contextPath.length());
+            } else if (uri.endsWith(contextPath)) {
+                return uri;
             }
         }
         return null; // 无法解析出上下文地址
     }
 
-    public static String getContextPathByContextUrl(String contextUrl) {
-        int index = contextUrl.indexOf(Strings.DOUBLE_SLASH);
+    public static String getContextPathByContextUri(String contextUri) {
+        int index = contextUri.indexOf(Strings.DOUBLE_SLASH);
         if (index >= 0) {
-            index = contextUrl.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length());
+            index = contextUri.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length());
             if (index > 0) {
-                return contextUrl.substring(index);
+                return contextUri.substring(index);
             } else {
                 return Strings.SLASH;
             }
@@ -726,19 +725,19 @@ public class NetUtil {
         return new Binary<>(beginIndex, endIndex);
     }
 
-    public static String replacePort(String url, int newPort) {
-        Binate<Integer, Integer> position = getPortPosition(url);
+    public static String replacePort(String uri, int newPort) {
+        Binate<Integer, Integer> position = getPortPosition(uri);
         int beginIndex = position.getLeft();
         int endIndex = position.getRight();
-        String newUrl = url.substring(0, beginIndex);
-        if (!newUrl.endsWith(Strings.COLON)) {
-            newUrl += Strings.COLON;
+        String newUri = uri.substring(0, beginIndex);
+        if (!newUri.endsWith(Strings.COLON)) {
+            newUri += Strings.COLON;
         }
-        newUrl += newPort;
-        if (0 <= endIndex && endIndex < url.length()) {
-            newUrl += url.substring(endIndex);
+        newUri += newPort;
+        if (0 <= endIndex && endIndex < uri.length()) {
+            newUri += uri.substring(endIndex);
         }
-        return newUrl;
+        return newUri;
     }
 
 }

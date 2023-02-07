@@ -32,13 +32,13 @@ public abstract class WebViewSecurityConfigurerSupport extends WebMvcSecurityCon
         AccessDeniedHandlerImpl accessDeniedHandler = (AccessDeniedHandlerImpl) super.accessDeniedHandler();
         String prefix = this.mvcProperties.getView().getPrefix();
         if (StringUtils.isNotBlank(prefix)) {
-            prefix = NetUtil.standardizeUrl(prefix);
+            prefix = NetUtil.standardizeUri(prefix);
         } else {
             prefix = Strings.EMPTY;
         }
         String businessErrorPath = this.viewResolvableExceptionResolver.getBusinessErrorPath();
         if (StringUtils.isNotBlank(businessErrorPath)) {
-            businessErrorPath = NetUtil.standardizeUrl(businessErrorPath);
+            businessErrorPath = NetUtil.standardizeUri(businessErrorPath);
         } else {
             businessErrorPath = Strings.EMPTY;
         }

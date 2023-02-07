@@ -86,7 +86,7 @@ public interface FssServiceStrategy<I extends UserIdentity<?>> extends FssDirDel
      * @return 存储路径
      */
     default String getStoragePath(String locationPath) {
-        return getStorageRootDir() + NetUtil.standardizeUrl(locationPath);
+        return getStorageRootDir() + NetUtil.standardizeUri(locationPath);
     }
 
     /**

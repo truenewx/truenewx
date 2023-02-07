@@ -28,7 +28,7 @@ public class FssFileLocation {
         if (StringUtils.isBlank(dir)) {
             this.dir = Strings.EMPTY;
         } else {
-            this.dir = NetUtil.standardizeUrl(dir);
+            this.dir = NetUtil.standardizeUri(dir);
         }
         this.filename = filename;
     }
@@ -49,7 +49,7 @@ public class FssFileLocation {
 
     public static FssFileLocation of(String s) {
         if (StringUtils.isNotBlank(s)) {
-            s = NetUtil.standardizeUrl(s);
+            s = NetUtil.standardizeUri(s);
             if (s.startsWith(PROTOCOL)) {
                 s = s.substring(PROTOCOL.length() - 1);
             } else if (s.startsWith(Strings.DOUBLE_SLASH)) {
