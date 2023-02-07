@@ -1,14 +1,11 @@
 package org.truenewx.tnxjee.webmvc.controller;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.tnxjee.core.Strings;
@@ -36,7 +33,7 @@ public abstract class WarControllerSupport {
 
     public Long getSize() {
         File sourceFile = ApplicationUtil.getWarFile(getBuildName());
-        if (sourceFile != null) {
+        if (sourceFile != null && sourceFile.exists()) {
             return sourceFile.length();
         }
         return null;
@@ -46,17 +43,12 @@ public abstract class WarControllerSupport {
 
     public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         File sourceFile = ApplicationUtil.getWarFile(getBuildName());
-        if (sourceFile != null) {
-            response.setContentLengthLong(sourceFile.length());
+        if (sourceFile != null && sourceFile.exists()) {
             String filename = getDownloadFilename(request) + FileExtensions.DOT_WAR;
-            WebUtil.setDownloadFilename(request, response, filename);
-
-            FileInputStream in = new FileInputStream(sourceFile);
-            ServletOutputStream out = response.getOutputStream();
-            IOUtils.copy(in, out);
-            in.close();
+            WebUtil.download(request, response, filename, sourceFile);
         } else {
             response.getWriter().println("Source war file not found.");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
