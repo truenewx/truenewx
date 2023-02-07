@@ -15,6 +15,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.Framework;
 import org.truenewx.tnxjee.core.Strings;
@@ -67,18 +68,15 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
             if (StringUtils.isBlank(basename)) {
                 basename = SpringUtil.getApplicationName(environment);
             }
-            if (StringUtils.isBlank(basename)) {
-                System.out.println("====== Can't load property '" + AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL
-                        + "' and '" + AppConstants.PROPERTY_SPRING_APP_NAME
-                        + "', please make sure one of them is in classpath:application.properties/yaml/yml");
-            } else {
-                dirLocation = ResourceUtils.FILE_URL_PREFIX + dirLocation;
-                // 先添加应用特有配置属性
-                boolean added = addPropertySources(environment, dirLocation, basename);
-                // 再添加与公共配置属性（因为是外部配置，所以存在与其它应用公用配置的可能性）
-                added = addPropertySources(environment, dirLocation, BASENAME) || added;
-                return added;
-            }
+            Assert.hasText(basename, () -> "====== Can't load property '" + AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL
+                    + "' and '" + AppConstants.PROPERTY_SPRING_APP_NAME
+                    + "', please make sure one of them is in classpath:application.properties/yaml/yml");
+            dirLocation = ResourceUtils.FILE_URL_PREFIX + dirLocation;
+            // 先添加应用特有配置属性
+            boolean added = addPropertySources(environment, dirLocation, basename);
+            // 再添加与公共配置属性（因为是外部配置，所以存在与其它应用公用配置的可能性）
+            added = addPropertySources(environment, dirLocation, BASENAME) || added;
+            return added;
         }
         return false;
     }
