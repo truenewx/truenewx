@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Assert;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
@@ -146,6 +147,11 @@ public class AppConfiguration {
 
     public void setSubs(Map<String, String> subs) {
         this.subs = subs;
+    }
+
+    public String loadSymbol() {
+        Assert.hasText(this.symbol, () -> "The app '" + this.caption + "' must specify an symbol");
+        return this.symbol;
     }
 
     /**
