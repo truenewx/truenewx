@@ -1,8 +1,6 @@
 package org.truenewx.tnxjee.web.util;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -624,6 +622,17 @@ public class WebUtil {
             filename = new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         }
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
+    }
+
+    public static void download(HttpServletRequest request, HttpServletResponse response, String downloadFilename,
+            File sourceFile) throws IOException {
+        WebUtil.setDownloadFilename(request, response, downloadFilename);
+        response.setContentLengthLong(sourceFile.length());
+
+        FileInputStream in = new FileInputStream(sourceFile);
+        ServletOutputStream out = response.getOutputStream();
+        IOUtils.copy(in, out);
+        in.close();
     }
 
     /**
