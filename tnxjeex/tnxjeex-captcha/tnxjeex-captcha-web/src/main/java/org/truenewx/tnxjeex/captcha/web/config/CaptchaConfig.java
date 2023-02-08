@@ -21,6 +21,7 @@ public class CaptchaConfig {
         config.setProperty(Const.CAPTCHA_TYPE, DisposableDefaultCaptchaService.TYPE);
         config.setProperty(Const.CAPTCHA_CACHETYPE, RamCaptchaCacheService.TYPE);
         config.setProperty(Const.CAPTCHA_WATER_MARK, Strings.EMPTY);
+        config.setProperty(Const.CAPTCHA_WATER_FONT, "SimSun"); // 宋体
         config.setProperty(Const.CAPTCHA_FONT_TYPE, "WenQuanZhengHei.ttf");
         return CaptchaServiceFactory.getInstance(config);
     }
