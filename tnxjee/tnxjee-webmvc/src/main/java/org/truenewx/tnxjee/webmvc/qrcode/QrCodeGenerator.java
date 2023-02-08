@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -34,26 +35,36 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  */
 @Component
 @ConfigurationProperties("tnxjee.web.qrcode")
-public class QrCodeGenerator {
+public class QrCodeGenerator implements InitializingBean {
 
     /**
      * 二维码图片扩展名
      */
     public static final String EXTENSION = FileExtensions.PNG;
 
-    private String root;
+    private File root;
 
     public void setRoot(String root) {
-        this.root = root;
+        this.root = new File(ApplicationUtil.getAbsolutePath(root));
+        this.root.mkdirs();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.root == null) {
+            Class<?> clazz = getClass();
+            LogUtil.warn(clazz, "====== The root should not be empty, otherwise {} is not available.",
+                    clazz.getSimpleName());
+        }
     }
 
     public File getImageFileByName(String name) {
-        Assert.hasText(this.root, "The root must has text");
+        Assert.notNull(this.root, "The root should not be empty.");
         // 取名称的每两位一层目录，划分为三层目录，以控制每个目录的文件数量
-        String dir = this.root + IOUtil.FILE_SEPARATOR + name.substring(0, 2) + IOUtil.FILE_SEPARATOR
+        String location = name.substring(0, 2) + IOUtil.FILE_SEPARATOR
                 + name.substring(2, 4) + IOUtil.FILE_SEPARATOR + name.substring(4, 6)
-                + IOUtil.FILE_SEPARATOR;
-        return new File(dir + name);
+                + IOUtil.FILE_SEPARATOR + name;
+        return new File(this.root, location);
     }
 
     private File getImageFileByValue(String value) {
