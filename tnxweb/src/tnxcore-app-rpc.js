@@ -251,7 +251,6 @@ export default {
                         break;
                     }
                     case 403: {
-                        console.error(response);
                         if (response.data === '') { // 服务端已修正无操作权限时不正常报错的问题，此处暂留以待观察
                             response.data = {
                                 errors: [{
@@ -260,8 +259,12 @@ export default {
                                 }]
                             };
                         }
-                        if (_this.handleErrors(response.data.errors, options)) {
-                            return;
+                        if (response.data.errors) {
+                            if (_this.handleErrors(response.data.errors, options)) {
+                                return;
+                            }
+                        } else {
+                            _this.handleOtherError(response.data, options);
                         }
                         break;
                     }
