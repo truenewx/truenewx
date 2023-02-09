@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
@@ -101,16 +100,13 @@ public class CasTicketManagerImpl implements CasTicketManager {
      */
     private TicketGrantingTicket findValidTicketGrantingTicket(HttpServletRequest request) {
         String ticketGrantingTicketId = readTicketGrantingTicketId(request);
-        LogUtil.debug(getClass(), "\n====== {}\ntgtId = {}", request.getRequestURL(), ticketGrantingTicketId);
         if (ticketGrantingTicketId != null) {
             TicketGrantingTicket ticketGrantingTicket = this.ticketGrantingTicketRepo.findById(ticketGrantingTicketId)
                     .orElse(null);
             if (ticketGrantingTicket != null) {
                 if (ticketGrantingTicket.getExpiredTime().getTime() > System.currentTimeMillis()) {
-                    LogUtil.debug(getClass(), "====== valid");
                     return ticketGrantingTicket;
                 } else { // 如果已过期则删除，以尽量减少垃圾数据
-                    LogUtil.debug(getClass(), "====== expired");
                     this.ticketGrantingTicketRepo.delete(ticketGrantingTicket);
                 }
             }
