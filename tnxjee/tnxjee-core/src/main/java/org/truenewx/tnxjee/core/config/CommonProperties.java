@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.NetUtil;
+import org.truenewx.tnxjee.core.util.StringUtil;
 
 /**
  * Web通用配置属性
@@ -85,12 +86,31 @@ public class CommonProperties implements InitializingBean {
                 }
             }
             uri = NetUtil.standardizeUri(uri);
-            for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
-                AppConfiguration configuration = entry.getValue();
-                String contextUri = NetUtil.standardizeUri(configuration.getContextUri(direct));
+            // 优先根据上下文根匹配查找，无法找到再根据空的上下文根匹配查找
+            String contextPath = NetUtil.getContextPathByContextUri(uri);
+            if (Strings.SLASH.equals(contextPath)) {
+                contextPath = Strings.EMPTY;
+            }
+            String appName = findAppName(uri, contextPath, direct);
+            if (appName == null && StringUtils.isNotBlank(contextPath)) {
+                appName = findAppName(uri, Strings.EMPTY, direct);
+            }
+            return appName;
+        }
+        return null;
+    }
+
+    private String findAppName(String uri, String contextPath, boolean direct) {
+        for (Map.Entry<String, AppConfiguration> entry : this.apps.entrySet()) {
+            AppConfiguration configuration = entry.getValue();
+            String contextUri = configuration.getContextUri(direct);
+            if (StringUtils.isNotBlank(contextUri)) {
+                contextUri = NetUtil.standardizeUri(contextUri);
                 if (uri.equals(contextUri) || uri.startsWith(contextUri + Strings.SLASH)
                         || uri.startsWith(contextUri + Strings.WELL) || uri.startsWith(contextUri + Strings.QUESTION)) {
-                    return entry.getKey();
+                    if (StringUtil.equalsIgnoreBlank(contextPath, configuration.getContextPath())) {
+                        return entry.getKey();
+                    }
                 }
             }
         }
