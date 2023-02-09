@@ -15,6 +15,8 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.EncryptUtil;
+import org.truenewx.tnxjee.core.util.JsonUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.security.UserSpecificDetails;
 import org.truenewx.tnxjee.service.exception.BusinessException;
 import org.truenewx.tnxjee.service.transaction.annotation.WriteTransactional;
@@ -100,9 +102,11 @@ public class CasTicketManagerImpl implements CasTicketManager {
      */
     private TicketGrantingTicket findValidTicketGrantingTicket(HttpServletRequest request) {
         String ticketGrantingTicketId = readTicketGrantingTicketId(request);
+        LogUtil.debug(getClass(), "====== {}\ntgtId = {}", request.getRequestURL(), ticketGrantingTicketId);
         if (ticketGrantingTicketId != null) {
             TicketGrantingTicket ticketGrantingTicket = this.ticketGrantingTicketRepo.findById(ticketGrantingTicketId)
                     .orElse(null);
+            LogUtil.debug(getClass(), "tgt = {}", JsonUtil.toJson(ticketGrantingTicket));
             if (ticketGrantingTicket != null) {
                 if (ticketGrantingTicket.getExpiredTime().getTime() > System.currentTimeMillis()) {
                     return ticketGrantingTicket;
