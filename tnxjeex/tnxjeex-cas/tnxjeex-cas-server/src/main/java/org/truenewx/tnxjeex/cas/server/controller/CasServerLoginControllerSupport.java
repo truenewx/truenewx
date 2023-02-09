@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.truenewx.tnxjee.core.Strings;
-import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.web.util.WebConstants;
@@ -76,20 +75,16 @@ public abstract class CasServerLoginControllerSupport {
             }
             return null;
         } else {
-            LogUtil.debug(getClass(), "====== to check tgt for service '{}'", service);
             if (this.ticketManager.checkTicketGrantingTicket(request)) {
-                LogUtil.debug(getClass(), "====== checked tgt for service '{}'", service);
                 String targetUrl = this.serviceManager.getLoginProcessUrl(request, service, scope);
                 String redirectUrl = request.getParameter(redirectParameter);
                 if (StringUtils.isNotBlank(redirectUrl)) {
                     redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
                     targetUrl = NetUtil.mergeParam(targetUrl, redirectParameter, redirectUrl);
                 }
-                LogUtil.debug(getClass(), "====== checked tgt for service '{}' to {}", service, targetUrl);
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
-            LogUtil.debug(getClass(), "====== check failed tgt for service '{}'", service);
             return new ModelAndView(CasConstants.URL_LOGIN);
         }
     }
