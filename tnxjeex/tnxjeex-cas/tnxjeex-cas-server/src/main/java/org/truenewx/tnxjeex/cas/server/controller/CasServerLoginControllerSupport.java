@@ -76,17 +76,20 @@ public abstract class CasServerLoginControllerSupport {
             }
             return null;
         } else {
+            LogUtil.debug(getClass(), "====== to check tgt for service '{}'", service);
             if (this.ticketManager.checkTicketGrantingTicket(request)) {
+                LogUtil.debug(getClass(), "====== checked tgt for service '{}'", service);
                 String targetUrl = this.serviceManager.getLoginProcessUrl(request, service, scope);
                 String redirectUrl = request.getParameter(redirectParameter);
                 if (StringUtils.isNotBlank(redirectUrl)) {
                     redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
                     targetUrl = NetUtil.mergeParam(targetUrl, redirectParameter, redirectUrl);
                 }
-                LogUtil.debug(getClass(), "====== service '{}' checked tgt to {}", service, targetUrl);
+                LogUtil.debug(getClass(), "====== checked tgt for service '{}' to {}", service, targetUrl);
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
+            LogUtil.debug(getClass(), "====== check failed tgt for service '{}'", service);
             return new ModelAndView(CasConstants.URL_LOGIN);
         }
     }
