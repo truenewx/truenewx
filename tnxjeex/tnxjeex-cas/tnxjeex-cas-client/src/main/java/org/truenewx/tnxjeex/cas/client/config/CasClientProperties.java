@@ -43,16 +43,18 @@ public class CasClientProperties extends ServiceProperties {
     @Override
     public void afterPropertiesSet() {
         if (StringUtils.isBlank(getService())) {
+            String service;
             AppConfiguration app = this.commonProperties.getApp(this.appName);
             if (app == null) { // 属性配置中不包含当前应用的配置，则当前应用可将任意地址作为service，只是需添加特殊前缀
-                String service = CasUtil.getServicePrefixByAppName(this.appName);
-                setService(service);
+                service = CasUtil.getServicePrefixByAppName(this.appName);
                 LogUtil.warn(getClass(),
                         "There is no app named '{}' in tnxjee.common.apps. '{}' has been used as the service",
                         this.appName, service);
             } else {
-                setService(app.getContextUri(false) + app.getLoginedPath());
+                service = app.getContextUri(false) + app.getLoginedPath();
             }
+            setService(service);
+            LogUtil.debug(getClass(), "====== '{}' service: {}", this.appName, service);
         }
         super.afterPropertiesSet();
     }
