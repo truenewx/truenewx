@@ -83,7 +83,7 @@ public abstract class CasServerLoginControllerSupport {
                     redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
                     targetUrl = NetUtil.mergeParam(targetUrl, redirectParameter, redirectUrl);
                 }
-                LogUtil.debug(getClass(), "====== checked tgt to {}", targetUrl);
+                LogUtil.debug(getClass(), "====== service '{}' checked tgt to {}", service, targetUrl);
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
