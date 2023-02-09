@@ -54,7 +54,6 @@ public class CasClientProperties extends ServiceProperties {
                 service = app.getContextUri(false) + app.getLoginedPath();
             }
             setService(service);
-            LogUtil.debug(getClass(), "====== '{}' service: {}", this.appName, service);
         }
         super.afterPropertiesSet();
     }
