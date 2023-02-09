@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.truenewx.tnxjee.core.Strings;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.core.util.NetUtil;
 import org.truenewx.tnxjee.core.util.StringUtil;
 import org.truenewx.tnxjee.web.util.WebConstants;
@@ -82,6 +83,7 @@ public abstract class CasServerLoginControllerSupport {
                     redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
                     targetUrl = NetUtil.mergeParam(targetUrl, redirectParameter, redirectUrl);
                 }
+                LogUtil.debug(getClass(), "====== checked tgt to {}", targetUrl);
                 this.redirectStrategy.sendRedirect(request, response, targetUrl);
                 return null;
             }
