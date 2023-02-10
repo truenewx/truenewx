@@ -70,6 +70,17 @@ public class CommonProperties implements InitializingBean {
         return name == null ? null : this.apps.get(name);
     }
 
+    public AppConfiguration findByGatewayUri(String gatewayUri) {
+        if (StringUtils.isNotBlank(gatewayUri)) {
+            for (AppConfiguration configuration : this.apps.values()) {
+                if (gatewayUri.equals(configuration.getGatewayUri())) {
+                    return configuration;
+                }
+            }
+        }
+        return null;
+    }
+
     public String findAppName(String uri, boolean direct) {
         if (uri != null) {
             if (uri.startsWith(Strings.LEFT_SQUARE_BRACKET)) {
