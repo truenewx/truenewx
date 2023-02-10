@@ -20,6 +20,7 @@ public class ApplicationUtil {
 
     public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
     public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
+    private static final String TOMCAT_APPS_DIR_NAME = "webapps";
 
     public static ApplicationRunMode RUN_MODE;
 
@@ -65,7 +66,7 @@ public class ApplicationUtil {
     }
 
     private static int webappsIndexOf(String path) {
-        return path.replace('\\', '/').indexOf("/webapps/");
+        return path.replace('\\', '/').indexOf(Strings.SLASH + TOMCAT_APPS_DIR_NAME + Strings.SLASH);
     }
 
     public static String getTomcatRootLocation(String dirLocation) {
@@ -85,6 +86,10 @@ public class ApplicationUtil {
                 return url.substring(JAR_FILE_URL_PREFIX.length(),
                         index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
             } else {
+                int index = webappsIndexOf(url);
+                if (index >= 0) { // 位于tomcat中
+                    return url.substring(0, index + TOMCAT_APPS_DIR_NAME.length() + 1);
+                }
                 return resource.getFile().getParentFile().getParentFile().getAbsolutePath();
             }
         } catch (IOException e) {
