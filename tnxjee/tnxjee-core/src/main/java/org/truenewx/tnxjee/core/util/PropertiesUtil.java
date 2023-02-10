@@ -63,17 +63,6 @@ public class PropertiesUtil {
         return properties;
     }
 
-    public static void store(Properties source, File target, String comment) throws IOException {
-        if (!source.isEmpty()) {
-            target.createNewFile(); // 确保文件存在
-            // 先加载文件中的原数据，再写入
-            Properties properties = new KeySortedProperties();
-            load(target, properties);
-            properties.putAll(source);
-            save(properties, target, comment);
-        }
-    }
-
     /**
      * 用指定属性集覆盖保存至指定文件，不加载文件内原有属性
      *
@@ -91,32 +80,45 @@ public class PropertiesUtil {
         writer.close();
     }
 
-    public static void store(Properties source, String targetLocation, String comment) throws IOException {
-        if (!source.isEmpty()) {
-            File file;
-            if (targetLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
-                file = new UrlResource(targetLocation).getFile();
-            } else {
-                file = ResourceUtils.getFile(targetLocation);
-            }
-            store(source, file, comment);
+    public static Properties store(Properties source, File target, String comment) throws IOException {
+        // 先加载文件中的原数据再写入
+        Properties all = new KeySortedProperties();
+        if (target.exists()) {
+            load(target, all);
         }
+        if (!source.isEmpty()) {
+            target.createNewFile(); // 确保文件存在
+            all.putAll(source);
+            save(all, target, comment);
+        }
+        return all;
     }
 
-    public static void store(File target, String key, @Nullable String value, String comment) throws IOException {
+    public static Properties store(Properties source, String targetLocation, String comment) throws IOException {
+        File file;
+        if (targetLocation.startsWith(ApplicationUtil.JAR_FILE_URL_PREFIX)) {
+            file = new UrlResource(targetLocation).getFile();
+        } else {
+            file = ResourceUtils.getFile(targetLocation);
+        }
+        return store(source, file, comment);
+    }
+
+    public static Properties store(File target, String key, @Nullable String value, String comment) throws IOException {
         if (value == null) {
+            Properties all = new KeySortedProperties();
             if (target.exists()) {
-                Properties properties = new KeySortedProperties();
-                PropertiesUtil.load(target, properties);
-                if (properties.remove(key) != null) {
-                    save(properties, target, comment);
+                PropertiesUtil.load(target, all);
+                if (all.remove(key) != null) {
+                    save(all, target, comment);
                 }
             }
             // 设置值为null，目标文件不存在，则无需保存
+            return all;
         } else {
             Properties properties = new Properties();
             properties.setProperty(key, value);
-            store(properties, target, comment);
+            return store(properties, target, comment);
         }
     }
 
