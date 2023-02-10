@@ -2,14 +2,17 @@ package org.truenewx.tnxjee.core.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.config.AppConstants;
-import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
 
 /**
  * 基于当前框架的应用的工具类
@@ -18,79 +21,63 @@ import org.truenewx.tnxjee.core.spec.ApplicationRunMode;
  */
 public class ApplicationUtil {
 
-    public static final String JAR_FILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
-    public static final String JAR_WORKING_DIR_SUFFIX = "ar!";
-    private static final String TOMCAT_APPS_DIR_NAME = "webapps";
-
-    public static ApplicationRunMode RUN_MODE;
+    public static final String JAR_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
+    private static final String JAR_URL_SUFFIX = "ar!";
+    /**
+     * 是否通过tomcat运行，false：以一般应用的方式运行（即调用main()方法）
+     */
+    public static final boolean VIA_TOMCAT = System.getProperty("catalina.home") != null;
+    public static final boolean IN_CODING;
 
     private ApplicationUtil() {
+    }
+
+    static {
+        System.out.println("Run via tomcat: " + VIA_TOMCAT);
+        try {
+            Resource resource = new ClassPathResource(Strings.SLASH);
+            String classPath = resource.getURL().toString().replace('\\', '/');
+            System.out.println("Class path: " + classPath);
+            IN_CODING = (!classPath.startsWith(JAR_URL_PREFIX))
+                    && (StringUtil.antPathMatch(classPath, "**/target/**/classes/")
+                    || classPath.endsWith("/target/test-classes/"));
+            System.out.println("In coding: " + IN_CODING);
+            File workingDir = getWorkingDir();
+            System.out.println("Working dir: " + workingDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getSymbol(Environment env) {
         return env.getProperty(AppConstants.PROPERTY_FRAMEWORK_APP_SYMBOL);
     }
 
-    public static boolean isInJar(String path) {
-        return path.startsWith(JAR_FILE_URL_PREFIX) || path.endsWith(JAR_WORKING_DIR_SUFFIX);
-    }
-
-    private static boolean isInTomcat(String dirLocation) {
-        return webappsIndexOf(dirLocation) >= 0;
-    }
-
-    public static ApplicationRunMode getRunMode() {
-        if (RUN_MODE == null) {
-            String dirLocation = getWorkingDirLocation();
-            if (isInJar(dirLocation)) {
-                RUN_MODE = ApplicationRunMode.JAR;
-            } else if (isInTomcat(dirLocation)) {
-                RUN_MODE = ApplicationRunMode.TOMCAT;
-            } else {
-                RUN_MODE = ApplicationRunMode.IDE;
-            }
-        }
-        return RUN_MODE;
-    }
-
-    public static boolean isInJar() {
-        return getRunMode() == ApplicationRunMode.JAR;
-    }
-
-    public static boolean isInTomcat() {
-        return getRunMode() == ApplicationRunMode.TOMCAT;
-    }
-
-    public static boolean isInIde() {
-        return getRunMode() == ApplicationRunMode.IDE;
-    }
-
-    private static int webappsIndexOf(String path) {
-        return path.replace('\\', '/').indexOf(Strings.SLASH + TOMCAT_APPS_DIR_NAME + Strings.SLASH);
-    }
-
-    public static String getTomcatRootLocation(String dirLocation) {
-        int index = webappsIndexOf(dirLocation);
-        if (index >= 0) {
-            return dirLocation.substring(0, index);
-        }
-        return null;
-    }
-
-    public static String getWorkingDirLocation() {
+    /**
+     * @return 应用运行时所在的目录
+     */
+    public static File getWorkingDir() {
         Resource resource = new ClassPathResource(Strings.SLASH);
         try {
-            String url = resource.getURL().toString();
-            if (isInJar(url)) { // 位于jar/war中
-                int index = url.indexOf(JAR_WORKING_DIR_SUFFIX); // 一定有
-                return url.substring(JAR_FILE_URL_PREFIX.length(),
-                        index + JAR_WORKING_DIR_SUFFIX.length()); // 以.jar!或.war!结尾
-            } else {
-                int index = webappsIndexOf(url);
-                if (index >= 0) { // 位于tomcat中
-                    return url.substring(0, index + TOMCAT_APPS_DIR_NAME.length() + 1);
+            if (VIA_TOMCAT) {
+                if (IN_CODING) { // 编程时通过Tomcat运行
+                    // 形如：**/target/[构建名称]/WEB-INF/classes
+                    return resource.getFile().getParentFile().getParentFile().getParentFile();
+                } else { // 构建后通过Tomcat运行
+                    // 形如：**/webapps/[构建名称]/WEB-INF/classes
+                    return resource.getFile().getParentFile().getParentFile().getParentFile();
                 }
-                return resource.getFile().getParentFile().getParentFile().getAbsolutePath();
+            } else {
+                if (IN_CODING) { // 编程时以一般应用的方式运行
+                    // 形如：**/target/classes
+                    return resource.getFile().getParentFile();
+                } else { // 构建后以一般应用的方式运行
+                    // 形如：jar:file:/**/[构建名称].war!/WEB-INF/classes!/
+                    String location = resource.getURL().toString().replace('\\', '/');
+                    location = location.substring(JAR_URL_PREFIX.length(), location.indexOf(JAR_URL_SUFFIX));
+                    location = location.substring(0, location.lastIndexOf(Strings.SLASH));
+                    return new File(location);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -98,17 +85,10 @@ public class ApplicationUtil {
     }
 
     /**
-     * @return 应用根目录定位路径
+     * @return 应用根目录
      */
-    public static String getApplicationRootLocation() {
-        String location = getWorkingDirLocation(); // 默认情况下，根目录为工作目录
-        String tomcatRootLocation = getTomcatRootLocation(location);
-        if (tomcatRootLocation != null) { // 位于tomcat中，则根目录为tomcat安装目录
-            location = tomcatRootLocation;
-        } else if (location.endsWith(JAR_WORKING_DIR_SUFFIX)) { // 位于jar中，则根目录为上级目录的上级目录
-            location = new File(location).getParentFile().getParentFile().getAbsolutePath();
-        }
-        return location;
+    public static File getApplicationRootDir() {
+        return getWorkingDir().getParentFile();
     }
 
     /**
@@ -117,16 +97,16 @@ public class ApplicationUtil {
      * @return 工作临时目录
      */
     public static File getWorkingTempDir() {
-        return new File(getApplicationRootLocation(), "temp");
+        return new File(getApplicationRootDir(), "temp");
     }
 
     public static String getAbsolutePath(String path) {
         if (path.startsWith(Strings.DOT)) { // 相对路径
-            String rootLocation = ApplicationUtil.getApplicationRootLocation();
+            File root = getApplicationRootDir();
             if (path.startsWith("./")) {
-                path = rootLocation + IOUtil.FILE_SEPARATOR + path.substring(2);
+                path = root.getAbsolutePath() + IOUtil.FILE_SEPARATOR + path.substring(2);
             } else if (path.startsWith("../")) {
-                path = new File(rootLocation).getParent() + IOUtil.FILE_SEPARATOR + rootLocation.substring(3);
+                path = root.getParent() + IOUtil.FILE_SEPARATOR + path.substring(3);
             } else {
                 throw new RuntimeException("Invalid root path: " + path);
             }
@@ -134,20 +114,60 @@ public class ApplicationUtil {
         return path;
     }
 
-    public static File getWarFile(String buildName) {
-        String workingDirLocation = getWorkingDirLocation();
-        String tomcatRootLocation = getTomcatRootLocation(workingDirLocation);
-        if (tomcatRootLocation != null) {
-            return new File(workingDirLocation + FileExtensions.DOT_WAR);
-        } else if (isInJar()) {
-            return new File(workingDirLocation.substring(0, workingDirLocation.length() - 1));
-        } else {
-            File dir = new File(workingDirLocation).getParentFile().getParentFile();
-            File file = new File(dir, "/target/" + buildName + FileExtensions.DOT_WAR);
-            if (!file.exists()) {
-                file = null;
+    public static File getWarFile() {
+        try {
+            if (IN_CODING) {
+                // 从maven的pom.xml文件中读取构建目标文件
+                File root = ApplicationUtil.getApplicationRootDir();
+                File pomFile = new File(root, "pom.xml");
+                SAXReader reader = new SAXReader();
+                Document doc = reader.read(pomFile);
+                Element projectElement = doc.getRootElement();
+                Element buildElement = projectElement.element("build");
+                String buildName = buildElement.elementTextTrim("finalName");
+                String targetDirLocation = getTargetDirLocation(buildElement);
+                File targetDir;
+                if (targetDirLocation != null) {
+                    while (targetDirLocation.startsWith("../")) {
+                        targetDirLocation = targetDirLocation.substring(3);
+                        root = root.getParentFile();
+                    }
+                    targetDir = new File(root, targetDirLocation);
+                } else {
+                    targetDir = getWorkingDir();
+                }
+                return new File(targetDir, buildName + FileExtensions.DOT_WAR);
             }
-            return file;
+            Resource resource = new ClassPathResource(Strings.SLASH);
+            if (VIA_TOMCAT) {
+                // 形如：**/webapps/[构建名称]/WEB-INF/classes
+                return new File(resource.getFile().getParentFile().getParent() + FileExtensions.DOT_WAR);
+            } else {
+                // 形如：jar:file:/**/[构建名称].war!/WEB-INF/classes!/
+                String location = resource.getURL().toString().replace('\\', '/');
+                location = location.substring(JAR_URL_PREFIX.length(), location.indexOf(JAR_URL_SUFFIX) + 2);
+                return new File(location);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
+
+    private static String getTargetDirLocation(Element buildElement) {
+        Element pluginsElement = buildElement.element("plugins");
+        if (pluginsElement != null) {
+            List<Element> pluginElements = pluginsElement.elements("plugin");
+            for (Element pluginElement : pluginElements) {
+                String groupId = pluginElement.elementTextTrim("groupId");
+                String artifactId = pluginElement.elementTextTrim("artifactId");
+                if ("org.springframework.boot".equals(groupId) && "spring-boot-maven-plugin".equals(artifactId)) {
+                    Element configurationElement = pluginElement.element("configuration");
+                    return configurationElement == null ? null :
+                            configurationElement.elementTextTrim("outputDirectory");
+                }
+            }
+        }
+        return null;
+    }
+
 }

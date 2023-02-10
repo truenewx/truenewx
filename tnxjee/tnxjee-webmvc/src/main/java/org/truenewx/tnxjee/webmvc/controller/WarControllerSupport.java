@@ -32,18 +32,16 @@ public abstract class WarControllerSupport {
     }
 
     public Long getSize() {
-        File sourceFile = ApplicationUtil.getWarFile(getBuildName());
-        if (sourceFile != null && sourceFile.exists()) {
+        File sourceFile = ApplicationUtil.getWarFile();
+        if (sourceFile.exists()) {
             return sourceFile.length();
         }
         return null;
     }
 
-    protected abstract String getBuildName();
-
     public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        File sourceFile = ApplicationUtil.getWarFile(getBuildName());
-        if (sourceFile != null && sourceFile.exists()) {
+        File sourceFile = ApplicationUtil.getWarFile();
+        if (sourceFile.exists()) {
             String filename = getDownloadFilename(request) + FileExtensions.DOT_WAR;
             WebUtil.download(request, response, filename, sourceFile);
         } else {

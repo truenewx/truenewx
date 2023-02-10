@@ -82,7 +82,8 @@ public class ConfigDirEnvironmentPostProcessor implements EnvironmentPostProcess
     }
 
     public static String getExternalConfigDirLocation() {
-        return ApplicationUtil.getApplicationRootLocation() + "/conf"; // 外部配置目录为conf，与内部配置目录名不同
+        // 外部配置目录为conf，与内部配置目录名不同
+        return ApplicationUtil.getApplicationRootDir().getAbsolutePath() + "/conf";
     }
 
     private boolean addLayerPropertySources(ConfigurableEnvironment environment, boolean added) throws IOException {
