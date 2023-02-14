@@ -83,11 +83,11 @@ public class CasServiceManagerImpl implements CasServiceManager {
         if (service.startsWith(CasUtil.getServicePrefixByAppName(appName))) {
             service = service.substring(appName.length() + 2);
             String contextPath = app.getContextPath();
-            contextUri = NetUtil.getContextUri(service, contextPath);
+            contextUri = NetUtil.getContextUri(service, contextPath, true);
             if (contextUri == null) {
                 throw new BusinessException(CasServerExceptionCodes.INVALID_SERVICE);
             }
-            loginUrl = contextUri + app.getLoginPath();
+            loginUrl = NetUtil.concatUri(contextUri, app.getLoginPath());
         } else {
             contextUri = app.getContextUri(false);
             loginUrl = app.getLoginProcessUrl();

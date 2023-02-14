@@ -24,8 +24,11 @@ public class NetUtil {
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String LOCAL_IP_V4 = "127.0.0.1";
     public static final String LOCAL_IP_V6 = "0:0:0:0:0:0:0:1";
-    public static final String PROTOCOL_HTTP = "http://";
-    public static final String PROTOCOL_HTTPS = "https://";
+    public static final String PROTOCOL_MARK = "://";
+    public static final String PROTOCOL_HTTP = "http" + PROTOCOL_MARK;
+    public static final String PROTOCOL_HTTPS = "https" + PROTOCOL_MARK;
+    public static final int PORT_HTTP = 80;
+    public static final int PORT_HTTPS = 443;
 
     private NetUtil() {
     }
@@ -500,11 +503,11 @@ public class NetUtil {
      * @return 包含有协议的URI，如果输入的URL为相对路径，则原样返回
      */
     public static String standardizeUriWithProtocol(String uri, String defaultProtocol) {
-        if (!uri.contains("://")) {
+        if (!uri.contains(PROTOCOL_MARK)) {
             if (uri.startsWith(Strings.DOUBLE_SLASH)) {
                 uri = defaultProtocol + Strings.COLON + uri;
             } else if (!uri.startsWith(Strings.SLASH)) {
-                uri = defaultProtocol + "://" + uri;
+                uri = defaultProtocol + PROTOCOL_MARK + uri;
             }
             // 斜杠开头的为相对URL，不作处理
         }
@@ -545,11 +548,11 @@ public class NetUtil {
         return uri;
     }
 
-    public static String getProtocol(String url, boolean withSlash) {
-        int index = url.indexOf("://");
+    public static String getProtocol(String url, boolean withMark) {
+        int index = url.indexOf(PROTOCOL_MARK);
         if (index > 0) {
-            if (withSlash) {
-                index += 3;
+            if (withMark) {
+                index += PROTOCOL_MARK.length();
             }
             return url.substring(0, index);
         }
@@ -564,7 +567,7 @@ public class NetUtil {
      * @return 主机地址
      */
     public static String getHost(String url, boolean portPossible) {
-        int index = url.indexOf("://");
+        int index = url.indexOf(PROTOCOL_MARK);
         if (index >= 0) {
             url = url.substring(index + 3);
         } else if (url.startsWith(Strings.DOUBLE_SLASH)) { // 以//开头是不包含协议但包含主机地址的链接
@@ -580,7 +583,7 @@ public class NetUtil {
         if (index >= 0 && portPossible) { // 即使需要带上可能的端口号，但80和443端口必须忽略
             String portString = url.substring(index + 1);
             int port = MathUtil.parseInt(portString);
-            if (port != 80 && port != 443) {
+            if (port != PORT_HTTP && port != PORT_HTTPS) {
                 index = -1;
             }
         }
@@ -623,7 +626,7 @@ public class NetUtil {
         return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
-    public static String getContextUri(String uri, String contextPath) {
+    public static String getContextUri(String uri, String contextPath, boolean withContextPath) {
         if (StringUtils.isBlank(contextPath) || Strings.SLASH.equals(contextPath)) {
             if (isRelativeUri(uri)) { // 相对地址的上下文地址设为/
                 return Strings.SLASH;
@@ -653,9 +656,16 @@ public class NetUtil {
                 index = uri.indexOf(contextPath + Strings.QUESTION);
             }
             if (index >= 0) {
-                return uri.substring(0, index + contextPath.length());
+                if (withContextPath) {
+                    index += contextPath.length();
+                }
+                return uri.substring(0, index);
             } else if (uri.endsWith(contextPath)) {
-                return uri;
+                if (withContextPath) {
+                    return uri;
+                } else {
+                    return uri.substring(0, uri.length() - contextPath.length());
+                }
             }
         }
         return null; // 无法解析出上下文地址
@@ -696,7 +706,7 @@ public class NetUtil {
         int beginIndex = position.getLeft();
         int endIndex = position.getRight();
         String port = url.substring(beginIndex, endIndex);
-        int defaultPort = url.startsWith(PROTOCOL_HTTPS) ? 443 : 80;
+        int defaultPort = url.startsWith(PROTOCOL_HTTPS) ? PORT_HTTPS : PORT_HTTP;
         return MathUtil.parseInt(port, defaultPort);
     }
 
@@ -706,7 +716,7 @@ public class NetUtil {
         if (url.startsWith(Strings.DOUBLE_SLASH)) {
             beginIndex = Strings.DOUBLE_SLASH.length();
         } else {
-            int index = url.indexOf("://");
+            int index = url.indexOf(PROTOCOL_MARK);
             if (index >= 0) {
                 beginIndex = index + 3;
             }
@@ -730,10 +740,20 @@ public class NetUtil {
         int beginIndex = position.getLeft();
         int endIndex = position.getRight();
         String newUri = uri.substring(0, beginIndex);
-        if (!newUri.endsWith(Strings.COLON)) {
-            newUri += Strings.COLON;
+        String protocol = getProtocol(uri, true);
+        // http://*:80和https://*:443无需附加端口号
+        if ((PROTOCOL_HTTP.equals(protocol) && newPort == PORT_HTTP)
+                || (PROTOCOL_HTTPS.equals(protocol) && newPort == PORT_HTTPS)) {
+            newPort = 0;
         }
-        newUri += newPort;
+        if (newPort > 0) {
+            if (!newUri.endsWith(Strings.COLON)) {
+                newUri += Strings.COLON;
+            }
+            newUri += newPort;
+        } else if (newUri.endsWith(Strings.COLON)) {
+            newUri = newUri.substring(0, newUri.length() - 1);
+        }
         if (0 <= endIndex && endIndex < uri.length()) {
             newUri += uri.substring(endIndex);
         }
