@@ -45,7 +45,9 @@ public class CasClientProperties extends ServiceProperties {
         if (StringUtils.isBlank(getService())) {
             String service;
             AppConfiguration app = this.commonProperties.getApp(this.appName);
-            if (app == null) { // 属性配置中不包含当前应用的配置，则当前应用可将任意地址作为service，只是需添加特殊前缀
+            if (app == null) {
+                // 属性配置中不包含当前应用的配置，则当前应用可将任意地址作为service，只是需添加特殊前缀
+                // 如果需要在属性配置中包含当前应用配置，同时要将任意地址作为service，请配置属性：tnxjeex.cas.service=[appName]
                 service = CasUtil.getServicePrefixByAppName(this.appName);
                 LogUtil.warn(getClass(),
                         "There is no app named '{}' in tnxjee.common.apps. '{}' has been used as the service",
