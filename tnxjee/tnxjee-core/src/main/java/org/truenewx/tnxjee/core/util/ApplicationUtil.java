@@ -33,17 +33,12 @@ public class ApplicationUtil {
     }
 
     static {
-        System.out.println("Run via tomcat: " + VIA_TOMCAT);
         try {
             Resource resource = new ClassPathResource(Strings.SLASH);
             String classPath = resource.getURL().toString().replace('\\', '/');
-            System.out.println("Class path: " + classPath);
             IN_CODING = (!classPath.startsWith(JAR_URL_PREFIX))
                     && (StringUtil.antPathMatch(classPath, "**/target/**/classes/")
                     || classPath.endsWith("/target/test-classes/"));
-            System.out.println("In coding: " + IN_CODING);
-            File workingDir = getWorkingDir();
-            System.out.println("Working dir: " + workingDir);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
