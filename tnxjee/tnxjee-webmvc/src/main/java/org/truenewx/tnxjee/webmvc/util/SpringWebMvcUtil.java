@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.webmvc.util;
 
 import java.util.Locale;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -57,6 +59,10 @@ public class SpringWebMvcUtil {
      */
     public static ApplicationContext getApplicationContext() {
         return getApplicationContext(SpringWebContext.getRequest());
+    }
+
+    public static ApplicationContext getApplicationContext(ServletContext servletContext) {
+        return WebApplicationContextUtils.getWebApplicationContext(servletContext);
     }
 
     public static Environment getEnvironment() {
