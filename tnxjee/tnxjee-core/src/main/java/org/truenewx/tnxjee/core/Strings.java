@@ -145,6 +145,11 @@ public class Strings {
     public static final String GREATER_THAN = ">";
 
     /**
+     * 感叹号
+     */
+    public static final String EXCLAMATION = "!";
+
+    /**
      * 字符编码：UTF-8
      */
     public static final String ENCODING_UTF8 = "UTF-8";
