@@ -225,9 +225,11 @@ export default {
                                 originalUrl = undefined;
                                 originalMethod = undefined;
                             }
-                            const toLogin = options.toLogin || _this.toLogin;
-                            if (toLogin(loginUrl, originalUrl, originalMethod) !== false) {
-                                return;
+                            if (!loginUrl.endsWith(url)) { // 忽略相同的地址
+                                let toLogin = options.toLogin || _this.toLogin;
+                                if (toLogin(loginUrl, originalUrl, originalMethod) !== false) {
+                                    return;
+                                }
                             }
                         }
                         _this.handleOtherError(url + ':\n' + error, options);
