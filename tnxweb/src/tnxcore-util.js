@@ -684,6 +684,22 @@ export const ArrayUtil = {
 }
 
 export const NetUtil = {
+    concatUri(contextUri, path) {
+        // 如果相对路径为空或/，则无需拼接
+        if (!path || path === '/') {
+            return contextUri;
+        }
+        if (ObjectUtil.isNull(contextUri)) {
+            return null;
+        }
+        if (contextUri.endsWith(Strings.SLASH)) {
+            contextUri = contextUri.substring(0, contextUri.length() - 1);
+        }
+        if (!path.startsWith(Strings.SLASH)) {
+            path = Strings.SLASH + path;
+        }
+        return contextUri + path;
+    },
     /**
      * 从指定头信息集中获取指定头信息值
      * @param headers 头信息集
