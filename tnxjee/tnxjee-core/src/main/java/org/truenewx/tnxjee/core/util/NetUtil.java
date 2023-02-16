@@ -627,45 +627,49 @@ public class NetUtil {
     }
 
     public static String getContextUri(String uri, String contextPath, boolean withContextPath) {
+        // 去掉#后的锚点
+        int index = uri.indexOf(Strings.WELL);
+        if (index >= 0) {
+            uri = uri.substring(0, index);
+        }
+        // 去掉?后的参数
+        index = uri.indexOf(Strings.QUESTION);
+        if (index >= 0) {
+            uri = uri.substring(0, index);
+        }
         if (StringUtils.isBlank(contextPath) || Strings.SLASH.equals(contextPath)) {
-            if (isRelativeUri(uri)) { // 相对地址的上下文地址设为/
+            contextPath = Strings.EMPTY;
+        }
+        if (isRelativeUri(uri)) {
+            // contextPath为空，则必然匹配，结果为/
+            if (contextPath.length() == 0) {
                 return Strings.SLASH;
             }
-            int index = uri.indexOf(Strings.DOUBLE_SLASH);
-            if (index >= 0) {
-                int fromIndex = index + Strings.DOUBLE_SLASH.length();
-                index = uri.indexOf(Strings.SLASH, fromIndex);
-                if (index < 0) {
-                    index = uri.indexOf(Strings.WELL, fromIndex);
-                }
-                if (index < 0) {
-                    index = uri.indexOf(Strings.QUESTION, fromIndex);
-                }
-                if (index > 0) {
-                    return uri.substring(0, index);
-                } else {
-                    return uri;
-                }
+            // contextPath不为空，则uri以contextPath开头，才是匹配的相对地址
+            if (uri.startsWith(contextPath + Strings.SLASH) || uri.equals(contextPath)) {
+                return withContextPath ? contextPath : Strings.SLASH;
             }
-        } else {
-            int index = uri.indexOf(contextPath + Strings.SLASH);
-            if (index < 0) {
-                index = uri.indexOf(contextPath + Strings.WELL);
-            }
-            if (index < 0) {
-                index = uri.indexOf(contextPath + Strings.QUESTION);
-            }
-            if (index >= 0) {
-                if (withContextPath) {
-                    index += contextPath.length();
+            return null; // 不匹配，无法解析出上下文地址
+        }
+        // 绝对地址
+        index = uri.indexOf(Strings.DOUBLE_SLASH);
+        if (index >= 0) {
+            index = uri.indexOf(Strings.SLASH, index + Strings.DOUBLE_SLASH.length()); // 除协议部分外的第一个/
+            if (index > 0) {
+                String contextUri = uri.substring(0, index);
+                if (contextPath.length() > 0) { // contextPath不为空，则需匹配
+                    String suffix = uri.substring(index);
+                    if (suffix.startsWith(contextPath + Strings.SLASH) || suffix.equals(contextPath)) {
+                        if (withContextPath) {
+                            contextUri += contextPath;
+                        }
+                    } else {
+                        return null;
+                    }
                 }
-                return uri.substring(0, index);
-            } else if (uri.endsWith(contextPath)) {
-                if (withContextPath) {
-                    return uri;
-                } else {
-                    return uri.substring(0, uri.length() - contextPath.length());
-                }
+                return contextUri;
+            } else if (contextPath.length() == 0) { // 除协议部分外，没有后续/，则contextPath必须为空才匹配
+                return uri;
             }
         }
         return null; // 无法解析出上下文地址
