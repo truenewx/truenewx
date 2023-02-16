@@ -219,18 +219,17 @@ export default {
                                 }
                                 loginUrl += _this.loginSuccessRedirectParameter + '=' + loginSuccessRedirectUrl;
                             }
-                            // 原始地址是授权验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
-                            if (originalUrl && (originalUrl.startsWith(_this.authenticationContextUrl + '/')
-                                || originalUrl === _this.logoutProcessUrl)) {
-                                originalUrl = undefined;
-                                originalMethod = undefined;
-                            }
-                            const toLogin = options.toLogin || _this.toLogin;
-                            if (toLogin(loginUrl, originalUrl, originalMethod) !== false) {
-                                return;
-                            }
                         }
-                        _this.handleOtherError(url + ':\n' + error, options);
+                        // 原始地址是授权验证地址或登出地址，视为框架特有请求，无需应用做个性化处理
+                        if (originalUrl && (originalUrl.startsWith(_this.authenticationContextUrl + '/')
+                            || originalUrl === _this.logoutProcessUrl)) {
+                            originalUrl = undefined;
+                            originalMethod = undefined;
+                        }
+                        const toLogin = options.toLogin || _this.toLogin;
+                        if (toLogin(loginUrl, originalUrl, originalMethod)) {
+                            return;
+                        }
                         break;
                     }
                     case 400: {
