@@ -586,4 +586,9 @@ public class MathUtil {
         return s;
     }
 
+    public static String calcPercent(long dividend, long divisor, int scale) {
+        return HUNDRED.multiply(new BigDecimal(dividend)).divide(new BigDecimal(divisor), scale, RoundingMode.HALF_UP)
+                + Strings.PERCENT;
+    }
+
 }
