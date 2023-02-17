@@ -17,12 +17,14 @@ public class ThreadUtil {
     /**
      * 当前线程睡眠
      *
-     * @param interval 睡眠间隔，超出则唤醒
+     * @param interval 睡眠时间，超出则唤醒，小于等于0时不睡眠
      */
     public static void sleep(long interval) {
-        try {
-            Thread.sleep(interval);
-        } catch (InterruptedException ignored) {
+        if (interval > 0) {
+            try {
+                Thread.sleep(interval);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
