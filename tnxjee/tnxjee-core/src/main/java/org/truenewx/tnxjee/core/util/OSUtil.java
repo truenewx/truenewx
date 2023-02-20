@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.truenewx.tnxjee.core.Strings;
 
 /**
@@ -124,55 +125,56 @@ public class OSUtil {
         }
     }
 
-    public static boolean exitsProcess(String name, String keyword) {
-        return findProcessHandles(name, keyword).size() > 0;
+    public static boolean exitsProcess(String commandPattern, String... commandLinePatterns) {
+        return findProcessHandles(commandPattern, commandLinePatterns).size() > 0;
     }
 
-    private static List<ProcessHandle> findProcessHandles(String name, String keyword) {
+    private static List<ProcessHandle> findProcessHandles(String commandPattern, String... commandLinePatterns) {
         String os = currentSystem();
-        String pattern = Strings.ASTERISK + keyword + Strings.ASTERISK; // 支持keyword中包含通配符
-        if (Strings.OS_WINDOWS.equals(os)) { // Windows系统无法通过ProcessHandle取得命令行参数，无法比对keyword
-            List<ProcessHandle> phs = new ArrayList<>();
-            String command = "wmic process where name=\"" + name + "\" get CommandLine,ProcessId";
-            executeCommand(command, (exitValue, result) -> {
-                if (exitValue == 0) {
-                    String[] lines = result.trim().split(Strings.ENTER);
-                    if (lines.length > 1) {
-                        for (int i = 1; i < lines.length; i++) {
-                            String line = lines[i].trim();
-                            String[] cells = line.split(" {2,}", 2);
-                            if (cells.length > 1) {
-                                String commandLine = cells[0];
-                                if (StringUtil.wildcardMatch(commandLine, pattern)) {
-                                    Long pid = MathUtil.parseLongObject(cells[1].trim());
-                                    if (pid != null) {
-                                        ProcessHandle.of(pid).ifPresent(phs::add);
-                                    }
+        List<ProcessHandle> list = ProcessHandle.allProcesses().filter(ph -> {
+            ProcessHandle.Info phi = ph.info();
+            Optional<String> commandOptional = phi.command();
+            return commandOptional.isPresent() && StringUtil.wildcardMatch(commandOptional.get(), commandPattern);
+        }).collect(Collectors.toList());
+        if (ArrayUtils.isEmpty(commandLinePatterns)) {
+            return list;
+        }
+        List<ProcessHandle> phs = new ArrayList<>();
+        list.forEach(ph -> {
+            if (Strings.OS_WINDOWS.equals(os)) {  // Windows系统无法通过ProcessHandle取得命令行数据
+                String command = "wmic process where ProcessId=" + ph.pid() + " get CommandLine"; // 该指令耗时约为2秒
+                executeCommand(command, (exitValue, result) -> {
+                    if (exitValue == 0) {
+                        String[] lines = result.trim().split(Strings.ENTER);
+                        if (lines.length > 1) {
+                            for (int i = 1; i < lines.length; i++) {
+                                String commandLine = lines[i].trim();
+                                if (StringUtil.wildcardMatchOneOf(commandLine, commandLinePatterns)) {
+                                    phs.add(ph);
                                 }
                             }
                         }
+                    } else if (result != null) {
+                        LogUtil.warn(OSUtil.class,
+                                "====== command execute error:\ncommand: {}\nexitValue: {}\nresult: {}",
+                                command, exitValue, result);
                     }
-                } else {
-                    LogUtil.error(OSUtil.class, "{}\n{}", command, result);
+                });
+            } else {
+                Optional<String> commandLineOptional = ph.info().commandLine();
+                if (commandLineOptional.isPresent()
+                        && StringUtil.wildcardMatchOneOf(commandLineOptional.get(), commandLinePatterns)) {
+                    phs.add(ph);
                 }
-            });
-            return phs;
-        } else {
-            return ProcessHandle.allProcesses().filter(ph -> {
-                ProcessHandle.Info phi = ph.info();
-                Optional<String> commandLineOptional = phi.commandLine();
-                if (commandLineOptional.isPresent()) {
-                    String commandLine = commandLineOptional.get();
-                    return commandLine.contains(name) && StringUtil.wildcardMatch(commandLine, pattern);
-                }
-                return false;
-            }).collect(Collectors.toList());
-        }
+            }
+        });
+        return phs;
     }
 
-    public static void killProcesses(String name, String keyword) {
-        List<ProcessHandle> phs = findProcessHandles(name, keyword);
+    public static int killProcesses(String commandPattern, String... commandLinePatterns) {
+        List<ProcessHandle> phs = findProcessHandles(commandPattern, commandLinePatterns);
         phs.forEach(ProcessHandle::destroyForcibly);
+        return phs.size();
     }
 
 }
