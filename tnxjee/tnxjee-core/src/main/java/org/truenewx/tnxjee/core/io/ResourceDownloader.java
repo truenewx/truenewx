@@ -6,11 +6,10 @@ import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.util.HttpClientUtil;
-import org.truenewx.tnxjee.core.util.IOUtil;
-import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.*;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 
 /**
@@ -24,6 +23,8 @@ public class ResourceDownloader {
     @Autowired
     private ResourceDownloadProgressTaskExecutor taskExecutor;
     private long interval;
+
+    private final Logger logger = LogUtil.getLogger(getClass());
 
     public void setInterval(long interval) {
         this.interval = interval;
@@ -41,7 +42,7 @@ public class ResourceDownloader {
             try {
                 FileUtils.forceDelete(targetFile);
             } catch (IOException e) {
-                LogUtil.error(getClass(), e);
+                LogUtil.error(this.logger, e);
             }
         }
         return this.taskExecutor.submit(new DefaultProgressTask<>(new ResourceDownloadTaskProgress(url)) {
@@ -64,12 +65,9 @@ public class ResourceDownloader {
                                 }
                                 out.write(buffer, 0, count);
                                 progress.addCount(count);
-                                if (ResourceDownloader.this.interval > 0) {
-                                    try {
-                                        Thread.sleep(ResourceDownloader.this.interval);
-                                    } catch (InterruptedException ignored) {
-                                    }
-                                }
+                                ResourceDownloader.this.logger.debug("====== {}: {}", downloadingFile.getAbsolutePath(),
+                                        MathUtil.calcPercent(progress.getCount(), progress.getTotal(), 0));
+                                ThreadUtil.sleep(ResourceDownloader.this.interval);
                             }
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -77,14 +75,17 @@ public class ResourceDownloader {
                     });
                 } catch (IOException e) {
                     progress.fail(new RuntimeException(e));
+                    progress.toStop();
                 } catch (RuntimeException e) {
                     progress.fail(e);
+                    progress.toStop();
                 }
                 if (progress.isStopped()) { // 如果是中止的任务，则删除本地文件
                     downloadingFile.delete();
                 } else {  // 下载完成后，下载中文件更名为目标文件
                     targetFile.delete();
                     downloadingFile.renameTo(targetFile);
+                    ResourceDownloader.this.logger.debug("====== {} is downloaded.", targetFile.getAbsolutePath());
                 }
             }
 
