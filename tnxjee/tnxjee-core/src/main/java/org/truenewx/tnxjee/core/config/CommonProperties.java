@@ -55,7 +55,7 @@ public class CommonProperties implements InitializingBean {
         if (this.gatewayEnabled && StringUtils.isNotBlank(this.gatewayUri)) {
             this.apps.values().forEach(app -> {
                 // 应用未配置特殊的网关地址，则用通用网关地址作为应用网关地址
-                if (StringUtils.isBlank(app.getGatewayUri())) {
+                if (app.getGatewayUri() == null) {
                     app.setGatewayUri(this.gatewayUri);
                 }
             });
