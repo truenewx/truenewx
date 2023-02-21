@@ -2,9 +2,9 @@ package org.truenewx.tnxjeex.fss.service.storage.aliyun;
 
 import java.util.Date;
 
-import org.slf4j.LoggerFactory;
 import org.truenewx.tnxjee.core.Strings;
 import org.truenewx.tnxjee.core.util.DateUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
 import org.truenewx.tnxjee.model.spec.user.UserIdentity;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageAuthorizer;
 import org.truenewx.tnxjeex.fss.service.storage.FssStorageProvider;
@@ -58,15 +58,24 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
     @Override
     public void authorizePublicRead(String storagePath) {
         storagePath = AliyunOssUtil.standardizePath(storagePath);
-        this.account.getOssClient()
-                .setObjectAcl(this.account.getOssBucket(), storagePath, CannedAccessControlList.PublicRead);
+        try {
+            this.account.getOssClient()
+                    .setObjectAcl(this.account.getOssBucket(), storagePath, CannedAccessControlList.PublicRead);
+        } catch (Exception e) {
+            LogUtil.error(getClass(), e);
+        }
     }
 
     private boolean isPublicRead(String path) {
         path = AliyunOssUtil.standardizePath(path);
-        ObjectAcl acl = this.account.getOssClient().getObjectAcl(this.account.getOssBucket(), path);
-        ObjectPermission permission = acl.getPermission();
-        return permission == ObjectPermission.PublicRead || permission == ObjectPermission.PublicReadWrite;
+        try {
+            ObjectAcl acl = this.account.getOssClient().getObjectAcl(this.account.getOssBucket(), path);
+            ObjectPermission permission = acl.getPermission();
+            return permission == ObjectPermission.PublicRead || permission == ObjectPermission.PublicReadWrite;
+        } catch (Exception e) {
+            LogUtil.error(getClass(), e);
+            return false;
+        }
     }
 
     @Override
@@ -121,7 +130,7 @@ public class AliyunFssStorageAuthorizer implements FssStorageAuthorizer {
                 }
             }
         } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
+            LogUtil.error(getClass(), e);
         }
         return null;
     }
