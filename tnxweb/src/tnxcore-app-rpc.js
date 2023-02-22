@@ -275,8 +275,18 @@ export default {
                         _this.handle500Error(response.data?.message || response.data, options);
                         break;
                     }
+                    case 0: {
+                        let errors = [{
+                            code: error.code,
+                            url: url,
+                        }]; // 不含message，以避免默认弹框提示，仅用于业务代码判断code后处理
+                        if (_this.handleErrors(errors, options)) {
+                            return;
+                        }
+                        break;
+                    }
                     default: {
-                        _this.handleOtherError(url + ':\n' + error.stack, options);
+                        _this.handleOtherError(url + ':\n' + error.stack || error.message, options);
                     }
                 }
             } else {
@@ -344,16 +354,22 @@ export default {
         return false;
     },
     error(errors) {
-        const message = this.getErrorMessage(errors);
-        window.tnx.error(message);
+        let message = this.getErrorMessage(errors);
+        if (message) {
+            window.tnx.error(message);
+        } else {
+            console.error(errors);
+        }
     },
     getErrorMessage(errors) {
         let message = '';
         if (!Array.isArray(errors)) {
             errors = [errors];
         }
-        for (let i = 0; i < errors.length; i++) {
-            message += errors[i].message + '\n';
+        for (let error of errors) {
+            if (error.message) {
+                message += error.message + '\n';
+            }
         }
         return message.trim();
     },
