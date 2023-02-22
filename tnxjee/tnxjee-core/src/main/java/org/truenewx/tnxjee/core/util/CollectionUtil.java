@@ -383,7 +383,7 @@ public class CollectionUtil {
      * @param predicate 移除断言
      * @param <T>       元素类型
      */
-    public static <T> void remove(Iterator<T> iterator, Predicate<T> predicate) {
+    public static <T> void removeIf(Iterator<T> iterator, Predicate<T> predicate) {
         while (iterator.hasNext()) {
             if (predicate.test(iterator.next())) {
                 iterator.remove();
@@ -398,7 +398,7 @@ public class CollectionUtil {
      * @param predicate 移除断言
      * @param <T>       元素类型
      */
-    public static <T> void remove(Iterator<T> iterator, BiPredicate<T, Integer> predicate) {
+    public static <T> void removeIf(Iterator<T> iterator, BiPredicate<T, Integer> predicate) {
         int i = 0;
         while (iterator.hasNext()) {
             if (predicate.test(iterator.next(), i++)) {
@@ -414,9 +414,9 @@ public class CollectionUtil {
      * @param predicate 移除断言
      * @param <T>       元素类型
      */
-    public static <T> void remove(Iterable<T> iterable, Predicate<T> predicate) {
+    public static <T> void removeIf(Iterable<T> iterable, Predicate<T> predicate) {
         Iterator<T> iterator = iterable.iterator();
-        remove(iterator, predicate);
+        removeIf(iterator, predicate);
     }
 
     /**
@@ -426,9 +426,13 @@ public class CollectionUtil {
      * @param predicate 移除断言
      * @param <T>       元素类型
      */
-    public static <T> void remove(Iterable<T> iterable, BiPredicate<T, Integer> predicate) {
+    public static <T> void removeIf(Iterable<T> iterable, BiPredicate<T, Integer> predicate) {
         Iterator<T> iterator = iterable.iterator();
-        remove(iterator, predicate);
+        removeIf(iterator, predicate);
+    }
+
+    public static <K, V> void removeIf(Map<K, V> map, BiPredicate<K, V> predicate) {
+        map.entrySet().removeIf(entry -> predicate.test(entry.getKey(), entry.getValue()));
     }
 
     public static boolean isNotEmpty(Map<?, ?> map) {
