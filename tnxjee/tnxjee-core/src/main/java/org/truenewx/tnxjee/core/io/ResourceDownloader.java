@@ -9,7 +9,10 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.truenewx.tnxjee.core.util.*;
+import org.truenewx.tnxjee.core.util.HttpClientUtil;
+import org.truenewx.tnxjee.core.util.IOUtil;
+import org.truenewx.tnxjee.core.util.LogUtil;
+import org.truenewx.tnxjee.core.util.ThreadUtil;
 import org.truenewx.tnxjee.core.util.concurrent.DefaultProgressTask;
 
 /**
@@ -65,8 +68,6 @@ public class ResourceDownloader {
                                 }
                                 out.write(buffer, 0, count);
                                 progress.addCount(count);
-                                ResourceDownloader.this.logger.debug("====== {}: {}", downloadingFile.getAbsolutePath(),
-                                        MathUtil.calcPercent(progress.getCount(), progress.getTotal(), 0));
                                 ThreadUtil.sleep(ResourceDownloader.this.interval);
                             }
                         } catch (IOException e) {
