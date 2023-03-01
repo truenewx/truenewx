@@ -44,7 +44,7 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
             String logoutService = WebUtil.getParameterOrAttribute(request, CasConstants.PARAMETER_SERVICE);
             for (AppTicket appTicket : appTickets) {
                 // 排除当前CAS服务端应用，之所以需要在此排除是考虑到一个应用同时作为CAS服务端和客户端的场景
-                if (!appTicket.getApp().equals(this.appName)) {
+                if (!appTicket.getAppName().equals(this.appName)) {
                     this.executorService.submit(() -> {
                         noticeAppLogout(appTicket, logoutService);
                     });
@@ -54,8 +54,8 @@ public class CasServerLogoutHandlerImpl implements CasServerLogoutHandler {
     }
 
     private void noticeAppLogout(AppTicket appTicket, String excludedService) {
-        String appName = appTicket.getApp();
-        String logoutProcessUrl = this.serviceManager.getLogoutProcessUrl(appName, excludedService);
+        String logoutProcessUrl = this.serviceManager.getLogoutProcessUrl(appTicket.getAppName(),
+                appTicket.getContextUri(), excludedService);
         if (logoutProcessUrl != null) {
             Map<String, Object> params = new HashMap<>();
             params.put("logoutRequest", "<SessionIndex>" + appTicket.getId() + "</SessionIndex>");

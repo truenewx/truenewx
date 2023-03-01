@@ -22,7 +22,7 @@ public interface CasTicketManager extends Service {
 
     boolean checkTicketGrantingTicket(HttpServletRequest request);
 
-    String getAppTicketId(HttpServletRequest request, String app, String scope);
+    String getAppTicketId(HttpServletRequest request, String appName, String contextUri, String scope);
 
     UserSpecificDetails<?> getUserDetailsInTicketGrantingTicket(HttpServletRequest request);
 
@@ -30,5 +30,5 @@ public interface CasTicketManager extends Service {
 
     List<AppTicket> deleteTicketGrantingTicket(HttpServletRequest request, HttpServletResponse response);
 
-    Assertion validateAppTicket(String app, String appTicketId);
+    Assertion validateAppTicket(String appName, String appTicketId);
 }

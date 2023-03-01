@@ -123,11 +123,12 @@ public class CasTicketManagerImpl implements CasTicketManager {
     // 用户登录或登出CAS服务器成功后调用，以获取目标应用的票据
     @Override
     @WriteTransactional
-    public String getAppTicketId(HttpServletRequest request, String app, String scope) {
+    public String getAppTicketId(HttpServletRequest request, String appName, String contextUri, String scope) {
         TicketGrantingTicket ticketGrantingTicket = findValidTicketGrantingTicket(request);
         if (ticketGrantingTicket != null) {
             String ticketGrantingTicketId = ticketGrantingTicket.getId();
-            AppTicket appTicket = this.appTicketRepo.findByTicketGrantingTicketIdAndApp(ticketGrantingTicketId, app);
+            AppTicket appTicket = this.appTicketRepo.findByTicketGrantingTicketIdAndApp(ticketGrantingTicketId,
+                    appName);
             if (appTicket == null) { // 不存在则创建新的
                 // 创建新的服务票据前，先进行可能的范围切换动作
                 if (this.scopeResolver != null) {
@@ -138,11 +139,12 @@ public class CasTicketManagerImpl implements CasTicketManager {
                 }
 
                 Date now = new Date();
-                String text = ticketGrantingTicketId + Strings.MINUS + app + Strings.MINUS + now.getTime();
+                String text = ticketGrantingTicketId + Strings.MINUS + appName + Strings.MINUS + now.getTime();
                 String appTicketId = SERVICE_TICKET_PREFIX + EncryptUtil.encryptByMd5(text);
                 appTicket = new AppTicket(appTicketId);
                 appTicket.setTicketGrantingTicket(ticketGrantingTicket);
-                appTicket.setApp(app);
+                appTicket.setAppName(appName);
+                appTicket.setContextUri(contextUri);
                 appTicket.setCreateTime(now);
                 // 所属票据授权票据的过期时间即为服务票据的过期时间
                 appTicket.setExpiredTime(ticketGrantingTicket.getExpiredTime());
@@ -187,14 +189,14 @@ public class CasTicketManagerImpl implements CasTicketManager {
 
     // 用户访问业务服务，由业务服务校验票据有效性时调用
     @Override
-    public Assertion validateAppTicket(String app, String appTicketId) {
+    public Assertion validateAppTicket(String appName, String appTicketId) {
         AppTicket appTicket = this.appTicketRepo.findById(appTicketId).orElse(null);
-        if (appTicket == null || !appTicket.getApp().equals(app)) {
+        if (appTicket == null || !appTicket.getAppName().equals(appName)) {
             throw new BusinessException(CasServerExceptionCodes.INVALID_APP_TICKET);
         }
         UserSpecificDetails<?> userDetails = appTicket.getTicketGrantingTicket().getUserDetails();
         if (this.userDetailsConverter != null) {
-            UserSpecificDetails<?> newUserDetails = this.userDetailsConverter.convert(app, userDetails);
+            UserSpecificDetails<?> newUserDetails = this.userDetailsConverter.convert(appName, userDetails);
             if (newUserDetails != null) {
                 userDetails = newUserDetails;
             }

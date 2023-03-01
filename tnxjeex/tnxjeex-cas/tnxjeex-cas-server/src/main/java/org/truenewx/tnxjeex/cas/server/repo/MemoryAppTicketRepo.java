@@ -36,7 +36,7 @@ public class MemoryAppTicketRepo implements AppTicketRepo {
         if (ids != null) {
             for (String id : ids) {
                 AppTicket appTicket = this.dataMapping.get(id);
-                if (appTicket != null && appTicket.getApp().equals(app)) {
+                if (appTicket != null && appTicket.getAppName().equals(app)) {
                     return appTicket;
                 }
             }
@@ -58,7 +58,7 @@ public class MemoryAppTicketRepo implements AppTicketRepo {
                     // 先移除，如果是需要排除的应用，则再加回去
                     AppTicket appTicket = this.dataMapping.remove(id);
                     if (appTicket != null) {
-                        if (appTicket.getApp().equals(appNot)) {
+                        if (appTicket.getAppName().equals(appNot)) {
                             this.dataMapping.put(id, appTicket);
                         } else {
                             idIterator.remove();

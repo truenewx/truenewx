@@ -98,7 +98,8 @@ public class CasServiceManagerImpl implements CasServiceManager {
         } else {
             loginUrl += Strings.AND;
         }
-        loginUrl += this.artifactParameter + Strings.EQUAL + this.ticketManager.getAppTicketId(request, appName, scope);
+        loginUrl += this.artifactParameter + Strings.EQUAL + this.ticketManager.getAppTicketId(request, appName,
+                contextUri, scope);
         String redirectParameter = this.apiMetaProperties.getRedirectTargetUrlParameter();
         if (StringUtils.isBlank(request.getParameter(redirectParameter))) {
             if (service.length() > contextUri.length()) {
@@ -116,7 +117,7 @@ public class CasServiceManagerImpl implements CasServiceManager {
     }
 
     @Override
-    public String getLogoutProcessUrl(String appName, String serviceNot) {
+    public String getLogoutProcessUrl(String appName, String contextUri, String serviceNot) {
         AppConfiguration app = loadAppConfiguration(appName);
         if (serviceNot != null) {
             String service = getService(app);
@@ -127,7 +128,11 @@ public class CasServiceManagerImpl implements CasServiceManager {
                 return null;
             }
         }
-        return app.getLogoutProcessUrl();
+        String url = app.getLogoutProcessUrl();
+        if (StringUtils.isBlank(url)) {
+            url = NetUtil.concatUri(contextUri, app.getLogoutPath());
+        }
+        return url;
     }
 
 }

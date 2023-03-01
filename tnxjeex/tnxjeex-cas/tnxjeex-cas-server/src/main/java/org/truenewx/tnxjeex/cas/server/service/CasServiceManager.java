@@ -17,6 +17,6 @@ public interface CasServiceManager {
 
     String getLoginProcessUrl(HttpServletRequest request, String service, String scope);
 
-    String getLogoutProcessUrl(String appName, String serviceNot);
+    String getLogoutProcessUrl(String appName, String contextUri, String serviceNot);
 
 }

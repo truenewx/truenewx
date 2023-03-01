@@ -11,7 +11,8 @@ public class AppTicket implements Unity<String> {
 
     private String id;
     private TicketGrantingTicket ticketGrantingTicket;
-    private String app;
+    private String appName;
+    private String contextUri;
     private Date createTime;
     private Date expiredTime;
 
@@ -39,12 +40,20 @@ public class AppTicket implements Unity<String> {
         this.ticketGrantingTicket = ticketGrantingTicket;
     }
 
-    public String getApp() {
-        return this.app;
+    public String getAppName() {
+        return this.appName;
     }
 
-    public void setApp(String app) {
-        this.app = app;
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getContextUri() {
+        return this.contextUri;
+    }
+
+    public void setContextUri(String contextUri) {
+        this.contextUri = contextUri;
     }
 
     public Date getCreateTime() {
