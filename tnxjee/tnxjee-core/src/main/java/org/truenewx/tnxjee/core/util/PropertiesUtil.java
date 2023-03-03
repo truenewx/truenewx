@@ -80,7 +80,7 @@ public class PropertiesUtil {
         writer.close();
     }
 
-    public static Properties store(Properties source, File target, String comment) throws IOException {
+    public static void store(Properties source, File target, String comment) throws IOException {
         // 先加载文件中的原数据再写入
         Properties all = new KeySortedProperties();
         if (target.exists()) {
@@ -91,20 +91,19 @@ public class PropertiesUtil {
             all.putAll(source);
             save(all, target, comment);
         }
-        return all;
     }
 
-    public static Properties store(Properties source, String targetLocation, String comment) throws IOException {
+    public static void store(Properties source, String targetLocation, String comment) throws IOException {
         File file;
         if (targetLocation.startsWith(ApplicationUtil.JAR_URL_PREFIX)) {
             file = new UrlResource(targetLocation).getFile();
         } else {
             file = ResourceUtils.getFile(targetLocation);
         }
-        return store(source, file, comment);
+        store(source, file, comment);
     }
 
-    public static Properties store(File target, String key, @Nullable String value, String comment) throws IOException {
+    public static void store(File target, String key, @Nullable String value, String comment) throws IOException {
         if (value == null) {
             Properties all = new KeySortedProperties();
             if (target.exists()) {
@@ -113,12 +112,10 @@ public class PropertiesUtil {
                     save(all, target, comment);
                 }
             }
-            // 设置值为null，目标文件不存在，则无需保存
-            return all;
         } else {
             Properties properties = new Properties();
             properties.setProperty(key, value);
-            return store(properties, target, comment);
+            store(properties, target, comment);
         }
     }
 
