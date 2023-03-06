@@ -63,6 +63,12 @@ public class PropertiesUtil {
         return properties;
     }
 
+    public static String getProperty(File source, String key) {
+        Properties properties = new Properties();
+        load(source, properties);
+        return properties.getProperty(key);
+    }
+
     /**
      * 用指定属性集覆盖保存至指定文件，不加载文件内原有属性
      *
