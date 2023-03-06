@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -56,7 +57,8 @@ public class JpaDataAutoConfiguration extends JpaBaseConfiguration {
             ApplicationContext context,
             HibernateProperties hibernateProperties,
             SqlInitializationProperties sqlInitializationProperties,
-            ObjectProvider<DataSourceInitializeListener> listenerProvider) {
+            ObjectProvider<DataSourceInitializeListener> listenerProvider,
+            ObjectProvider<Flyway> flywayProvider) {
         super(dataSource, jpaProperties, jtaTransactionManagerProvider);
         this.context = context;
         this.hibernateProperties = hibernateProperties;
@@ -66,6 +68,8 @@ public class JpaDataAutoConfiguration extends JpaBaseConfiguration {
                 dataSource, sqlInitializationProperties, listenerProvider);
         initializer.initializeDatabase();
         sqlInitializationProperties.setMode(DatabaseInitializationMode.NEVER);
+        // 在flyway执行之前，删除失败的增量脚本执行记录
+        flywayProvider.ifAvailable(Flyway::repair);
     }
 
     protected String getSchema() {
