@@ -13,8 +13,11 @@ import org.springframework.core.io.Resource;
  */
 public interface DataSourceInitializeListener {
 
-    boolean isExecutable(DataSource dataSource, Resource script);
+    default boolean isExecutable(DataSource dataSource, Resource script) {
+        return true;
+    }
 
-    void afterRun(List<Resource> scripts);
+    default void afterRun(List<Resource> scripts) {
+    }
 
 }
