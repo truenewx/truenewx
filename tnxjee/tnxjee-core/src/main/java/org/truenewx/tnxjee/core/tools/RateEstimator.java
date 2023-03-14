@@ -14,18 +14,33 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
  */
 public class RateEstimator {
 
-    private long defaultRate;
+    private Long defaultRate;
     private Queue<Long> rateQueue = new CircularFifoQueue<>(12);
 
     public RateEstimator(long defaultRate) {
         this.defaultRate = defaultRate;
     }
 
-    public void add(long rate) {
-        this.rateQueue.add(rate);
+    public RateEstimator() {
     }
 
-    public long getEstimatedRate() {
+    /**
+     * 添加样本
+     *
+     * @param variance 变化量
+     * @param times    耗时（单位：毫秒）
+     * @return 计算后的速率，如果样本不被接受，则返回null
+     */
+    public Long addSample(long variance, long times) {
+        if (times > 1000) {
+            long rate = variance / times;
+            this.rateQueue.add(rate);
+            return rate;
+        }
+        return null;
+    }
+
+    public Long getEstimatedRate() {
         int count = this.rateQueue.size();
         if (0 < count && count < 5) { // 样本数量小于5个，则简单取均值
             long total = 0;
