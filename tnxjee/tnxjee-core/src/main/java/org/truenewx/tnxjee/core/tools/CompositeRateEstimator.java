@@ -2,6 +2,7 @@ package org.truenewx.tnxjee.core.tools;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * 复合速率估算器
@@ -10,14 +11,11 @@ import java.util.Map;
  */
 public class CompositeRateEstimator<E extends Enum<E>> {
 
-    private Map<E, RateEstimator> estimators = new HashMap<>();
+    private final Map<E, RateEstimator> estimators = new HashMap<>();
 
-    public void support(E type, long defaultRate) {
-        RateEstimator estimator = this.estimators.get(type);
-        if (estimator == null) {
-            estimator = new RateEstimator(defaultRate);
-            this.estimators.put(type, estimator);
-        }
+    public void setDefaultRate(E type, long defaultRate) {
+        // 覆盖已有
+        this.estimators.put(type, new RateEstimator(defaultRate));
     }
 
     public Long addSample(E type, long variance, long times) {
@@ -35,6 +33,10 @@ public class CompositeRateEstimator<E extends Enum<E>> {
 
     public Long getEstimatedRate(E type) {
         return getEstimator(type).getEstimatedRate();
+    }
+
+    protected final void forEach(BiConsumer<E, Long> consumer) {
+        this.estimators.forEach((type, estimator) -> consumer.accept(type, estimator.getEstimatedRate()));
     }
 
 }
