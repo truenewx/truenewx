@@ -87,13 +87,14 @@ public class PropertiesUtil {
     }
 
     public static void store(Properties source, File target, String comment) throws IOException {
-        // 先加载文件中的原数据再写入
-        Properties all = new KeySortedProperties();
-        if (target.exists()) {
-            load(target, all);
-        }
         if (!source.isEmpty()) {
-            target.createNewFile(); // 确保文件存在
+            // 先加载文件中的原数据再写入
+            Properties all = new KeySortedProperties();
+            if (target.exists()) {
+                load(target, all);
+            } else {
+                target.createNewFile(); // 确保文件存在
+            }
             all.putAll(source);
             save(all, target, comment);
         }
