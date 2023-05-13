@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import feign.Feign;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
+import feign.hystrix.HystrixFeign;
 
 @Configuration
 public class FeignConfiguration {
@@ -24,7 +25,7 @@ public class FeignConfiguration {
 
     @Bean
     public Feign.Builder feignBuilder() {
-        return Feign.builder().queryMapEncoder(new BeanPropertyQueryMapEncoder());
+        return HystrixFeign.builder().queryMapEncoder(new BeanPropertyQueryMapEncoder());
     }
 
 }
